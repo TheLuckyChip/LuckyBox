@@ -2,6 +2,7 @@ void WIFIinit() {
   // Попытка подключения к точке доступа
   WiFi.mode(WIFI_STA);
   byte tries = 11;
+  IPAddress Local_IP;
   WiFi.begin(_ssid.c_str(), _password.c_str());
   // Делаем проверку подключения до тех пор пока счетчик tries
   // не станет равен нулю или не получим подключение
@@ -20,10 +21,23 @@ void WIFIinit() {
   else {
     // Иначе удалось подключиться отправляем сообщение
     // о подключении и выводим адрес IP
+	Local_IP = WiFi.localIP();
     Serial.println("");
     Serial.println("WiFi connected");
     Serial.println("IP address: ");
-    Serial.println(WiFi.localIP());
+    Serial.println(Local_IP);
+
+    // если есть индикатор выводим локальный IP
+#if defined OLED_Display
+	oled_start_normal();
+	display.setTextSize(1);
+	display.setCursor(20, 20);
+	display.print("Local IP adress:");
+	display.setCursor(32, 40);
+	display.print(Local_IP);
+	display.display();
+	delay(5000);
+#endif
   }
 }
 

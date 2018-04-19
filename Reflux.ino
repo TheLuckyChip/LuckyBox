@@ -1,9 +1,9 @@
 // Ректификация
 
 float settingColumn =101;         // Температура срабатывания оповещения от датчика в царге
-
 float temperatureStartPressure = 78;   //Температура кипения спирта при запуске отслеживания ректификации
 float settingColumnShow = 0;
+float temperatureAlcoholBoil = 0;
 
 //Установка уставки для ректификации
 void Reflux_init() {
@@ -19,8 +19,7 @@ void handleSetTemp() {              //
 
 void handleRefluxJSON() {
   String root = "{}";  // Формируем строку для отправки в файл конфигурации в json формате
-   
-   pressure = bmp.readPressure()/133.3;
+
    temperatureAlcoholBoil = 78.91 -(780-pressure)*0.038; // расчет температуры кипения спирта при данном давлении
    settingColumnShow = settingColumn + (temperatureAlcoholBoil-temperatureStartPressure); // расчет уставки при изменившемся атмосферном давлении
    
@@ -29,7 +28,7 @@ void handleRefluxJSON() {
   DynamicJsonBuffer jsonBuffer;
   JsonObject& json = jsonBuffer.parseObject(root);
  
-  json["temperature"] = temperature;
+  json["temperature"] = temperature1;
   json["temperature2"] = temperature2;
   json["temperature3"] = temperature3;
   json["temperature4"] = temperature4;
