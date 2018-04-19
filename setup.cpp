@@ -1,4 +1,24 @@
-void setup() {
+
+#include "setup.h"
+#include "wifi_config.h"
+#include "timer_config.h"
+#include "time_config.h"
+#include "ssdp.h"
+#include "reflux_mode.h"
+#include "pressure.h"
+#include "oled.h"
+#include "http_config.h"
+#include "fs_config.h"
+#include "file_config.h"
+#include "distillation_mode.h"
+#include "sensors.h"
+#include "setting.h"
+#include "buzzer.h"
+#include "heater.h"
+#include "brewing_mode.h"
+
+void setup()
+{
 
 	Serial.begin(115200);
 	Serial.println("");
@@ -9,64 +29,66 @@ void setup() {
 	DS_Count = DS_Cnt;
 	if (DS_Count > 8) DS_Count = 8;
 
-	// Ğ¸Ğ½Ğ¸Ñ†Ğ¸Ğ°Ğ»Ğ¸Ğ·Ğ°Ñ†Ğ¸Ñ I2C
+	// èíèöèàëèçàöèÿ I2C
 	Serial.println("Step 2 - I2C Init");
 	Wire.setClock(1000000);
 	Wire.begin(pSDA, pSCL);
 	delay(100);
 
-	// Ğ˜Ğ½Ğ¸Ñ†Ğ¸Ğ°Ğ»Ğ¸Ğ·Ğ°Ñ†Ğ¸Ñ Ğ´Ğ°Ñ‚Ñ‡Ğ¸ĞºĞ¾Ğ² Ñ‚ĞµĞ¼Ğ¿ĞµÑ€Ğ°Ñ‚ÑƒÑ€Ñ‹
+	// Èíèöèàëèçàöèÿ äàò÷èêîâ òåìïåğàòóğû
 	dallSearch();
 	dallRead();
 
-#if defined OLED_Display
+	#if defined OLED_Display
 	// I2C & OLED
-	oled_init();
-#endif
+	initOLED();
+	#endif
 
-	//Ğ—Ğ°Ğ¿ÑƒÑĞºĞ°ĞµĞ¼ Ñ„Ğ°Ğ¹Ğ»Ğ¾Ğ²ÑƒÑ ÑĞ¸ÑÑ‚ĞµĞ¼Ñƒ
+	//Çàïóñêàåì ôàéëîâóş ñèñòåìó
 	Serial.println("Step 3 - FS Init");
-	FS_init();
+	initFS();
 	Serial.println("Step 4 - File Config");
 	loadConfig();
 	Serial.println("Step 5 - WIFI Init");
-	//Ğ—Ğ°Ğ¿ÑƒÑĞºĞ°ĞµĞ¼ WIFI
-	WIFIinit();
+	//Çàïóñêàåì WIFI
+	initWifi();
 	Serial.println("Step 6 - Time, NTP Init");
-	// ĞŸĞ¾Ğ»ÑƒÑ‡Ğ°ĞµĞ¼ Ğ²Ñ€ĞµĞ¼Ñ Ğ¸Ğ· ÑĞµÑ‚Ğ¸
-	Time_init();
-	//ĞĞ°ÑÑ‚Ñ€Ğ°Ğ¸Ğ²Ğ°ĞµĞ¼ Ğ¸ Ğ·Ğ°Ğ¿ÑƒÑĞºĞ°ĞµĞ¼ SSDP Ğ¸Ğ½Ñ‚ĞµÑ€Ñ„ĞµĞ¹Ñ
+	// Ïîëó÷àåì âğåìÿ èç ñåòè
+	initTime();
+	//Íàñòğàèâàåì è çàïóñêàåì SSDP èíòåğôåéñ
 	if (WiFi.status() != WL_CONNECTED)
 	{
-		// Ğ•ÑĞ»Ğ¸ Ğ½Ğµ ÑƒĞ´Ğ°Ğ»Ğ¾ÑÑŒ Ğ¿Ğ¾Ğ´ĞºĞ»ÑÑ‡Ğ¸Ñ‚ÑŒÑÑ, Ğ¸ Ğ¼Ñ‹ Ğ² Ñ€ĞµĞ¶Ğ¸Ğ¼Ğµ AP, Ñ‚Ğ¾ SSDP Ğ½Ğ°Ğ¼ Ğ½Ğµ Ğ½ÑƒĞ¶ĞµĞ½. ĞĞ¸Ñ‡ĞµĞ³Ğ¾ Ğ½Ğµ Ğ´ĞµĞ»Ğ°ĞµĞ¼
+		// Åñëè íå óäàëîñü ïîäêëş÷èòüñÿ, è ìû â ğåæèìå AP, òî SSDP íàì íå íóæåí. Íè÷åãî íå äåëàåì
 	}
-	else {
-		//Ğ£Ğ´Ğ°Ğ»Ğ¾ÑÑŒ Ğ¿Ğ¾Ğ´ĞºĞ»ÑÑ‡Ğ¸Ñ‚ÑŒÑÑ - Ğ·Ğ°Ğ¿ÑƒÑĞºĞ°ĞµĞ¼ SSDP
+	else
+	{
+		//Óäàëîñü ïîäêëş÷èòüñÿ - çàïóñêàåì SSDP
 		Serial.println("Step 7  - SSDP Init");
-		SSDP_init();
+		initSSDP();
 	}
 
-	//ĞĞ°ÑÑ‚Ñ€Ğ°Ğ¸Ğ²Ğ°ĞµĞ¼ Ğ¸ Ğ·Ğ°Ğ¿ÑƒÑĞºĞ°ĞµĞ¼ HTTP Ğ¸Ğ½Ñ‚ĞµÑ€Ñ„ĞµĞ¹Ñ
+	//Íàñòğàèâàåì è çàïóñêàåì HTTP èíòåğôåéñ
 	Serial.println("Step 8  - WebServer Start");
-	HTTP_init();
+	initHTTP();
 	Serial.println("Step 9  - Reflux Init");
-	Reflux_init();
+	initReflux();
 	Serial.println("Step 10 - Distillation Init");
-	Destillation_init();
+	initDistillation();
 	Serial.println("Step 11 - Brewing Init");
-	Brewing_init();
+	initBrewing();
 	Serial.println("Step 12 - Heater Init");
-	Heater_init();
+	initHeater();
 	Serial.println("Step 13 - Pressure sensor Init");
-	Pressure_sensor_init();
+	initPressureSensor();
 	Serial.println("Step 14 - Buzzer Init");
-	buzzer_Init();
+	initBuzzer();
 	Serial.println("Step 15 - Variables Init");
 	pinMode(heater, OUTPUT);
 	pinMode(buzzer, OUTPUT);
 
 	int count_w = 10;
-	while (1) {
+	while (1)
+	{
 		dallRead();
 		if (temperature1 != 5 || count_w == 0) break;
 		count_w--;
@@ -82,15 +104,18 @@ void setup() {
 	if (DS_Count >= 7) Serial.println(temperature7);
 	if (DS_Count >= 8) Serial.println(temperature8);
 	Serial.println("Pressure sensor:");
-	if (pressure_status) pressure = Pressure_read();
+	if (pressureStatus) pressure = readPressureSensor();
 	Serial.println(pressure);
- 
-  for(int cnt=0; cnt<120; cnt++) temp_in[cnt] = temperature1 * 10;
 
-  flipper.attach(1.0, myTimer);
-#if defined OLED_Display
-  oled_start_normal();
-  read_temp_interval = 10;
-#endif
-  Serial.println("Setup Done!");
+	for (int cnt=0; cnt<120; cnt++) temp_in[cnt] = temperature1 * 10;
+
+	flipper.attach(1.0, myTimer);
+	#if defined OLED_Display
+	oledStartNormal();
+	readTempInterval = 10;
+	#endif
+	Serial.println("Setup Done!");
 }
+
+
+
