@@ -21,7 +21,7 @@ void handleDistillationJSON() {
   DynamicJsonBuffer jsonBuffer;
   JsonObject& json = jsonBuffer.parseObject(root);
  
-  json["temperature"] = temperature;
+  json["temperature"] = temperature1;
   json["temperature2"] = temperature2;
   json["temperature3"] = temperature3;
   json["temperature4"] = temperature4;
@@ -36,7 +36,7 @@ void handleDistillationJSON() {
 
 void distillationLoop() {
 
-  if (temperature >= settingTank) {
+  if (temperature1 >= settingTank) {
     settingAlarmDistillation = true;
     digitalWrite(buzzer, HIGH);
   } else {

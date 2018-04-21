@@ -57,7 +57,7 @@ void handleBrewingJSON() {
   json["pauseTime4"] = pauseTime4;
   
   json["time"] = GetTime();
-  json["temperature"] = temperature;
+  json["temperature"] = temperature1;
   json["startBrewing"] = startBrewing;    // Передаем значение исключительно для отладки ПО
   json["stepBrewing"] = stepBrewing; 
   
@@ -78,7 +78,7 @@ void brewingLoop() {
       break; 
      
       case 1:
-       if (temperature < pauseTemp1) { heaterStatus = 1; }
+       if (temperature1 < pauseTemp1) { heaterStatus = 1; }
        else {
          heaterStatus = 0;
          stepBrewing++;                                       // добавить перекраску цвета пауз
@@ -90,12 +90,12 @@ void brewingLoop() {
      if (processStartTime + pauseTime1*60 < currentTime) {stepBrewing++;}
       else {
        heaterStatus=0;
-       if (temperature < pauseTemp1) {heaterStatus = 1;}         //добавить гистерезис
+       if (temperature1 < pauseTemp1) {heaterStatus = 1;}         //добавить гистерезис
      }
      break;
  
      case 3:
-     if (temperature < pauseTemp2) {heaterStatus = 1;}
+     if (temperature1 < pauseTemp2) {heaterStatus = 1;}
      else {
        heaterStatus = 0;
        stepBrewing++;
@@ -107,12 +107,12 @@ void brewingLoop() {
      if (processStartTime + pauseTime2*60 < currentTime) {stepBrewing++;}
       else {
        heaterStatus = 0;
-       if (temperature < pauseTemp2) {heaterStatus = 1;}
+       if (temperature1 < pauseTemp2) {heaterStatus = 1;}
      }
      break;
  
      case 5:
-     if (temperature < pauseTemp3) { heaterStatus = 1; }
+     if (temperature1 < pauseTemp3) { heaterStatus = 1; }
      else {
        heaterStatus = 0;
        stepBrewing++;
@@ -124,12 +124,12 @@ void brewingLoop() {
      if (processStartTime + pauseTime3*60 < currentTime) { stepBrewing++; }
       else {
         heaterStatus = 0;
-        if (temperature < pauseTemp3) {heaterStatus = 1;}
+        if (temperature1 < pauseTemp3) {heaterStatus = 1;}
     }
      break;
   
      case 7:
-     if (temperature < pauseTemp4) { heaterStatus = 1; }
+     if (temperature1 < pauseTemp4) { heaterStatus = 1; }
      else {
        heaterStatus = 0;
        stepBrewing++;
@@ -145,7 +145,7 @@ void brewingLoop() {
      }
       else {
        heaterStatus = 0;
-       if (temperature < pauseTemp4) { heaterStatus = 1; }
+       if (temperature1 < pauseTemp4) { heaterStatus = 1; }
      }
      break;     
     } 

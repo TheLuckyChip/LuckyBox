@@ -66,7 +66,7 @@ void handle_ConfigJSON() {
   json["ip"] = WiFi.localIP().toString();
   json["time"] = GetTime();
   json["date"] = GetDate();
-  json["temperature"] = temperature;
+  json["temperature"] = temperature1;
   json["temperature2"] = temperature2;
   json["temperature3"] = temperature3;
   json["temperature4"] = temperature4;
