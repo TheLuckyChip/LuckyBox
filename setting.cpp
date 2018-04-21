@@ -7,37 +7,37 @@
 
 Ticker flipper;
 
-// Объект для обновления с web страницы 
+// РћР±СЉРµРєС‚ РґР»СЏ РѕР±РЅРѕРІР»РµРЅРёСЏ СЃ web СЃС‚СЂР°РЅРёС†С‹ 
 ESP8266HTTPUpdateServer httpUpdater;
 
-// Web интерфейс для устройства
+// Web РёРЅС‚РµСЂС„РµР№СЃ РґР»СЏ СѓСЃС‚СЂРѕР№СЃС‚РІР°
 ESP8266WebServer HTTP;
 
-// Для файловой системы
+// Р”Р»СЏ С„Р°Р№Р»РѕРІРѕР№ СЃРёСЃС‚РµРјС‹
 File fsUploadFile;
 
-// Определяем переменные wifi
-String _ssid       = "SSID";      // Для хранения SSID
-String _password   = "PASSWORD";  // Для хранения пароля сети
-String _ssidAP     = "LuckyBox";  // SSID AP точки доступа
-String _passwordAP = "12345678";  // пароль точки доступа
-String SSDP_Name   = "LuckyBox";  // Имя SSDP
+// РћРїСЂРµРґРµР»СЏРµРј РїРµСЂРµРјРµРЅРЅС‹Рµ wifi
+String _ssid       = "SSID";      // Р”Р»СЏ С…СЂР°РЅРµРЅРёСЏ SSID
+String _password   = "PASSWORD";  // Р”Р»СЏ С…СЂР°РЅРµРЅРёСЏ РїР°СЂРѕР»СЏ СЃРµС‚Рё
+String _ssidAP     = "LuckyBox";  // SSID AP С‚РѕС‡РєРё РґРѕСЃС‚СѓРїР°
+String _passwordAP = "12345678";  // РїР°СЂРѕР»СЊ С‚РѕС‡РєРё РґРѕСЃС‚СѓРїР°
+String SSDP_Name   = "LuckyBox";  // РРјСЏ SSDP
 String jsonConfig  = "{}";
 int port = 80;
 
-int timezone = 3;                 // часовой пояс GTM
+int timezone = 3;                 // С‡Р°СЃРѕРІРѕР№ РїРѕСЏСЃ GTM
 int DS_Count;
-float temperature1 = 5.0;           // Температура 1
-float temperature2 = 5.0;           // Температура 2
-float temperature3 = 5.0;           // Температура 3
-float temperature4 = 5.0;           // Температура 4
-float temperature5 = 5.0;           // Температура 5
-float temperature6 = 5.0;           // Температура 6
-float temperature7 = 5.0;           // Температура 7
-float temperature8 = 5.0;           // Температура 8
-float pressure = 760.0;				// Давление
+float temperature1 = 5.0;           // РўРµРјРїРµСЂР°С‚СѓСЂР° 1
+float temperature2 = 5.0;           // РўРµРјРїРµСЂР°С‚СѓСЂР° 2
+float temperature3 = 5.0;           // РўРµРјРїРµСЂР°С‚СѓСЂР° 3
+float temperature4 = 5.0;           // РўРµРјРїРµСЂР°С‚СѓСЂР° 4
+float temperature5 = 5.0;           // РўРµРјРїРµСЂР°С‚СѓСЂР° 5
+float temperature6 = 5.0;           // РўРµРјРїРµСЂР°С‚СѓСЂР° 6
+float temperature7 = 5.0;           // РўРµРјРїРµСЂР°С‚СѓСЂР° 7
+float temperature8 = 5.0;           // РўРµРјРїРµСЂР°С‚СѓСЂР° 8
+float pressure = 760.0;				// Р”Р°РІР»РµРЅРёРµ
 bool  pressureStatus = 0;
-int readTempInterval;				// Инетрал времени для вывода графика температуры если показания неизменны
+int readTempInterval;				// РРЅРµС‚СЂР°Р» РІСЂРµРјРµРЅРё РґР»СЏ РІС‹РІРѕРґР° РіСЂР°С„РёРєР° С‚РµРјРїРµСЂР°С‚СѓСЂС‹ РµСЃР»Рё РїРѕРєР°Р·Р°РЅРёСЏ РЅРµРёР·РјРµРЅРЅС‹
 
-bool settingAlarm = false;        // Пересечение границы уставки
-int temp_in[120];                 // вывод графика на дисплей
+bool settingAlarm = false;        // РџРµСЂРµСЃРµС‡РµРЅРёРµ РіСЂР°РЅРёС†С‹ СѓСЃС‚Р°РІРєРё
+int temp_in[120];                 // РІС‹РІРѕРґ РіСЂР°С„РёРєР° РЅР° РґРёСЃРїР»РµР№

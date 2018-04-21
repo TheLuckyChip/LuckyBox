@@ -6,8 +6,8 @@
 
 void myTimer()
 {
-	if (pressureStatus) pressure = readPressureSensor(); // чтение датчика давления
-	dallRead(); // чтение датчиков температуры
+	if (pressureStatus) pressure = readPressureSensor(); // С‡С‚РµРЅРёРµ РґР°С‚С‡РёРєР° РґР°РІР»РµРЅРёСЏ
+	dallRead(); // С‡С‚РµРЅРёРµ РґР°С‚С‡РёРєРѕРІ С‚РµРјРїРµСЂР°С‚СѓСЂС‹
 	#if defined Debug_en
 	Serial.print("Temperature 1: ");
 	Serial.println(temperature1);
@@ -38,7 +38,7 @@ void myTimer()
 	Serial.println("......");
 	#endif
 	#if defined OLED_Display
-	oledOutDisplay(); // вывод на дисплей, если он есть
+	oledOutDisplay(); // РІС‹РІРѕРґ РЅР° РґРёСЃРїР»РµР№, РµСЃР»Рё РѕРЅ РµСЃС‚СЊ
 	#endif
 }
 

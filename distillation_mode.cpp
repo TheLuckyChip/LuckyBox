@@ -4,28 +4,28 @@
 #include "time_config.h"
 #include <ArduinoJson.h>
 
-//Дистилляция
+//Ж’РёСЃС‚РёР»Р»В¤С†РёВ¤
 
-// Определяем переменные
-bool settingAlarmDistillation = false;     // Достижение уставки по температуре куба 
-float settingTank = 100;                   // Температура отключения нагрева куба при дистилляции браги в спирт-сырец
+// СњРїСЂРµРґРµР»В¤РµРј РїРµСЂРµРјРµРЅРЅС‹Рµ
+bool settingAlarmDistillation = false;     // РґРѕСЃС‚РёР¶РµРЅРёРµ СѓСЃС‚Р°РІРєРё РїРѕ С‚РµРјРїРµСЂР°С‚СѓСЂРµ РєСѓР±Р° 
+float settingTank = 100;                   // С‚РµРјРїРµСЂР°С‚СѓСЂР° РѕС‚РєР»СЋС‡РµРЅРёВ¤ РЅР°РіСЂРµРІР° РєСѓР±Р° РїСЂРё РґРёСЃС‚РёР»Р»В¤С†РёРё Р±СЂР°РіРё РІ СЃРїРёСЂС‚-СЃС‹СЂРµС†
 
 void initDistillation()
 {
-	HTTP.on("/SetTempTank", handleSetTempTank);    // Установка уставки для дистилляции (вкладка Distillation)
-	HTTP.on("/distillation.json", handleDistillationJSON); // формирование distillation.json страницы для передачи данных в web интерфейс
+	HTTP.on("/SetTempTank", handleSetTempTank);    // РѕСЃС‚Р°РЅРѕРІРєР° СѓСЃС‚Р°РІРєРё РґР»В¤ РґРёСЃС‚РёР»Р»В¤С†РёРё (РІРєР»Р°РґРєР° Distillation)
+	HTTP.on("/distillation.json", handleDistillationJSON); // С„РѕСЂРјРёСЂРѕРІР°РЅРёРµ distillation.json СЃС‚СЂР°РЅРёС†С‹ РґР»В¤ РїРµСЂРµРґР°С‡Рё РґР°РЅРЅС‹С… РІ web РёРЅС‚РµСЂС„РµР№СЃ
 }
 
-//Установка уставки для дистилляции
+//вЂќСЃС‚Р°РЅРѕРІРєР° СѓСЃС‚Р°РІРєРё РґР»В¤ РґРёСЃС‚РёР»Р»В¤С†РёРё
 void handleSetTempTank()
 {
-	settingTank = HTTP.arg("SettingTank").toFloat();         // Получаем значение уставки из запроса и сохраняем в глобальной переменной
-	HTTP.send(200, "text/plain", "OK");   // отправляем ответ о выполнении
+	settingTank = HTTP.arg("SettingTank").toFloat();         // РїРѕР»СѓС‡Р°РµРј Р·РЅР°С‡РµРЅРёРµ СѓСЃС‚Р°РІРєРё РёР· Р·Р°РїСЂРѕСЃР° Рё СЃРѕС…СЂР°РЅВ¤РµРј РІ РіР»РѕР±Р°Р»СЊРЅРѕР№ РїРµСЂРµРјРµРЅРЅРѕР№
+	HTTP.send(200, "text/plain", "OK");   // РѕС‚РїСЂР°РІР»В¤РµРј РѕС‚РІРµС‚ Рѕ РІС‹РїРѕР»РЅРµРЅРёРё
 }
 
 void handleDistillationJSON()
 {
-	String root = "{}";  // Формируем строку для отправки в файл конфигурации в json формате
+	String root = "{}";  // С„РѕСЂРјРёСЂСѓРµРј СЃС‚СЂРѕРєСѓ РґР»В¤ РѕС‚РїСЂР°РІРєРё РІ С„Р°Р№Р» РєРѕРЅС„РёРіСѓСЂР°С†РёРё РІ json С„РѕСЂРјР°С‚Рµ
 
 	DynamicJsonBuffer jsonBuffer;
 	JsonObject& json = jsonBuffer.parseObject(root);

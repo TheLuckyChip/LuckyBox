@@ -1,33 +1,33 @@
 #include "reflux_mode.h"
 #include "setting.h"
 #include <ArduinoJson.h>
-// Ректификация
+// Р РµРєС‚РёС„РёРєР°С†РёСЏ
 
-float settingColumn =101;         // Температура срабатывания оповещения от датчика в царге
-float temperatureStartPressure = 78;   //Температура кипения спирта при запуске отслеживания ректификации
+float settingColumn =101;         // РўРµРјРїРµСЂР°С‚СѓСЂР° СЃСЂР°Р±Р°С‚С‹РІР°РЅРёСЏ РѕРїРѕРІРµС‰РµРЅРёСЏ РѕС‚ РґР°С‚С‡РёРєР° РІ С†Р°СЂРіРµ
+float temperatureStartPressure = 78;   //РўРµРјРїРµСЂР°С‚СѓСЂР° РєРёРїРµРЅРёСЏ СЃРїРёСЂС‚Р° РїСЂРё Р·Р°РїСѓСЃРєРµ РѕС‚СЃР»РµР¶РёРІР°РЅРёСЏ СЂРµРєС‚РёС„РёРєР°С†РёРё
 float settingColumnShow = 0;
 float temperatureAlcoholBoil = 0;
 
-//Установка уставки для ректификации
+//РЈСЃС‚Р°РЅРѕРІРєР° СѓСЃС‚Р°РІРєРё РґР»СЏ СЂРµРєС‚РёС„РёРєР°С†РёРё
 void initReflux()
 {
-	HTTP.on("/SetTemp", handleSetTemp);    // Установка уставки для ректификации (вкладка Reflux)
-	HTTP.on("/reflux.json", handleRefluxJSON); // формирование reflux.json страницы для передачи данных в web интерфейс
+	HTTP.on("/SetTemp", handleSetTemp);    // РЈСЃС‚Р°РЅРѕРІРєР° СѓСЃС‚Р°РІРєРё РґР»СЏ СЂРµРєС‚РёС„РёРєР°С†РёРё (РІРєР»Р°РґРєР° Reflux)
+	HTTP.on("/reflux.json", handleRefluxJSON); // С„РѕСЂРјРёСЂРѕРІР°РЅРёРµ reflux.json СЃС‚СЂР°РЅРёС†С‹ РґР»СЏ РїРµСЂРµРґР°С‡Рё РґР°РЅРЅС‹С… РІ web РёРЅС‚РµСЂС„РµР№СЃ
 }
 
 void handleSetTemp()
 {              //
-	settingColumn = HTTP.arg("setting").toFloat();         // Получаем значение уставки из запроса и сохраняем в глобальной переменной
+	settingColumn = HTTP.arg("setting").toFloat();         // РџРѕР»СѓС‡Р°РµРј Р·РЅР°С‡РµРЅРёРµ СѓСЃС‚Р°РІРєРё РёР· Р·Р°РїСЂРѕСЃР° Рё СЃРѕС…СЂР°РЅСЏРµРј РІ РіР»РѕР±Р°Р»СЊРЅРѕР№ РїРµСЂРµРјРµРЅРЅРѕР№
 	temperatureStartPressure = HTTP.arg("temperatureAlcoholBoil").toFloat();
-	HTTP.send(200, "text/plain", "OK");   // отправляем ответ о выполнении
+	HTTP.send(200, "text/plain", "OK");   // РѕС‚РїСЂР°РІР»СЏРµРј РѕС‚РІРµС‚ Рѕ РІС‹РїРѕР»РЅРµРЅРёРё
 }
 
 void handleRefluxJSON()
 {
-	String root = "{}";  // Формируем строку для отправки в файл конфигурации в json формате
+	String root = "{}";  // Р¤РѕСЂРјРёСЂСѓРµРј СЃС‚СЂРѕРєСѓ РґР»СЏ РѕС‚РїСЂР°РІРєРё РІ С„Р°Р№Р» РєРѕРЅС„РёРіСѓСЂР°С†РёРё РІ json С„РѕСЂРјР°С‚Рµ
 
-	temperatureAlcoholBoil = 78.91 - ( 780 - pressure )*0.038; // расчет температуры кипения спирта при данном давлении
-	settingColumnShow = settingColumn + ( temperatureAlcoholBoil - temperatureStartPressure ); // расчет уставки при изменившемся атмосферном давлении
+	temperatureAlcoholBoil = 78.91 - ( 780 - pressure )*0.038; // СЂР°СЃС‡РµС‚ С‚РµРјРїРµСЂР°С‚СѓСЂС‹ РєРёРїРµРЅРёСЏ СЃРїРёСЂС‚Р° РїСЂРё РґР°РЅРЅРѕРј РґР°РІР»РµРЅРёРё
+	settingColumnShow = settingColumn + ( temperatureAlcoholBoil - temperatureStartPressure ); // СЂР°СЃС‡РµС‚ СѓСЃС‚Р°РІРєРё РїСЂРё РёР·РјРµРЅРёРІС€РµРјСЃСЏ Р°С‚РјРѕСЃС„РµСЂРЅРѕРј РґР°РІР»РµРЅРёРё
 
 																							   //AlarmSound (settingAlarm);
 

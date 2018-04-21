@@ -4,21 +4,21 @@
 #include <FS.h>
 #include <ArduinoJson.h>
 
-// Загрузка данных сохраненных в файл  config.json
+// Р—Р°РіСЂСѓР·РєР° РґР°РЅРЅС‹С… СЃРѕС…СЂР°РЅРµРЅРЅС‹С… РІ С„Р°Р№Р»  config.json
 bool loadConfig()
 {
-	// Открываем файл для чтения
+	// РћС‚РєСЂС‹РІР°РµРј С„Р°Р№Р» РґР»СЏ С‡С‚РµРЅРёСЏ
 	File configFile = SPIFFS.open("/config.json", "r");
 	if (!configFile)
 	{
-		// если файл не найден
+		// РµСЃР»Рё С„Р°Р№Р» РЅРµ РЅР°Р№РґРµРЅ
 		Serial.println("Failed to open config file");
-		//  Создаем файл записав в него даные по умолчанию
+		//  РЎРѕР·РґР°РµРј С„Р°Р№Р» Р·Р°РїРёСЃР°РІ РІ РЅРµРіРѕ РґР°РЅС‹Рµ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ
 		saveConfig();
 		configFile.close();
 		return false;
 	}
-	// Проверяем размер файла, будем использовать файл размером меньше 2048 байта
+	// РџСЂРѕРІРµСЂСЏРµРј СЂР°Р·РјРµСЂ С„Р°Р№Р»Р°, Р±СѓРґРµРј РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ С„Р°Р№Р» СЂР°Р·РјРµСЂРѕРј РјРµРЅСЊС€Рµ 2048 Р±Р°Р№С‚Р°
 	size_t size = configFile.size();
 	if (size > 2048)
 	{
@@ -27,32 +27,32 @@ bool loadConfig()
 		return false;
 	}
 
-	// загружаем файл конфигурации в глобальную переменную
+	// Р·Р°РіСЂСѓР¶Р°РµРј С„Р°Р№Р» РєРѕРЅС„РёРіСѓСЂР°С†РёРё РІ РіР»РѕР±Р°Р»СЊРЅСѓСЋ РїРµСЂРµРјРµРЅРЅСѓСЋ
 	jsonConfig = configFile.readString();
 	configFile.close();
-	// Резервируем памяь для json обекта буфер может рости по мере необходимти предпочтительно для ESP8266
+	// Р РµР·РµСЂРІРёСЂСѓРµРј РїР°РјСЏСЊ РґР»СЏ json РѕР±РµРєС‚Р° Р±СѓС„РµСЂ РјРѕР¶РµС‚ СЂРѕСЃС‚Рё РїРѕ РјРµСЂРµ РЅРµРѕР±С…РѕРґРёРјС‚Рё РїСЂРµРґРїРѕС‡С‚РёС‚РµР»СЊРЅРѕ РґР»СЏ ESP8266
 	DynamicJsonBuffer jsonBuffer;
-	//  вызовите парсер JSON через экземпляр jsonBuffer
-	//  строку возьмем из глобальной переменной String jsonConfig
+	//  РІС‹Р·РѕРІРёС‚Рµ РїР°СЂСЃРµСЂ JSON С‡РµСЂРµР· СЌРєР·РµРјРїР»СЏСЂ jsonBuffer
+	//  СЃС‚СЂРѕРєСѓ РІРѕР·СЊРјРµРј РёР· РіР»РѕР±Р°Р»СЊРЅРѕР№ РїРµСЂРµРјРµРЅРЅРѕР№ String jsonConfig
 	JsonObject& root = jsonBuffer.parseObject(jsonConfig);
-	// Теперь можно получить значения из root
-	_ssidAP = root["ssidAPName"].as<String>(); // Так получаем строку
+	// РўРµРїРµСЂСЊ РјРѕР¶РЅРѕ РїРѕР»СѓС‡РёС‚СЊ Р·РЅР°С‡РµРЅРёСЏ РёР· root
+	_ssidAP = root["ssidAPName"].as<String>(); // РўР°Рє РїРѕР»СѓС‡Р°РµРј СЃС‚СЂРѕРєСѓ
 	_passwordAP = root["ssidAPPassword"].as<String>();
-	timezone = root["timezone"];               // Так получаем число
+	timezone = root["timezone"];               // РўР°Рє РїРѕР»СѓС‡Р°РµРј С‡РёСЃР»Рѕ
 	SSDP_Name = root["SSDPName"].as<String>();
 	_ssid = root["ssidName"].as<String>();
 	_password = root["ssidPassword"].as<String>();
 	return true;
 }
 
-// Запись данных в файл config.json
+// Р—Р°РїРёСЃСЊ РґР°РЅРЅС‹С… РІ С„Р°Р№Р» config.json
 bool saveConfig()
 {
-	// Резервируем память для json объекта, буфер может расти по мере необходимости, предпочтительно для ESP8266
+	// Р РµР·РµСЂРІРёСЂСѓРµРј РїР°РјСЏС‚СЊ РґР»СЏ json РѕР±СЉРµРєС‚Р°, Р±СѓС„РµСЂ РјРѕР¶РµС‚ СЂР°СЃС‚Рё РїРѕ РјРµСЂРµ РЅРµРѕР±С…РѕРґРёРјРѕСЃС‚Рё, РїСЂРµРґРїРѕС‡С‚РёС‚РµР»СЊРЅРѕ РґР»СЏ ESP8266
 	DynamicJsonBuffer jsonBuffer;
-	//  вызовите парсер JSON через экземпляр jsonBuffer
+	//  РІС‹Р·РѕРІРёС‚Рµ РїР°СЂСЃРµСЂ JSON С‡РµСЂРµР· СЌРєР·РµРјРїР»СЏСЂ jsonBuffer
 	JsonObject& json = jsonBuffer.parseObject(jsonConfig);
-	// Заполняем поля json
+	// Р—Р°РїРѕР»РЅСЏРµРј РїРѕР»СЏ json
 	json["SSDPName"] = SSDP_Name;
 	json["ssidAPName"] = _ssidAP;
 	json["ssidAPPassword"] = _passwordAP;
@@ -60,9 +60,9 @@ bool saveConfig()
 	json["ssidPassword"] = _password;
 	json["timezone"] = timezone;
 
-	// Помещаем созданный json в глобальную переменную json.printTo(jsonConfig);
+	// РџРѕРјРµС‰Р°РµРј СЃРѕР·РґР°РЅРЅС‹Р№ json РІ РіР»РѕР±Р°Р»СЊРЅСѓСЋ РїРµСЂРµРјРµРЅРЅСѓСЋ json.printTo(jsonConfig);
 	json.printTo(jsonConfig);
-	// Открываем файл для записи
+	// РћС‚РєСЂС‹РІР°РµРј С„Р°Р№Р» РґР»СЏ Р·Р°РїРёСЃРё
 	File configFile = SPIFFS.open("/config.json", "w");
 	if (!configFile)
 	{
@@ -70,7 +70,7 @@ bool saveConfig()
 		configFile.close();
 		return false;
 	}
-	// Записываем строку json в файл
+	// Р—Р°РїРёСЃС‹РІР°РµРј СЃС‚СЂРѕРєСѓ json РІ С„Р°Р№Р»
 	json.printTo(configFile);
 	configFile.close();
 	return true;

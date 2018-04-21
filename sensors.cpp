@@ -8,15 +8,15 @@ void dallSearch()
 	int i = 1, err_count = DS_Count;
 	while (i)
 	{
-		if (!ds.search(dallas_my_sensor[i - 1].addr, false)) //  определяем адрес на шине 1wire и проверяем наличие датчиков 
+		if (!ds.search(dallas_my_sensor[i - 1].addr, false)) //В  РѕРїСЂРµРґРµР»СЏРµРј Р°РґСЂРµСЃ РЅР° С€РёРЅРµ 1wire Рё РїСЂРѕРІРµСЂСЏРµРј РЅР°Р»РёС‡РёРµ РґР°С‚С‡РёРєРѕРІВ 
 		{
-			ds.reset(); // запрос шины 1-Wire
-			ds.select(dallas_my_sensor[i - 1].addr); // выбор нашего DS18B20
-			ds.write(0x4E); // запись в  scratchPad
+			ds.reset(); // Р·Р°РїСЂРѕСЃ С€РёРЅС‹ 1-Wire
+			ds.select(dallas_my_sensor[i - 1].addr); // РІС‹Р±РѕСЂ РЅР°С€РµРіРѕ DS18B20
+			ds.write(0x4E); // Р·Р°РїРёСЃСЊ РІВ  scratchPad
 			ds.write(0x00); // User byte 0 - Unused
 			ds.write(0x00); // User byte 1 - Unused
-			ds.write(0x7F); // выставляем 12 бит (0x7F)
-			ds.reset(); // сбрасываем 1-Wire
+			ds.write(0x7F); // РІС‹СЃС‚Р°РІР»СЏРµРј 12 Р±РёС‚ (0x7F)
+			ds.reset(); // СЃР±СЂР°СЃС‹РІР°РµРј 1-Wire
 		}
 		else
 		{
@@ -42,8 +42,8 @@ void dallRead()
 	{
 		ds.reset();
 		ds.select(dallas_my_sensor[i - 1].addr);
-		ds.write(0xBE); //Считывание значения с датчика
-		dallas_my_sensor[i - 1].temperature = ( short )( ds.read() | ds.read() << 8 ); //Принимаем два байта температуры
+		ds.write(0xBE); //РЎС‡РёС‚С‹РІР°РЅРёРµ Р·РЅР°С‡РµРЅРёСЏ СЃ РґР°С‚С‡РёРєР°
+		dallas_my_sensor[i - 1].temperature = ( short )( ds.read() | ds.read() << 8 ); //РџСЂРёРЅРёРјР°РµРј РґРІР° Р±Р°Р№С‚Р° С‚РµРјРїРµСЂР°С‚СѓСЂС‹
 		dallas_my_sensor[i - 1].temperature *= 0.0625;
 		dallas_my_sensor[i - 1].temperature *= 100;
 		dallas_my_sensor[i - 1].temperature = floor(dallas_my_sensor[i - 1].temperature + 0.5);
@@ -61,6 +61,6 @@ void dallRead()
 	if (DS_Count >= 8) temperature8 = dallas_my_sensor[7].temperature;
 
 	ds.reset();
-	ds.write(0xCC); //Обращение ко всем датчикам
-	ds.write(0x44); //Команда на конвертацию
+	ds.write(0xCC); //РћР±СЂР°С‰РµРЅРёРµ РєРѕ РІСЃРµРј РґР°С‚С‡РёРєР°Рј
+	ds.write(0x44); //РљРѕРјР°РЅРґР° РЅР° РєРѕРЅРІРµСЂС‚Р°С†РёСЋ
 }

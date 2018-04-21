@@ -29,13 +29,13 @@ void setup()
 	DS_Count = DS_Cnt;
 	if (DS_Count > 8) DS_Count = 8;
 
-	// инициализация I2C
+	// РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ I2C
 	Serial.println("Step 2 - I2C Init");
 	Wire.setClock(1000000);
 	Wire.begin(pSDA, pSCL);
 	delay(100);
 
-	// Инициализация датчиков температуры
+	// РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РґР°С‚С‡РёРєРѕРІ С‚РµРјРїРµСЂР°С‚СѓСЂС‹
 	dallSearch();
 	dallRead();
 
@@ -44,30 +44,30 @@ void setup()
 	initOLED();
 	#endif
 
-	//Запускаем файловую систему
+	//Р—Р°РїСѓСЃРєР°РµРј С„Р°Р№Р»РѕРІСѓСЋ СЃРёСЃС‚РµРјСѓ
 	Serial.println("Step 3 - FS Init");
 	initFS();
 	Serial.println("Step 4 - File Config");
 	loadConfig();
 	Serial.println("Step 5 - WIFI Init");
-	//Запускаем WIFI
+	//Р—Р°РїСѓСЃРєР°РµРј WIFI
 	initWifi();
 	Serial.println("Step 6 - Time, NTP Init");
-	// Получаем время из сети
+	// РџРѕР»СѓС‡Р°РµРј РІСЂРµРјСЏ РёР· СЃРµС‚Рё
 	initTime();
-	//Настраиваем и запускаем SSDP интерфейс
+	//РќР°СЃС‚СЂР°РёРІР°РµРј Рё Р·Р°РїСѓСЃРєР°РµРј SSDP РёРЅС‚РµСЂС„РµР№СЃ
 	if (WiFi.status() != WL_CONNECTED)
 	{
-		// Если не удалось подключиться, и мы в режиме AP, то SSDP нам не нужен. Ничего не делаем
+		// Р•СЃР»Рё РЅРµ СѓРґР°Р»РѕСЃСЊ РїРѕРґРєР»СЋС‡РёС‚СЊСЃСЏ, Рё РјС‹ РІ СЂРµР¶РёРјРµ AP, С‚Рѕ SSDP РЅР°Рј РЅРµ РЅСѓР¶РµРЅ. РќРёС‡РµРіРѕ РЅРµ РґРµР»Р°РµРј
 	}
 	else
 	{
-		//Удалось подключиться - запускаем SSDP
+		//РЈРґР°Р»РѕСЃСЊ РїРѕРґРєР»СЋС‡РёС‚СЊСЃСЏ - Р·Р°РїСѓСЃРєР°РµРј SSDP
 		Serial.println("Step 7  - SSDP Init");
 		initSSDP();
 	}
 
-	//Настраиваем и запускаем HTTP интерфейс
+	//РќР°СЃС‚СЂР°РёРІР°РµРј Рё Р·Р°РїСѓСЃРєР°РµРј HTTP РёРЅС‚РµСЂС„РµР№СЃ
 	Serial.println("Step 8  - WebServer Start");
 	initHTTP();
 	Serial.println("Step 9  - Reflux Init");

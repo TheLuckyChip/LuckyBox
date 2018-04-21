@@ -2,7 +2,7 @@
 #include "fs_config.h"
 #include "setting.h"
 #include "user_config.h"
-// Инициализация FFS
+// РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ FFS
 void initFS(void)
 {
 	SPIFFS.begin();
@@ -14,17 +14,17 @@ void initFS(void)
 			size_t fileSize = dir.fileSize();
 		}
 	}
-	//HTTP страницы для работы с FFS
+	//HTTP СЃС‚СЂР°РЅРёС†С‹ РґР»В¤ СЂР°Р±РѕС‚С‹ СЃ FFS
 	//list directory
 	HTTP.on("/list", HTTP_GET, handleFileList);
-	//загрузка редактора editor
+	//Р·Р°РіСЂСѓР·РєР° СЂРµРґР°РєС‚РѕСЂР° editor
 	HTTP.on("/edit", HTTP_GET, []()
 	{
 		if (!handleFileRead("/edit.htm")) HTTP.send(404, "text/plain", "FileNotFound");
 	});
-	//Создание файла
+	//вЂ”РѕР·РґР°РЅРёРµ С„Р°Р№Р»Р°
 	HTTP.on("/edit", HTTP_PUT, handleFileCreate);
-	//Удаление файла
+	//вЂќРґР°Р»РµРЅРёРµ С„Р°Р№Р»Р°
 	HTTP.on("/edit", HTTP_DELETE, handleFileDelete);
 	//first callback is called after the request has ended with all parsed arguments
 	//second callback handles file uploads at that location
@@ -40,7 +40,7 @@ void initFS(void)
 			HTTP.send(404, "text/plain", "FileNotFound");
 	});
 }
-// Здесь функции для работы с файловой системой
+// В«РґРµСЃСЊ С„СѓРЅРєС†РёРё РґР»В¤ СЂР°Р±РѕС‚С‹ СЃ С„Р°Р№Р»РѕРІРѕР№ СЃРёСЃС‚РµРјРѕР№
 String getContentType(String filename)
 {
 	if (HTTP.hasArg("download")) return "application/octet-stream";

@@ -4,9 +4,9 @@
 #include <ArduinoJson.h>
 #include "time_config.h"
 
-// Затирание
+// Р—Р°С‚РёСЂР°РЅРёРµ
 
-// Переменные для пауз затирания
+// РџРµСЂРµРјРµРЅРЅС‹Рµ РґР»СЏ РїР°СѓР· Р·Р°С‚РёСЂР°РЅРёСЏ
 float pauseTemp1 = 48;
 float pauseTemp2 = 64;
 float pauseTemp3 = 72;
@@ -17,39 +17,39 @@ int pauseTime2 = 40;
 int pauseTime3 = 30;
 int pauseTime4 = 5;
 
-unsigned long currentTime=0;      // переменная текущего времени
-unsigned long processStartTime=0; // время начала процесса затирания
-int startBrewing = 0;     // статус процесса затирания
-int stepBrewing = 0;              // Этап затирания
+unsigned long currentTime=0;     // РїРµСЂРµРјРµРЅРЅР°СЏ С‚РµРєСѓС‰РµРіРѕ РІСЂРµРјРµРЅРё
+unsigned long processStartTime=0;// РІСЂРµРјСЏ РЅР°С‡Р°Р»Р° РїСЂРѕС†РµСЃСЃР° Р·Р°С‚РёСЂР°РЅРёСЏ
+int startBrewing = 0;     // СЃС‚Р°С‚СѓСЃ РїСЂРѕС†РµСЃСЃР° Р·Р°С‚РёСЂР°РЅРёСЏ
+int stepBrewing = 0;              // Р­С‚Р°Рї Р·Р°С‚РёСЂР°РЅРёСЏ
 
 void initBrewing()
 {
-	HTTP.on("/SettingBrewing", handleSettingBrewing);    // Установка уставки для дистилляции (вкладка Distillation)
-	HTTP.on("/brewing.json", handleBrewingJSON); // формирование distillation.json страницы для передачи данных в web интерфейс
+	HTTP.on("/SettingBrewing", handleSettingBrewing); // РЈСЃС‚Р°РЅРѕРІРєР° СѓСЃС‚Р°РІРєРё РґР»СЏ РґРёСЃС‚РёР»Р»СЏС†РёРё (РІРєР»Р°РґРєР° Distillation)
+	HTTP.on("/brewing.json", handleBrewingJSON); // С„РѕСЂРјРёСЂРѕРІР°РЅРёРµ distillation.json СЃС‚СЂР°РЅРёС†С‹ РґР»СЏ РїРµСЂРµРґР°С‡Рё РґР°РЅРЅС‹С… РІ web РёРЅС‚РµСЂС„РµР№СЃ
 }
 
-//Получение и установка температур для затирания
+//РџРѕР»СѓС‡РµРЅРёРµ Рё СѓСЃС‚Р°РЅРѕРІРєР° С‚РµРјРїРµСЂР°С‚СѓСЂ РґР»СЏ Р·Р°С‚РёСЂР°РЅРёСЏ
 void handleSettingBrewing()
 {
-	pauseTemp1 = HTTP.arg("pauseTemp1").toFloat();         // Получаем значение температуры из запроса и сохраняем в глобальной переменной
+	pauseTemp1 = HTTP.arg("pauseTemp1").toFloat();       // РџРѕР»СѓС‡Р°РµРј Р·РЅР°С‡РµРЅРёРµ С‚РµРјРїРµСЂР°С‚СѓСЂС‹ РёР· Р·Р°РїСЂРѕСЃР° Рё СЃРѕС…СЂР°РЅСЏРµРј РІ РіР»РѕР±Р°Р»СЊРЅРѕР№ РїРµСЂРµРјРµРЅРЅРѕР№
 	pauseTemp2 = HTTP.arg("pauseTemp2").toFloat();
 	pauseTemp3 = HTTP.arg("pauseTemp3").toFloat();
 	pauseTemp4 = HTTP.arg("pauseTemp4").toFloat();
 
-	pauseTime1 = HTTP.arg("pauseTime1").toInt();         // Получаем значение времени паузы из запроса и сохраняем в глобальной переменной
-	pauseTime2 = HTTP.arg("pauseTime2").toInt();         // Получаем значение времени паузы из запроса и сохраняем в глобальной переменной
-	pauseTime3 = HTTP.arg("pauseTime3").toInt();         // Получаем значение времени паузы из запроса и сохраняем в глобальной переменной
-	pauseTime4 = HTTP.arg("pauseTime4").toInt();         // Получаем значение времени паузы из запроса и сохраняем в глобальной переменной
+	pauseTime1 = HTTP.arg("pauseTime1").toInt();         // РџРѕР»СѓС‡Р°РµРј Р·РЅР°С‡РµРЅРёРµ РІСЂРµРјРµРЅРё РїР°СѓР·С‹ РёР· Р·Р°РїСЂРѕСЃР° Рё СЃРѕС…СЂР°РЅСЏРµРј РІ РіР»РѕР±Р°Р»СЊРЅРѕР№ РїРµСЂРµРјРµРЅРЅРѕР№
+	pauseTime2 = HTTP.arg("pauseTime2").toInt();         // РџРѕР»СѓС‡Р°РµРј Р·РЅР°С‡РµРЅРёРµ РІСЂРµРјРµРЅРё РїР°СѓР·С‹ РёР· Р·Р°РїСЂРѕСЃР° Рё СЃРѕС…СЂР°РЅСЏРµРј РІ РіР»РѕР±Р°Р»СЊРЅРѕР№ РїРµСЂРµРјРµРЅРЅРѕР№
+	pauseTime3 = HTTP.arg("pauseTime3").toInt();         // РџРѕР»СѓС‡Р°РµРј Р·РЅР°С‡РµРЅРёРµ РІСЂРµРјРµРЅРё РїР°СѓР·С‹ РёР· Р·Р°РїСЂРѕСЃР° Рё СЃРѕС…СЂР°РЅСЏРµРј РІ РіР»РѕР±Р°Р»СЊРЅРѕР№ РїРµСЂРµРјРµРЅРЅРѕР№
+	pauseTime4 = HTTP.arg("pauseTime4").toInt();         // РџРѕР»СѓС‡Р°РµРј Р·РЅР°С‡РµРЅРёРµ РІСЂРµРјРµРЅРё РїР°СѓР·С‹ РёР· Р·Р°РїСЂРѕСЃР° Рё СЃРѕС…СЂР°РЅСЏРµРј РІ РіР»РѕР±Р°Р»СЊРЅРѕР№ РїРµСЂРµРјРµРЅРЅРѕР№
 
-	startBrewing = HTTP.arg("startBrewing").toInt();             // Получаем значение старта или стопа из запроса и сохраняем в переменной
+	startBrewing = HTTP.arg("startBrewing").toInt();             // РџРѕР»СѓС‡Р°РµРј Р·РЅР°С‡РµРЅРёРµ СЃС‚Р°СЂС‚Р° РёР»Рё СЃС‚РѕРїР° РёР· Р·Р°РїСЂРѕСЃР° Рё СЃРѕС…СЂР°РЅСЏРµРј РІ РїРµСЂРµРјРµРЅРЅРѕР№
 	stepBrewing = HTTP.arg("stepBrewing").toInt();
 
-	HTTP.send(200, "text/plain", "OK");   // отправляем ответ о выполнении
+	HTTP.send(200, "text/plain", "OK");   // РѕС‚РїСЂР°РІР»СЏРµРј РѕС‚РІРµС‚ Рѕ РІС‹РїРѕР»РЅРµРЅРёРё
 }
 
 void handleBrewingJSON()
 {
-	String root = "{}";  // Формируем строку для отправки в файл конфигурации в json формате
+	String root = "{}";  // Р¤РѕСЂРјРёСЂСѓРµРј СЃС‚СЂРѕРєСѓ РґР»СЏ РѕС‚РїСЂР°РІРєРё РІ С„Р°Р№Р» РєРѕРЅС„РёРіСѓСЂР°С†РёРё РІ json С„РѕСЂРјР°С‚Рµ
 
 	DynamicJsonBuffer jsonBuffer;
 	JsonObject& json = jsonBuffer.parseObject(root);
@@ -66,7 +66,7 @@ void handleBrewingJSON()
 
 	json["time"] = GetTime();
 	json["temperature"] = temperature1;
-	json["startBrewing"] = startBrewing;    // Передаем значение исключительно для отладки ПО
+	json["startBrewing"] = startBrewing;    // РџРµСЂРµРґР°РµРј Р·РЅР°С‡РµРЅРёРµ РёСЃРєР»СЋС‡РёС‚РµР»СЊРЅРѕ РґР»СЏ РѕС‚Р»Р°РґРєРё РџРћ
 	json["stepBrewing"] = stepBrewing;
 
 	root = "";
@@ -77,7 +77,7 @@ void handleBrewingJSON()
 void brewingLoop()
 {
 
-	currentTime = millis() / 1000;         // текущее время в сек.
+	currentTime = millis() / 1000;         // С‚РµРєСѓС‰РµРµ РІСЂРµРјСЏ РІ СЃРµРє.
 
 	if (startBrewing)
 	{
@@ -93,7 +93,7 @@ void brewingLoop()
 				else
 				{
 					heaterStatus = 0;
-					stepBrewing++;                                       // добавить перекраску цвета пауз
+					stepBrewing++;                                       // РґРѕР±Р°РІРёС‚СЊ РїРµСЂРµРєСЂР°СЃРєСѓ С†РІРµС‚Р° РїР°СѓР·
 					processStartTime = currentTime;
 				}
 				break;
@@ -103,7 +103,7 @@ void brewingLoop()
 				else
 				{
 					heaterStatus=0;
-					if (temperature1 < pauseTemp1) { heaterStatus = 1; }         //добавить гистерезис
+					if (temperature1 < pauseTemp1) { heaterStatus = 1; }         //РґРѕР±Р°РІРёС‚СЊ РіРёСЃС‚РµСЂРµР·РёСЃ
 				}
 				break;
 

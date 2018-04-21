@@ -29,15 +29,15 @@ void oledOutDisplay()
 
 		display.clearDisplay();
 		//                 x1, y1, x2, y2
-		display.drawLine(0, 63, 127, 63, WHITE); // низ
-		display.drawLine(0, 18, 0, 63, WHITE);   // лево
-		display.drawLine(0, 18, 127, 18, WHITE); // верх
-		display.drawLine(127, 18, 127, 63, WHITE); // право
+		display.drawLine(0, 63, 127, 63, WHITE); // РЅРёР·
+		display.drawLine(0, 18, 0, 63, WHITE);   // Р»РµРІРѕ
+		display.drawLine(0, 18, 127, 18, WHITE); // РІРµСЂС…
+		display.drawLine(127, 18, 127, 63, WHITE); // РїСЂР°РІРѕ
 		display.drawPixel(0, 38, BLACK);
 		display.drawPixel(1, 38, WHITE);
 		display.drawPixel(2, 38, WHITE);
 
-		// сдвиг показаний массива
+		// СЃРґРІРёРі РїРѕРєР°Р·Р°РЅРёР№ РјР°СЃСЃРёРІР°
 		for (count = 0; count<119; count++)
 		{
 			temp_in[count] = temp_in[count + 1];
@@ -56,7 +56,7 @@ void oledOutDisplay()
 		display.drawPixel(121, 38, WHITE);
 		for (count = 118; count>0; count--)
 		{
-			// текущая точка меньше последующей - черта вверх
+			// С‚РµРєСѓС‰Р°СЏ С‚РѕС‡РєР° РјРµРЅСЊС€Рµ РїРѕСЃР»РµРґСѓСЋС‰РµР№ - С‡РµСЂС‚Р° РІРІРµСЂС…
 			if (temp_in[count] < temp_in[count + 1])
 			{
 				temp_inc = temp_in[count + 1] - temp_in[count];
@@ -120,17 +120,17 @@ void oledOutDisplay()
 				}
 			}
 		}
-		// вывод текущей температуры для графика крупно
+		// РІС‹РІРѕРґ С‚РµРєСѓС‰РµР№ С‚РµРјРїРµСЂР°С‚СѓСЂС‹ РґР»СЏ РіСЂР°С„РёРєР° РєСЂСѓРїРЅРѕ
 		display.setTextSize(2);
 		display.setCursor(14, 1);
 		display.printf("%d.%d", temp_in[119] / 10, temp_in[119] % 10);
-		// вывод на график показаний мин и макс значений в последних 120 измерениях
+		// РІС‹РІРѕРґ РЅР° РіСЂР°С„РёРє РїРѕРєР°Р·Р°РЅРёР№ РјРёРЅ Рё РјР°РєСЃ Р·РЅР°С‡РµРЅРёР№ РІ РїРѕСЃР»РµРґРЅРёС… 120 РёР·РјРµСЂРµРЅРёСЏС…
 		display.setTextSize(1);
 		display.setCursor(2, 20);
 		display.printf("%d.%d", temp_max / 10, temp_max % 10);
 		display.setCursor(2, 55);
 		display.printf("%d.%d", temp_min / 10, temp_min % 10);
-		// вывод времени и давления
+		// РІС‹РІРѕРґ РІСЂРµРјРµРЅРё Рё РґР°РІР»РµРЅРёСЏ
 		display.setCursor(80, 0);
 		display.print(time_ntp);
 		display.setCursor(92, 9);
@@ -139,7 +139,7 @@ void oledOutDisplay()
 	}
 	else
 	{
-		// вывод времени и давления
+		// РІС‹РІРѕРґ РІСЂРµРјРµРЅРё Рё РґР°РІР»РµРЅРёСЏ
 		display.setCursor(80, 0);
 		display.print(time_ntp);
 		readTempInterval++;
