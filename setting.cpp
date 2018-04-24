@@ -17,8 +17,8 @@ ESP8266WebServer HTTP;
 File fsUploadFile;
 
 // Определяем переменные wifi
-String _ssid       = "SSID";      // Для хранения SSID
-String _password   = "PASSWORD";  // Для хранения пароля сети
+String _ssid       = "exegate1";  // Для хранения SSID
+String _password   = "Mt244244";  // Для хранения пароля сети
 String _ssidAP     = "LuckyBox";  // SSID AP точки доступа
 String _passwordAP = "12345678";  // пароль точки доступа
 String SSDP_Name   = "LuckyBox";  // Имя SSDP

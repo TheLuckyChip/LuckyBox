@@ -1,4 +1,9 @@
 $(document).ready(function () {
+    let deviceUrl = 'http://192.168.1.116/';    // Для отладги графиков
+
+    sensorsConditions = [];
+
+
 	$(function() {
 		function widthOfList () {
 			let itemsWidth = 0;
@@ -84,23 +89,34 @@ $(document).ready(function () {
 
 	//Свойства
 	function getSettings() {
-		$.ajax({
-			url: 'configs.json',
-			data: {},
-			type: 'GET',
-			dataType: 'json',
-			success: function (msg) {
-				console.log('Settings',msg);
-				$("#settings_ssdp").val(msg["SSDP"]);
-				$("#settings_ssid").val(msg["ssid"]);
-				$("#settings_password").val(msg["password"]);
-				$("#settings_ssidap").val(msg["ssidAP"]);
-				$("#settings_passwordap").val(msg["passwordAP"]);
-				$("#settings_timezone").val(msg["timezone"]);
+	    $.ajax({
+	        url: deviceUrl + 'configs.json',
+	        data: {},
+	        async: false,
+	        type: 'GET',
+	        dataType: 'text',
+	        success: function(msg) {
+	            console.log('Settings', msg);
+	            $("#settings_ssdp").val(msg["SSDP"]);
+	            $("#settings_ssid").val(msg["ssid"]);
+	            $("#settings_password").val(msg["password"]);
+	            $("#settings_ssidap").val(msg["ssidAP"]);
+	            $("#settings_passwordap").val(msg["passwordAP"]);
+	            $("#settings_timezone").val(msg["timezone"]);
 
-				setTimeout(getDistillation, 2000);
+
+                sensorsConditions.push({
+                        temperatures: msg["temperatures"]
+                    }
+                );
+
+                setTimeout(getDistillation, 2000);
+			    setTimeout(getReflux, 2000);
+
 			}
-		});
+        }).done();
+
+	    
 	}
 
 	//Обновление прошивки
@@ -260,7 +276,6 @@ $(document).ready(function () {
 				}else{
 					$("#distillation_status").removeClass("danger").addClass("success");
 				}
-				setTimeout(getReflux, 2000);
 			}
 		});
 	}

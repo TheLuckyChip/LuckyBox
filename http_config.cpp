@@ -7,13 +7,16 @@
 void initHTTP(void)
 {
 
-	HTTP.on("/configs.json", handleConfigJSON); // формирование configs.json страницы для передачи данных в web интерфейс
-												 // API для устройства
+	// API для устройства
+	
+	HTTP.on("/configs.json", HTTP_GET, []() {	// формирование configs.json страницы для передачи данных в web интерфейс
+		HTTP.sendHeader("Access-Control-Allow-Origin", "*");	// Доступ с любого домена. (Для отладки удобно)
+		HTTP.send(200, "text/plain", getConfigJSON());
+	});
 	HTTP.on("/ssdp", handleSetSSDP);     // Установить имя SSDP устройства по запросу вида /ssdp?ssdp=proba
 	HTTP.on("/ssid", handleSetSSID);     // Установить имя и пароль роутера по запросу вида /ssid?ssid=home2&password=12345678
 	HTTP.on("/ssidap", handleSetSSIDAP); // Установить имя и пароль для точки доступа по запросу вида /ssidap?ssidAP=home1&passwordAP=8765439
 	HTTP.on("/restart", handleRestart);   // Перезагрузка модуля по запросу вида /restart?device=ok
-
 										   // Добавляем функцию Update для перезаписи прошивки по WiFi при 1М(256K SPIFFS) и выше
 	httpUpdater.setup(&HTTP);
 	// Запускаем HTTP сервер
@@ -61,7 +64,7 @@ void handleRestart()
 	}
 }
 
-void handleConfigJSON()
+String getConfigJSON()
 {
 	String root = "{}";  // Формируем строку для отправки в файл конфигурации в json формате
 						 //{"SSDP":"LuckyBox","ssid":"LuckyBox","password":"12345678","ssidAP":"WiFi","passwordAP":"","ip":"192.168.0.101" и т.д.}
@@ -83,6 +86,8 @@ void handleConfigJSON()
 	json["temperature2"] = temperature2;
 	json["temperature3"] = temperature3;
 	json["temperature4"] = temperature4;
+
+	json["temperatures"] = new float[temperature1, temperature2];	// TODO завести все температуры в массив
 	//json["setting"] = settingColumn;
 	//json["settingAlarm"] = settingAlarm;
 
@@ -90,7 +95,6 @@ void handleConfigJSON()
 	// Помещаем созданный json в переменную root
 	root = "";
 	json.printTo(root);
-	HTTP.send(200, "text/json", root);
+
+	return root;
 }
-
-
