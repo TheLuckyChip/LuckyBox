@@ -113,10 +113,10 @@ $(document).ready(function () {
 	$("form#firmware_update").submit(function(e){
 		e.preventDefault();
 		let formData = new FormData();
-		formData.append('file', $('#file_update')[0].files[0]);
+		formData.append('update', $('#file_update')[0].files[0]);
 		//console.log(formData,$('#file_update')[0].files[0]);
 		$.ajax({
-			url: 'upload',
+			url: 'update',
 			type: 'POST',
 			data: formData,
 			async: false,
