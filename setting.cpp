@@ -4,7 +4,6 @@
 
 #include "setting.h"
 
-
 Ticker flipper;
 
 // Объект для обновления с web страницы 
@@ -36,8 +35,8 @@ float temperature6 = 5.0;           // Температура 6
 float temperature7 = 5.0;           // Температура 7
 float temperature8 = 5.0;           // Температура 8
 float pressure = 760.0;				// Давление
-bool  pressureStatus = 0;
+bool  pressureStatus = 0;			// Если датчик давления отсутствует
 int readTempInterval;				// Инетрал времени для вывода графика температуры если показания неизменны
-
-bool settingAlarm = false;        // Пересечение границы уставки
-int temp_in[120];                 // вывод графика на дисплей
+int timeWiFiReconnect = 0;
+bool settingAlarm = false;          // Пересечение границы уставки
+int modeWiFi;

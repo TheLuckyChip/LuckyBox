@@ -14,8 +14,8 @@
 #define OLED_RESET 0
 extern Adafruit_SSD1306 display;
 extern void initOLED();
-extern void oledStartNormal();
-extern void oledOutDisplay();
+extern void oledStartForGraph();
+extern void oledOutGraphDisplay();
 
 #endif
 

@@ -2,13 +2,27 @@
 #include "pressure.h"
 #include "sensors.h"
 #include "oled.h"
+#include "tft.h"
+#include "wifi_config.h"
 #include "setting.h"
+#include "user_config.h"
 
 void myTimer()
 {
+	reconnectWiFi(timeWiFiReconnect);
+	if (timeWiFiReconnect < setRestartWiFi) timeWiFiReconnect++;
+	else timeWiFiReconnect = 0;
+
 	if (pressureStatus) pressure = readPressureSensor(); // чтение датчика давления
 	dallRead(); // чтение датчиков температуры
-	#if defined Debug_en
+
+#if defined TFT_Display
+	tftOutGraphDisplay(); // вывод на дисплей, если он есть
+#elif defined OLED_Display
+	oledOutGraphDisplay(); // вывод на дисплей, если он есть
+#endif
+
+#if defined Debug_en
 	Serial.print("Temperature 1: ");
 	Serial.println(temperature1);
 
@@ -35,12 +49,14 @@ void myTimer()
 
 	Serial.print("TPressure: ");
 	Serial.println(pressure);
+
+	Serial.print("Client's AP: ");
+	Serial.println(WiFi.softAPgetStationNum());
+
+	Serial.print("Status STA: ");
+	Serial.println(WiFi.status());
+
 	Serial.println("......");
-	#endif
-	#if defined OLED_Display
-	oledOutDisplay(); // вывод на дисплей, если он есть
-	#endif
+
+#endif
 }
-
-
-

@@ -1,5 +1,6 @@
-
+#include "touch_interrupt.h"
 #include "setup.h"
+#include "user_config.h"
 #include "wifi_config.h"
 #include "timer_config.h"
 #include "time_config.h"
@@ -7,6 +8,7 @@
 #include "reflux_mode.h"
 #include "pressure.h"
 #include "oled.h"
+#include "tft.h"
 #include "http_config.h"
 #include "fs_config.h"
 #include "file_config.h"
@@ -19,58 +21,153 @@
 
 void setup()
 {
-
 	Serial.begin(115200);
 	Serial.println("");
 	Serial.println("");
 	Serial.println("Start Setup");
 
-	Serial.println("Step 1 - DS Init");
-	DS_Count = DS_Cnt;
-	if (DS_Count > 8) DS_Count = 8;
-
-	// инициализация I2C
-	Serial.println("Step 2 - I2C Init");
-	Wire.setClock(1000000);
+	Wire.setClock(100000);
 	Wire.begin(pSDA, pSCL);
 	delay(100);
 
+#if defined TFT_Display
+	initTFT();	    // HSPI & TFT
+#elif defined OLED_Display
+	initOLED();	// I2C & OLED
+#endif
+
+	// инициализация Touch csreen
+	pinMode(12, INPUT_PULLUP);
+	attachInterrupt(12, touchInt, RISING);
+
+
+	// инициализация I2C
+	Serial.println("Step 1 - I2C Init");
+#if defined TFT_Display
+	tft.println("Step 1 - I2C Init");
+#endif
+
 	// Инициализация датчиков температуры
+	Serial.println("Step 2 - DS Init");
+#if defined TFT_Display
+	tft.println("Step 2 - DS Init");
+#endif
+	DS_Count = DS_Cnt;
+	if (DS_Count > 8) DS_Count = 8;
 	dallSearch();
 	dallRead();
 
-	#if defined OLED_Display
-	// I2C & OLED
-	initOLED();
-	#endif
-
 	//Запускаем файловую систему
 	Serial.println("Step 3 - FS Init");
+#if defined TFT_Display
+	tft.println("Step 3 - FS Init");
+#endif
 	initFS();
 	Serial.println("Step 4 - File Config");
+#if defined TFT_Display
+	tft.println("Step 4 - File Config");
+#endif
 	loadConfig();
 	Serial.println("Step 5 - WIFI Init");
+#if defined TFT_Display
+	tft.println("Step 5 - WIFI Init");
+	tft.println("");
+#endif
 	//Запускаем WIFI
 	initWifi();
+
+	// просто отчет о подключении
+	if (WiFi.status() != WL_CONNECTED) {
+		Serial.println("Not'Connected STA! WiFi up AP.");
+		Serial.println("");
+		// если есть индикатор выводим локальный IP
+#if defined TFT_Display
+		tft.setTextSize(2);
+		tft.setTextColor(ILI9341_YELLOW);
+		tft.println("AP mode. IP adress:");
+		tft.setTextSize(1);
+		tft.println("");
+		tft.setTextSize(2);
+		tft.println("192.168.4.1");
+		tft.setTextSize(1);
+		tft.setTextColor(ILI9341_GREEN);
+		delay(5000);
+#elif defined OLED_Display
+		display.clearDisplay();
+		display.setTextColor(WHITE, BLACK);
+		display.invertDisplay(0);
+		display.setTextSize(1);
+		display.setCursor(20, 20);
+		display.print("AP IP adress:");
+		display.setCursor(32, 40);
+		display.print("192.168.4.1");
+		display.display();
+		delay(5000);
+#endif
+	}
+	else {
+		// Иначе удалось подключиться отправляем сообщение
+		// о подключении и выводим адрес IP
+		IPAddress Local_IP = WiFi.localIP();
+		Serial.println("");
+		Serial.println("WiFi connected");
+		Serial.println("IP address: ");
+		Serial.println(Local_IP);
+
+		// если есть индикатор выводим локальный IP
+#if defined TFT_Display
+		tft.setTextSize(2);
+		tft.setTextColor(ILI9341_YELLOW);
+		tft.println("STA mode. IP adress:");
+		tft.setTextSize(1);
+		tft.println("");
+		tft.setTextSize(2);
+		tft.println(Local_IP);
+		tft.setTextSize(1);
+		tft.setTextColor(ILI9341_GREEN);
+		delay(5000);
+#elif defined OLED_Display
+		display.clearDisplay();
+		display.setTextColor(WHITE, BLACK);
+		display.invertDisplay(0);
+		display.setTextSize(1);
+		display.setCursor(20, 20);
+		display.print("STA IP adress:");
+		display.setCursor(32, 40);
+		display.print(Local_IP);
+		display.display();
+		delay(5000);
+#endif
+	}
+
 	Serial.println("Step 6 - Time, NTP Init");
+#if defined TFT_Display
+	tft.println("");
+	tft.println("Step 6 - Time, Init");
+#endif
 	// Получаем время из сети
 	initTime();
 	//Настраиваем и запускаем SSDP интерфейс
-	if (WiFi.status() != WL_CONNECTED)
-	{
-		// Если не удалось подключиться, и мы в режиме AP, то SSDP нам не нужен. Ничего не делаем
-	}
-	else
+	if (WiFi.status() == WL_CONNECTED)
 	{
 		//Удалось подключиться - запускаем SSDP
 		Serial.println("Step 7  - SSDP Init");
+#if defined TFT_Display
+		tft.println("Step 7 - SSDP Init");
+#endif
 		initSSDP();
 	}
 
 	//Настраиваем и запускаем HTTP интерфейс
 	Serial.println("Step 8  - WebServer Start");
+#if defined TFT_Display
+	tft.println("Step 8 - WebServer Sart");
+#endif
 	initHTTP();
 	Serial.println("Step 9  - Reflux Init");
+#if defined TFT_Display
+	tft.println("Step 9 - User functions Init");
+#endif
 	initReflux();
 	Serial.println("Step 10 - Distillation Init");
 	initDistillation();
@@ -87,8 +184,7 @@ void setup()
 	pinMode(buzzer, OUTPUT);
 
 	int count_w = 10;
-	while (1)
-	{
+	while (1) {
 		dallRead();
 		if (temperature1 != 5 || count_w == 0) break;
 		count_w--;
@@ -107,14 +203,15 @@ void setup()
 	if (pressureStatus) pressure = readPressureSensor();
 	Serial.println(pressure);
 
-	for (int cnt=0; cnt<120; cnt++) temp_in[cnt] = temperature1 * 10;
+#if defined TFT_Display
+	tftStartForGraph();
+#elif defined OLED_Display
+	oledStartForGraph();
+#endif
 
-	flipper.attach(1.0, myTimer);
-	#if defined OLED_Display
-	oledStartNormal();
-	readTempInterval = 10;
-	#endif
-	Serial.println("Setup Done!");
+  Serial.println("Setup Done!");
+
+  flipper.attach(1.0, myTimer);
 }
 
 

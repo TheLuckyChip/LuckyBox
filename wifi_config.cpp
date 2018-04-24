@@ -1,67 +1,60 @@
 #include "wifi_config.h"
 #include <ESP8266WiFi.h>
 #include "setting.h"
-#include "oled.h"
+#include "user_config.h"
 
-void initWifi()
-{
-	// Попытка подключения к точке доступа
-	WiFi.mode(WIFI_STA);
-	byte tries = 11;
-	IPAddress Local_IP;
-	WiFi.begin(_ssid.c_str(), _password.c_str());
-	// Делаем проверку подключения до тех пор пока счетчик tries
-	// не станет равен нулю или не получим подключение
-	while (--tries && WiFi.status() != WL_CONNECTED)
-	{
-		Serial.print(".");
-		delay(1000);
-	}
-	if (WiFi.status() != WL_CONNECTED)
-	{
-		// Если не удалось подключиться запускаем в режиме AP
-		Serial.println("");
-		Serial.println("WiFi up AP");
-		StartAPMode();
-	}
-	else
-	{
-		// Иначе удалось подключиться отправляем сообщение
-		// о подключении и выводим адрес IP
-		Local_IP = WiFi.localIP();
-		Serial.println("");
-		Serial.println("WiFi connected");
-		Serial.println("IP address: ");
-		Serial.println(Local_IP);
-
-		// если есть индикатор выводим локальный IP
-		#if defined OLED_Display
-		oledStartNormal();
-		display.setTextSize(1);
-		display.setCursor(20, 20);
-		display.print("Local IP adress:");
-		display.setCursor(32, 40);
-		display.print(Local_IP);
-		display.display();
-		delay(5000);
-		#endif
-	}
-}
-
-bool StartAPMode()
-{
-	IPAddress apIP(192, 168, 4, 1);
-	// Отключаем WIFI
+void initWifi() {
 	WiFi.disconnect();
-	// Меняем режим на режим точки доступа
-	WiFi.mode(WIFI_AP);
-	// Задаем настройки сети
+	IPAddress apIP(192, 168, 4, 1);
+	WiFi.mode(WIFI_AP_STA);
 	WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
-	// Включаем WIFI в режиме точки доступа с именем и паролем
-	// хронящихся в переменных _ssidAP _passwordAP
 	WiFi.softAP(_ssidAP.c_str(), _passwordAP.c_str());
-	return true;
+	modeWiFi = 0;
+	int n_network = WiFi.scanNetworks(); // запрос количества доступных сетей
+	for (int i = 0; i < n_network; ++i) {
+
+#if defined Debug_en
+		Serial.print(i + 1);
+		Serial.print(" -> ");
+		Serial.print(WiFi.SSID(i));
+		Serial.print(" (");
+		Serial.print(WiFi.RSSI(i));
+		Serial.println(")  ");
+#endif
+
+		if (WiFi.SSID(i) == _ssid.c_str()) modeWiFi = 1; // наша сеть присутствует
+	}
+
+	if (modeWiFi == 1) {
+	    // пробуем подключиться
+		Serial.printf("Connecting to %s\n", _ssid.c_str());
+		WiFi.disconnect(true);
+		WiFi.begin(_ssid.c_str(), _password.c_str());
+		// ждем N кол-во попыток, если нет, то AP Mode
+		byte tmp_while = 0;
+		while (WiFi.status() != WL_CONNECTED) {
+			delay(1000);
+			Serial.print(".");
+			if (tmp_while < 20) tmp_while++;
+			else {
+				modeWiFi = 0;
+				break;
+			}
+		}
+	}
 }
 
-
-
+void reconnectWiFi(int tCnt) {
+	if (WiFi.status() == WL_CONNECTED) {
+		modeWiFi = 1;
+		return;
+	}
+	else if (modeWiFi == 1) {
+		modeWiFi = 0;
+	}
+	// При потери связи с базовой станцией переходим в режим точки доступа и пробуем переподключиться
+	if (_ssid.length() && tCnt >= setRestartWiFi && !WiFi.softAPgetStationNum()) {
+		WiFi.reconnect();
+		Serial.println("reconnect");
+	}
+}

@@ -9,6 +9,7 @@ Adafruit_BMP280 bmp;
 
 void initPressureSensor()
 {
+  pressureStatus = 0;
 	#if defined Pressure_BMP085 || defined Pressure_BMP180
 	if (!bmp.begin())
 	{
@@ -20,12 +21,11 @@ void initPressureSensor()
 	{
 		Serial.println("Ooops, no Pressure sensor BMP280 detected ... Check your wiring or I2C Addres!");
 	}
-	else pressure_status = 1;
+	else pressureStatus = 1;
 	#endif
 }
 
 float readPressureSensor()
 {
-	float pressure = bmp.readPressure() / 133.3;
-	return pressure;
+  return bmp.readPressure() / 133.3;
 }
