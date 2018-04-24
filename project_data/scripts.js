@@ -433,7 +433,7 @@ $(document).ready(function () {
 				console.log('Heater',msg);
 				$("#heater_power").val(msg["heaterPower"].toFixed(2));
 
-				setTimeout(getSettings, 2000);
+				setTimeout(getDistillation, 2000);
 			}
 		});
 	}

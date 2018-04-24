@@ -38,6 +38,7 @@ float temperature8 = 5.0;           // Температура 8
 float pressure = 760.0;				// Давление
 bool  pressureStatus = 0;
 int readTempInterval;				// Инетрал времени для вывода графика температуры если показания неизменны
-
+int timeWiFiReconnect = 0;
 bool settingAlarm = false;        // Пересечение границы уставки
-int temp_in[120];                 // вывод графика на дисплей
+int modeWiFi;
+//int temp_in[120];                 // вывод графика на дисплей
