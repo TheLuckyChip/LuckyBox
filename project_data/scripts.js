@@ -82,6 +82,164 @@ $(document).ready(function () {
 		//alert(msg);
 	}
 
+	//Свойства
+	function getSettings() {
+		$.ajax({
+			url: 'configs.json',
+			data: {},
+			type: 'GET',
+			dataType: 'json',
+			success: function (msg) {
+				console.log('Settings',msg);
+				$("#settings_ssdp").val(msg["SSDP"]);
+				$("#settings_ssid").val(msg["ssid"]);
+				$("#settings_password").val(msg["password"]);
+				$("#settings_ssidap").val(msg["ssidAP"]);
+				$("#settings_passwordap").val(msg["passwordAP"]);
+				$("#settings_timezone").val(msg["timezone"]);
+
+				setTimeout(getDistillation, 2000);
+			}
+		});
+	}
+
+	//Обновление прошивки
+	$("#file_update").on("change",function (e) {
+		let vidFileLength = $(this)[0].files.length;
+		if(vidFileLength !== 0) {
+			$("#settings_update").prop("disabled",false);
+		}
+	});
+	$("form#firmware_update").submit(function(e){
+		e.preventDefault();
+		let formData = new FormData();
+		formData.append('file', $('#file_update')[0].files[0]);
+		//console.log(formData,$('#file_update')[0].files[0]);
+		$.ajax({
+			url: 'upload',
+			type: 'POST',
+			data: formData,
+			async: false,
+			cache: false,
+			contentType: false,
+			enctype: 'multipart/form-data',
+			processData: false,
+			beforeSend: function () {
+				$("#settings_update").ajaxLoading({disabled: true});
+			},
+			success: function (msg) {
+				console.log(msg);
+			},
+			error: function (err, exception) {
+				alertAjaxError(err, exception, $("#error_settings"));
+			},
+			complete: function () {
+				$("#settings_update").ajaxLoading('stop').prop("disabled",false);
+			}
+		});
+		//return false;
+	});
+
+	/**
+	 * <b>Отправка данных на сервер</b>
+	 * @param {string} url - адрес
+	 * @param {object} data - данные
+	 * @param {string} dataType - тип передаваемых данных "text","json","html"...
+	 * @param {object|boolean} success_action - действия после успешного отправления данных
+	 * @param {object|boolean} load_target - елемент «отправитель» (для лоадера)
+	 * @param {object|boolean} error_target - контейнер для вывода ошибок
+	 */
+	function sendRequest(url,data,dataType,success_action,load_target,error_target) {
+		//console.log(url,data,target);
+		$.ajax({
+			url: url,
+			data: data,
+			type: 'GET',
+			dataType: dataType,
+			beforeSend: function(){
+				if(load_target !== false)
+					load_target.ajaxLoading({disabled:true});
+			},
+			success: function (msg) {
+				//TODO реализовать success_action
+			},
+			error:function (err,exception) {
+				if(error_target !== false)
+					alertAjaxError(err,exception,error_target);
+			},
+			complete:function () {
+				if(load_target !== false)
+					load_target.ajaxLoading('stop');
+			}
+		});
+	}
+
+	$(document).on("focus","#settings_password, #settings_passwordap",function () {
+		$(this).prop("type","text");
+	});
+	$(document).on("blur","#settings_password, #settings_passwordap",function () {
+		$(this).prop("type","password");
+	});
+	$("#settings_set_ssdp").on("click",function (e) {
+		e.preventDefault();
+		let _this = $(this);
+		let ssdp = $("#settings_ssdp").val();
+		sendRequest("ssdp",{"ssdp":ssdp},"text",false,_this,$("#error_settings"));
+	});
+	$("#settings_set_ssid").on("click",function (e) {
+		e.preventDefault();
+		let _this = $(this);
+		let ssid = $("#settings_ssid").val();
+		let pass = $("#settings_password").val();
+		sendRequest("ssid",{"ssdp":ssid,"password":pass},"text",false,_this,$("#error_settings"));
+		//TODO сделать действия SUCCESS в sendRequest
+		$.fn.openModal('', 'Изменения вступят в силу после перезагрузки. Пожалуйста перезагрузите устройство.', "modal-sm", false, true);
+	});
+	$("#settings_set_ssidap").on("click",function (e) {
+		e.preventDefault();
+		let _this = $(this);
+		let ssidap = $("#settings_ssidap").val();
+		let pass = $("#settings_passwordap").val();
+		sendRequest("ssidap",{"ssidAP":ssidap,"passwordAP":pass},"text",false,_this,$("#error_settings"));
+		//TODO сделать действия SUCCESS в sendRequest
+		$.fn.openModal('', 'Изменения вступят в силу после перезагрузки. Пожалуйста перезагрузите устройство.', "modal-sm", false, true);
+	});
+	$("#settings_auto_timezone").on("click",function (e) {
+		e.preventDefault();
+		let _this = $(this);
+		let date = new Date();
+		let timezone = Math.abs(date.getTimezoneOffset()/60);
+		$("#settings_timezone").val(timezone);
+		sendRequest("TimeZone",{"timezone":timezone},"text",false,_this,$("#error_settings"));
+	});
+	$("#settings_set_timezone").on("click",function (e) {
+		e.preventDefault();
+		let _this = $(this);
+		let timezone = $("#settings_timezone").val();
+		sendRequest("TimeZone",{"timezone":timezone},"text",false,_this,$("#error_settings"));
+	});
+	$("#settings_restart").on("click",function (e) {
+		e.preventDefault();
+		let _this = $(this);
+		$.fn.openModal('', '<h4 class="text-danger">Вы действительно хотите перезагрузить устройство?</h4>', "modal-sm", false, [{
+			text: "Да",
+			id: "return_restart",
+			class: "btn btn-primary btn-sm",
+			click: function () {
+				$(this).closest(".modal").modal("hide");
+				sendRequest("restart",{"device":"ok"},"text",false,_this,false);
+			}
+		},
+			{
+				text: "Нет",
+				id: "return_tab",
+				class: "btn btn-danger btn-sm",
+				click: function () {
+					$(this).closest(".modal").modal("hide");
+				}
+			}], {buttons: "replace"});
+	});
+
 
 	//Дистиляция
 	function getDistillation() {
@@ -109,20 +267,9 @@ $(document).ready(function () {
 	$("#distillation_set_setting").on("click",function () {
 		let setting = Number($("#distillation_setting").val());
 
-		$.ajax({
-			url: 'SetTempTank',
-			data: {
-				SettingTank:setting
-			},
-			type: 'GET',
-			dataType: 'text',
-			success: function (msg) {
-				$("#distillation_get_setting").text(setting);
-			},
-			error:function (err,exception) {
-				alertAjaxError(err,exception,$("#error_distillation"));
-			}
-		});
+		//TODO сделать действия SUCCESS в sendRequest
+		$("#distillation_get_setting").text(setting);
+		sendRequest("SetTempTank",{"SettingTank":setting},"text",false,$(this),$("#error_distillation"));
 	});
 
 	//Ректификация
@@ -157,23 +304,15 @@ $(document).ready(function () {
 		let temp_alco_boil = Number($("#reflux_alco_boil").text());
 
 		let setting = temp_2 + delta;
+		let data_send = {
+			delta:delta,
+			setting:setting,
+			temperatureAlcoholBoil:temp_alco_boil
+		};
 
-		$.ajax({
-			url: 'SetTemp',
-			data: {
-				delta:delta,
-				setting:setting,
-				temperatureAlcoholBoil:temp_alco_boil
-			},
-			type: 'GET',
-			dataType: 'text',
-			success: function (msg) {
-				$("#reflux_setting").text(setting);
-			},
-			error:function (err,exception) {
-				alertAjaxError(err,exception,$("#error_reflux"));
-			}
-		});
+		//TODO сделать действия SUCCESS в sendRequest
+		$("#reflux_setting").text(setting);
+		sendRequest("SetTemp",data_send,"text",false,$(this),$("#error_reflux"));
 	});
 
 
@@ -240,28 +379,21 @@ $(document).ready(function () {
 		let pauseTime3 = Number($("#brewing_time_3").val());
 		let pauseTime4 = Number($("#brewing_time_4").val());
 
-		$.ajax({
-			url: 'SettingBrewing',
-			data: {
-				startBrewing:start_brewing,
-				stepBrewing:step_brewing,
-				pauseTemp1:pauseTemp1,
-				pauseTemp2:pauseTemp2,
-				pauseTemp3:pauseTemp3,
-				pauseTemp4:pauseTemp4,
-				pauseTime1:pauseTime1,
-				pauseTime2:pauseTime2,
-				pauseTime3:pauseTime3,
-				pauseTime4:pauseTime4
-			},
-			type: 'GET',
-			dataType: 'text',
-			success: function (msg) {
-			},
-			error:function (err,exception) {
-				alertAjaxError(err,exception,$("#error_brewing"));
-			}
-		});
+		let data_send = {
+			startBrewing:start_brewing,
+			stepBrewing:step_brewing,
+			pauseTemp1:pauseTemp1,
+			pauseTemp2:pauseTemp2,
+			pauseTemp3:pauseTemp3,
+			pauseTemp4:pauseTemp4,
+			pauseTime1:pauseTime1,
+			pauseTime2:pauseTime2,
+			pauseTime3:pauseTime3,
+			pauseTime4:pauseTime4
+		};
+
+		//TODO сделать действия SUCCESS в sendRequest
+		sendRequest("SettingBrewing",data_send,"text",false,$(this),$("#error_brewing"));
 	}
 
 	function startBrewing(start,step){
@@ -287,10 +419,10 @@ $(document).ready(function () {
 		start_brewing = 0;
 		step_brewing = 0;
 		stopBrewing(1,1);
-		heaterPower(0,$("#error_brewing"));
+		sendRequest("SetHeaterPower",{"heaterPower":0},"text",false,$(this),$("#error_brewing"));
 	});
 
-	//мощность тена
+	//мощность тэна
 	function getPower() {
 		$.ajax({
 			url: 'heater.json',
@@ -301,22 +433,7 @@ $(document).ready(function () {
 				console.log('Heater',msg);
 				$("#heater_power").val(msg["heaterPower"].toFixed(2));
 
-				setTimeout(getDistillation, 2000);
-			}
-		});
-	}
-	function heaterPower(pover,error_container){
-		$.ajax({
-			url: 'SetHeaterPower',
-			data: {
-				heaterPower:pover
-			},
-			type: 'GET',
-			dataType: 'text',
-			success: function (msg) {
-			},
-			error:function (err,exception) {
-				alertAjaxError(err,exception,error_container);
+				setTimeout(getSettings, 2000);
 			}
 		});
 	}
@@ -324,10 +441,12 @@ $(document).ready(function () {
 	$("#heater_set_power").on("click",function () {
 		let pover = Number($("#heater_power").val());
 		pover = (pover > 0 ? pover : 0);
-		heaterPower(pover,$("#error_heater"));
+
+		//TODO сделать действия SUCCESS в sendRequest
+		sendRequest("SetHeaterPower",{"heaterPower":pover},"text",false,$(this),$("#error_heater"));
 	});
 
 	//TODO сейчас запускается каждая функция по очереди, потом переделать каждую на «старт/стоп»
-	setTimeout(getDistillation, 2000);
+	setTimeout(getSettings, 2000);
 	//setInterval(getDistillation,2000);
 });

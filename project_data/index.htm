@@ -366,79 +366,79 @@
 						</div>
 					</div>
 				</div>
-				<div class="tab-pane" id="settings">settings</div>
+				<div class="tab-pane" id="settings">
+					<div class="container">
+						<div class="row">
+							<div id="error_settings" class="col-md-offset-2 col-md-8"></div>
+						</div>
+						<div class="row">
+							<div class="col-md-12">
+								<h4>Обновление прошивки</h4>
+								<div class="form-inline">
+									<form id="firmware_update" method="POST" enctype="multipart/form-data">
+										<div class="form-inline">
+											<input id="file_update" type="file" class="form-control btn-success_ input-sm noSwipe" name="update">
+											<button id="settings_update" type="submit" class="btn btn-success btn-sm noSwipe" disabled>Загрузить</button>
+											<!--<input type="submit" class="btn btn-default active" value="загрузить" onclick="this.value='Подождите...';" style="height: 38px;">-->
+										</div>
+									</form>
+								</div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12">
+								<h4>Имя устройства</h4>
+								<div class="form-inline">
+								<input id="settings_ssdp" class="form-control input-sm noSwipe" value="" pattern="[0-9a-zA-Zа-яА-Я. ]{1,20}" placeholder="Имя устройства" size ="30">
+									<button id="settings_set_ssdp" type="button" class="btn btn-success btn-sm noSwipe">Сохранить</button>
+								</div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12">
+								<h4>Подключение к WiFi роутеру</h4>
+								<div class="form-inline">
+									<input id="settings_ssid" class="form-control input-sm noSwipe" value=""  pattern="[0-9a-zA-Z.]{1,15}" placeholder="Имя WiFi сети">
+									<input id="settings_password" class="form-control input-sm noSwipe" value="{{password}}" pattern=".{8,15}" type="password" placeholder="Пароль">
+									<button id="settings_set_ssid" type="button" class="btn btn-success btn-sm noSwipe">Сохранить</button>
+								</div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12">
+								<h4>Точка доступа</h4>
+								<div class="form-inline">
+									<input id="settings_ssidap" class="form-control input-sm noSwipe" value=""  pattern="[0-9a-zA-Z.]{1,15}" placeholder="Имя WiFi сети">
+									<input id="settings_passwordap" class="form-control input-sm noSwipe" value="{{passwordAP}}" pattern=".{8,15}" onfocus="this.type='text'" type="password"  placeholder="Пароль">
+									<button id="settings_set_ssidap" type="button" class="btn btn-success btn-sm noSwipe" onclick="set_ssid_ap(this);">Сохранить</button>
+								</div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12">
+								<h4>Часовой пояс</h4>
+								<div class="form-inline">
+									<input id="settings_timezone" class="form-control input-sm noSwipe" value="" pattern="[0-9]{1,3}" size="3">
+									<button id="settings_set_timezone" type="button" class="btn btn-success btn-sm noSwipe">Сохранить</button>
+									<button id="settings_auto_timezone" type="button" class="btn btn-success btn-sm noSwipe">Авто определение и сохранение зоны</button>
+								</div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12">
+								<h4>Перезагрузка устройства</h4>
+								<div class="form-inline">
+									<button id="settings_restart" type="button" class="btn btn-warning btn-sm noSwipe">Перезагрузить</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
 				<div class="tab-pane" id="graph">
 					<div class="container">
 						<div class="row">
 							<div class="col-md-12">
-								<p>Дистиляция</p>
-							</div>
-						</div>
-						<div class="row">
-							<div class="col-md-2">
-								<span id="d_t_1"></span>t&#176
-							</div>
-							<div class="col-md-2">
-								<span id="d_t_2"></span>t&#176
-							</div>
-							<div class="col-md-2">
-								<span id="d_t_3"></span>t&#176
-							</div>
-							<div class="col-md-2">
-								<span id="d_t_4"></span>t&#176
-							</div>
-						</div>
-						<div class="row">
-							<div class="col-md-12">
-								<p>Ректификация</p>
-							</div>
-						</div>
-						<div class="row">
-							<div class="col-md-2">
-								<span id="r_t_1"></span>t&#176
-							</div>
-							<div class="col-md-2">
-								<span id="r_t_2"></span>t&#176
-							</div>
-							<div class="col-md-2">
-								<span id="r_t_3"></span>t&#176
-							</div>
-							<div class="col-md-2">
-								<span id="r_t_4"></span>t&#176
-							</div>
-							<div class="col-md-2">
-								<span id="r_t_5"></span>t&#176
-							</div>
-						</div>
-						<div class="row">
-							<div class="col-md-12">
-								<p>Затирание</p>
-							</div>
-						</div>
-						<div class="row">
-							<div class="col-md-2">
-								<span id="z_t_1"></span>t&#176
-							</div>
-							<div class="col-md-2">
-								<span id="z_t_2"></span>t&#176
-							</div>
-							<div class="col-md-2">
-								<span id="z_t_3"></span>t&#176
-							</div>
-							<div class="col-md-2">
-								<span id="z_t_4"></span>t&#176
-							</div>
-							<div class="col-md-1">
-								<span id="z_m_1"></span>м
-							</div>
-							<div class="col-md-1">
-								<span id="z_m_2"></span>м
-							</div>
-							<div class="col-md-1">
-								<span id="z_m_3"></span>м
-							</div>
-							<div class="col-md-1">
-								<span id="z_m_4"></span>м
+
 							</div>
 						</div>
 					</div>
@@ -456,6 +456,8 @@
 <script src="jquery.min.js"></script>
 <script src="jquery.touchSwipe.min.js"></script>
 <script src="bootstrap.min.js"></script>
+<script src="ajaxloader.js"></script>
+<script src="dialog.js"></script>
 <script src="scripts.js"></script>
 </body>
 </html>
