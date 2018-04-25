@@ -16,16 +16,16 @@
 
 extern Ticker flipper;
 
-// $B'0'R'l'V'\'d(B $B'U']'q(B $B'`'R'_'`'S']'V'_'Z'q(B $B'c(B web $B'c'd'b'Q'_'Z'h'm(B
+// Объект для обновления с web страницы
 extern ESP8266HTTPUpdateServer httpUpdater;
 
-// Web $B'Z'_'d'V'b'f'V'['c(B $B'U']'q(B $B'e'c'd'b'`'['c'd'S'Q(B
+// Web интерфейс для устройства
 extern ESP8266WebServer HTTP;
 
-// $B'%']'q(B $B'f'Q'[']'`'S'`'[(B $B'c'Z'c'd'V'^'m(B
+// Для файловой системы
 extern File fsUploadFile;
 
-// $B'0'a'b'V'U'V']'q'V'^(B $B'a'V'b'V'^'V'_'_'m'V(B wifi
+// Определяем переменные wifi
 extern String _ssid;
 extern String _password;
 extern String _ssidAP;
