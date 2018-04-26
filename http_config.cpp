@@ -87,7 +87,7 @@ String getConfigJSON()
 	json["temperature3"] = temperature3;
 	json["temperature4"] = temperature4;
 
-	json["temperatures"] = new float[temperature1, temperature2];	// TODO завести все температуры в массив
+	// json["temperatures"] = new float[temperature1, temperature2];	// TODO завести все температуры в массив
 	//json["setting"] = settingColumn;
 	//json["settingAlarm"] = settingAlarm;
 

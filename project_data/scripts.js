@@ -1,5 +1,5 @@
 $(document).ready(function () {
-    let deviceUrl = 'http://192.168.1.116/';    // Для отладги графиков
+    let deviceUrl = 'http://192.168.1.106/';    // Для отладги графиков
 
     sensorsConditions = [];
 
@@ -105,16 +105,15 @@ $(document).ready(function () {
 	            $("#settings_timezone").val(msg["timezone"]);
 
 
-                sensorsConditions.push({
-                        temperatures: msg["temperatures"]
-                    }
-                );
+                //sensorsConditions.push({
+                //        temperatures: msg["temperatures"]
+                //    }
+                //);
 
-                setTimeout(getDistillation, 2000);
-			    setTimeout(getReflux, 2000);
-
-			}
-        }).done();
+                // setTimeout(getDistillation, 2000);
+			    // setTimeout(getReflux, 2000);
+	        }
+        })/*.done()*/;
 
 	    
 	}
@@ -462,6 +461,6 @@ $(document).ready(function () {
 	});
 
 	//TODO сейчас запускается каждая функция по очереди, потом переделать каждую на «старт/стоп»
-	setTimeout(getSettings, 2000);
+	// setTimeout(getSettings, 2000);
 	//setInterval(getDistillation,2000);
 });

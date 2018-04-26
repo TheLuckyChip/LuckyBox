@@ -7,7 +7,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LuckyBox", "LuckyBox.vcxpro
 EndProject
 Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "project_data", "project_data\", "{0C03E8E0-29E2-46B6-883A-8DAB9ADD8DC7}"
 	ProjectSection(WebsiteProperties) = preProject
-		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.0"
+		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.6.1"
 		Debug.AspNetCompiler.VirtualPath = "/localhost_12958"
 		Debug.AspNetCompiler.PhysicalPath = "project_data\"
 		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_12958\"
