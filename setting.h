@@ -16,7 +16,7 @@
 
 extern Ticker flipper;
 
-// Объект для обновления с web страницы 
+// Объект для обновления с web страницы
 extern ESP8266HTTPUpdateServer httpUpdater;
 
 // Web интерфейс для устройства
@@ -47,7 +47,8 @@ extern float pressure;
 extern bool  pressureStatus;
 extern int readTempInterval;
 extern bool settingAlarm;
-extern int temp_in[120];
+extern int modeWiFi;
+extern int timeWiFiReconnect;
 
 #endif
 

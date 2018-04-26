@@ -10,7 +10,7 @@
 #endif
 
 extern void initWifi();
-extern bool StartAPMode();
+extern void reconnectWiFi(int tCnt);
 
 #endif
 
