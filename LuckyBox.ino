@@ -2,6 +2,7 @@
    Система автоматики винокура. 
    Проект центра открытого проектирования у Счастливчика https://LuckyCenter.ru
 */
+#include "touch_interrupt.h"
 #include "setup.h"
 #include "wifi_config.h"
 #include "timer_config.h"
@@ -10,6 +11,7 @@
 #include "reflux_mode.h"
 #include "pressure.h"
 #include "oled.h"
+#include "tft.h"
 #include "http_config.h"
 #include "fs_config.h"
 #include "file_config.h"
