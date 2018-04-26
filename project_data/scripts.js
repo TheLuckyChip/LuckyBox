@@ -1,5 +1,6 @@
 $(document).ready(function () {
-    let deviceUrl = 'http://192.168.1.116/';    // Для отладги графиков
+    let deviceUrl = 'http://192.168.1.116/';    // Для отладки графиков
+    deviceUrl = "";
 
     sensorsConditions = [];
 
