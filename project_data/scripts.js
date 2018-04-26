@@ -11,7 +11,7 @@ $(document).ready(function () {
 		}
 
 		function widthOfHidden () {
-			return (($('.wrapper-nav').outerWidth()) - widthOfList() - getLeftPos() - 40);
+			return (($('.wrapper-nav').outerWidth()) - widthOfList() - getLeftPos()/* - 40*/);
 		}
 
 		function getLeftPos () {
@@ -33,10 +33,17 @@ $(document).ready(function () {
                 let listWidth = widthOfList();
                 let hiddenWidth = widthOfHidden();
                 let $tab = $('.list-tab .active').next();
+
+
 				if ($tab.length > 0) {
+					let posTab = $tab.offset();
+					//console.log($tab,posTab);
+					let leftTab = posTab.left-12;
 					$tab.find('a').tab('show');
+					//console.log(hiddenWidth, listWidth, leftTab);
 					if(hiddenWidth < listWidth)
-						$('.list-tab').animate({left:"+="+widthOfHidden()+"px"},'slow');
+						$('.list-tab').animate({left:"-="+leftTab+"px"},'slow');
+					//$('.list-tab').animate({left:"+="+widthOfHidden()+"px"},'slow');
 				}
 			},
 			swipeRight:function(event, distance, duration, fingerCount, fingerData, currentDirection) {
@@ -44,9 +51,12 @@ $(document).ready(function () {
                 let hiddenWidth = widthOfHidden();
                 let $tab = $('.list-tab .active').prev();
 				if ($tab.length > 0) {
+					let posTab = $tab.offset();
+					let leftTab = posTab.left-12;
 					$tab.find('a').tab('show');
 					if(hiddenWidth < listWidth)
-						$('.list-tab').animate({left:"-="+getLeftPos()+"px"},'slow');
+						$('.list-tab').animate({left:"-="+leftTab+"px"},'slow');
+					//$('.list-tab').animate({left:"-="+getLeftPos()+"px"},'slow');
 				}
 			},
 			allowPageScroll:"auto"
