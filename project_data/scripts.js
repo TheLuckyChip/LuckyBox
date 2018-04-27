@@ -63,6 +63,18 @@ $(document).ready(function () {
 		});
 	});
 
+	//загружаем контент во вкладки
+	$('li.swipe-tab a').on('show.bs.tab', function (e) {
+		let url = $(this).attr("href");
+		let target = $(this).data("target");
+		let tab = $(this);
+
+		$(target).load(url,function(result){
+			tab.tab('show');
+		});
+	});
+	$('li.swipe-tab a:first').tab('show');
+
 	function alertAjaxError(err,exception,container){
 		//console.log(err,exception);
 		let msg = '';

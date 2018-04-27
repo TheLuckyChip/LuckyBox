@@ -1,0 +1,83 @@
+<div class="container">
+	<div class="row">
+		<div id="error_brewing" class="col-md-offset-2 col-md-8"></div>
+	</div>
+	<div class="row mt-10">
+		<div class="col-md-offset-2 col-md-2">
+			Время <span id="brewing_time"></span>
+		</div>
+		<div class="col-md-4">
+			<button id="start_brewing" class="btn btn-success btn-sm noSwipe">Старт</button>
+		</div>
+		<div class="col-md-4">
+			<button id="stop_brewing" class="btn btn-danger btn-sm noSwipe">Стоп</button>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-12 fill-height">
+			<table class="table">
+				<thead>
+				<tr>
+					<th>
+						Пауза
+					</th>
+					<th>
+						Время паузы
+					</th>
+					<th>
+						Температура паузы
+					</th>
+				</tr>
+				</thead>
+				<tbody>
+				<tr id='brewing_status_1' class="brewing-status">
+					<td>
+						1
+					</td>
+					<td class="form-inline">
+						<input id='brewing_time_1' class="form-control input-sm noSwipe" type="number" value ='' min="0"  max="90" size="6"> <span>минут</span>
+					</td>
+					<td class="form-inline">
+						<input id='brewing_temp_1' class="form-control input-sm noSwipe" type="number" value ='' min="30"  max="103" size="6"> <span>&#176
+														С</span>
+					</td>
+				</tr>
+				<tr id='brewing_status_2' class="brewing-status">
+					<td>
+						2
+					</td>
+					<td class="form-inline">
+						<input id='brewing_time_2' class="form-control input-sm noSwipe" type="number" value ='' min="0"  max="90" size="6"> <span>минут</span>
+					</td>
+					<td class="form-inline">
+						<input id='brewing_temp_2' class="form-control input-sm noSwipe" type="number" value ='' size="6" min="30"  max="103"> <span>&#176С</span>
+					</td>
+				</tr>
+				<tr id='brewing_status_3' class="brewing-status">
+					<td>
+						3
+					</td>
+					<td class="form-inline">
+						<input id='brewing_time_3' class="form-control input-sm noSwipe" type="number" value ='' min="0"  max="90"  size="6"> <span>минут</span>
+					</td>
+					<td class="form-inline">
+						<input id='brewing_temp_3' class="form-control input-sm noSwipe" type="number" value ='' min="30"  max="103" size="6"> <span>&#176С</span>
+					</td>
+				</tr>
+				<tr id='brewing_status_4' class="brewing-status">
+					<td>
+						4
+					</td>
+					<td class="form-inline">
+						<input id='brewing_time_4' class="form-control input-sm noSwipe" type="number" value ='' min="0"  max="90" size="6"> <span>минут</span>
+					</td>
+					<td class="form-inline">
+						<input id='brewing_temp_4' class="form-control input-sm noSwipe" type="number" value ='' min="30"  max="103" size="6"> <span>&#176С</span>
+						<button id="brewing_set_pause_temp" type="button" class="btn btn-success btn-sm noSwipe">Задать</button>
+					</td>
+				</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+</div>
