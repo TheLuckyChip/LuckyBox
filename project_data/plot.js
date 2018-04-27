@@ -138,12 +138,12 @@
         }).done();
     }
 
-
     
 
-
-
     setInterval(getDeviceCondition, 1000);
+
+
+    var luckyBox = new LuckyBox();
 
 });
 

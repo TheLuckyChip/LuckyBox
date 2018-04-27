@@ -1,7 +1,30 @@
 $(document).ready(function () {
-    let deviceUrl = 'http://192.168.1.106/';    // Для отладги графиков
+    let deviceUrl = 'http://192.168.1.106/';    // Для отладки графиков
 
     sensorsConditions = [];
+
+    function getDeviceCondition() {
+        
+
+            $.ajax({
+                url: deviceUrl + 'configs.json',
+                data: {},
+                async: false,
+                type: 'GET',
+                dataType: 'text',
+                success: function (msg) {
+                    console.log('Settings', msg);
+
+                    let deviceCondition = JSON.parse(msg);
+                    localStorage.sensorsConditions.push(deviceCondition);
+
+                    deviceConditions.push(JSON.parse(msg));
+
+
+                }
+            }).done();
+
+    }
 
 
 	$(function() {
@@ -117,8 +140,7 @@ $(document).ready(function () {
 
 	    
 	}
-
-	//Обновление прошивки
+    //Обновление прошивки
 	$("#file_update").on("change",function (e) {
 		let vidFileLength = $(this)[0].files.length;
 		if(vidFileLength !== 0) {
