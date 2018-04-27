@@ -4,12 +4,12 @@
 
 void initSSDP(void)
 {
-	// SSDP дескриптор
+	// SSDP РґРµСЃРєСЂРёРїС‚РѕСЂ
 	HTTP.on("/description.xml", HTTP_GET, []()
 	{
 		SSDP.schema(HTTP.client());
 	});
-	//Если версия  2.0.0 закомментируйте следующую строчку
+	//Р•СЃР»Рё РІРµСЂСЃРёСЏ  2.0.0 Р·Р°РєРѕРјРјРµРЅС‚РёСЂСѓР№С‚Рµ СЃР»РµРґСѓСЋС‰СѓСЋ СЃС‚СЂРѕС‡РєСѓ
 	SSDP.setDeviceType("upnp:rootdevice");
 	SSDP.setSchemaURL("description.xml");
 	SSDP.setHTTPPort(80);
@@ -19,7 +19,7 @@ void initSSDP(void)
 	SSDP.setModelName("LuckyBox");
 	SSDP.setModelNumber("000000000001");
 	SSDP.setModelURL("https://luckycenter.ru");
-	SSDP.setManufacturer("Счастливчик");
+	SSDP.setManufacturer("РЎС‡Р°СЃС‚Р»РёРІС‡РёРє");
 	SSDP.setManufacturerURL("https://luckycenter.ru");
 	SSDP.begin();
 }

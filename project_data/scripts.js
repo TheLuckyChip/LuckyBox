@@ -129,7 +129,7 @@ $(document).ready(function () {
 			url: 'update',
 			type: 'POST',
 			data: formData,
-			async: false,
+			//async: false,
 			cache: false,
 			contentType: false,
 			enctype: 'multipart/form-data',
@@ -201,7 +201,7 @@ $(document).ready(function () {
 		let _this = $(this);
 		let ssid = $("#settings_ssid").val();
 		let pass = $("#settings_password").val();
-		sendRequest("ssid",{"ssdp":ssid,"password":pass},"text",false,_this,$("#error_settings"));
+		sendRequest("ssid",{"ssid":ssid,"password":pass},"text",false,_this,$("#error_settings"));
 		//TODO сделать действия SUCCESS в sendRequest
 		$.fn.openModal('', 'Изменения вступят в силу после перезагрузки. Пожалуйста перезагрузите устройство.', "modal-sm", false, true);
 	});
