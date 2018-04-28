@@ -1,13 +1,14 @@
 ﻿var luckyBoxReceiver = {
     
     deviceConditions: [],   // Контейнер состояний в ОЗУ
-    frequencyRecordingToLocalStorage: 10,   // Частота архивации
-    frequencyReqest: 2000,                  // Частота запросов на сервер TODO вынести в UI
+    frequencyRecordingToLocalStorage: 5,    // Частота архивации
+    frequencyReqest: 1000,                  // Частота запросов на сервер TODO вынести в UI
 
     getDeviceCondition: function () {  
         const self = luckyBoxReceiver;
         const deviceUrl = 'http://192.168.1.106/'; // Для отладки графиков !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         let recordingTicker = 0;
+        let power = 10;
 
         $.ajax({
             url: deviceUrl + 'configs.json',
@@ -19,18 +20,33 @@
                 console.log('Settings', msg);
                 self.deviceConditionCurrent = JSON.parse(msg);
                 self.deviceConditionCurrent.dateTime = (new Date()).getTime();
+                self.deviceConditionCurrent.power = power;                   // TODO Эмуляция
+
                 self.deviceConditions.push(self.deviceConditionCurrent);
 
                 // Запись в хранилище
-                if (recordingTicker++ % self.frequencyRecordingToLocalStorage === 0) {
+                if ((recordingTicker++ % self.frequencyRecordingToLocalStorage) === 0) {
                     localStorage.setObj('deviceConditions', self.deviceConditions);
                     self.recordingTicker = 0;
+
+                    power = getRandomInt(0, 100);
                 }
 
                 // Вызов события что данные получены
                 $(document).trigger('receivedNewCondition', [self.deviceConditionCurrent]);
             }
         }).done();
+
+
+        function getRandomInt(min, max) {
+            return Math.floor(Math.random() * (max - min)) + min;
+        }
+
+    },
+
+    clearDeviceConditions() {
+        this.deviceConditions = [];
+        localStorage.removeItem('deviceConditions');
     },
 
     start: function () {
