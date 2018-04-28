@@ -122,10 +122,18 @@
         					<p></p>
         				</dt>
         				<dt>
-        					<form method="POST" action="/update" enctype="multipart/form-data">
+        					<form method="POST" action="/update?cmd=0" enctype="multipart/form-data">
         					 <div class="btn-group">
                     <input type="file" class="btn btn-success " name="update" style="height: 38px;">
-                    <input type="submit" class="btn btn-default active" value="загрузить" onclick="this.value='Подождите...';" style="height: 38px;">
+                    <input type="submit" class="btn btn-default active" value="Прошивка" onclick="this.value='Подождите...';" style="height: 38px;">
+                    </div>
+                  </form>
+                  </dt>
+					<dt>
+        					<form method="POST" action="/update?cmd=100" enctype="multipart/form-data">
+        					 <div class="btn-group">
+                    <input type="file" class="btn btn-success " name="update" style="height: 38px;">
+                    <input type="submit" class="btn btn-default active" value="WEBсервер" onclick="this.value='Подождите...';" style="height: 38px;">
                     </div>
                   </form>
                   </dt>
