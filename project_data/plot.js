@@ -1,8 +1,14 @@
 ﻿$(document).ready(function() {
     const deviceUrl = 'http://192.168.1.106/';
 
-    const deviceConditions = [];
-    const data = [];
+    // Считывание предыдущих сохранённых значений
+    let deviceConditions = localStorage.getObj('deviceConditions');
+
+    // Проверка на существование сохранённых значений
+    if (deviceConditions == null) {
+        deviceConditions = [];
+    }
+
 
     Highcharts.setOptions({
         global: {
@@ -55,10 +61,10 @@
 
         series: [
             { name: "Power", yAxis: 1, type: "area", step: 'left', fillOpacity: 0.05, color: "#f00000", lineWidth: 0, showInLegend: true},
-            { name: "T1" },
-            { name: "T2" },
-            { name: "T3" },
-            { name: "T4" }
+            { name: "T1", data: deviceConditions.map(function (dc) { return [dc.dateTime, dc.temperature] })},
+            { name: "T2", data: deviceConditions.map(function (dc) { return [dc.dateTime, dc.temperature2] })},
+            { name: "T3", data: deviceConditions.map(function (dc) { return [dc.dateTime, dc.temperature3] })},
+            { name: "T4", data: deviceConditions.map(function (dc) { return [dc.dateTime, dc.temperature4] })}
         ],
         rangeSelector: {
             buttons: [{
@@ -107,44 +113,32 @@
     var power = 0;
     var i = 0;
 
-    function getDeviceCondition() {
+    $(document).on("receivedNewCondition", function (e, deviceCondition) {
+        // console.log(arg1);
+
+        if ((i++) % 10 === 0) power = getRandomInt(0, 100);
+
+        let time = (new Date()).getTime();
+        plot.series[0].addPoint([time, power], false);
+
+        plot.series[1].addPoint([time, deviceCondition.temperature], false);
+        plot.series[2].addPoint([time, deviceCondition.temperature2], false);
+        plot.series[3].addPoint([time, deviceCondition.temperature3], false);
+        plot.series[4].addPoint([time, deviceCondition.temperature4], false);
 
 
-        $.ajax({
-            url: deviceUrl + 'configs.json',
-            data: {},
-            async: false,
-            type: 'GET',
-            dataType: 'text',
-            success: function(msg) {
-                console.log('Settings', msg);
+        plot.redraw();
+    });
 
-                let deviceCondition = JSON.parse(msg);
-                deviceConditions.push(JSON.parse(msg));
+    $('#plotClear').click(function() {
+        localStorage.setObj('deviceConditions', []);
+        localStorage.clear();
 
-                if ((i++) % 10 === 0) power = getRandomInt(0, 100);
-
-                let time = (new Date()).getTime();
-                plot.series[0].addPoint([time, power], false);
-
-                plot.series[1].addPoint([time, deviceCondition.temperature], false);
-                plot.series[2].addPoint([time, deviceCondition.temperature2], false);
-                plot.series[3].addPoint([time, deviceCondition.temperature3], false);
-                plot.series[4].addPoint([time, deviceCondition.temperature4], false);
-
-
-                plot.redraw();
-            }
-        }).done();
-    }
-
-    
-
-    setInterval(getDeviceCondition, 1000);
-
-
-    var luckyBox = new LuckyBox();
-
+        plot.series.forEach(function(s) {
+            s.data = [];
+        });
+        plot.redraw();
+    });
 });
 
 
