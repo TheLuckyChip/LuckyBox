@@ -4,23 +4,38 @@
 #define _SETTING_h
 
 #if defined(ARDUINO) && ARDUINO >= 100
-#include "arduino.h"
+#include "Arduino.h"
 #else
 #include "WProgram.h"
 #endif
 
-#include <FS.h>
 #include <Ticker.h>
-#include <ESP8266HTTPUpdateServer.h> 
-#include <ESP8266WebServer.h>
 
 extern Ticker flipper;
+
+#ifdef ESP8266
+#include <FS.h>
+#include <ESP8266HTTPUpdateServer.h> 
+#include <ESP8266WebServer.h>
 
 // Объект для обновления с web страницы
 extern ESP8266HTTPUpdateServer httpUpdater;
 
 // Web интерфейс для устройства
 extern ESP8266WebServer HTTP;
+
+#else
+#include <SPIFFS.h>
+#include <ESP32HTTPUpdateServer.h>
+#include <ESP32WebServer.h>
+
+// Объект для обновления с web страницы
+extern ESP32HTTPUpdateServer httpUpdater;
+
+// Web интерфейс для устройства
+extern ESP32WebServer HTTP;
+
+#endif
 
 // Для файловой системы
 extern File fsUploadFile;

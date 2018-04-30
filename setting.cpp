@@ -6,11 +6,21 @@
 
 Ticker flipper;
 
+#ifdef ESP8266
 // Объект для обновления с web страницы 
 ESP8266HTTPUpdateServer httpUpdater;
 
 // Web интерфейс для устройства
 ESP8266WebServer HTTP;
+
+#else
+// Объект для обновления с web страницы 
+ESP32HTTPUpdateServer httpUpdater;
+
+// Web интерфейс для устройства
+ESP32WebServer HTTP;
+
+#endif
 
 // Для файловой системы
 File fsUploadFile;
