@@ -112,7 +112,7 @@ $(document).ready(function () {
 	        data: {},
 	        async: false,
 	        type: 'GET',
-	        dataType: 'text',
+	        dataType: 'json',
 	        success: function(msg) {
 	            console.log('Settings', msg);
 	            $("#settings_ssdp").val(msg["SSDP"]);
@@ -478,6 +478,6 @@ $(document).ready(function () {
 	});
 
 	//TODO сейчас запускается каждая функция по очереди, потом переделать каждую на «старт/стоп»
-	// setTimeout(getSettings, 2000);
+	setTimeout(getSettings, 2000);
 	//setInterval(getDistillation,2000);
 });

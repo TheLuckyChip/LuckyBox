@@ -63,11 +63,14 @@
             ],
 
             series: [
-                { name: "Power", yAxis: 1, type: "area", step: 'left', fillOpacity: 0.05, color: "#f00000", lineWidth: 0, showInLegend: true },
-                { name: "T1", data: dtoReceiver.dtos.map(function (dc) { return [dc.dateTime, dc.temperature] }) },
-                { name: "T2", data: dtoReceiver.dtos.map(function (dc) { return [dc.dateTime, dc.temperature2] }) },
-                { name: "T3", data: dtoReceiver.dtos.map(function (dc) { return [dc.dateTime, dc.temperature3] }) },
-                { name: "T4", data: dtoReceiver.dtos.map(function (dc) { return [dc.dateTime, dc.temperature4] }) }
+                {
+                    name: "Power", yAxis: 1, type: "area", step: 'left', fillOpacity: 0.05, color: "#f00000", lineWidth: 0, showInLegend: true,
+                    data: dtoReceiver.dtos.map(function (dc) { return [dc.dateTime, dc.heaterPower] }) 
+                },
+                { name: "T1", data: dtoReceiver.dtos.map(function (dc) { return [dc.dateTime, dc.temperature0] }) },
+                { name: "T2", data: dtoReceiver.dtos.map(function (dc) { return [dc.dateTime, dc.temperature1] }) },
+                { name: "T3", data: dtoReceiver.dtos.map(function (dc) { return [dc.dateTime, dc.temperature2] }) },
+                { name: "T4", data: dtoReceiver.dtos.map(function (dc) { return [dc.dateTime, dc.temperature3] }) }
             ],
             rangeSelector: {
                 buttons: [{
@@ -109,14 +112,14 @@
             //}
         });
 
-        $(document).on("newDTOreceived", function (e, deviceCondition) {
+        $(document).on("newDTOreceived", function (e, dto) {
 
-            //plot.series[0].addPoint([deviceCondition.dateTime, deviceCondition.power], false);
+            plot.series[0].addPoint([dto.dateTime, dto.heaterPower], false);
 
-            plotNew.series[1].addPoint([deviceCondition.dateTime, deviceCondition.temperature], false);
-            plotNew.series[2].addPoint([deviceCondition.dateTime, deviceCondition.temperature2], false);
-            plotNew.series[3].addPoint([deviceCondition.dateTime, deviceCondition.temperature3], false);
-            plotNew.series[4].addPoint([deviceCondition.dateTime, deviceCondition.temperature4], false);
+            plotNew.series[1].addPoint([dto.dateTime, dto.temperature0], false);
+            plotNew.series[2].addPoint([dto.dateTime, dto.temperature1], false);
+            plotNew.series[3].addPoint([dto.dateTime, dto.temperature2], false);
+            plotNew.series[4].addPoint([dto.dateTime, dto.temperature3], false);
 
             plotNew.redraw();
         });

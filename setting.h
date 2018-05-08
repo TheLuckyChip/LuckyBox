@@ -10,6 +10,7 @@
 #endif
 
 #include <Ticker.h>
+#include "sensors.h"
 
 extern Ticker flipper;
 
@@ -65,5 +66,6 @@ extern bool settingAlarm;
 extern int modeWiFi;
 extern int timeWiFiReconnect;
 
+extern float temperatures[DS_Cnt];
 #endif
 

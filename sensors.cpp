@@ -56,9 +56,12 @@ void dallRead()
 		  dallas_my_sensor[i-1].temperature *= 100;
 		  dallas_my_sensor[i-1].temperature = floor(dallas_my_sensor[i-1].temperature + 0.5);
 		  dallas_my_sensor[i-1].temperature /= 100;
+
+		  temperatures[i - 1] = dallas_my_sensor[i - 1].temperature;
 		  i--;
 	  }
 
+	  // TODO выпилить
 	  if (DS_Count >= 1) temperature1 = dallas_my_sensor[0].temperature;
 	  if (DS_Count >= 2) temperature2 = dallas_my_sensor[1].temperature;
 	  if (DS_Count >= 3) temperature3 = dallas_my_sensor[2].temperature;

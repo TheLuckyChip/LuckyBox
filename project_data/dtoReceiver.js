@@ -18,7 +18,7 @@ var dtoReceiver = {
         let requestСounter = 0;    // Счётчик запросов, служит для записи в localStorage каждые frequencyRecordingToLocalStorage раз
 
         $.ajax({
-            url: deviceUrl + 'configs.json',
+            url: deviceUrl + 'GetDto',
             data: {},
             async: false,
             type: 'GET',
@@ -71,7 +71,7 @@ var dtoReceiver = {
         this.dtos = localStorage.getObj('dtos');
 
         // Проверка на существование сохранённых значений
-        if (this.deviceConditions == null) {
+        if (this.dtos == null) {
             this.dtos = [];
         }
         setInterval(this.dtoGet, this.reqestDelay);

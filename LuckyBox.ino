@@ -2,7 +2,6 @@
    Система автоматики винокура. 
    Проект центра открытого проектирования у Счастливчика https://LuckyCenter.ru
 */
-#include "dto.h"
 #include "touch_interrupt.h"
 #include "setup.h"
 #include "wifi_config.h"

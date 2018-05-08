@@ -3,7 +3,7 @@
 // 
 
 #include "setting.h"
-
+#include "sensors.h"
 
 Ticker flipper;
 
@@ -51,4 +51,5 @@ int readTempInterval;				// Инетрал времени для вывода г
 int timeWiFiReconnect = 0;
 bool settingAlarm = false;        // Пересечение границы уставки
 int modeWiFi;
+float temperatures[DS_Cnt];
 //int temp_in[120];                 // вывод графика на дисплей

@@ -4,17 +4,24 @@
 #define _DTO_h
 
 #if defined(ARDUINO) && ARDUINO >= 100
-	#include "arduino.h"
+#include "arduino.h"
 #else
-	#include "WProgram.h"
+#include "WProgram.h"
 #endif
-
-struct dto
+// структура для передачи данных клиенту
+class dto
 {
 
+public:
+	float temperatures[8];	// Датчики температуры
 
- public:
+	/*		ТЭН		*/
+	float settingTank;		// Температура отключения нагрева куба
+	float heaterPower;		// Установленная мощность ТЭНа
+	bool heaterStatus;		// Состояние ТЭНа вкл/выкл
+
 	void init();
+	String getJson();		// Формируем строку для отправки в файл конфигурации в json формате
 };
 
 
