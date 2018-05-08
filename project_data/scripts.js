@@ -12,7 +12,7 @@ $(document).ready(function () {
 		}
 
 		function widthOfHidden () {
-			return (($('.wrapper-nav').outerWidth()) - widthOfList() - getLeftPos() - 40);
+			return (($('.wrapper-nav').outerWidth()) - widthOfList() - getLeftPos()/* - 40*/);
 		}
 
 		function getLeftPos () {
@@ -34,10 +34,17 @@ $(document).ready(function () {
                 let listWidth = widthOfList();
                 let hiddenWidth = widthOfHidden();
                 let $tab = $('.list-tab .active').next();
+
+
 				if ($tab.length > 0) {
+					let posTab = $tab.offset();
+					//console.log($tab,posTab);
+					let leftTab = posTab.left-12;
 					$tab.find('a').tab('show');
+					//console.log(hiddenWidth, listWidth, leftTab);
 					if(hiddenWidth < listWidth)
-						$('.list-tab').animate({left:"+="+widthOfHidden()+"px"},'slow');
+						$('.list-tab').animate({left:"-="+leftTab+"px"},'slow');
+					//$('.list-tab').animate({left:"+="+widthOfHidden()+"px"},'slow');
 				}
 			},
 			swipeRight:function(event, distance, duration, fingerCount, fingerData, currentDirection) {
@@ -45,14 +52,29 @@ $(document).ready(function () {
                 let hiddenWidth = widthOfHidden();
                 let $tab = $('.list-tab .active').prev();
 				if ($tab.length > 0) {
+					let posTab = $tab.offset();
+					let leftTab = posTab.left-12;
 					$tab.find('a').tab('show');
 					if(hiddenWidth < listWidth)
-						$('.list-tab').animate({left:"-="+getLeftPos()+"px"},'slow');
+						$('.list-tab').animate({left:"-="+leftTab+"px"},'slow');
+					//$('.list-tab').animate({left:"-="+getLeftPos()+"px"},'slow');
 				}
 			},
 			allowPageScroll:"auto"
 		});
 	});
+
+	//загружаем контент во вкладки
+	$('li.swipe-tab a').on('show.bs.tab', function (e) {
+		let url = $(this).attr("href");
+		let target = $(this).data("target");
+		let tab = $(this);
+
+		$(target).load(url,function(result){
+			tab.tab('show');
+		});
+	});
+	$('li.swipe-tab a:first').tab('show');
 
 	function alertAjaxError(err,exception,container){
 		//console.log(err,exception);
@@ -129,7 +151,7 @@ $(document).ready(function () {
 			url: 'update',
 			type: 'POST',
 			data: formData,
-			async: false,
+			//async: false,
 			cache: false,
 			contentType: false,
 			enctype: 'multipart/form-data',
@@ -201,7 +223,7 @@ $(document).ready(function () {
 		let _this = $(this);
 		let ssid = $("#settings_ssid").val();
 		let pass = $("#settings_password").val();
-		sendRequest("ssid",{"ssdp":ssid,"password":pass},"text",false,_this,$("#error_settings"));
+		sendRequest("ssid",{"ssid":ssid,"password":pass},"text",false,_this,$("#error_settings"));
 		//TODO сделать действия SUCCESS в sendRequest
 		$.fn.openModal('', 'Изменения вступят в силу после перезагрузки. Пожалуйста перезагрузите устройство.', "modal-sm", false, true);
 	});
