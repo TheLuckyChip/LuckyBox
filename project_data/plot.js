@@ -5,13 +5,14 @@
             useUTC: false
         }
     });
+
     var plot;
-    $(document).one("receivedNewCondition", function () {
+    $(document).one("newDTOreceived", function () {
         plot = getPlot();
     });
 
     $('#plotClear').click(function() {
-        window.luckyBoxReceiver.clearDeviceConditions();
+        window.dtoReceiver.clearDeviceConditions();
         plot.series.forEach(function (s) { s.setData([]) });
 
         plot.redraw();
@@ -19,10 +20,7 @@
 
     function getPlot() {
 
-        // Считывание предыдущих сохранённых значений
-        let deviceConditions = localStorage.getObj('deviceConditions');
-
-        let plot = Highcharts.stockChart('viewPort', {
+        var plotNew = Highcharts.stockChart('viewPort', {
             chart: {
 
             },
@@ -66,10 +64,10 @@
 
             series: [
                 { name: "Power", yAxis: 1, type: "area", step: 'left', fillOpacity: 0.05, color: "#f00000", lineWidth: 0, showInLegend: true },
-                { name: "T1", data: deviceConditions.map(function (dc) { return [dc.dateTime, dc.temperature] }) },
-                { name: "T2", data: deviceConditions.map(function (dc) { return [dc.dateTime, dc.temperature2] }) },
-                { name: "T3", data: deviceConditions.map(function (dc) { return [dc.dateTime, dc.temperature3] }) },
-                { name: "T4", data: deviceConditions.map(function (dc) { return [dc.dateTime, dc.temperature4] }) }
+                { name: "T1", data: dtoReceiver.dtos.map(function (dc) { return [dc.dateTime, dc.temperature] }) },
+                { name: "T2", data: dtoReceiver.dtos.map(function (dc) { return [dc.dateTime, dc.temperature2] }) },
+                { name: "T3", data: dtoReceiver.dtos.map(function (dc) { return [dc.dateTime, dc.temperature3] }) },
+                { name: "T4", data: dtoReceiver.dtos.map(function (dc) { return [dc.dateTime, dc.temperature4] }) }
             ],
             rangeSelector: {
                 buttons: [{
@@ -111,19 +109,19 @@
             //}
         });
 
-        $(document).on("receivedNewCondition", function (e, deviceCondition) {
+        $(document).on("newDTOreceived", function (e, deviceCondition) {
 
-            plot.series[0].addPoint([deviceCondition.dateTime, deviceCondition.power], false);
+            //plot.series[0].addPoint([deviceCondition.dateTime, deviceCondition.power], false);
 
-            plot.series[1].addPoint([deviceCondition.dateTime, deviceCondition.temperature], false);
-            plot.series[2].addPoint([deviceCondition.dateTime, deviceCondition.temperature2], false);
-            plot.series[3].addPoint([deviceCondition.dateTime, deviceCondition.temperature3], false);
-            plot.series[4].addPoint([deviceCondition.dateTime, deviceCondition.temperature4], false);
+            plotNew.series[1].addPoint([deviceCondition.dateTime, deviceCondition.temperature], false);
+            plotNew.series[2].addPoint([deviceCondition.dateTime, deviceCondition.temperature2], false);
+            plotNew.series[3].addPoint([deviceCondition.dateTime, deviceCondition.temperature3], false);
+            plotNew.series[4].addPoint([deviceCondition.dateTime, deviceCondition.temperature4], false);
 
-            plot.redraw();
+            plotNew.redraw();
         });
 
-        return plot;
+        return plotNew;
     }
 });
 

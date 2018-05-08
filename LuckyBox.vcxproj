@@ -89,6 +89,7 @@
     <ClInclude Include="distillation_mode.h">
       <FileType>CppCode</FileType>
     </ClInclude>
+    <ClInclude Include="dto.h" />
     <ClInclude Include="file_config.h">
       <FileType>CppCode</FileType>
     </ClInclude>
@@ -140,6 +141,7 @@
     <ClCompile Include="brewing_mode.cpp" />
     <ClCompile Include="buzzer.cpp" />
     <ClCompile Include="distillation_mode.cpp" />
+    <ClCompile Include="dto.cpp" />
     <ClCompile Include="file_config.cpp" />
     <ClCompile Include="fs_config.cpp" />
     <ClCompile Include="heater.cpp" />

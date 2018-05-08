@@ -16,6 +16,7 @@ extern void handleSetSSIDAP();
 extern void handleRestart();
 extern void handleConfigJSON();
 extern String getConfigJSON();
+extern String getDto();
 
 #endif
 

@@ -1,31 +1,4 @@
 $(document).ready(function () {
-    let deviceUrl = 'http://192.168.1.106/';    // Для отладки графиков
-
-    sensorsConditions = [];
-
-    function getDeviceCondition() {
-        
-
-            $.ajax({
-                url: deviceUrl + 'configs.json',
-                data: {},
-                async: false,
-                type: 'GET',
-                dataType: 'text',
-                success: function (msg) {
-                    console.log('Settings', msg);
-
-                    let deviceCondition = JSON.parse(msg);
-                    localStorage.sensorsConditions.push(deviceCondition);
-
-                    deviceConditions.push(JSON.parse(msg));
-
-
-                }
-            }).done();
-
-    }
-
 
 	$(function() {
 		function widthOfList () {
@@ -113,7 +86,7 @@ $(document).ready(function () {
 	//Свойства
 	function getSettings() {
 	    $.ajax({
-	        url: deviceUrl + 'configs.json',
+	        url: 'configs.json',
 	        data: {},
 	        async: false,
 	        type: 'GET',
