@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>LuckyBox Система автоматики винокура</title>
+
+    <meta name="description" content="Версия 1.3 от 04.04.18. ПО распространяется на условиях лицензии GNU GPL v.3. www.LuckyCenter.ru">
+    <meta name="author" content="Счастливчик">
+
+    <link href="bootstrap.min.css" rel="stylesheet">
+    <script type="text/javascript" src="/LB_distillation.js"></script>
+    <link rel="icon" type="image/png" href="favicon-32x32.png" sizes="32x32" />
+    <link rel="icon" type="image/png" href="favicon-16x16.png" sizes="16x16" />
+
+   
+  </head>
+  <body onload="process();">
+	
+	<div class="container-fluid">
+	<div class="row">
+	
+			
+						
+						<p>
+							<h3>Дистилляция</h3>
+						<p>
+	
+						<div class="row">
+      				<div class="col-md-6">
+      				   <img alt="Изображение колонны" src="LB_distillator.png" align="left" 
+      				   hspace="5" vspace="7" />
+      				</div>
+      				
+      				<div class="col-md-6">
+      				 <dl>
+      				  <dt>
+        					Подключите датчики согласно рисунка 
+        					<p></p>
+        				</dt>
+        				<dt>
+        					3 - T воды на выходе из дефлегматора
+        				</dt>
+        				<dt>
+        					2 - Т в узле отбора 
+        				</dt>
+        				<dt>
+        					1 - Т в кубе
+        				</dt>
+			         </dl>
+      				</div>
+    			 </div>
+		         <p></p>
+		         
+	
+		         
+		   <div class="col-md-12">
+		    <table class="table">
+				<thead>
+					<tr>
+						<th>
+							Температура
+						</th>
+						<th>
+							Значение
+						</th>
+						<th>
+							Установка
+						</th>
+						<th>
+							Уставка
+						</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>
+							Т&#176 Воды на выходе
+						</td>
+						<td>
+							<input type="text" id='temperatureWater' value ='??' name='temperatureWater' size="6" readonly> <span>&#176С</span>
+						</td>
+						<td>
+							
+						</td>
+						<td>
+							
+						</td>
+					</tr>
+					<tr>
+						<td>
+							Т&#176 в узле отбора
+						</td>
+						<td>
+							<input type="text" id='temperatureTakeOff' value ='??' name='temperatureTakeOff' size="6" align ="right" readonly> <span>&#176С</span>
+						</td>
+						<td>
+						</td>
+						<td>
+						</td>
+					</tr>
+					<tr class="success" id='statusTank'>
+						<td>
+							Т&#176 в кубе
+						</td>
+						<td>
+							<input type="text" id='temperatureTank' value ='??' name='temperatureTank' size="6" readonly> <span>&#176С</span>
+						</td>
+						<td>
+						  <input type="number" id="setTank" value="" min="0"  max="103"  size="6"><span>&#176С</span>
+							<input type="submit" name ="setTank" value="Задать"  onclick="set_Tank()" > 
+						</td>
+						<td>
+						  <input type="text" id='settingTank' value='??' name='settingTank' size="6" readonly><span>&#176С</span>
+						</td>
+					</tr>
+				</tbody>
+			 </table>
+      </div>        
+		 </div>
+	</div>
+			
+  
+	
+    <script src="jquery.min.js"></script> 
+    <script src="bootstrap.min.js"></script> 
+  </body>
+</html>

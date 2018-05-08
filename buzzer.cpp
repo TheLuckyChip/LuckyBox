@@ -17,6 +17,8 @@ void setPin()
 
 void initBuzzer()
 {
+	pinMode(buzzer, OUTPUT);
+    digitalWrite(buzzer, LOW);
 	tickerSet.attach_ms(3, setPin);
 }
 

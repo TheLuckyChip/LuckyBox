@@ -1,7 +1,14 @@
 #include "time_config.h"
 #include "file_config.h"
 #include "setting.h"
+
+#ifdef ESP8266
 #include <ESP8266WiFi.h>
+
+#else
+#include <WiFi.h>
+
+#endif
 
 #include <time.h>               //Содержится в пакете
 void initTime()
