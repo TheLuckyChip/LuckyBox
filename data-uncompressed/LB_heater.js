@@ -35,7 +35,7 @@ document.getElementById('heaterPower').value = allData.heaterPower.toFixed(0);
 // Функция передачи значений мощности ТЭНа
 function setting_Heater(){          
 
-server = "/SetHeaterPower?heaterPower="+ document.getElementById('heaterPower').value;
+server = "/SetHeaterPower?heaterPower="+ document.getElementById('heaterPower').value + "&heaterStatus=" + 1;
 request = new XMLHttpRequest();
 request.open("GET", server, false);
 request.send();
