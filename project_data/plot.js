@@ -18,9 +18,22 @@
         plot.redraw();
     });
 
+    $("#reqestDelay").val(window.dtoReceiver.reqestDelayDefalt / 1000);
+    $('#changeSpeed').click(function () {
+
+        let reqestDelay = $("#reqestDelay").val();
+
+        if (reqestDelay>=1) {
+            window.dtoReceiver.changeSpeed($("#reqestDelay").val() * 1000);
+        } else {
+            $("#reqestDelay").val(window.dtoReceiver.reqestDelayDefalt / 1000);
+            alert('Минимальный интервал 1 сек');
+        }
+    });
+
     function getPlot() {
 
-        var plotNew = Highcharts.stockChart('viewPort', {
+       var plotNew = Highcharts.stockChart('viewPort', {
             chart: {
 
             },
@@ -66,11 +79,7 @@
                 {
                     name: "Power", yAxis: 1, type: "area", step: 'left', fillOpacity: 0.05, color: "#f00000", lineWidth: 0, showInLegend: true,
                     data: dtoReceiver.dtos.map(function (dc) { return [dc.dateTime, dc.heaterPower] }) 
-                },
-                { name: "T1", data: dtoReceiver.dtos.map(function (dc) { return [dc.dateTime, dc.temperature0] }) },
-                { name: "T2", data: dtoReceiver.dtos.map(function (dc) { return [dc.dateTime, dc.temperature1] }) },
-                { name: "T3", data: dtoReceiver.dtos.map(function (dc) { return [dc.dateTime, dc.temperature2] }) },
-                { name: "T4", data: dtoReceiver.dtos.map(function (dc) { return [dc.dateTime, dc.temperature3] }) }
+                }
             ],
             rangeSelector: {
                 buttons: [{
@@ -111,21 +120,25 @@
             //    shared: true
             //}
         });
+        
+        dtoReceiver.dtos[0].temperatures.forEach(function(t, i) {
+            plotNew.addSeries({
+                name: "T" + i,
+                data: dtoReceiver.dtos.map(function (dc) { return [dc.dateTime, dc.temperatures[i]] })
+            });
+        });
+        
 
         $(document).on("newDTOreceived", function (e, dto) {
 
             plot.series[0].addPoint([dto.dateTime, dto.heaterPower], false);
 
-            plotNew.series[1].addPoint([dto.dateTime, dto.temperature0], false);
-            plotNew.series[2].addPoint([dto.dateTime, dto.temperature1], false);
-            plotNew.series[3].addPoint([dto.dateTime, dto.temperature2], false);
-            plotNew.series[4].addPoint([dto.dateTime, dto.temperature3], false);
-
+            dto.temperatures.forEach(function(t,i) {
+                plotNew.series[i + 1].addPoint([dto.dateTime, dto.temperatures[i]], false);
+            });
             plotNew.redraw();
         });
 
         return plotNew;
     }
 });
-
-

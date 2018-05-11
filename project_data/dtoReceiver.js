@@ -5,7 +5,8 @@ var dtoReceiver = {
     
     dtos: [],                               // Контейнер состояний в ОЗУ
     frequencyRecordingToLocalStorage: 5,    // Частота архивации (Через сколько опросов осуществляется запись в localStorage)
-    reqestDelay: 1000,                      // Период между запросами (в мс) на сервер TODO вынести в UI
+    reqestDelayDefalt: 1000,                // Период между запросами (в мс) на сервер TODO вынести в UI
+    intervalId: 0,
 
     dtoGet: function () {  
         const self = dtoReceiver;  // Для доступа к this в jquery
@@ -47,6 +48,12 @@ var dtoReceiver = {
         localStorage.removeItem('dtos');
     },
 
+    // Изменить скорость обновления
+    changeSpeed: function(intervar) {
+        clearInterval(this.intervalId);
+         this.intervalId = setInterval(this.dtoGet, intervar);
+    },
+
     // Запуск опроса ESP
     start: function () {
         // Функция записи в LocalStorage
@@ -60,12 +67,12 @@ var dtoReceiver = {
                 }
                 return null;
             }
-        }
+        };
 
         // Функция чтения из LocalStorage
-        Storage.prototype.getObj = function (key) {
+        Storage.prototype.getObj = function(key) {
             return JSON.parse(this.getItem(key));
-        }
+        };
 
         // Считывание предыдущих сохранённых значений
         this.dtos = localStorage.getObj('dtos');
@@ -73,8 +80,9 @@ var dtoReceiver = {
         // Проверка на существование сохранённых значений
         if (this.dtos == null) {
             this.dtos = [];
-        }
-        setInterval(this.dtoGet, this.reqestDelay);
+        };
+
+        this.intervalId = setInterval(this.dtoGet, this.reqestDelay);
     }
 }
 

@@ -119,14 +119,15 @@ String getDto()
 	Заполняем JSON
 	*/
 
+	JsonArray& data = json.createNestedArray("temperatures");
 	// Датчики температуры
 	for (int i = 0; i < DS_Cnt - 1; i++)
 	{
-		if (temperatures[i] < -126)	// Можно сделать проверку на клиенте?
+		if (temperatures[i] <= 0)	// Можно сделать проверку на клиенте?
 			continue;
-		json["temperature" + String(i)] = temperatures[i];
+		data.add(temperatures[i]);
 	}
-
+	
 	//json["settingTank"] = settingTank;
 	json["heaterPower"] = heaterPower;
 	//json["heaterStatus"] = heaterStatus;
