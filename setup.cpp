@@ -2,12 +2,9 @@
 #include "setup.h"
 #include "user_config.h"
 #include "wifi_config.h"
-#include "timer_config.h"
 #include "time_config.h"
 #include "ssdp.h"
 #include "reflux_mode.h"
-#include "pressure.h"
-#include "oled.h"
 #include "tft.h"
 #include "http_config.h"
 #include "fs_config.h"
@@ -21,25 +18,34 @@
 
 void setup()
 {
+	// Настройка вывода для ТЭНа
+	pinMode(heater, OUTPUT);
+	digitalWrite(heater, LOW);
+	// Настройка вывода для пищалки
+	pinMode(buzzer, OUTPUT);
+	digitalWrite(buzzer, LOW);
+
 	Serial.begin(115200);
 	Serial.println("");
 	Serial.println("");
 	Serial.println("Start Setup");
 
-	Wire.setClock(100000);
+	Wire.setClock(400000);
 	Wire.begin(pSDA, pSCL);
-	delay(100);
+	delay(10);
+
+	// Установим CS для всех SPI устройств
+	pwm = Adafruit_PWMServoDriver();
+	pwm.begin();
+	pwm.setPWMFreq(1000);
+	csOff(13);	// CS SD
+	csOff(14);	// CS TFT
+	csOff(15);	// CS Touch
 
 #if defined TFT_Display
+	csOn(14);
 	initTFT();	    // HSPI & TFT
-#elif defined OLED_Display
-	initOLED();	// I2C & OLED
 #endif
-
-	// инициализация Touch csreen
-	pinMode(12, INPUT_PULLUP);
-	attachInterrupt(12, touchInt, RISING);
-
 
 	// инициализация I2C
 	Serial.println("Step 1 - I2C Init");
@@ -91,18 +97,7 @@ void setup()
 		tft.println("192.168.4.1");
 		tft.setTextSize(1);
 		tft.setTextColor(ILI9341_GREEN);
-		delay(5000);
-#elif defined OLED_Display
-		display.clearDisplay();
-		display.setTextColor(WHITE, BLACK);
-		display.invertDisplay(0);
-		display.setTextSize(1);
-		display.setCursor(20, 20);
-		display.print("AP IP adress:");
-		display.setCursor(32, 40);
-		display.print("192.168.4.1");
-		display.display();
-		delay(5000);
+		delay(2000);
 #endif
 	}
 	else {
@@ -125,18 +120,7 @@ void setup()
 		tft.println(Local_IP);
 		tft.setTextSize(1);
 		tft.setTextColor(ILI9341_GREEN);
-		delay(5000);
-#elif defined OLED_Display
-		display.clearDisplay();
-		display.setTextColor(WHITE, BLACK);
-		display.invertDisplay(0);
-		display.setTextSize(1);
-		display.setCursor(20, 20);
-		display.print("STA IP adress:");
-		display.setCursor(32, 40);
-		display.print(Local_IP);
-		display.display();
-		delay(5000);
+		delay(2000);
 #endif
 	}
 
@@ -178,41 +162,52 @@ void setup()
 	Serial.println("Step 13 - Pressure sensor Init");
 	initPressureSensor();
 	Serial.println("Step 14 - Buzzer Init");
-	initBuzzer();
+
 	Serial.println("Step 15 - Variables Init");
-	pinMode(heater, OUTPUT);
-	pinMode(buzzer, OUTPUT);
+
+	dallas_my_sensor[DS_Cube].temperature = 5.0;
+	dallas_my_sensor[DS_Tube].temperature = 5.0;
+	dallas_my_sensor[DS_Out].temperature = 5.0;
+	dallas_my_sensor[DS_Def].temperature = 5.0;
+	dallas_my_sensor[DS_Res1].temperature = 5.0;
+	dallas_my_sensor[DS_Res2].temperature = 5.0;
+	dallas_my_sensor[DS_Res3].temperature = 5.0;
+	dallas_my_sensor[DS_Res4].temperature = 5.0;
 
 	int count_w = 10;
 	while (1) {
 		dallRead();
-		if (temperature1 != 5 || count_w == 0) break;
+		if (dallas_my_sensor[DS_Cube].temperature != 5 || count_w == 0) break;
 		count_w--;
 		delay(200);
 	}
 	Serial.println("Temperature sensors:");
-	if (DS_Count >= 1) Serial.println(temperature1);
-	if (DS_Count >= 2) Serial.println(temperature2);
-	if (DS_Count >= 3) Serial.println(temperature3);
-	if (DS_Count >= 4) Serial.println(temperature4);
-	if (DS_Count >= 5) Serial.println(temperature5);
-	if (DS_Count >= 6) Serial.println(temperature6);
-	if (DS_Count >= 7) Serial.println(temperature7);
-	if (DS_Count >= 8) Serial.println(temperature8);
+	if (DS_Count == 0) Serial.println("Not present...");
+	if (DS_Count >= 1) Serial.println(dallas_my_sensor[DS_Cube].temperature);
+	if (DS_Count >= 2) Serial.println(dallas_my_sensor[DS_Tube].temperature);
+	if (DS_Count >= 3) Serial.println(dallas_my_sensor[DS_Out].temperature);
+	if (DS_Count >= 4) Serial.println(dallas_my_sensor[DS_Def].temperature);
+	if (DS_Count >= 5) Serial.println(dallas_my_sensor[DS_Res1].temperature);
+	if (DS_Count >= 6) Serial.println(dallas_my_sensor[DS_Res2].temperature);
+	if (DS_Count >= 7) Serial.println(dallas_my_sensor[DS_Res3].temperature);
+	if (DS_Count >= 8) Serial.println(dallas_my_sensor[DS_Res4].temperature);
 	Serial.println("Pressure sensor:");
-	if (pressureStatus) pressure = readPressureSensor();
+	if (pressureStatus) pressureRead();
 	Serial.println(pressure);
 
 #if defined TFT_Display
 	tftStartForGraph();
-#elif defined OLED_Display
-	oledStartForGraph();
 #endif
 
   Serial.println("Setup Done!");
 
-  flipper.attach(1.0, myTimer);
+#if defined TFT_Display
+  tftStartForGraph();
+  tft.setTextColor(ILI9341_GREEN);
+  tft.println("");
+  tft.println("Done!!!");
+  delay(2000);
+  tft.fillScreen(ILI9341_BLACK);
+  csOff(14);
+#endif
 }
-
-
-

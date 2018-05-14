@@ -4,12 +4,13 @@
 #define _TOUCH_INTERRUPT_h
 
 #if defined(ARDUINO) && ARDUINO >= 100
-  #include "Arduino.h"
+	#include "arduino.h"
 #else
-  #include "WProgram.h"
+	#include "WProgram.h"
 #endif
 
 extern void touchInt();
+extern void touchscreenUpdate();
 
 #endif
 

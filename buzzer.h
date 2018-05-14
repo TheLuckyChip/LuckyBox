@@ -4,12 +4,13 @@
 #define _BUZZER_h
 
 #if defined(ARDUINO) && ARDUINO >= 100
-	#include "Arduino.h"
+	#include "arduino.h"
 #else
 	#include "WProgram.h"
 #endif
 
-extern void initBuzzer();
+extern void initBuzzer(unsigned long duration);
+extern void deinitBuzzer();
 
 #endif
 
