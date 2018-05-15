@@ -1,30 +1,19 @@
 #include "http_config.h"
 #include "setting.h"
-#include "sensors.h"
 #include "file_config.h"
 #include "time_config.h"
 #include <ArduinoJson.h>
-#include "heater.h"
 
 void initHTTP(void)
 {
 
-	// API для устройства
-	
-	HTTP.on("/configs.json", HTTP_GET, []() {	// формирование configs.json страницы для передачи данных в web интерфейс
-		HTTP.sendHeader("Access-Control-Allow-Origin", "*");	// Доступ с любого домена. (Для отладки удобно)
-		HTTP.send(200, "text/plain", getConfigJSON());
-	});
-
-	HTTP.on("/GetDto", HTTP_GET, []() {	
-		HTTP.sendHeader("Access-Control-Allow-Origin", "*");
-		HTTP.send(200, "text/plain", getDto());
-	});
-
+	HTTP.on("/configs.json", handleConfigJSON); // формирование configs.json страницы для передачи данных в web интерфейс
+												 // API для устройства
 	HTTP.on("/ssdp", handleSetSSDP);     // Установить имя SSDP устройства по запросу вида /ssdp?ssdp=proba
 	HTTP.on("/ssid", handleSetSSID);     // Установить имя и пароль роутера по запросу вида /ssid?ssid=home2&password=12345678
 	HTTP.on("/ssidap", handleSetSSIDAP); // Установить имя и пароль для точки доступа по запросу вида /ssidap?ssidAP=home1&passwordAP=8765439
 	HTTP.on("/restart", handleRestart);   // Перезагрузка модуля по запросу вида /restart?device=ok
+
 										   // Добавляем функцию Update для перезаписи прошивки по WiFi при 1М(256K SPIFFS) и выше
 	httpUpdater.setup(&HTTP);
 	// Запускаем HTTP сервер
@@ -72,8 +61,7 @@ void handleRestart()
 	}
 }
 
-
-String getConfigJSON()
+void handleConfigJSON()
 {
 	String root = "{}";  // Формируем строку для отправки в файл конфигурации в json формате
 						 //{"SSDP":"LuckyBox","ssid":"LuckyBox","password":"12345678","ssidAP":"WiFi","passwordAP":"","ip":"192.168.0.101" и т.д.}
@@ -86,16 +74,15 @@ String getConfigJSON()
 	json["ssidAP"] = _ssidAP;
 	json["passwordAP"] = _passwordAP;
 	json["ssid"] = _ssid;
+	json["password"] = _password;
 	json["timezone"] = timezone;
 	json["ip"] = WiFi.localIP().toString();
 	json["time"] = GetTime();
 	json["date"] = GetDate();
-	json["temperature"] = temperature1;
-	json["temperature2"] = temperature2;
-	json["temperature3"] = temperature3;
-	json["temperature4"] = temperature4;
-
-	// json["temperatures"] = new float[temperature1, temperature2];	// TODO завести все температуры в массив
+	json["temperature"] = dallas_my_sensor[DS_Cube].temperature;
+	json["temperature2"] = dallas_my_sensor[DS_Tube].temperature;
+	json["temperature3"] = dallas_my_sensor[DS_Out].temperature;
+	json["temperature4"] = dallas_my_sensor[DS_Def].temperature;
 	//json["setting"] = settingColumn;
 	//json["settingAlarm"] = settingAlarm;
 
@@ -103,44 +90,7 @@ String getConfigJSON()
 	// Помещаем созданный json в переменную root
 	root = "";
 	json.printTo(root);
-
-	return root;
+	HTTP.send(200, "text/json", root);
 }
 
 
-// Почему на С++ нет рефлексии... (((
-String getDto()
-{
-	String root = "";
-	DynamicJsonBuffer jsonBuffer;						// Резервируем память для json объекта буфер может рости по мере необходимости, предпочтительно для ESP8266
-	JsonObject& json = jsonBuffer.parseObject("{}");	//  вызовите парсер JSON через экземпляр jsonBuffer
-
-	/*
-	Заполняем JSON
-	*/
-
-	JsonArray& data = json.createNestedArray("temperatures");
-	// Датчики температуры
-	for (int i = 0; i < DS_Cnt - 1; i++)
-	{
-		if (temperatures[i] <= 0)	// Можно сделать проверку на клиенте?
-			continue;
-		data.add(temperatures[i]);
-	}
-	
-	//json["settingTank"] = settingTank;
-	json["heaterPower"] = heaterPower;
-	//json["heaterStatus"] = heaterStatus;
-
-	// Помещаем созданный json в переменную root
-	json.printTo(root);
-
-
-	/****************************************\
-	******************************************
-	******** TODO реализовать остальное ******
-	******************************************
-	*****************************************/
-
-	return root;	// {"SSDP":"LuckyBox","ssid":"LuckyBox","password":"12345678","ssidAP":"WiFi","passwordAP":"","ip":"192.168.0.101" и т.д.}
-}

@@ -1,10 +1,42 @@
 #include "sensors.h"
 #include "setting.h"
+#include "buzzer.h"
 #include "tft.h"
+#include "wifi_config.h"
+
+#if defined Pressure_BMP085 || defined Pressure_BMP180
+Adafruit_BMP085 bmp;
+#elseif defined Pressure_BMP280 || defined Pressure_BME280
+Adafruit_BMP280 bmp;
+#endif
 
 OneWire ds(DS_Pin);
 
-struct DS_Str dallas_my_sensor[DS_Cnt];
+//struct DS_Str dallas_my_sensor[DS_Cnt];
+
+void initPressureSensor()
+{
+	pressureStatus = 0;
+#if defined Pressure_BMP085 || defined Pressure_BMP180
+	if (!bmp.begin(BMP085_HIGHRES))
+	{
+		Serial.println("Ooops, no Pressure sensor BMP085 detected ... Check your wiring or I2C Addres!");
+	}
+	else pressureStatus = 1;
+#elif defined Pressure_BMP280 || defined Pressure_BME280
+	if (!bmp.begin(0x76, 0x58))
+	{
+		Serial.println("Ooops, no Pressure sensor BMP280 detected ... Check your wiring or I2C Addres!");
+	}
+	else pressureStatus = 1;
+#endif
+}
+
+void pressureRead()
+{
+	pressure = bmp.readPressure() / 133.3;
+}
+
 void dallSearch()
 {
 	int i;
@@ -56,22 +88,66 @@ void dallRead()
 		  dallas_my_sensor[i-1].temperature *= 100;
 		  dallas_my_sensor[i-1].temperature = floor(dallas_my_sensor[i-1].temperature + 0.5);
 		  dallas_my_sensor[i-1].temperature /= 100;
-
-		  temperatures[i - 1] = dallas_my_sensor[i - 1].temperature;
 		  i--;
 	  }
-
-	  // TODO выпилить
-	  if (DS_Count >= 1) temperature1 = dallas_my_sensor[0].temperature;
-	  if (DS_Count >= 2) temperature2 = dallas_my_sensor[1].temperature;
-	  if (DS_Count >= 3) temperature3 = dallas_my_sensor[2].temperature;
-	  if (DS_Count >= 4) temperature4 = dallas_my_sensor[3].temperature;
-	  if (DS_Count >= 5) temperature5 = dallas_my_sensor[4].temperature;
-	  if (DS_Count >= 6) temperature6 = dallas_my_sensor[5].temperature;
-	  if (DS_Count >= 7) temperature7 = dallas_my_sensor[6].temperature;
-	  if (DS_Count >= 8) temperature8 = dallas_my_sensor[7].temperature;
 
 	 ds.reset();
 	 ds.write(0xCC); //Обращение ко всем датчикам
 	 ds.write(0x44); //Команда на конвертацию
+}
+
+void sensorLoop() {
+	if ((millis() - sensorTimeRead)	>= 1000) {
+		sensorTimeRead = millis();
+
+		// опрос датчиков
+		pressureRead();
+		dallRead();
+
+		// Пищалка для WEB
+		if (settingAlarm == true) {
+			initBuzzer(80);
+			pwm.setPWM(0, 0, 4096); // =0 выключить клапан отбора
+		}
+		else pwm.setPWM(0, 4096, 0); // =1 включить клапан отбора
+
+		// Отладочная информация
+#if defined Debug_en
+		Serial.print("Temperature 1: ");
+		Serial.println(dallas_my_sensor[DS_Cube].temperature);
+
+		Serial.print("Temperature 2: ");
+		Serial.println(dallas_my_sensor[DS_Tube].temperature);
+
+		Serial.print("Temperature 3: ");
+		Serial.println(dallas_my_sensor[DS_Out].temperature);
+
+		Serial.print("Temperature 4: ");
+		Serial.println(dallas_my_sensor[DS_Def].temperature);
+
+		Serial.print("Temperature 5: ");
+		Serial.println(dallas_my_sensor[DS_Res1].temperature);
+
+		Serial.print("Temperature 6: ");
+		Serial.println(dallas_my_sensor[DS_Res2].temperature);
+
+		Serial.print("Temperature 7: ");
+		Serial.println(dallas_my_sensor[DS_Res3].temperature);
+
+		Serial.print("Temperature 8: ");
+		Serial.println(dallas_my_sensor[DS_Res4].temperature);
+
+		Serial.print("TPressure: ");
+		Serial.println(pressure);
+
+		Serial.print("Client's AP: ");
+		Serial.println(WiFi.softAPgetStationNum());
+
+		Serial.print("Status STA: ");
+		Serial.println(WiFi.status());
+
+		Serial.println("......");
+
+#endif
+	}
 }

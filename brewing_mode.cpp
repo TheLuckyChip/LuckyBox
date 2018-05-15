@@ -65,7 +65,7 @@ void handleBrewingJSON()
 	json["pauseTime4"] = pauseTime4;
 
 	json["time"] = GetTime();
-	json["temperature"] = temperature1;
+	json["temperature"] = dallas_my_sensor[DS_Cube].temperature;
 	json["startBrewing"] = startBrewing;    // Передаем значение исключительно для отладки ПО
 	json["stepBrewing"] = stepBrewing;
 
@@ -89,7 +89,7 @@ void brewingLoop()
 				break;
 
 			case 1:
-				if (temperature1 < pauseTemp1) { heaterStatus = 1; }
+				if (dallas_my_sensor[DS_Cube].temperature < pauseTemp1) { heaterStatus = 1; }
 				else
 				{
 					heaterStatus = 0;
@@ -103,12 +103,12 @@ void brewingLoop()
 				else
 				{
 					heaterStatus=0;
-					if (temperature1 < pauseTemp1) { heaterStatus = 1; }         //добавить гистерезис
+					if (dallas_my_sensor[DS_Cube].temperature < pauseTemp1) { heaterStatus = 1; }         //добавить гистерезис
 				}
 				break;
 
 			case 3:
-				if (temperature1 < pauseTemp2) { heaterStatus = 1; }
+				if (dallas_my_sensor[DS_Cube].temperature < pauseTemp2) { heaterStatus = 1; }
 				else
 				{
 					heaterStatus = 0;
@@ -122,12 +122,12 @@ void brewingLoop()
 				else
 				{
 					heaterStatus = 0;
-					if (temperature1 < pauseTemp2) { heaterStatus = 1; }
+					if (dallas_my_sensor[DS_Cube].temperature < pauseTemp2) { heaterStatus = 1; }
 				}
 				break;
 
 			case 5:
-				if (temperature1 < pauseTemp3) { heaterStatus = 1; }
+				if (dallas_my_sensor[DS_Cube].temperature < pauseTemp3) { heaterStatus = 1; }
 				else
 				{
 					heaterStatus = 0;
@@ -141,12 +141,12 @@ void brewingLoop()
 				else
 				{
 					heaterStatus = 0;
-					if (temperature1 < pauseTemp3) { heaterStatus = 1; }
+					if (dallas_my_sensor[DS_Cube].temperature < pauseTemp3) { heaterStatus = 1; }
 				}
 				break;
 
 			case 7:
-				if (temperature1 < pauseTemp4) { heaterStatus = 1; }
+				if (dallas_my_sensor[DS_Cube].temperature < pauseTemp4) { heaterStatus = 1; }
 				else
 				{
 					heaterStatus = 0;
@@ -165,7 +165,7 @@ void brewingLoop()
 				else
 				{
 					heaterStatus = 0;
-					if (temperature1 < pauseTemp4) { heaterStatus = 1; }
+					if (dallas_my_sensor[DS_Cube].temperature < pauseTemp4) { heaterStatus = 1; }
 				}
 				break;
 		}

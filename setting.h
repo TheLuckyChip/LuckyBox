@@ -4,39 +4,33 @@
 #define _SETTING_h
 
 #if defined(ARDUINO) && ARDUINO >= 100
-#include "Arduino.h"
+#include "arduino.h"
 #else
 #include "WProgram.h"
 #endif
 
-#include <Ticker.h>
-#include "sensors.h"
-
-extern Ticker flipper;
-
-#ifdef ESP8266
 #include <FS.h>
+#include <Ticker.h>
+#include <Adafruit_PWMServoDriver.h>
 #include <ESP8266HTTPUpdateServer.h> 
 #include <ESP8266WebServer.h>
+#include "user_config.h"
+
+typedef struct DS_Str
+{
+	byte  addr[8];
+	float temperature;
+};
+
+extern Ticker tickerSet;
+
+extern Adafruit_PWMServoDriver pwm;
 
 // Объект для обновления с web страницы
 extern ESP8266HTTPUpdateServer httpUpdater;
 
 // Web интерфейс для устройства
 extern ESP8266WebServer HTTP;
-
-#else
-#include <SPIFFS.h>
-#include <ESP32HTTPUpdateServer.h>
-#include <ESP32WebServer.h>
-
-// Объект для обновления с web страницы
-extern ESP32HTTPUpdateServer httpUpdater;
-
-// Web интерфейс для устройства
-extern ESP32WebServer HTTP;
-
-#endif
 
 // Для файловой системы
 extern File fsUploadFile;
@@ -51,21 +45,20 @@ extern String jsonConfig;
 extern int port;
 extern int timezone;
 extern int DS_Count;
-extern float temperature1;
-extern float temperature2;
-extern float temperature3;
-extern float temperature4;
-extern float temperature5;
-extern float temperature6;
-extern float temperature7;
-extern float temperature8;
+extern struct DS_Str dallas_my_sensor[DS_Cnt];
 extern float pressure;
 extern bool  pressureStatus;
-extern int readTempInterval;
+extern unsigned long displayTimeInterval;
+extern unsigned long sensorTimeRead;
+extern unsigned long touchTimeRead;
 extern bool settingAlarm;
 extern int modeWiFi;
 extern int timeWiFiReconnect;
+extern uint8_t DefCubOut;
+extern int16_t touch_x;
+extern int16_t touch_y;
+extern bool touch_in;
 
-extern float temperatures[DS_Cnt];
-#endif
+extern void csOff(uint8_t ch);
+extern void csOn(uint8_t ch);
 
