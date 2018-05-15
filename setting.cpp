@@ -3,22 +3,32 @@
 // 
 
 #include "setting.h"
-
+#include "sensors.h"
 
 Ticker flipper;
 
+#ifdef ESP8266
 // Объект для обновления с web страницы 
 ESP8266HTTPUpdateServer httpUpdater;
 
 // Web интерфейс для устройства
 ESP8266WebServer HTTP;
 
+#else
+// Объект для обновления с web страницы 
+ESP32HTTPUpdateServer httpUpdater;
+
+// Web интерфейс для устройства
+ESP32WebServer HTTP;
+
+#endif
+
 // Для файловой системы
 File fsUploadFile;
 
 // Определяем переменные wifi
-String _ssid       = "SSID";      // Для хранения SSID
-String _password   = "PASSWORD";  // Для хранения пароля сети
+String _ssid       = "exegate1";  // Для хранения SSID
+String _password   = "Mt244244";  // Для хранения пароля сети
 String _ssidAP     = "LuckyBox";  // SSID AP точки доступа
 String _passwordAP = "12345678";  // пароль точки доступа
 String SSDP_Name   = "LuckyBox";  // Имя SSDP
@@ -41,4 +51,5 @@ int readTempInterval;				// Инетрал времени для вывода г
 int timeWiFiReconnect = 0;
 bool settingAlarm = false;        // Пересечение границы уставки
 int modeWiFi;
+float temperatures[DS_Cnt];
 //int temp_in[120];                 // вывод графика на дисплей

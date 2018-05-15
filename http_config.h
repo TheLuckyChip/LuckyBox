@@ -4,7 +4,7 @@
 #define _HTTP_CONFIG_h
 
 #if defined(ARDUINO) && ARDUINO >= 100
-	#include "arduino.h"
+	#include "Arduino.h"
 #else
 	#include "WProgram.h"
 #endif
@@ -15,6 +15,8 @@ extern void handleSetSSID();
 extern void handleSetSSIDAP();
 extern void handleRestart();
 extern void handleConfigJSON();
+extern String getConfigJSON();
+extern String getDto();
 
 #endif
 
