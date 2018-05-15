@@ -7,6 +7,7 @@
     });
 
     var plot;
+    //TODO сделать передачу в «getPlot» ID контейнера, для вывода графиков в требуемом процессе, и скорее всего еще сами датчики (для каждого процесса разные) или он сам подтянет нужные?
     $(document).one("newDTOreceived", function () {
         plot = getPlot();
     });
@@ -32,6 +33,7 @@
     });
 
     function getPlot() {
+		//console.log("Запуск графиков!");
 
        var plotNew = Highcharts.stockChart('viewPort', {
             chart: {
@@ -134,6 +136,7 @@
             plot.series[0].addPoint([dto.dateTime, dto.heaterPower], false);
 
             dto.temperatures.forEach(function(t,i) {
+                //console.log(t,i);
                 plotNew.series[i + 1].addPoint([dto.dateTime, dto.temperatures[i]], false);
             });
             plotNew.redraw();

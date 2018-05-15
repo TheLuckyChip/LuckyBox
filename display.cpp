@@ -11,21 +11,21 @@
 
 
 void displayLoop() {
-	// îïðîñ òà÷ñêðèíà
+	// Ð¾Ð¿Ñ€Ð¾Ñ Ñ‚Ð°Ñ‡ÑÐºÑ€Ð¸Ð½Ð°
 #if defined TFT_Display
 	if ((millis() - touchTimeRead) >= 250) {
 		touchTimeRead = millis();
 		touchscreenUpdate();
 	}
 #endif
-	// Âûâîä íà ýêðàí
+	// Ð’Ñ‹Ð²Ð¾Ð´ Ð½Ð° ÑÐºÑ€Ð°Ð½
 	if ((millis() - displayTimeInterval) >= 1000) {
 		displayTimeInterval = millis();
 #if defined TFT_Display
-		tftOutGraphDisplay(); // âûâîä íà äèñïëåé, åñëè îí åñòü
+		tftOutGraphDisplay(); // Ð²Ñ‹Ð²Ð¾Ð´ Ð½Ð° Ð´Ð¸ÑÐ¿Ð»ÐµÐ¹, ÐµÑÐ»Ð¸ Ð¾Ð½ ÐµÑÑ‚ÑŒ
 		DefCubOut++;
 #endif
-		// ïðîâåðêà WiFi
+		// Ð¿Ñ€Ð¾Ð²ÐµÑ€ÐºÐ° WiFi
 		if ((millis() - displayTimeInterval) >= (Display_out_temp * 1000)) {
 			displayTimeInterval = millis();
 

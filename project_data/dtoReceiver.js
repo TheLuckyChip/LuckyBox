@@ -8,38 +8,41 @@ var dtoReceiver = {
     reqestDelayDefalt: 1000,                // Период между запросами (в мс) на сервер TODO вынести в UI
     intervalId: 0,
 
-    dtoGet: function () {  
+    dtoGet: function () {
         const self = dtoReceiver;  // Для доступа к this в jquery
 
-        let deviceUrl = '';
-        if (window.location.hostname == 'localhost' || window.location.hostname == '') { // Для отладки 
-            deviceUrl = 'http://192.168.1.106/';
+        let deviceUrl = 'handleConfigJSON';
+		//TODO Для отладки
+        if (window.location.hostname === 'localhost' || window.location.hostname === '') {
+            //deviceUrl = 'http://192.168.1.106/' + 'GetDto';
+			deviceUrl = 'dto.json';
         }
          
-        let requestСounter = 0;    // Счётчик запросов, служит для записи в localStorage каждые frequencyRecordingToLocalStorage раз
+        let requestCounter = 0;    // Счётчик запросов, служит для записи в localStorage каждые frequencyRecordingToLocalStorage раз
 
         $.ajax({
-            url: deviceUrl + 'GetDto',
+            url: deviceUrl,
             data: {},
-            async: false,
+            //async: false,
             type: 'GET',
-            dataType: 'text',   // json не пропускает с чужого хоста
+			//TODO Для отладки
+            dataType: 'json',   // json не пропускает с чужого хоста
             success: function (json) {
-
-                self.dtoCurrent = JSON.parse(json);
+				//console.log("dtoGet",json);
+				self.dtoCurrent = json;
                 self.dtoCurrent.dateTime = (new Date()).getTime();  // Пользуемся временем клиента, для несчастных без доступа к NTP
 
                 self.dtos.push(self.dtoCurrent);
 
                 // Запись в хранилище
-                if ((requestСounter++ % self.frequencyRecordingToLocalStorage) === 0) {
+                if ((requestCounter++ % self.frequencyRecordingToLocalStorage) === 0) {
                     localStorage.setObj('dtos', self.dtos);
                 }
 
-                // Вызов события что данные получены
+				// Вызов события что данные получены
                 $(document).trigger('newDTOreceived', [self.dtoCurrent]);
             }
-        }).done();
+        });//.done();
     },
 
     // Очистка LocalStorage
@@ -51,7 +54,9 @@ var dtoReceiver = {
     // Изменить скорость обновления
     changeSpeed: function(intervar) {
         clearInterval(this.intervalId);
-         this.intervalId = setInterval(this.dtoGet, intervar);
+		this.reqestDelayDefalt = intervar;
+		this.start()
+         //this.intervalId = setInterval(this.dtoGet, intervar);
     },
 
     // Запуск опроса ESP
@@ -62,7 +67,9 @@ var dtoReceiver = {
             try {
                 return this.setItem(key, JSON.stringify(obj));
             } catch (e) {
-                if (e == QUOTA_EXCEEDED_ERR) {
+                //TODO кажется нужно указывать e.name и то не для всех браузеров, нужно покурить мануал
+                //TODO есть пример функции (isQuotaExceeded) отлова ошибки для разных браузеров http://crocodillon.com/blog/always-catch-localstorage-security-and-quota-exceeded-errors
+                if (e === 'QUOTA_EXCEEDED_ERR') {
                     alert('Превышен лимит localStorage');
                 }
                 return null;
@@ -80,10 +87,10 @@ var dtoReceiver = {
         // Проверка на существование сохранённых значений
         if (this.dtos == null) {
             this.dtos = [];
-        };
+        }
 
-        this.intervalId = setInterval(this.dtoGet, this.reqestDelay);
+        this.intervalId = setInterval(this.dtoGet, this.reqestDelayDefalt);
     }
-}
-
-dtoReceiver.start();
+};
+//TODO запускаем кнопкой
+//dtoReceiver.start();

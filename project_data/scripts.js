@@ -69,8 +69,10 @@ $(document).ready(function () {
 		let url = $(this).attr("href");
 		let target = $(this).data("target");
 		let tab = $(this);
+		$(target).ajaxLoading();
 
 		$(target).load(url,function(result){
+			$(target).ajaxLoading('stop');
 			tab.tab('show');
 		});
 	});
@@ -110,7 +112,6 @@ $(document).ready(function () {
 	    $.ajax({
 	        url: 'configs.json',
 	        data: {},
-	        async: false,
 	        type: 'GET',
 	        dataType: 'json',
 	        success: function(msg) {
