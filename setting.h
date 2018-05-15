@@ -11,21 +11,31 @@
 
 #include <FS.h>
 #include <Ticker.h>
+#include <Adafruit_PWMServoDriver.h>
 #include <ESP8266HTTPUpdateServer.h> 
 #include <ESP8266WebServer.h>
+#include "user_config.h"
 
-extern Ticker flipper;
+typedef struct DS_Str
+{
+	byte  addr[8];
+	float temperature;
+};
 
-// РћР±СЉРµРєС‚ РґР»СЏ РѕР±РЅРѕРІР»РµРЅРёСЏ СЃ web СЃС‚СЂР°РЅРёС†С‹
+extern Ticker tickerSet;
+
+extern Adafruit_PWMServoDriver pwm;
+
+// Объект для обновления с web страницы 
 extern ESP8266HTTPUpdateServer httpUpdater;
 
-// Web РёРЅС‚РµСЂС„РµР№СЃ РґР»СЏ СѓСЃС‚СЂРѕР№СЃС‚РІР°
+// Web интерфейс для устройства
 extern ESP8266WebServer HTTP;
 
-// Р”Р»СЏ С„Р°Р№Р»РѕРІРѕР№ СЃРёСЃС‚РµРјС‹
+// Для файловой системы
 extern File fsUploadFile;
 
-// РћРїСЂРµРґРµР»СЏРµРј РїРµСЂРµРјРµРЅРЅС‹Рµ wifi
+// Определяем переменные wifi
 extern String _ssid;
 extern String _password;
 extern String _ssidAP;
@@ -35,20 +45,20 @@ extern String jsonConfig;
 extern int port;
 extern int timezone;
 extern int DS_Count;
-extern float temperature1;
-extern float temperature2;
-extern float temperature3;
-extern float temperature4;
-extern float temperature5;
-extern float temperature6;
-extern float temperature7;
-extern float temperature8;
+extern struct DS_Str dallas_my_sensor[DS_Cnt];
 extern float pressure;
 extern bool  pressureStatus;
-extern int readTempInterval;
+extern unsigned long displayTimeInterval;
+extern unsigned long sensorTimeRead;
+extern unsigned long touchTimeRead;
 extern bool settingAlarm;
 extern int modeWiFi;
 extern int timeWiFiReconnect;
+extern uint8_t DefCubOut;
+extern int16_t touch_x;
+extern int16_t touch_y;
+extern bool touch_in;
 
+extern void csOff(uint8_t ch);
+extern void csOn(uint8_t ch);
 #endif
-

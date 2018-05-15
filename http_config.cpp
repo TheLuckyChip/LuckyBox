@@ -79,10 +79,10 @@ void handleConfigJSON()
 	json["ip"] = WiFi.localIP().toString();
 	json["time"] = GetTime();
 	json["date"] = GetDate();
-	json["temperature"] = temperature1;
-	json["temperature2"] = temperature2;
-	json["temperature3"] = temperature3;
-	json["temperature4"] = temperature4;
+	json["temperature"] = dallas_my_sensor[DS_Cube].temperature;
+	json["temperature2"] = dallas_my_sensor[DS_Tube].temperature;
+	json["temperature3"] = dallas_my_sensor[DS_Out].temperature;
+	json["temperature4"] = dallas_my_sensor[DS_Def].temperature;
 	//json["setting"] = settingColumn;
 	//json["settingAlarm"] = settingAlarm;
 

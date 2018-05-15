@@ -9,7 +9,8 @@
 	#include "WProgram.h"
 #endif
 
-extern void initBuzzer();
+extern void initBuzzer(unsigned long duration);
+extern void deinitBuzzer();
 
 #endif
 

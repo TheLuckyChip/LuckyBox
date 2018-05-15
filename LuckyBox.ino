@@ -2,15 +2,13 @@
    Система автоматики винокура. 
    Проект центра открытого проектирования у Счастливчика https://LuckyCenter.ru
 */
+#include "display.h"
 #include "touch_interrupt.h"
 #include "setup.h"
 #include "wifi_config.h"
-#include "timer_config.h"
 #include "time_config.h"
 #include "ssdp.h"
 #include "reflux_mode.h"
-#include "pressure.h"
-#include "oled.h"
 #include "tft.h"
 #include "http_config.h"
 #include "fs_config.h"
@@ -30,5 +28,7 @@ void loop() {
   refluxLoop();
   brewingLoop();
   heaterLoop();
+  sensorLoop();
+  displayLoop();
   yield();
 }

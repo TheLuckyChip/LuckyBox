@@ -10,6 +10,7 @@
 #endif
 
 extern void touchInt();
+extern void touchscreenUpdate();
 
 #endif
 

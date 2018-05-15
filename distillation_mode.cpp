@@ -2,6 +2,7 @@
 #include "setting.h"
 #include "user_config.h"
 #include "time_config.h"
+#include "buzzer.h"
 #include <ArduinoJson.h>
 
 //ƒистилл¤ци¤
@@ -30,10 +31,10 @@ void handleDistillationJSON()
 	DynamicJsonBuffer jsonBuffer;
 	JsonObject& json = jsonBuffer.parseObject(root);
 
-	json["temperature"] = temperature1;
-	json["temperature2"] = temperature2;
-	json["temperature3"] = temperature3;
-	json["temperature4"] = temperature4;
+	json["temperature"] = dallas_my_sensor[DS_Cube].temperature;
+	json["temperature2"] = dallas_my_sensor[DS_Tube].temperature;
+	json["temperature3"] = dallas_my_sensor[DS_Out].temperature;
+	json["temperature4"] = dallas_my_sensor[DS_Def].temperature;
 	json["time"] = GetTime();
 	json["settingTank"] = settingTank;
 	json["settingAlarmDistillation"] = settingAlarmDistillation;
@@ -46,15 +47,17 @@ void handleDistillationJSON()
 void distillationLoop()
 {
 
-	if (temperature1 >= settingTank)
+	if (dallas_my_sensor[DS_Cube].temperature >= settingTank)
 	{
+		//if (settingAlarmDistillation == false) initBuzzer();
 		settingAlarmDistillation = true;
-		digitalWrite(buzzer, HIGH);
+		//digitalWrite(buzzer, HIGH);
 	}
 	else
 	{
+		//if (settingAlarmDistillation == true) deinitBuzzer();
 		settingAlarmDistillation = false;
-		digitalWrite(buzzer, LOW);
+		//digitalWrite(buzzer, LOW);
 	}
 }
 

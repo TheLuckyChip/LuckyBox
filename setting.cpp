@@ -4,7 +4,9 @@
 
 #include "setting.h"
 
-Ticker flipper;
+Ticker tickerSet;
+
+Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
 // Объект для обновления с web страницы 
 ESP8266HTTPUpdateServer httpUpdater;
@@ -26,17 +28,24 @@ int port = 80;
 
 int timezone = 3;                 // часовой пояс GTM
 int DS_Count;
-float temperature1 = 5.0;           // Температура 1
-float temperature2 = 5.0;           // Температура 2
-float temperature3 = 5.0;           // Температура 3
-float temperature4 = 5.0;           // Температура 4
-float temperature5 = 5.0;           // Температура 5
-float temperature6 = 5.0;           // Температура 6
-float temperature7 = 5.0;           // Температура 7
-float temperature8 = 5.0;           // Температура 8
+struct DS_Str dallas_my_sensor[DS_Cnt];
 float pressure = 760.0;				// Давление
 bool  pressureStatus = 0;			// Если датчик давления отсутствует
-int readTempInterval;				// Инетрал времени для вывода графика температуры если показания неизменны
+unsigned long displayTimeInterval;				// Инетрал времени для вывода графика температуры если показания неизменны
+unsigned long sensorTimeRead = 0;				// Интервал чтения датчиков
+unsigned long touchTimeRead = millis();			// Интервал опроста тачскрина
 int timeWiFiReconnect = 0;
 bool settingAlarm = false;          // Пересечение границы уставки
 int modeWiFi;
+uint8_t DefCubOut = 9;
+extern int16_t touch_x = 0;
+extern int16_t touch_y = 0;
+extern bool touch_in = false;
+
+void csOff(uint8_t ch) {
+	pwm.setPWM(ch, 4096, 0); // CS TFT = 1
+}
+void csOn(uint8_t ch) {
+	pwm.setPWM(ch, 0, 4096); // CS TFT = 0
+	delay(1);
+}

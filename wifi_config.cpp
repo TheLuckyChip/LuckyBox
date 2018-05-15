@@ -1,7 +1,14 @@
 #include "wifi_config.h"
-#include <ESP8266WiFi.h>
 #include "setting.h"
 #include "user_config.h"
+
+#ifdef ESP8266
+#include <ESP8266WiFi.h>
+
+#else
+#include <WiFi.h>
+
+#endif
 
 void initWifi() {
 	WiFi.disconnect();
