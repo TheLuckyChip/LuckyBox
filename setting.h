@@ -62,3 +62,4 @@ extern bool touch_in;
 extern void csOff(uint8_t ch);
 extern void csOn(uint8_t ch);
 
+#endif

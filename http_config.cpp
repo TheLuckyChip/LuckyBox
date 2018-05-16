@@ -102,15 +102,15 @@ void handleConfigJSON()
 
 // Почему на С++ нет рефлексии... (((
 //TODO разбираемся с рефлексией ))) см. еще http_config.h (почему не void ?)
-String getDto()
+/*String getDto()
 {
 	String root = "";
 	DynamicJsonBuffer jsonBuffer;	// Резервируем память для json объекта буфер может рости по мере необходимости, предпочтительно для ESP8266
 	JsonObject& json = jsonBuffer.parseObject("{}");	//  вызовите парсер JSON через экземпляр jsonBuffer
 
-	/*
-	Заполняем JSON
-	*/
+
+	//Заполняем JSON
+
 
 	JsonArray& data = json.createNestedArray("temperatures");
 	// Датчики температуры
@@ -129,12 +129,8 @@ String getDto()
 	json.printTo(root);
 
 
-	/****************************************\
-	******************************************
-	******** TODO реализовать остальное ******
-	******************************************
-	*****************************************/
+	//TODO реализовать остальное
 
 	return root;	// {"SSDP":"LuckyBox","ssid":"LuckyBox","password":"12345678","ssidAP":"WiFi","passwordAP":"","ip":"192.168.0.101" и т.д.}
-}
+}*/
 

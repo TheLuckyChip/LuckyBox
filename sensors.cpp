@@ -6,7 +6,7 @@
 
 #if defined Pressure_BMP085 || defined Pressure_BMP180
 Adafruit_BMP085 bmp;
-#elseif defined Pressure_BMP280 || defined Pressure_BME280
+#elif defined Pressure_BMP280 || defined Pressure_BME280
 Adafruit_BMP280 bmp;
 #endif
 
