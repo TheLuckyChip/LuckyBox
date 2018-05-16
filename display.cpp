@@ -13,7 +13,7 @@
 void displayLoop() {
 	// опрос тачскрина
 #if defined TFT_Display
-	if ((millis() - touchTimeRead) >= 250) {
+	if ((millis() - touchTimeRead) >= 125) {
 		touchTimeRead = millis();
 		touchscreenUpdate();
 	}

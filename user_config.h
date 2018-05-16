@@ -8,8 +8,8 @@
 #define		buzzer			16
 
 // GPIO для I2C
-#define		pSDA			4
-#define		pSCL			5
+#define		pSDA			5
+#define		pSCL			4
 
 // GPIO для DS18B20
 #define		DS_Pin			0
@@ -39,10 +39,10 @@
 // Периодичность переподключения к потерянной точке доступа (роутеру) в секундах
 #define		setRestartWiFi		60
 
-// Какой используем датчик температуры
+// Какой используем датчик давления
 //#define		Pressure_BMP085
-#define		Pressure_BMP180
-//#define		Pressure_BMP280
+//#define		Pressure_BMP180
+#define		Pressure_BMP280
 //#define		Pressure_BME280
 
 // Вывод отладочной информации в UART
