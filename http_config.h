@@ -15,6 +15,10 @@ extern void handleSetSSID();
 extern void handleSetSSIDAP();
 extern void handleRestart();
 extern void handleConfigJSON();
+//TODO этот лишний?
+//extern String getConfigJSON();
+//TODO разбираемся с рефлексией )))
+//extern String getDto();
 
 #endif
 

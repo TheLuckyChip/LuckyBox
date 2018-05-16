@@ -29,10 +29,10 @@ void initTFT() {
 	tft.println("");
 }
 void tftStartForGraph() {
-	dallas_graph[DS_Tube].color = ILI9341_CYAN;
-	dallas_graph[DS_Out].color = ILI9341_GREEN;
-	dallas_graph[DS_Cube].color = ILI9341_RED;// ILI9341_LIGHTMAROON;
-	dallas_graph[DS_Def].color = ILI9341_DARKGREY;
+	dallas_graph[DS_Tube].color = ILI9341_YELLOW; // желтый
+	dallas_graph[DS_Out].color = 0x1EE1; // зеленый
+	dallas_graph[DS_Cube].color = 0XFC4C; // розовый
+	dallas_graph[DS_Def].color = 0x419F; // светло синий
 	int temp_graph_1 = dallas_my_sensor[DS_Tube].temperature * 10.0;
 	int temp_graph_2 = dallas_my_sensor[DS_Out].temperature * 10.0;
 	int temp_graph_3 = dallas_my_sensor[DS_Cube].temperature * 10.0;
@@ -246,12 +246,12 @@ void tftOutGraphDisplay() {
 		// вывод максимальной и минимальной температуры основного графика
 		tft.setTextSize(2);
 		if (settingAlarm == true) tft.setTextColor(ILI9341_MAGENTA, ILI9341_BLACK); // цвет = розовый
-		else tft.setTextColor(ILI9341_LIGHTGREY, ILI9341_BLACK);
+		else tft.setTextColor(dallas_graph[DS_Tube].color, ILI9341_BLACK);
 		tft.setCursor(2, 2);
 		tft.printf("\x1e");
 		tft.setCursor(20, 2);
 		tft.printf("%d.%d", temp_max / 10, temp_max % 10);
-		tft.setTextColor(ILI9341_LIGHTGREY, ILI9341_BLACK);
+		tft.setTextColor(dallas_graph[DS_Tube].color, ILI9341_BLACK);
 		tft.setCursor(2, 22);
 		tft.printf("\x1f");
 		tft.setCursor(20, 22);
@@ -260,8 +260,15 @@ void tftOutGraphDisplay() {
 		// температура остальных датчиков снизу графика
 		tft.setTextSize(2);
 		tft.setCursor(18, DW_Y_axis + 5);
-		tft.setTextColor(ILI9341_GREEN, ILI9341_BLACK); 
-		tft.printf("1:%.1f   3:%.1f   4:%.1f", dallas_my_sensor[DS_Cube].temperature, dallas_my_sensor[DS_Out].temperature, dallas_my_sensor[DS_Def].temperature);
+		tft.setTextColor(dallas_graph[DS_Cube].color, ILI9341_BLACK);
+		tft.printf("1:%.1f    ", dallas_my_sensor[DS_Cube].temperature);
+		tft.setCursor(18 + 108, DW_Y_axis + 5);
+		tft.setTextColor(dallas_graph[DS_Out].color, ILI9341_BLACK);
+		tft.printf("3:%.1f    ", dallas_my_sensor[DS_Out].temperature);
+		tft.setCursor(18 + 216, DW_Y_axis + 5);
+		tft.setTextColor(dallas_graph[DS_Def].color, ILI9341_BLACK);
+		tft.printf("4:%.1f    ", dallas_my_sensor[DS_Def].temperature);
+
 		//tft.printf("X:%d     Y:%d     ", touch_x, touch_y); // test TachScreen
 
 		// крупно температура основного графика
@@ -295,7 +302,8 @@ void tftOutGraphDisplay() {
 		tft.setTextColor(ILI9341_LIGHTGREY, ILI9341_BLACK);
 		tft.print(time_ntp);
 		tft.setCursor(236, 22);
-		tft.setTextColor(ILI9341_CYAN, ILI9341_BLACK);
+		tft.setTextColor(ILI9341_CYAN, ILI9341_BLACK); // голубой
+		//tft.setTextColor(ILI9341_CYAN, ILI9341_BLACK);
 		tft.printf("%d mm", (int)pressure);
 		//readTempInterval++;
 	//}

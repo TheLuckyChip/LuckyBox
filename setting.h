@@ -26,16 +26,16 @@ extern Ticker tickerSet;
 
 extern Adafruit_PWMServoDriver pwm;
 
-// Объект для обновления с web страницы 
+// РћР±СЉРµРєС‚ РґР»СЏ РѕР±РЅРѕРІР»РµРЅРёСЏ СЃ web СЃС‚СЂР°РЅРёС†С‹
 extern ESP8266HTTPUpdateServer httpUpdater;
 
-// Web интерфейс для устройства
+// Web РёРЅС‚РµСЂС„РµР№СЃ РґР»СЏ СѓСЃС‚СЂРѕР№СЃС‚РІР°
 extern ESP8266WebServer HTTP;
 
-// Для файловой системы
+// Р”Р»СЏ С„Р°Р№Р»РѕРІРѕР№ СЃРёСЃС‚РµРјС‹
 extern File fsUploadFile;
 
-// Определяем переменные wifi
+// РћРїСЂРµРґРµР»СЏРµРј РїРµСЂРµРјРµРЅРЅС‹Рµ wifi
 extern String _ssid;
 extern String _password;
 extern String _ssidAP;
@@ -61,4 +61,5 @@ extern bool touch_in;
 
 extern void csOff(uint8_t ch);
 extern void csOn(uint8_t ch);
+
 #endif

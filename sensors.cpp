@@ -34,7 +34,9 @@ void initPressureSensor()
 
 void pressureRead()
 {
-	pressure = bmp.readPressure() / 133.3;
+#if defined Pressure_BMP085 || defined Pressure_BMP180 || defined Pressure_BMP280 || defined Pressure_BME280
+	if (pressureStatus) pressure = bmp.readPressure() / 133.3;
+#endif
 }
 
 void dallSearch()

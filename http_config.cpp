@@ -79,10 +79,17 @@ void handleConfigJSON()
 	json["ip"] = WiFi.localIP().toString();
 	json["time"] = GetTime();
 	json["date"] = GetDate();
+	//TODO сделал массив температур, пока костыль
+	json["temperatures"][0] = dallas_my_sensor[DS_Cube].temperature;
+	json["temperatures"][1] = dallas_my_sensor[DS_Tube].temperature;
+	json["temperatures"][2] = dallas_my_sensor[DS_Out].temperature;
+	json["temperatures"][3] = dallas_my_sensor[DS_Def].temperature;
+	//TODO очевидно для экрана тоже переделать массив
 	json["temperature"] = dallas_my_sensor[DS_Cube].temperature;
 	json["temperature2"] = dallas_my_sensor[DS_Tube].temperature;
 	json["temperature3"] = dallas_my_sensor[DS_Out].temperature;
 	json["temperature4"] = dallas_my_sensor[DS_Def].temperature;
+
 	//json["setting"] = settingColumn;
 	//json["settingAlarm"] = settingAlarm;
 
@@ -93,4 +100,37 @@ void handleConfigJSON()
 	HTTP.send(200, "text/json", root);
 }
 
+// Почему на С++ нет рефлексии... (((
+//TODO разбираемся с рефлексией ))) см. еще http_config.h (почему не void ?)
+/*String getDto()
+{
+	String root = "";
+	DynamicJsonBuffer jsonBuffer;	// Резервируем память для json объекта буфер может рости по мере необходимости, предпочтительно для ESP8266
+	JsonObject& json = jsonBuffer.parseObject("{}");	//  вызовите парсер JSON через экземпляр jsonBuffer
+
+
+	//Заполняем JSON
+
+
+	JsonArray& data = json.createNestedArray("temperatures");
+	// Датчики температуры
+	for (int i = 0; i < DS_Cnt - 1; i++)
+	{
+		if (temperatures[i] <= 0)	// Можно сделать проверку на клиенте?
+			continue;
+		data.add(temperatures[i]);
+	}
+
+	//json["settingTank"] = settingTank;
+	json["heaterPower"] = heaterPower;
+	//json["heaterStatus"] = heaterStatus;
+
+	// Помещаем созданный json в переменную root
+	json.printTo(root);
+
+
+	//TODO реализовать остальное
+
+	return root;	// {"SSDP":"LuckyBox","ssid":"LuckyBox","password":"12345678","ssidAP":"WiFi","passwordAP":"","ip":"192.168.0.101" и т.д.}
+}*/
 
