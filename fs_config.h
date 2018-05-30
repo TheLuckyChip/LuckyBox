@@ -16,11 +16,7 @@ extern void handleFileUpload();
 extern void handleFileDelete();
 extern void handleFileCreate();
 extern void handleFileList();
-#ifdef ESP8266
 String formatBytes(size_t bytes);
-#else
-void listDir(const char * dirname, uint8_t levels);
-#endif
 
 #endif
 

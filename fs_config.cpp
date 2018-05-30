@@ -1,14 +1,7 @@
 #include "fs_config.h"
 #include "setting.h"
 #include "user_config.h"
-
-#ifdef ESP8266
 #include <FS.h>
-
-#else
-#include <SPIFFS.h>
-
-#endif
 
 // инициализация FFS
 void initFS(void)
@@ -17,17 +10,13 @@ void initFS(void)
 	Serial.println("SPIFFS Mount Failed");
   return;
   }
-  #ifdef ESP8266
   Dir dir = SPIFFS.openDir("/");
   while (dir.next()) {    
     String fileName = dir.fileName();
     size_t fileSize = dir.fileSize();
     Serial.printf("FS File: %s, size: %s\n", fileName.c_str(), formatBytes(fileSize).c_str());
   }
-  #else
-    listDir("/", 0);
-  #endif
-    Serial.printf("\n");
+  Serial.printf("\n");
  
 	//HTTP страницы дл¤ работы с FFS
 	//list directory
@@ -154,8 +143,6 @@ void returnFail(String msg) {
 }
 
 
-
-#ifdef ESP8266
 String formatBytes(size_t bytes){
   if (bytes < 1024){
     return String(bytes)+"B";
@@ -193,80 +180,4 @@ void handleFileList() {
   output += "]";
   HTTP.send(200, "text/json", output);
 }
-
-#else
-void handleFileList() {
-  if(!HTTP.hasArg("dir")) {
-    returnFail("BAD ARGS");
-    return;
-  }
-  String path = HTTP.arg("dir");
-  if(path != "/" && !SPIFFS.exists((char *)path.c_str())) {
-    returnFail("BAD PATH");
-    return;
-  }
-  File dir = SPIFFS.open((char *)path.c_str());
-  path = String();
-  if(!dir.isDirectory()){
-    dir.close();
-    returnFail("NOT DIR");
-    return;
-  }
-  dir.rewindDirectory();
-
-  String output = "[";
-  for (int cnt = 0; true; ++cnt) {
-    File entry = dir.openNextFile();
-    if (!entry)
-    break;
-
-    if (cnt > 0)
-      output += ',';
-
-    output += "{\"type\":\"";
-    output += (entry.isDirectory()) ? "dir" : "file";
-    output += "\",\"name\":\"";
-    // Ignore '/' prefix
-    output += entry.name()+1;
-    output += "\"";
-    output += "}";
-    entry.close();
-  }
-  output += "]";
-  HTTP.send(200, "text/json", output);
-  dir.close();
-}
-
-void listDir(const char * dirname, uint8_t levels) {
-  Serial.printf("Listing directory: %s\n", dirname);
-  
-  File root = SPIFFS.open(dirname);
-  if (!root) {
-    Serial.println("Failed to open directory");
-    return;
-  }
-  if (!root.isDirectory()) {
-    Serial.println("Not a directory");
-    return;
-  }
-
-  File file = root.openNextFile();
-  while (file) {
-    if (file.isDirectory()) {
-      Serial.print("  DIR : ");
-      Serial.println(file.name());
-      if (levels) {
-        listDir(file.name(), levels - 1);
-      }
-    } else {
-      Serial.print("  FILE: ");
-      Serial.print(file.name());
-      Serial.print("  SIZE: ");
-      Serial.println(file.size());
-    }
-    file = root.openNextFile();
-  }
-}
-#endif
-
 
