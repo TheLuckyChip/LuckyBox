@@ -23,14 +23,15 @@ extern Ticker tickerSet;
 
 extern Adafruit_PWMServoDriver pwm;
 
-#include <FS.h>
-#include <ESP8266HTTPUpdateServer.h> 
-#include <ESP8266WebServer.h>// Объект для обновления с web страницы
+#include <SPIFFS.h>
+#include <ESP32HTTPUpdateServer.h>
+#include <ESP32WebServer.h>
 
-extern ESP8266HTTPUpdateServer httpUpdater;
+// Объект для обновления с web страницы 
+extern ESP32HTTPUpdateServer httpUpdater;
 
 // Web интерфейс для устройства
-extern ESP8266WebServer HTTP;
+extern ESP32WebServer HTTP;
 
 // Для файловой системы
 extern File fsUploadFile;

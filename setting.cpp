@@ -9,10 +9,10 @@ Ticker tickerSet;
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
 // Объект для обновления с web страницы 
-ESP8266HTTPUpdateServer httpUpdater;
+ESP32HTTPUpdateServer httpUpdater;
 
 // Web интерфейс для устройства
-ESP8266WebServer HTTP;
+ESP32WebServer HTTP;
 
 // Для файловой системы
 File fsUploadFile;

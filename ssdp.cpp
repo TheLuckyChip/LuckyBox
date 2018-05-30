@@ -1,6 +1,6 @@
 #include "ssdp.h"
 #include "setting.h"
-#include <ESP8266SSDP.h> 
+#include <ESP32SSDP.h>
 
 void initSSDP(void)
 {

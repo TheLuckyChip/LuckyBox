@@ -2,7 +2,7 @@
 #include "user_config.h"
 #include "setting.h"
 #include <ArduinoJson.h>
-#include <FS.h>
+#include <SPIFFS.h>
 
 // Загрузка данных сохраненных в файл  config.json
 bool loadConfig()

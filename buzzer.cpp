@@ -64,11 +64,11 @@ void tone(uint8_t _pin, unsigned int frequency, unsigned long duration) {
 			break;
 
 		case 1:
-			timer1_disable();
-			timer1_isr_init();
-			timer1_attachInterrupt(t1IntHandler);
-			timer1_enable(TIM_DIV1, TIM_EDGE, TIM_LOOP);
-			timer1_write((clockCyclesPerMicrosecond() * 500000) / frequency);
+//			timer1_disable();
+//			timer1_isr_init();
+//			timer1_attachInterrupt(t1IntHandler);
+//			timer1_enable(TIM_DIV1, TIM_EDGE, TIM_LOOP);
+//			timer1_write((clockCyclesPerMicrosecond() * 500000) / frequency);
 			break;
 		}
 	}
@@ -83,7 +83,7 @@ void disableTimer(uint8_t _index) {
 		break;
 
 	case 1:
-		timer1_disable();
+//		timer1_disable();
 		break;
 	}
 }
