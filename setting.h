@@ -9,11 +9,8 @@
 #include "WProgram.h"
 #endif
 
-#include <FS.h>
 #include <Ticker.h>
 #include <Adafruit_PWMServoDriver.h>
-#include <ESP8266HTTPUpdateServer.h> 
-#include <ESP8266WebServer.h>
 #include "user_config.h"
 
 typedef struct DS_Str
@@ -26,7 +23,10 @@ extern Ticker tickerSet;
 
 extern Adafruit_PWMServoDriver pwm;
 
-// Объект для обновления с web страницы
+#include <FS.h>
+#include <ESP8266HTTPUpdateServer.h> 
+#include <ESP8266WebServer.h>// Объект для обновления с web страницы
+
 extern ESP8266HTTPUpdateServer httpUpdater;
 
 // Web интерфейс для устройства

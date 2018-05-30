@@ -2,14 +2,7 @@
 #include "user_config.h"
 #include "setting.h"
 #include <ArduinoJson.h>
-
-#ifdef ESP8266
 #include <FS.h>
-
-#else
-#include <SPIFFS.h>
-
-#endif
 
 // Загрузка данных сохраненных в файл  config.json
 bool loadConfig()
