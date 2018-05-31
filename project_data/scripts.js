@@ -1,5 +1,75 @@
 $(document).ready(function () {
 
+
+	//Преобразование RGB888 <-> RGB565
+	//TODO пока не нужно, но оставим
+	/*function hexToRgb(hex) {
+		let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+		return result ? {
+			r: parseInt(result[1], 16),
+			g: parseInt(result[2], 16),
+			b: parseInt(result[3], 16)
+		} : null;
+	}
+	function numToHex(c) {
+		console.log(c);
+		let hex = c.toString(16);
+		return hex.length === 1 ? "0" + hex : hex;
+	}
+	function rgb3to2(rgb3) {
+		let rgb = hexToRgb(rgb3);
+
+		let r = (0x1f * rgb.r / 0xff) & 0x1f;
+		let g = (0x3f * rgb.g / 0xff) & 0x3f;
+		let b = (0x1f * rgb.b / 0xff) & 0x1f;
+
+		let result = b & 0x1f;
+		result += ((g & 0x3f) << 5);
+		result += (r & 0x1f) << 11;
+
+		return (numToHex((result >> 8) & 0xff) + numToHex(result & 0xff)).toUpperCase();
+	}
+	function rgb2to3(rgb2) {
+		let color = parseInt(rgb2, 16);
+		let r = ((color >> 11) & 0x1F)*0xff/0x1F;
+		let g = ((color >> 5) & 0x3F)*0xff/0x3F;
+		let b = ((color) & 0x1F)*0xff/0x1F;
+
+		r = Math.round(r);
+		g = Math.round(g);
+		b = Math.round(b);
+
+		return (numToHex(r) + numToHex(g) + numToHex(b)).toUpperCase();
+	}
+	console.log("C7EE",rgb3to2("CCFF75"));
+	console.log("CCFF75",rgb2to3("C7EE"));
+	*/
+
+
+	//Преобразование цвета hex <-> десятичные
+	function convertBase (num) {
+		return {
+			from : function (baseFrom) {
+				return {
+					to : function (baseTo) {
+						return parseInt(num, baseFrom).toString(baseTo);
+					}
+				};
+			}
+		};
+	}
+	// decimal to hex
+	function dec2hex (num) {
+		return convertBase(num).from(10).to(16).toUpperCase();
+	}
+	// hex to decimal
+	function hex2dec (num) {
+		return convertBase(num).from(16).to(10);
+	}
+	console.log("13434741",dec2hex("13434741"));
+	console.log("CCFF75",hex2dec("CCFF75"));
+
+	//Свайп вкладок
 	$(function() {
 		function widthOfList () {
 			let itemsWidth = 0;
@@ -12,7 +82,10 @@ $(document).ready(function () {
 		}
 
 		function widthOfHidden () {
-			return (($('.wrapper-nav').outerWidth()) - widthOfList() - getLeftPos()/* - 40*/);
+			//console.log($('.wrapper-nav').outerWidth(), widthOfList(), getLeftPos());
+			//console.log($('.wrapper-nav').outerWidth() - widthOfList() - getLeftPos());
+			//TODO ошибка в 2 пикселя !!! хрень какая-то, найти
+			return ($('.wrapper-nav').outerWidth() - widthOfList() - getLeftPos() + 2);
 		}
 
 		function getLeftPos () {
@@ -33,16 +106,21 @@ $(document).ready(function () {
 			swipeLeft:function(event, distance, duration, fingerCount, fingerData, currentDirection) {
                 let listWidth = widthOfList();
                 let hiddenWidth = widthOfHidden();
+                let containerWidth = $('.wrapper-nav').outerWidth();
                 let $tab = $('.list-tab .active').next();
 
 
 				if ($tab.length > 0) {
 					let posTab = $tab.offset();
+					let posList = $('.list-tab').offset();
 					//console.log($tab,posTab);
-					let leftTab = posTab.left-12;
+					let leftTab = posTab.left-10;
+
+
 					$tab.find('a').tab('show');
-					//console.log(hiddenWidth, listWidth, leftTab);
-					if(hiddenWidth < listWidth)
+					//console.log(hiddenWidth, listWidth, leftTab, containerWidth, (listWidth-Math.abs(posList.left)));
+					if((listWidth-Math.abs(posList.left))>containerWidth)
+					//if(hiddenWidth < listWidth)
 						$('.list-tab').animate({left:"-="+leftTab+"px"},'slow');
 					//$('.list-tab').animate({left:"+="+widthOfHidden()+"px"},'slow');
 				}
@@ -50,12 +128,16 @@ $(document).ready(function () {
 			swipeRight:function(event, distance, duration, fingerCount, fingerData, currentDirection) {
                 let listWidth = widthOfList();
                 let hiddenWidth = widthOfHidden();
+				let containerWidth = $('.wrapper-nav').outerWidth();
                 let $tab = $('.list-tab .active').prev();
 				if ($tab.length > 0) {
 					let posTab = $tab.offset();
-					let leftTab = posTab.left-12;
+					let posList = $('.list-tab').offset();
+					let leftTab = posTab.left-10;
 					$tab.find('a').tab('show');
-					if(hiddenWidth < listWidth)
+					//console.log(hiddenWidth, listWidth, leftTab, containerWidth, (listWidth-Math.abs(posList.left)));
+					if(leftTab < 0)
+					//if(hiddenWidth < listWidth)
 						$('.list-tab').animate({left:"-="+leftTab+"px"},'slow');
 					//$('.list-tab').animate({left:"-="+getLeftPos()+"px"},'slow');
 				}
@@ -63,18 +145,73 @@ $(document).ready(function () {
 			allowPageScroll:"auto"
 		});
 	});
+	//Скрытие навбара после клика
+	$(document).on('click','.navbar-collapse.in',function(e) {
+		if( $(e.target).is('a') && ( $(e.target).attr('class') !== 'dropdown-toggle' ) ) {
+			$(this).collapse('hide');
+		}
+	});
+
+	//Кнопки + и -
+	$(document).on('click','.minus',function(e) {
+		e.preventDefault();
+		let $input = $(this).parent().find('input');
+		let step = $input.attr("step");
+		let min = $input.attr("min");
+		let fixed = 0;
+		const f = x => ( (x.toString().includes('.')) ? (x.toString().split('.').pop().length) : (0) );
+		if (typeof min === typeof undefined && min === false)
+			min = 0;
+		if (typeof step !== typeof undefined && step !== false){
+			step = parseFloat(step);
+			fixed = f(step);
+		}else{
+			step = 1;
+		}
+		let count = parseFloat($input.val()) - step;
+		count = count < min ? min : count;
+		count =  parseFloat(count).toFixed(fixed);
+		console.log(count,step);
+		$input.val(count);
+		$input.change();
+		//return false;
+	});
+	$(document).on('click','.plus',function(e) {
+		e.preventDefault();
+		let $input = $(this).parent().find('input');
+		let step = $input.attr("step");
+		let max = $input.attr("max");
+		let fixed = 0;
+		const f = x => ( (x.toString().includes('.')) ? (x.toString().split('.').pop().length) : (0) );
+		if (typeof max === typeof undefined && max === false)
+			max = 100;
+		if (typeof step !== typeof undefined && step !== false){
+			step = parseFloat(step);
+			fixed = f(step);
+		}else{
+			step = 1;
+		}
+		let count = parseFloat($input.val()) + step;
+		count = count > max ? max : count;
+		count =  parseFloat(count).toFixed(fixed);
+		console.log(count,step);
+		$input.val(count);//
+		$input.change();
+		//return false;
+	});
 
 	//загружаем контент во вкладки
 	$('li.swipe-tab a').on('show.bs.tab', function (e) {
 		let url = $(this).attr("href");
 		let target = $(this).data("target");
 		let tab = $(this);
-		$(target).ajaxLoading();
-
-		$(target).load(url,function(result){
-			$(target).ajaxLoading('stop');
-			tab.tab('show');
-		});
+		if($.trim($(target).html())==='') {
+			$(target).ajaxLoading();
+			$(target).load(url, function (result) {
+				$(target).ajaxLoading('stop');
+				tab.tab('show');
+			});
+		}
 	});
 	$('li.swipe-tab a:first').tab('show');
 
@@ -134,8 +271,51 @@ $(document).ready(function () {
 	        }
         })/*.done()*/;
 
-	    
 	}
+
+	/**
+	 * <b>Отправка данных на сервер</b>
+	 * @param {string} url - адрес
+	 * @param {object} data - данные
+	 * @param {string} dataType - тип передаваемых данных "text","json","html"...
+	 * @param {object|boolean} success_action - действия после успешного отправления данных
+	 * @param {object|boolean} load_target - елемент «отправитель» (для лоадера)
+	 * @param {object|boolean} error_target - контейнер для вывода ошибок
+	 */
+	function sendRequest(url,data,dataType,success_action,load_target,error_target) {
+		//console.log(url,data,target);
+		$.ajax({
+			url: url,
+			data: data,
+			type: 'GET',
+			dataType: dataType,
+			beforeSend: function(){
+				if(load_target !== false)
+					load_target.ajaxLoading({disabled:true});
+			},
+			success: function (msg) {
+				//TODO реализовать success_action
+			},
+			error:function (err,exception) {
+				if(error_target !== false)
+					alertAjaxError(err,exception,error_target);
+			},
+			complete:function () {
+				if(load_target !== false)
+					load_target.ajaxLoading('stop');
+			}
+		});
+	}
+
+	//Определение датчиков
+	function getSensors() {
+
+	}
+
+
+
+
+
     //Обновление прошивки
 	$("#file_update").on("change",function (e) {
 		let vidFileLength = $(this)[0].files.length;
@@ -172,40 +352,6 @@ $(document).ready(function () {
 		});
 		//return false;
 	});
-
-	/**
-	 * <b>Отправка данных на сервер</b>
-	 * @param {string} url - адрес
-	 * @param {object} data - данные
-	 * @param {string} dataType - тип передаваемых данных "text","json","html"...
-	 * @param {object|boolean} success_action - действия после успешного отправления данных
-	 * @param {object|boolean} load_target - елемент «отправитель» (для лоадера)
-	 * @param {object|boolean} error_target - контейнер для вывода ошибок
-	 */
-	function sendRequest(url,data,dataType,success_action,load_target,error_target) {
-		//console.log(url,data,target);
-		$.ajax({
-			url: url,
-			data: data,
-			type: 'GET',
-			dataType: dataType,
-			beforeSend: function(){
-				if(load_target !== false)
-					load_target.ajaxLoading({disabled:true});
-			},
-			success: function (msg) {
-				//TODO реализовать success_action
-			},
-			error:function (err,exception) {
-				if(error_target !== false)
-					alertAjaxError(err,exception,error_target);
-			},
-			complete:function () {
-				if(load_target !== false)
-					load_target.ajaxLoading('stop');
-			}
-		});
-	}
 
 	$(document).on("focus","#settings_password, #settings_passwordap",function () {
 		$(this).prop("type","text");
@@ -465,7 +611,7 @@ $(document).ready(function () {
 				console.log('Heater',msg);
 				$("#heater_power").val(msg["heaterPower"].toFixed(2));
 
-				setTimeout(getDistillation, 2000);
+				//setTimeout(getDistillation, 2000);
 			}
 		});
 	}
