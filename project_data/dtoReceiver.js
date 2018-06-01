@@ -62,7 +62,8 @@ var dtoReceiver = {
     // Запуск опроса ESP
     start: function () {
         // Функция записи в LocalStorage
-        Storage.prototype.setObj = function(key, obj) {
+        //TODO перенес в общий файл scripts.js
+        /*Storage.prototype.setObj = function(key, obj) {
 
             try {
                 return this.setItem(key, JSON.stringify(obj));
@@ -79,7 +80,7 @@ var dtoReceiver = {
         // Функция чтения из LocalStorage
         Storage.prototype.getObj = function(key) {
             return JSON.parse(this.getItem(key));
-        };
+        };*/
 
         // Считывание предыдущих сохранённых значений
         this.dtos = localStorage.getObj('dtos');

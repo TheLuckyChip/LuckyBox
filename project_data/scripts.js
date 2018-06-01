@@ -1,9 +1,58 @@
 $(document).ready(function () {
 
+	// Функция записи в LocalStorage
+	Storage.prototype.setObj = function(key, obj) {
+		try {
+			return this.setItem(key, JSON.stringify(obj));
+		} catch (e) {
+			if (isQuotaExceeded(e)) {
+				$.fn.openModal('', 'Превышен лимит localStorage', "modal-sm", false, true);
+			}
+			return null;
+		}
+	};
+	// Функция чтения из LocalStorage
+	Storage.prototype.getObj = function(key) {
+		return JSON.parse(this.getItem(key));
+	};
+	// Функция проверли заполнения LocalStorage
+	function isQuotaExceeded(e) {
+		let quotaExceeded = false;
+		if (e) {
+			if (e.code) {
+				switch (e.code) {
+					case 22:
+						quotaExceeded = true;
+						break;
+					case 1014:
+						// Firefox
+						if (e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
+							quotaExceeded = true;
+						}
+						break;
+				}
+			} else if (e.number === -2147024882) {
+				// Internet Explorer 8
+				quotaExceeded = true;
+			}
+		}
+		return quotaExceeded;
+	}
 
+	//Преобразование цвета hex <-> десятичные
+	function convertBase (num) {
+		return {
+			from : function (baseFrom) {
+				return {
+					to : function (baseTo) {
+						return parseInt(num, baseFrom).toString(baseTo);
+					}
+				};
+			}
+		};
+	}
 	//Преобразование RGB888 <-> RGB565
-	//TODO пока не нужно, но оставим
-	/*function hexToRgb(hex) {
+	function hexToRgb(hex) {
 		let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
 		return result ? {
 			r: parseInt(result[1], 16),
@@ -12,7 +61,6 @@ $(document).ready(function () {
 		} : null;
 	}
 	function numToHex(c) {
-		console.log(c);
 		let hex = c.toString(16);
 		return hex.length === 1 ? "0" + hex : hex;
 	}
@@ -41,39 +89,27 @@ $(document).ready(function () {
 
 		return (numToHex(r) + numToHex(g) + numToHex(b)).toUpperCase();
 	}
-	console.log("C7EE",rgb3to2("CCFF75"));
-	console.log("CCFF75",rgb2to3("C7EE"));
-	*/
-
-
-	//Преобразование цвета hex <-> десятичные
-	function convertBase (num) {
-		return {
-			from : function (baseFrom) {
-				return {
-					to : function (baseTo) {
-						return parseInt(num, baseFrom).toString(baseTo);
-					}
-				};
-			}
-		};
-	}
 	// decimal to hex
 	function dec2hex (num) {
-		return convertBase(num).from(10).to(16).toUpperCase();
+		let hexColor = convertBase(num).from(10).to(16).toUpperCase();
+		return hexColor.length === 6 ? hexColor : rgb2to3(hexColor);
 	}
 	// hex to decimal
-	function hex2dec (num) {
-		return convertBase(num).from(16).to(10);
+	function hex2dec (hex) {
+		console.log(hex);
+		let hexColor = hex.length === 4 ? hex : rgb3to2(hex);
+		return convertBase(hexColor).from(16).to(10);
 	}
-	console.log("13434741",dec2hex("13434741"));
-	console.log("CCFF75",hex2dec("CCFF75"));
+	//console.log("C7EE",rgb3to2("CCFF75"));
+	//console.log("19DF08",rgb2to3("1EE1"));
+	//console.log("13434741",dec2hex("13434741"));
+	//console.log("CCFF75",hex2dec("CCFF75"));
 
 	//Свайп вкладок
 	$(function() {
 		function widthOfList () {
 			let itemsWidth = 0;
-            let itemWidth = 0;
+			let itemWidth = 0;
 			$('.list-tab li').each(function () {
 				itemWidth = $(this).outerWidth();
 				itemsWidth += itemWidth;
@@ -91,11 +127,11 @@ $(document).ready(function () {
 		function getLeftPos () {
 			return $('.list-tab').position().left;
 		}
-		//TODO нужно доделать свайп, чтобы двигал правильно «ярлыки вкладок»
+		//TODO нужно доделать свайп, чтобы двигал правильно «ярлыки вкладок», — проверить, должно уже работать
 		$(".list-tab-content").swipe( {
 			swipeStatus:function(event, phase, direction, distance, fingerCount) {
 				if ( phase === "move" || phase === "start" ) {
-                    let $target = event.target.nodeName;
+					let $target = event.target.nodeName;
 					if( $target.toLowerCase() === 'input' || $target.toLowerCase() === 'select' || $target.toLowerCase() === 'button' ) {
 						return false;
 					}else{
@@ -104,10 +140,10 @@ $(document).ready(function () {
 				}
 			},
 			swipeLeft:function(event, distance, duration, fingerCount, fingerData, currentDirection) {
-                let listWidth = widthOfList();
-                let hiddenWidth = widthOfHidden();
-                let containerWidth = $('.wrapper-nav').outerWidth();
-                let $tab = $('.list-tab .active').next();
+				let listWidth = widthOfList();
+				let hiddenWidth = widthOfHidden();
+				let containerWidth = $('.wrapper-nav').outerWidth();
+				let $tab = $('.list-tab .active').next();
 
 
 				if ($tab.length > 0) {
@@ -126,10 +162,10 @@ $(document).ready(function () {
 				}
 			},
 			swipeRight:function(event, distance, duration, fingerCount, fingerData, currentDirection) {
-                let listWidth = widthOfList();
-                let hiddenWidth = widthOfHidden();
+				let listWidth = widthOfList();
+				let hiddenWidth = widthOfHidden();
 				let containerWidth = $('.wrapper-nav').outerWidth();
-                let $tab = $('.list-tab .active').prev();
+				let $tab = $('.list-tab .active').prev();
 				if ($tab.length > 0) {
 					let posTab = $tab.offset();
 					let posList = $('.list-tab').offset();
@@ -207,7 +243,10 @@ $(document).ready(function () {
 		let tab = $(this);
 		if($.trim($(target).html())==='') {
 			$(target).ajaxLoading();
-			$(target).load(url, function (result) {
+			$(target).load(url, function (response, status, xhr) {
+				if ( status === "error" ) {
+					$.fn.openModal('', '<p class="text-center text-danger"><strong>Ошибка загрузки вкладки</strong></p><p>' + xhr.status + ' ' + xhr.statusText + '</p>', "modal-sm",false,true);
+				}
 				$(target).ajaxLoading('stop');
 				tab.tab('show');
 			});
@@ -244,41 +283,12 @@ $(document).ready(function () {
 		//alert(msg);
 	}
 
-	//Свойства
-	function getSettings() {
-	    $.ajax({
-	        url: 'configs.json',
-	        data: {},
-	        type: 'GET',
-	        dataType: 'json',
-	        success: function(msg) {
-	            console.log('Settings', msg);
-	            $("#settings_ssdp").val(msg["SSDP"]);
-	            $("#settings_ssid").val(msg["ssid"]);
-	            $("#settings_password").val(msg["password"]);
-	            $("#settings_ssidap").val(msg["ssidAP"]);
-	            $("#settings_passwordap").val(msg["passwordAP"]);
-	            $("#settings_timezone").val(msg["timezone"]);
-
-
-                //sensorsConditions.push({
-                //        temperatures: msg["temperatures"]
-                //    }
-                //);
-
-                // setTimeout(getDistillation, 2000);
-			    // setTimeout(getReflux, 2000);
-	        }
-        })/*.done()*/;
-
-	}
-
 	/**
 	 * <b>Отправка данных на сервер</b>
 	 * @param {string} url - адрес
 	 * @param {object} data - данные
 	 * @param {string} dataType - тип передаваемых данных "text","json","html"...
-	 * @param {object|boolean} success_action - действия после успешного отправления данных
+	 * @param {function|boolean} success_action - действия после успешного отправления данных
 	 * @param {object|boolean} load_target - елемент «отправитель» (для лоадера)
 	 * @param {object|boolean} error_target - контейнер для вывода ошибок
 	 */
@@ -294,7 +304,7 @@ $(document).ready(function () {
 					load_target.ajaxLoading({disabled:true});
 			},
 			success: function (msg) {
-				//TODO реализовать success_action
+				success_action(msg)
 			},
 			error:function (err,exception) {
 				if(error_target !== false)
@@ -308,14 +318,97 @@ $(document).ready(function () {
 	}
 
 	//Определение датчиков
-	function getSensors() {
-
+	var sensorsJson = {};
+	$(document).on('click','#get_sensors',function(e) {
+		e.preventDefault();
+		let _this = $(this);
+		//refluxTest
+		sendRequest("sensors.json",{},"json",getSensors,_this,$("#error_sensors"));
+	});
+	function getSensors(data) {
+		console.log(data);
+		let sensors = data["sensors"];
+		for (let key in sensors) {
+			if(sensors[key]["value"]<125){
+				$("#sensor_name_"+key).val(sensors[key]["name"]);
+				let jscolor = sensors[key]["color"] > 0 ? dec2hex(sensors[key]["color"]) : "FFFFFF";
+				$("#sensor_color_"+key).val(jscolor).css("background-color","#"+jscolor);
+				$("#sensor_val_"+key).text(sensors[key]["value"]).parent().find(".hidden").removeClass("hidden").addClass("show");
+			}else{
+				$("#sensor_name_"+key).val("");
+				$("#sensor_color_"+key).val("FFFFFF").css("background-color","#FFFFFF");
+				$("#sensor_val_"+key).text("").parent().find(".show").removeClass("show").addClass("hidden");
+			}
+			//console.log(key,sensors[key]);
+		}
+		sensorsJson = data;
+		//localStorage.setObj('dtos', self.dtos);
 	}
+	$(document).on('click','#set_sensors',function(e) {
+		e.preventDefault();
+		let _this = $(this);
+		let nameError = false;
+		for (let key in sensorsJson["sensors"]) {
+			if(sensorsJson["sensors"][key]["value"]<125){
+				let val_color = $("#sensor_color_"+key).val();
+				if($("#sensor_name_"+key).val() === "")
+					nameError = true;
+				sensorsJson["sensors"][key]["name"] = $("#sensor_name_"+key).val();
+				sensorsJson["sensors"][key]["color"] = (val_color !== "FFFFFF" && val_color !== "") ? hex2dec(val_color) : 0;
+				sensorsJson["sensors"][key]["member"] = 1;
+			}
+		}
+		if(nameError) {
+			$.fn.openModal('', '<p class="text-center text-danger"><strong>Заполните названия подключенных датчиков</strong></p>', "modal-sm", true, false);
+		}else {
+			sendRequest("SetTempTest", sensorsJson, "json", setSensors, _this, $("#error_sensors"));
+		}
+	});
+	function setSensors(data) {
+		//console.log(data);
+		//console.log(sensorsJson);
+		$.fn.openModal('', '<p class="text-center text-success"><strong>Тестовое сообщение, УРА!</strong></p>', "modal-sm", true, false);
+		localStorage.setObj('sensors', sensorsJson);
+	}
+	//Привязка датчиков к процессу ректификации
+	$(document).on('click','#reflux_add_sensor',function(e) {
+		e.preventDefault();
+		let _this = $(this);
+		let sensors = sensorsJson;//localStorage.getItem('sensors')
+	});
 
 
 
 
 
+
+	//Свойства TODO - переделать все свойства в один запрос
+	function getSettings() {
+		$.ajax({
+			url: 'configs.json',
+			data: {},
+			type: 'GET',
+			dataType: 'json',
+			success: function(msg) {
+				console.log('Settings', msg);
+				$("#settings_ssdp").val(msg["SSDP"]);
+				$("#settings_ssid").val(msg["ssid"]);
+				$("#settings_password").val(msg["password"]);
+				$("#settings_ssidap").val(msg["ssidAP"]);
+				$("#settings_passwordap").val(msg["passwordAP"]);
+				$("#settings_timezone").val(msg["timezone"]);
+
+
+				//sensorsConditions.push({
+				//        temperatures: msg["temperatures"]
+				//    }
+				//);
+
+				// setTimeout(getDistillation, 2000);
+				// setTimeout(getReflux, 2000);
+			}
+		})/*.done()*/;
+	}
     //Обновление прошивки
 	$("#file_update").on("change",function (e) {
 		let vidFileLength = $(this)[0].files.length;

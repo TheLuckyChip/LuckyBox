@@ -1,5 +1,5 @@
 файлы:
-brewing.json, reflux.json, distillation.json, heater.json, configs.json
+brewing.json, reflux.json, distillation.json, heater.json, configs.json, sensors.json
 для теста получения данных без сервера
 
 package.json
