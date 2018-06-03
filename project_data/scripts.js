@@ -1,20 +1,30 @@
 $(document).ready(function () {
 
 	// Функция записи в LocalStorage
-	Storage.prototype.setObj = function(key, obj) {
-		try {
-			return this.setItem(key, JSON.stringify(obj));
-		} catch (e) {
-			if (isQuotaExceeded(e)) {
-				$.fn.openModal('', 'Превышен лимит localStorage', "modal-sm", false, true);
+	if ( !Storage.prototype.setObj ) {
+		/**
+		 *
+		 * @param key - string
+		 * @param obj - object
+		 * @returns {*}
+		 */
+		Storage.prototype.setObj = function (key, obj) {
+			try {
+				return this.setItem(key, JSON.stringify(obj));
+			} catch (e) {
+				if (isQuotaExceeded(e)) {
+					$.fn.openModal('', 'Превышен лимит localStorage', "modal-sm", false, true);
+				}
+				return null;
 			}
-			return null;
 		}
-	};
+	}
 	// Функция чтения из LocalStorage
-	Storage.prototype.getObj = function(key) {
-		return JSON.parse(this.getItem(key));
-	};
+	if ( !Storage.prototype.getObj ) {
+		Storage.prototype.getObj = function (key) {
+			return JSON.parse(this.getItem(key));
+		}
+	}
 	// Функция проверли заполнения LocalStorage
 	function isQuotaExceeded(e) {
 		let quotaExceeded = false;
@@ -230,11 +240,81 @@ $(document).ready(function () {
 		let count = parseFloat($input.val()) + step;
 		count = count > max ? max : count;
 		count =  parseFloat(count).toFixed(fixed);
-		console.log(count,step);
+		//console.log(count,step);
 		$input.val(count);//
 		$input.change();
 		//return false;
 	});
+	//Рендер HTML шаблонов
+	function renderTpl(props) {
+		return function(tok, i) {
+			return (i % 2) ? props[tok] : tok;
+		};
+	}
+	function returnTplHtml(ar_props,tpl) {
+		return (ar_props.map(function(item) {
+			return tpl.split(/\$\{(.+?)\}/g).map(renderTpl(item)).join('');
+		}));
+	}
+	(function ($) {
+		/**
+		 * Проверка объекта на пустоту
+		 * @param obj - Объект
+		 * @param key - Проверять ключи в объекте
+		 * @returns {boolean}
+		 */
+		$.fn.objIsEmpty = function (obj,key) {
+			if(key) {
+				for (let k in obj) {
+					if (obj.hasOwnProperty(k) && obj[k] !== "") {
+						return false;
+					}
+				}
+			}else{
+				for (let i in obj) {
+					if (obj.hasOwnProperty(i)) {
+						return false;
+					}
+				}
+			}
+			return true;
+		};
+		/**
+		 * Убирает повторяющиеся значения из массива
+		 * @param arr
+		 * @returns {Array}
+		 */
+		$.fn.arrayUnique = function(arr){
+			let uniHash={}, outArr=[], i=arr.length;
+			while(i--) uniHash[arr[i]]=i;
+			for(i in uniHash) outArr.push(i);
+			return outArr
+		};
+		/**
+		 * Проверка массива на одинаковые значения (возвращает массив дублей)
+		 * @param arr
+		 * @returns {Array}
+		 */
+		$.fn.duplicateValues = function(arr){
+			let arr_res = [];
+			arr.sort();
+			for (let i=1; i < arr.length; i++) {
+				if (arr[i] === arr[i-1]) {
+					let is_unique = true;
+					for (let k=0; k < arr_res.length; k++) {
+						if (arr_res[k] === arr[i]) {
+							is_unique = false;
+							break;
+						}
+					}
+					if (is_unique) {
+						arr_res.push(arr[i]);
+					}
+				}
+			}
+			return arr_res;
+		}
+	})(jQuery);
 
 	//загружаем контент во вкладки
 	$('li.swipe-tab a').on('show.bs.tab', function (e) {
@@ -316,7 +396,7 @@ $(document).ready(function () {
 			}
 		});
 	}
-
+//////////////////////////////////////////////////////////////////////////
 	//Определение датчиков
 	var sensorsJson = {};
 	$(document).on('click','#get_sensors',function(e) {
@@ -335,7 +415,8 @@ $(document).ready(function () {
 				$("#sensor_color_"+key).val(jscolor).css("background-color","#"+jscolor);
 				$("#sensor_val_"+key).text(sensors[key]["value"]).parent().find(".hidden").removeClass("hidden").addClass("show");
 			}else{
-				$("#sensor_name_"+key).val("");
+				if(!$.fn.objIsEmpty(sensors[key]["name"],false))
+					$("#sensor_name_"+key).val("");
 				$("#sensor_color_"+key).val("FFFFFF").css("background-color","#FFFFFF");
 				$("#sensor_val_"+key).text("").parent().find(".show").removeClass("show").addClass("hidden");
 			}
@@ -370,12 +451,170 @@ $(document).ready(function () {
 		$.fn.openModal('', '<p class="text-center text-success"><strong>Тестовое сообщение, УРА!</strong></p>', "modal-sm", true, false);
 		localStorage.setObj('sensors', sensorsJson);
 	}
-	//Привязка датчиков к процессу ректификации
+	//Привязка датчиков к процессу ректификации, и запуск
+	var refluxProcess = {"sensors":[],"start":false};
+	//localStorage.setObj('reflux',refluxProcess);
+	const pressureTemplate = '<tr>' +
+		'<td>Атмосферное давление</td>' +
+		'<td><span id="reflux_pressure"></span> <span class="hidden">мм рт.ст.</span></td>' +
+		'<td></td>' +
+		'<td></td>' +
+		'</tr>' +
+		'<tr>' +
+		'<td>t&#176 кипения спирта при данном давлении</td>' +
+		'<td><span id="reflux_alco_boil"></span> <span class="hidden">&#176С</span></td>' +
+		'<td></td>' +
+		'<td></td>' +
+		'</tr>';
+	const deltaTempl =
+		'<div class="input-group number-group">' +
+		'<span class="input-group-btn minus">' +
+		'<button type="button" class="btn btn-danger btn-number noSwipe" data-type="minus" data-field="count">' +
+		'<span class="glyphicon glyphicon-minus"></span>' +
+		'</button>' +
+		'</span>' +
+		'<input id="${id}" class="form-control input-number noSwipe" type="text" value="${value}" min="${min}" max="${max}" step="${step}" size="4">' +
+		'<span class="input-group-btn plus">' +
+		'<button type="button" class="btn btn-success btn-number noSwipe" data-type="plus" data-field="count">' +
+		'<span class="glyphicon glyphicon-plus"></span>' +
+		'</button>' +
+		'</span>' +
+		'</div>';
 	$(document).on('click','#reflux_add_sensor',function(e) {
 		e.preventDefault();
-		let _this = $(this);
-		let sensors = sensorsJson;//localStorage.getItem('sensors')
+		let sensors = localStorage.getObj('sensors');//sensorsJson
+		//console.log(sensors);
+		if(sensors !== null) {
+			let section = '<section id="reflux_sensors" class="table-responsive"><table class="table table-noborder">';
+			for (let key in sensors["sensors"]) {
+				if (sensors["sensors"][key]["member"] > 0) {
+					section += '<tr><td><label class="checkbox-inline"><input data-sensor="' + key + '" type="checkbox" value="' + key + '">' + sensors["sensors"][key]["name"] + '</label></td>' +
+						'<td><label class="checkbox-inline"><input disabled id="delta_' + key + '" name="reflux_delta" type="radio" value="Y">Уставка</label></td>' +
+						'</tr>';
+				}
+			}
+			section += '</table></section>';
+			$.fn.openModal('Выбор датчика', section, "modal-md", false, {
+				text: "Выбрать",
+				id: "sensors_select",
+				class: "btn btn-success",
+				click: function () {
+					let sensors_select = $('#reflux_sensors input[type=checkbox]');
+					let reflux_sensors = $.map(sensors_select, function (e) {
+						if ($(e).is(":checked")) {
+							//console.log($(e).data("sensor"));
+							let key = $(e).data("sensor");
+							let delta = $("#delta_" + key).prop("checked");
+							return {"key": key, "delta": delta};
+						}
+					});
+					refluxProcess["sensors"] = reflux_sensors;
+					localStorage.setObj('reflux', refluxProcess);
+					//console.log(ar_sensors);
+					$(this).closest(".modal").modal("hide");
+					pasteRefluxSensors();
+				}
+			});
+		}
 	});
+	$(document).on('click','#reflux_sensors input[type=checkbox]',function() {
+		let checked = !$(this).prop("checked");
+		let radio_delta = $("#delta_"+$(this).data("sensor"));
+		radio_delta.prop("disabled",checked);
+		if(checked)
+			radio_delta.prop("checked",false);
+	});
+	pasteRefluxSensors = function(){
+		let sensors = localStorage.getObj('sensors');//sensorsJson
+		let refluxTemplate = '';
+		let localReflux = localStorage.getObj('reflux');
+		if(localReflux !== null)
+			refluxProcess = localReflux;
+		if(refluxProcess["sensors"].length > 0) {
+			$.each(refluxProcess["sensors"], function (i, e) {
+				//console.log(i,e);
+				let sensor_key = e["key"];
+				let name_sensor = sensors["sensors"][sensor_key]["name"];
+				let tpl_delta = '';
+				let tpl_delta_result = '';
+				if (e["delta"]) {
+					tpl_delta = returnTplHtml([{id:"reflux_delta", value: '0.00', min: '0', max: '1', step: '0.05'}], deltaTempl);
+					tpl_delta_result = '<span id="reflux_delta_result"></span> <span class="hidden">&#176С</span>'
+				}
+				refluxTemplate += '<tr><td>t&#176' + name_sensor + '</td>' +
+					'<td><span id="reflux_' + sensor_key + '"></span> <span class="hidden">&#176С</span></td>' +
+					'<td>' + tpl_delta + '</td>' +
+					'<td>' + tpl_delta_result + '</td>' +
+					'</tr>'
+			});
+		}
+		if(refluxTemplate !== '') {
+			refluxTemplate += pressureTemplate;
+			$("#start_group_button").removeClass("hidden");
+		}else{
+			$("#start_group_button").addClass("hidden");
+		}
+		$("#reflux_process tbody").html(refluxTemplate);
+		if(refluxProcess["start"] === true) {
+			refluxStartProcess ()
+		}
+	};
+	$(document).on('click','#reflux_start',function() {
+		let _this = $(this);
+		let sendRefluxProcess = refluxProcess;
+		sendRefluxProcess["start"] = true;
+		sendRequest("SetTempTest", sendRefluxProcess, "json", refluxStartProcess, _this, $("#error_reflux"));
+		//refluxStartProcess ();
+	});
+	$(document).on('click','#reflux_stop',function() {
+		let _this = $(this);
+		let sendRefluxProcess = refluxProcess;
+		sendRefluxProcess["start"] = false;
+		sendRequest("SetTempTest", sendRefluxProcess, "json", refluxStopProcess, _this, $("#error_reflux"));
+		//refluxStopProcess ();
+	});
+	function refluxStartProcess () {
+
+		//setInterval(getDistillation,2000);
+		//refluxProcess = localStorage.getObj('reflux');
+		refluxProcess["start"] = true;
+		localStorage.setObj('reflux',refluxProcess);
+		getReflux();
+	}
+	function refluxStopProcess () {
+		//refluxProcess = localStorage.getObj('reflux');
+		refluxProcess["start"] = false;
+		localStorage.setObj('reflux',refluxProcess);
+
+	}
+	function getReflux() {
+		$.ajax({
+			url: 'reflux.json',
+			data: {},
+			type: 'GET',
+			dataType: 'json',
+			success: function (msg) {
+				console.log('Reflux',msg);
+				$.each(msg["sensors"],function (i,e) {
+					let sensor_key = Object.keys(e).shift();
+					$("#reflux_"+sensor_key).text(msg["sensors"][i][sensor_key].toFixed(2));
+				});
+				$("#reflux_delta").val(msg["delta"].toFixed(2));
+				$("#reflux_delta_result").text(msg["delta_result"].toFixed(2));
+				$("#reflux_pressure").text(msg["pressure"].toFixed(2));
+				$("#reflux_alco_boil").text(msg["alcoBoilPressure"].toFixed(2));
+				/*
+				if(msg["settingAlarm"] === false){
+					$("#reflux_status").removeClass("success").addClass("danger");
+				}else{
+					$("#reflux_status").removeClass("danger").addClass("success");
+				}*/
+				if(refluxProcess["start"] === true)
+					setTimeout(getReflux,2000);
+			}
+		});
+
+	}
 
 
 
@@ -544,7 +783,7 @@ $(document).ready(function () {
 	});
 
 	//Ректификация
-	function getReflux() {
+	/*function getReflux() {
 		$.ajax({
 			url: 'reflux.json',
 			data: {},
@@ -584,7 +823,7 @@ $(document).ready(function () {
 		//TODO сделать действия SUCCESS в sendRequest
 		$("#reflux_setting").text(setting);
 		sendRequest("SetTemp",data_send,"text",false,$(this),$("#error_reflux"));
-	});
+	});*/
 
 
 	//Затирание

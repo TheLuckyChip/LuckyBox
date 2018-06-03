@@ -2,15 +2,25 @@ html,
 body {
 	height: 100%;
 }
-* {
+/** {
 	outline:0 !important;
 	-webkit-appearance:none;
-}
+}*/
 span.show {
 	display: inline-block !important;
 }
 .mt-10{
 	margin-top: 10px;
+}
+.mr-20{
+	margin-right: 20px;
+}
+.ml-20{
+	margin-left: 20px;
+}
+.table-noborder td,
+.table-noborder th {
+	border: 0!important;
 }
 .wrap {
 	min-height: 100%;

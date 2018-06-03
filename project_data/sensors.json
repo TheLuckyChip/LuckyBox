@@ -2,7 +2,7 @@
   "sensors": {
     "t1": {
       "value": 1.00,
-      "name": "",
+      "name": "В царге",
       "color": 7905,
       "member": 0,
       "priority": 0,
@@ -10,7 +10,7 @@
     },
     "t2": {
       "value": 2.00,
-      "name": "",
+      "name": "В узле отбора",
       "color": 65504,
       "member": 0,
       "priority": 0,
@@ -18,7 +18,7 @@
     },
     "t3": {
       "value": 3.00,
-      "name": "",
+      "name": "В кубе",
       "color": 64588,
       "member": 0,
       "priority": 0,
@@ -26,7 +26,7 @@
     },
     "t4": {
       "value": 4.00,
-      "name": "Def",
+      "name": "Вода на выходе",
       "color": 16799,
       "member": 0,
       "priority": 0,
@@ -34,7 +34,7 @@
     },
     "t5": {
       "value": 5.00,
-      "name": "",
+      "name": "Левый датчик",
       "color": 33415,
       "member": 0,
       "priority": 0,

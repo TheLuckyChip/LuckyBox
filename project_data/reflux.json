@@ -1,1 +1,1 @@
-{"temperature":5,"temperature2":5,"temperature3":5,"temperature4":5,"setting":101.15,"settingAlarm":false,"temperatureAlcoholBoil":78.15,"pressure":760,"temperatureStartPressure":78}
+{"sensors":[{"t1":80},{"t2":75},{"t3":65},{"t4":25}],"delta":1.15,"delta_result":101.15,"alarm_t1":true,"alcoBoil":78.15,"pressure":760,"alcoBoilPressure":78}

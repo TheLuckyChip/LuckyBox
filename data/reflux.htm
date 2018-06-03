@@ -1,4 +1,23 @@
-<div class="container"><div class="row"><div id="error_reflux" class="col-md-offset-2 col-md-8"></div></div><div class="row"><div class="col-md-12 fill-height"><table class="table"><thead><tr><th>Параметр</th><th>Значение</th><th>Дельта</th><th>Уставка</th></tr></thead><tbody><tr><td colspan="4"><button id="reflux_add_sensor" type="button" class="btn btn-success btn-sm noSwipe">Добавить датчик для процесса</button></td></tr><!--<tr>
+<div class="container"><div class="row"><div id="error_reflux" class="col-md-offset-2 col-md-8"></div></div><div class="row"><div class="col-md-12 fill-height"><table id="reflux_process" class="table"><thead><tr><th>Параметр</th><th>Значение</th><th>Дельта</th><th>Уставка</th></tr></thead><tbody><!--<tr>
+					<td>
+						Атмосферное давление
+					</td>
+					<td>
+						<span id="reflux_pressure"></span> <span class="hidden">мм рт.ст.</span>
+					</td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>
+						t&#176 кипения спирта при данном давлении
+					</td>
+					<td>
+						<span id="reflux_alco_boil"></span> <span class="hidden">&#176С</span>
+					</td>
+					<td></td>
+					<td></td>
+				</tr>--><!--<tr>
 					<td>
 						t&#176 Воды на выходе
 					</td>
@@ -22,8 +41,7 @@
 						</div>
 					</td>
 
-					<td>
-					</td>
+					<td></td>
 				</tr>--><!--<tr>
 					<td>
 						t&#176 Воды на выходе
@@ -88,4 +106,6 @@
 					</td>
 					<td></td>
 					<td></td>
-				</tr>--></tbody></table></div></div></div>
+				</tr>--></tbody><tfoot><tr><td colspan="4"><button id="reflux_add_sensor" type="button" class="btn btn-primary btn-sm noSwipe">Добавить датчики для процесса</button></td></tr><tr class="hidden" id="start_group_button"><td colspan="4"><button id="reflux_stop" type="button" class="btn btn-danger btn-sm pull-left noSwipe">СТОР</button> <button id="reflux_start" type="button" class="btn btn-success btn-sm pull-right noSwipe">СТАРТ</button></td></tr></tfoot></table></div></div></div><script>$(document).ready(function () {
+		pasteRefluxSensors();
+	});</script>
