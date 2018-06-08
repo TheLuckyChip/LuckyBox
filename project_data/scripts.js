@@ -412,12 +412,12 @@ $(document).ready(function () {
 			if(sensors[key]["value"]<125){
 				$("#sensor_name_"+key).val(sensors[key]["name"]);
 				let jscolor = sensors[key]["color"] > 0 ? dec2hex(sensors[key]["color"]) : "FFFFFF";
-				$("#sensor_color_"+key).val(jscolor).css("background-color","#"+jscolor);
+				$("#sensor_color_"+key).val(jscolor).next("button").css("background-color","#"+jscolor);
 				$("#sensor_val_"+key).text(sensors[key]["value"]).parent().find(".hidden").removeClass("hidden").addClass("show");
 			}else{
 				if(!$.fn.objIsEmpty(sensors[key]["name"],false))
 					$("#sensor_name_"+key).val("");
-				$("#sensor_color_"+key).val("FFFFFF").css("background-color","#FFFFFF");
+				$("#sensor_color_"+key).val("FFFFFF");//.css("background-color","#FFFFFF");
 				$("#sensor_val_"+key).text("").parent().find(".show").removeClass("show").addClass("hidden");
 			}
 			//console.log(key,sensors[key]);
@@ -436,7 +436,7 @@ $(document).ready(function () {
 					nameError = true;
 				sensorsJson["sensors"][key]["name"] = $("#sensor_name_"+key).val();
 				sensorsJson["sensors"][key]["color"] = (val_color !== "FFFFFF" && val_color !== "") ? hex2dec(val_color) : 0;
-				sensorsJson["sensors"][key]["member"] = 1;
+				//sensorsJson["sensors"][key]["member"] = 1;
 			}
 		}
 		if(nameError) {
@@ -487,11 +487,28 @@ $(document).ready(function () {
 		if(sensors !== null) {
 			let section = '<section id="reflux_sensors" class="table-responsive"><table class="table table-noborder">';
 			for (let key in sensors["sensors"]) {
-				if (sensors["sensors"][key]["member"] > 0) {
-					section += '<tr><td><label class="checkbox-inline"><input data-sensor="' + key + '" type="checkbox" value="' + key + '">' + sensors["sensors"][key]["name"] + '</label></td>' +
+				if (sensors["sensors"].hasOwnProperty(key) && key !== "p1") {
+					let sensor_name = sensors["sensors"][key]["name"];
+					let jscolor = sensors["sensors"][key]["color"] > 0 ? dec2hex(sensors["sensors"][key]["color"]) : "FFFFFF"; //"background-color","#"+jscolor
+					//if(key === "p1")
+						//sensor_name = "Атмосферное давление";
+					section += '<tr><td>' +
+						'<div class="input-group input-group-sm">'+
+						'<span class="input-group-addon">' + key + '</span>'+
+						'<input id="sensor_name_' + key + '" class="form-control input-sm" type="text" value="' + sensor_name + '">'+
+						'</div></td>'+
+						'<td><input type="hidden" id="sensor_color_' + key + '" value="'+jscolor+'">'+
+						'<button class="btn btn-sm jscolor {valueElement: \'sensor_color_' + key + '\'}" style="background-color: #'+jscolor+'">Цвет</button></td>'+
+						'<td><input data-sensor="' + key + '" type="checkbox" value="' + key + '"></td>' +
 						'<td><label class="checkbox-inline"><input disabled id="delta_' + key + '" name="reflux_delta" type="radio" value="Y">Уставка</label></td>' +
 						'</tr>';
 				}
+				/*if (sensors["sensors"].hasOwnProperty(key) && sensors["sensors"][key]["member"] > 0) {
+					section += '<tr><td><label class="checkbox-inline">' +
+						'<input data-sensor="' + key + '" type="checkbox" value="' + key + '">' + sensors["sensors"][key]["name"] + '</label></td>' +
+						'<td><label class="checkbox-inline"><input disabled id="delta_' + key + '" name="reflux_delta" type="radio" value="Y">Уставка</label></td>' +
+						'</tr>';
+				}*/
 			}
 			section += '</table></section>';
 			$.fn.openModal('Выбор датчика', section, "modal-md", false, {
@@ -514,8 +531,18 @@ $(document).ready(function () {
 					$(this).closest(".modal").modal("hide");
 					pasteRefluxSensors();
 				}
-			});
+			},
+			{id: "modal_sensors_select"}
+			);
+			//jscolor.installByClassName("jscolor");
 		}
+	});
+	$(document).on('shown.bs.modal',"#modal_sensors_select", function(event){
+		console.log(event);
+		jscolor.installByClassName("jscolor");
+		/*window.setTimeout(function(){
+			$(event.currentTarget).find('input#photo_name').first().focus()
+		}, 0500);*/
 	});
 	$(document).on('click','#reflux_sensors input[type=checkbox]',function() {
 		let checked = !$(this).prop("checked");
@@ -559,6 +586,7 @@ $(document).ready(function () {
 			refluxStartProcess ()
 		}
 	};
+	//{"sensors":[{"t1":80},{"t2":75},{"t3":65},{"t4":25}],"delta":1.15,"delta_result":101.15,"alarm_t1":true,"alcoBoil":78.15,"pressure":760,"alcoBoilPressure":78}
 	$(document).on('click','#reflux_start',function() {
 		let _this = $(this);
 		let sendRefluxProcess = refluxProcess;
@@ -589,7 +617,7 @@ $(document).ready(function () {
 	}
 	function getReflux() {
 		$.ajax({
-			url: 'reflux.json',
+			url: 'reflux.json',//refluxModeSensorsOut
 			data: {},
 			type: 'GET',
 			dataType: 'json',
