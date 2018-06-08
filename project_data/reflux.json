@@ -27,7 +27,7 @@
     {"in3":{"value":0,"allert":0}},
     {"in4":{"value":0,"allert":0}}
   ],
-  "power":0,
+  "power":50,
   "temperatureAlcoholBoil":78.15,
   "temperatureStartPressure":78.00
 }
