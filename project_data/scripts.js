@@ -618,28 +618,38 @@ $(document).ready(function () {
 		if(refluxProcess["start"] === true) {
 			getReflux();
 			//refluxStartProcess ()
+			$('#reflux_start').prop("disabled",true);
+		}else{
+			$('#reflux_stop').prop("disabled",true);
 		}
 	};
 
+	var tmpRefluxFlag = false;
 	$(document).on('click','#reflux_start',function() {
-		//let _this = $(this);
+		let _this = $(this);
+		_this.prop("disabled",true);
+		$('#reflux_stop').prop("disabled",false);
 		//let sendRefluxProcess = refluxProcess;
-		refluxProcess["start"] = true;
+		refluxProcess["start"] = tmpRefluxFlag = true;
 		//sendRequest("refluxModeSensorsIn", sendRefluxProcess, "json", refluxStartProcess, _this, $("#error_reflux"));
 		//refluxStartProcess ();
-		refluxProcess["start"] = true;
 		//localStorage.setObj('reflux',refluxProcess);
-		getReflux();
+		setReflux();
+		setTimeout(getReflux, 1000);
 	});
 	$(document).on('click','#reflux_stop',function() {
-		//let _this = $(this);
+		let _this = $(this);
+		_this.prop("disabled",true);
+		$('#reflux_start').prop("disabled",false);
 		//let sendRefluxProcess = refluxProcess;
 		//sendRefluxProcess["start"] = false;
 		//sendRequest("SetTempTest", sendRefluxProcess, "json", refluxStopProcess, _this, $("#error_reflux"));
 		//refluxStopProcess ();
+		tmpRefluxFlag = true;
 		refluxProcess["start"] = false;
 		//localStorage.setObj('reflux',refluxProcess);
-		getReflux();
+		//getReflux();
+		setReflux();
 	});
 	/*function refluxStartProcess () {
 
@@ -656,7 +666,7 @@ $(document).ready(function () {
 		getReflux();
 
 	}*/
-	function getReflux() {
+	function setReflux() {
 		let refluxSendData = {
 			"process":{"allow":0,"number":0},
 			"t1":{"allertValue":0},
@@ -669,21 +679,41 @@ $(document).ready(function () {
 			"t8":{"allertValue":0},
 			"power":0
 		};
+		let flag_send = false;
+		let power_set = $("#power_set");
 		refluxSendData["process"]["allow"] = (refluxProcess["start"] ? 1 : 0);
-		refluxSendData["power"] = refluxProcess["power"] = $("#power_set").val();
+		refluxSendData["power"] = refluxProcess["power"] = power_set.val();
+		if(refluxProcess["power"] !== power_set.val())
+			flag_send = true;
+
 		$.each(refluxProcess["sensors"], function (i, e) {
 			let sensor_key = e["key"];
 			let reflux_delta = $("#reflux_delta_"+sensor_key);
 			let reflux_cutoff = $("#reflux_cutoff_"+sensor_key);
-			if(reflux_delta.length)
+			if(reflux_delta.length) {
 				refluxSendData[sensor_key]["allertValue"] = e["allertValue"] = reflux_delta.val();
-			if(reflux_cutoff.length)
+				if(e["allertValue"] !== reflux_delta.val())
+					flag_send = true;
+			}
+			if(reflux_cutoff.length) {
 				refluxSendData[sensor_key]["allertValue"] = e["allertValue"] = reflux_cutoff.val();
+				if(e["allertValue"] !== reflux_cutoff.val())
+					flag_send = true;
+			}
 		});
-		localStorage.setObj('reflux',refluxProcess);
+		if(tmpRefluxFlag)
+			flag_send = true;
+		if(flag_send) {
+			tmpRefluxFlag = false;
+			localStorage.setObj('reflux', refluxProcess);
+			sendRequest("refluxModeSensorsIn", refluxSendData, "json", false, false, $("#error_reflux"));
+		}
+	}
+	function getReflux() {
+		setReflux();
 		$.ajax({
-			url: 'refluxModeSensorsIn',//'reflux.json',//refluxModeSensorsOut
-			data: refluxSendData,
+			url: 'refluxModeSensorsOut',//'refluxModeSensorsIn',//'reflux.json',//refluxModeSensorsOut
+			data: {},
 			type: 'GET',
 			dataType: 'json',
 			success: function (msg) {
