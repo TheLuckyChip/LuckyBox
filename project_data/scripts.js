@@ -405,24 +405,25 @@ $(document).ready(function () {
 		e.preventDefault();
 		let _this = $(this);
 		//refluxTest
-		sendRequest("sensors.json",{},"json",getSensors,_this,$("#error_sensors"));
+		sendRequest("sensorsOutSet",{},"json",getSensors,_this,$("#error_sensors"));
 	});
 	function getSensors(data) {
 		console.log(data);
-		let sensors = data["sensors"];
+		let sensors = data;
 		for (let key in sensors) {
-			if(sensors[key]["value"]<125){
-				$("#sensor_name_"+key).val(sensors[key]["name"]);
+			if(sensors.hasOwnProperty(key)) {
 				let jscolor = sensors[key]["color"] > 0 ? dec2hex(sensors[key]["color"]) : "FFFFFF";
-				$("#sensor_color_"+key).val(jscolor).next("button").css("background-color","#"+jscolor);
-				$("#sensor_val_"+key).text(sensors[key]["value"]).parent().find(".hidden").removeClass("hidden").addClass("show");
-			}else{
-				if(!$.fn.objIsEmpty(sensors[key]["name"],false))
-					$("#sensor_name_"+key).val("");
-				$("#sensor_color_"+key).val("FFFFFF");//.css("background-color","#FFFFFF");
-				$("#sensor_val_"+key).text("").parent().find(".show").removeClass("show").addClass("hidden");
+				if (sensors[key]["value"] < 150) {
+					$("#sensor_name_" + key).val(sensors[key]["name"]);
+					$("#sensor_color_" + key).val(jscolor).next("button").css("background-color", "#" + jscolor);
+					$("#sensor_val_" + key).text(sensors[key]["value"]).parent().find(".hidden").removeClass("hidden").addClass("show");
+				} else {
+					if (!$.fn.objIsEmpty(sensors[key]["name"], false))
+						$("#sensor_name_" + key).val("");
+					$("#sensor_color_" + key).val(jscolor).next("button").css("background-color", "#" + jscolor);
+					$("#sensor_val_" + key).text("").parent().find(".show").removeClass("show").addClass("hidden");
+				}
 			}
-			//console.log(key,sensors[key]);
 		}
 		sensorsJson = data;
 		//localStorage.setObj('dtos', self.dtos);
@@ -431,20 +432,24 @@ $(document).ready(function () {
 		e.preventDefault();
 		let _this = $(this);
 		let nameError = false;
-		for (let key in sensorsJson["sensors"]) {
-			if(sensorsJson["sensors"][key]["value"]<125){
+		let count = 1;
+		let sensorsSend = {};
+		for (let key in sensorsJson) {
+			if(sensorsJson.hasOwnProperty(key)){
+				sensorsSend[key] = {};
 				let val_color = $("#sensor_color_"+key).val();
-				if($("#sensor_name_"+key).val() === "")
+				if($("#sensor_name_"+key).val() === ""  && sensorsJson[key]["value"]<150)
 					nameError = true;
-				sensorsJson["sensors"][key]["name"] = $("#sensor_name_"+key).val();
-				sensorsJson["sensors"][key]["color"] = (val_color !== "FFFFFF" && val_color !== "") ? hex2dec(val_color) : 0;
-				//sensorsJson["sensors"][key]["member"] = 1;
+				sensorsSend[key]["name"] = sensorsJson[key]["name"] = $("#sensor_name_"+key).val();
+				sensorsSend[key]["color"] = sensorsJson[key]["color"] = (val_color !== "FFFFFF" && val_color !== "") ? hex2dec(val_color) : 0;
+				sensorsSend[key]["number"] = sensorsJson[key]["number"] = ($("#sensor_number_"+key).val()<=0 ? count : $("#sensor_number_"+key).val());
 			}
+			count++;
 		}
 		if(nameError) {
 			$.fn.openModal('', '<p class="text-center text-danger"><strong>Заполните названия подключенных датчиков</strong></p>', "modal-sm", true, false);
 		}else {
-			sendRequest("SetTempTest", sensorsJson, "json", setSensors, _this, $("#error_sensors"));
+			sendRequest("sensorsInSet", sensorsSend, "json", setSensors, _this, $("#error_sensors"));
 		}
 	});
 	function setSensors(data) {
@@ -494,7 +499,9 @@ $(document).ready(function () {
 
 	$(document).on('click','#reflux_add_sensor',function(e) {
 		e.preventDefault();
-		let sensors = localStorage.getObj('sensors');//sensorsJson
+		let _this = $(this);
+		sendRequest("refluxSensorsSetLoad", {}, "json", selectSensorsReflus, _this, $("#error_reflux"));
+		/*let sensors = localStorage.getObj('sensors');//sensorsJson
 		//console.log(sensors);
 		if(sensors !== null) {
 			let section = '<section id="reflux_sensors" class="table-responsive"><table class="table table-noborder">';
@@ -520,12 +527,6 @@ $(document).ready(function () {
 						'<td><label class="checkbox-inline"><input disabled id="cutoff_' + key + '" name="reflux_radio_' + key + '" type="radio" value="Y">Отсечка</label></td>' +
 						'</tr>';
 				}
-				/*if (sensors["sensors"].hasOwnProperty(key) && sensors["sensors"][key]["member"] > 0) {
-					section += '<tr><td><label class="checkbox-inline">' +
-						'<input data-sensor="' + key + '" type="checkbox" value="' + key + '">' + sensors["sensors"][key]["name"] + '</label></td>' +
-						'<td><label class="checkbox-inline"><input disabled id="delta_' + key + '" name="reflux_delta" type="radio" value="Y">Уставка</label></td>' +
-						'</tr>';
-				}*/
 			}
 			section += '</table></section>';
 			$.fn.openModal('Выбор датчиков для ректификации', section, "modal-md", false, {
@@ -534,7 +535,7 @@ $(document).ready(function () {
 				class: "btn btn-success",
 				click: function () {
 					let sensors_select = $('#reflux_sensors input[type=checkbox]');
-					let reflux_sensors = $.map(sensors_select, function (e) {
+					refluxProcess["sensors"] = $.map(sensors_select, function (e) {
 						if ($(e).is(":checked")) {
 							//console.log($(e).data("sensor"));
 							let key = $(e).data("sensor");
@@ -546,18 +547,82 @@ $(document).ready(function () {
 							return {"key": key, "name": name, "delta": delta, "cutoff": cutoff, "color": color, "allertValue":0};
 						}
 					});
-					refluxProcess["sensors"] = reflux_sensors;
+					//refluxProcess["sensors"] = reflux_sensors;
 					localStorage.setObj('reflux', refluxProcess);
 					//console.log(ar_sensors);
 					$(this).closest(".modal").modal("hide");
-					pasteRefluxSensors();
+					pasteRefluxSensors(true);
 				}
 			},
 			{id: "modal_sensors_select"}
 			);
 			//jscolor.installByClassName("jscolor");
-		}
+		}*/
 	});
+	//Запрос датчиков для ректификации и вывод их в диалоговое окно
+	function selectSensorsReflus(data){
+		let sensors = data;//sensorsJson
+		//console.log(sensors);
+		if(sensors !== null) {
+			let section = '<section id="reflux_sensors" class="table-responsive"><table class="table table-noborder">';
+			for (let key in sensors) {
+				if (sensors.hasOwnProperty(key)) {
+					let sensor_name = (sensors[key].hasOwnProperty("name") ? sensors[key]["name"] : "");
+					let sensor_delta = '<label class="checkbox-inline"><input disabled id="delta_' + key + '" name="reflux_radio_' + key + '" type="radio" value="Y">Уставка</label>';
+					let sensor_cutoff = '<label class="checkbox-inline"><input disabled id="cutoff_' + key + '" name="reflux_radio_' + key + '" type="radio" value="Y">Отсечка</label>';
+					if(key === "p1") {
+						sensor_delta = sensor_cutoff = '';
+						sensor_name = "Атмосферное давление";
+					}
+					let jscolor = sensors[key]["color"] > 0 ? dec2hex(sensors[key]["color"]) : "FFFFFF"; //"background-color","#"+jscolor
+					let disabled_check = "";
+					if(sensor_name === "")
+						disabled_check = "disabled";
+
+					section += '<tr><td>' +
+						'<div class="input-group input-group-sm">'+
+						'<span class="input-group-addon">' + key + '</span>'+
+						'<input id="reflux_name_' + key + '" class="form-control input-sm" type="text" value="' + sensor_name + '">'+
+						'</div></td>'+
+						'<td><input type="hidden" id="reflux_color_' + key + '" value="'+jscolor+'">'+
+						'<button class="btn btn-sm jscolor {valueElement: \'reflux_color_' + key + '\'}" style="background-color: #'+jscolor+'">Цвет</button></td>'+
+						'<td><input '+disabled_check+' data-sensor="' + key + '" type="checkbox" value="' + key + '"></td>' +
+						'<td>'+sensor_delta+'</td>' +
+						'<td>'+sensor_cutoff+'</td>' +
+						'</tr>';
+				}
+			}
+			section += '</table></section>';
+			$.fn.openModal('Выбор датчиков для ректификации', section, "modal-md", false, {
+					text: "Выбрать",
+					id: "sensors_select",
+					class: "btn btn-success",
+					click: function () {
+						let sensors_select = $('#reflux_sensors input[type=checkbox]');
+						refluxProcess["sensors"] = $.map(sensors_select, function (e) {
+							if ($(e).is(":checked")) {
+								//console.log($(e).data("sensor"));
+								let key = $(e).data("sensor");
+								let name = $("#reflux_name_" + key).val();
+								let val_color = $("#reflux_color_" + key).val();
+								let color = (val_color !== "FFFFFF" && val_color !== "") ? hex2dec(val_color) : 0;
+								let delta = $("#delta_" + key).prop("checked");
+								let cutoff = $("#cutoff_" + key).prop("checked");
+								return {"key": key, "name": name, "delta": delta, "cutoff": cutoff, "color": color, "allertValue":0};
+							}
+						});
+						//refluxProcess["sensors"] = reflux_sensors;
+						localStorage.setObj('reflux', refluxProcess);
+						//console.log(ar_sensors);
+						$(this).closest(".modal").modal("hide");
+						pasteRefluxSensors(true);
+					}
+				},
+				{id: "modal_sensors_select"}
+			);
+			//jscolor.installByClassName("jscolor");
+		}
+	}
 	$(document).on('shown.bs.modal',"#modal_sensors_select", function(event){
 		//console.log(event);
 		jscolor.installByClassName("jscolor");
@@ -573,8 +638,19 @@ $(document).ready(function () {
 			radio_cutoff.prop("checked",false);
 		}
 	});
-	pasteRefluxSensors = function(){
-		let sensors = localStorage.getObj('sensors');//sensorsJson
+	pasteRefluxSensors = function(sensors_select){
+		//let sensors = localStorage.getObj('sensors');//sensorsJson
+		let sensorsRefluxSend = {
+			"t1":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
+			"t2":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
+			"t3":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
+			"t4":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
+			"t5":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
+			"t6":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
+			"t7":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
+			"t8":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
+			"p1":{"value":760.00,"color":0,"member":0}
+		};
 		let refluxTemplate = '';
 		let localReflux = localStorage.getObj('reflux');
 		if(localReflux !== null)
@@ -584,9 +660,10 @@ $(document).ready(function () {
 				//console.log(i,e);
 				let sensor_key = e["key"];
 				let name_sensor = e["name"];
-				sensors["sensors"][sensor_key]["name"] = name_sensor;
-				sensors["sensors"][sensor_key]["color"] = e["color"];
-				sensors["sensors"][sensor_key]["member"] = 1;
+				if(sensorsRefluxSend[sensor_key].hasOwnProperty("name"))
+					sensorsRefluxSend[sensor_key]["name"] = name_sensor;
+				sensorsRefluxSend[sensor_key]["color"] = e["color"];
+				sensorsRefluxSend[sensor_key]["member"] = 1;
 				let tpl_delta = '';
 				let tpl_delta_result = '';
 				if (e["delta"]) {
@@ -597,16 +674,19 @@ $(document).ready(function () {
 					tpl_delta = returnTplHtml([{id:"reflux_cutoff_"+sensor_key, value: e["allertValue"], min: '0', max: '105', step: '1'}], deltaTempl);
 					tpl_delta_result = '<span id="reflux_cutoff_result_'+sensor_key+'"></span> <span class="hidden">&#176С</span>'
 				}
-				refluxTemplate += '<tr><td>t&#176' + name_sensor + '</td>' +
-					'<td><span id="reflux_' + sensor_key + '"></span> <span class="hidden">&#176С</span></td>' +
-					'<td>' + tpl_delta + '</td>' +
-					'<td>' + tpl_delta_result + '</td>' +
-					'</tr>'
+				if(sensor_key !== "p1") {
+					refluxTemplate += '<tr><td>t&#176' + name_sensor + '</td>' +
+						'<td><span id="reflux_' + sensor_key + '"></span> <span class="hidden">&#176С</span></td>' +
+						'<td>' + tpl_delta + '</td>' +
+						'<td>' + tpl_delta_result + '</td>' +
+						'</tr>'
+				}
 			});
-			sensors["process"]["allow"] = 2;
+			//sensors["process"]["allow"] = 2;
 		}
 		if(refluxTemplate !== '') {
-			sendRequest("SetTempTest", sensors, "json", false, false, $("#error_reflux"));
+			if(sensors_select)
+				sendRequest("refluxSensorsSetSave", sensorsRefluxSend, "json", false, false, $("#error_reflux"));
 			//localStorage.setObj('sensors', sensors);
 			refluxTemplate += pressureTemplate + powerTempl;
 			$("#start_group_button").removeClass("hidden");
@@ -682,25 +762,26 @@ $(document).ready(function () {
 		let flag_send = false;
 		let power_set = $("#power_set");
 		refluxSendData["process"]["allow"] = (refluxProcess["start"] ? 1 : 0);
-		refluxSendData["power"] = refluxProcess["power"] = power_set.val();
 		if(refluxProcess["power"] !== power_set.val())
 			flag_send = true;
+		refluxSendData["power"] = refluxProcess["power"] = power_set.val();
 
 		$.each(refluxProcess["sensors"], function (i, e) {
 			let sensor_key = e["key"];
 			let reflux_delta = $("#reflux_delta_"+sensor_key);
 			let reflux_cutoff = $("#reflux_cutoff_"+sensor_key);
 			if(reflux_delta.length) {
-				refluxSendData[sensor_key]["allertValue"] = e["allertValue"] = reflux_delta.val();
 				if(e["allertValue"] !== reflux_delta.val())
 					flag_send = true;
+				refluxSendData[sensor_key]["allertValue"] = e["allertValue"] = reflux_delta.val();
 			}
 			if(reflux_cutoff.length) {
-				refluxSendData[sensor_key]["allertValue"] = e["allertValue"] = reflux_cutoff.val();
 				if(e["allertValue"] !== reflux_cutoff.val())
 					flag_send = true;
+				refluxSendData[sensor_key]["allertValue"] = e["allertValue"] = reflux_cutoff.val();
 			}
 		});
+		console.log(refluxSendData);
 		if(tmpRefluxFlag)
 			flag_send = true;
 		if(flag_send) {
