@@ -1,5 +1,141 @@
-$(document).ready(function () {
+(function ($) {
+    /**
+     * Проверка объекта на пустоту
+     * @param obj - Объект
+     * @param key - Проверять ключи в объекте
+     * @returns {boolean}
+     */
+    $.fn.objIsEmpty = function (obj,key) {
+        if(key) {
+            for (let k in obj) {
+                if (obj.hasOwnProperty(k) && obj[k] !== "") {
+                    return false;
+                }
+            }
+        }else{
+            for (let i in obj) {
+                if (obj.hasOwnProperty(i)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    };
+    /**
+     * Убирает повторяющиеся значения из массива
+     * @param arr
+     * @returns {Array}
+     */
+    $.fn.arrayUnique = function(arr){
+        let uniHash={}, outArr=[], i=arr.length;
+        while(i--) uniHash[arr[i]]=i;
+        for(i in uniHash) outArr.push(i);
+        return outArr
+    };
+    /**
+     * Проверка массива на одинаковые значения (возвращает массив дублей)
+     * @param arr
+     * @returns {Array}
+     */
+    $.fn.duplicateValues = function(arr){
+        let arr_res = [];
+        arr.sort();
+        for (let i=1; i < arr.length; i++) {
+            if (arr[i] === arr[i-1]) {
+                let is_unique = true;
+                for (let k=0; k < arr_res.length; k++) {
+                    if (arr_res[k] === arr[i]) {
+                        is_unique = false;
+                        break;
+                    }
+                }
+                if (is_unique) {
+                    arr_res.push(arr[i]);
+                }
+            }
+        }
+        return arr_res;
+    };
+    /**
+	 * Удаление элемента из массива
+     * @param arr
+     * @param value
+     * @returns {Array}
+     */
+    $.fn.arrayUnset = function(arr,value) {
+        for(let i = 0; i < arr.length; i++) {
+            if(arr[i] === value) {
+                arr.splice(i, 1);
+                break;
+            }
+        }
+        return arr;
+    };
 
+    /**
+	 * Заполнение селекта
+     * @param select
+     * @param dataArray
+     * @param optgroup
+     */
+    $.fn.fillSelect = function (select, dataArray, optgroup) {
+        if (optgroup === undefined) optgroup = false;
+
+        if (select.prop('tagName') === 'SELECT') {
+            if (!optgroup) {
+                $.each(dataArray, function (index, value) {
+                    let option_text = "";
+                    let option_val = "";
+                    $.each(value, function (key, val) {
+                        //console.log(key, val);
+                        if (key === "text") {
+                            option_text = val;
+                        } else {
+                            option_val += " " + key + "=\"" + val + "\"";
+                        }
+                    });
+                    let option = "<option" + option_val + ">" + option_text + "</option>";
+                    select.append($(option)
+                        //.attr("value", value.id)
+                        //.text(value.name)
+                        //.attr("data-"+value.data[0],value.data[1])
+                    );
+                });
+            } else {
+                let opt_group = $('<optgroup label="' + optgroup + '">');
+                $.each(dataArray, function (index, value) {
+                    let option_text = "";
+                    let option_val = "";
+                    $.each(value, function (key, val) {
+                        //console.log(key, val);
+                        if (key === "text") {
+                            option_text = val;
+                        } else {
+                            option_val += " " + key + "=\"" + val + "\"";
+                        }
+                    });
+                    let option = "<option" + option_val + ">" + option_text + "</option>";
+                    opt_group.append($(option)
+                        //.attr("value", value.id)
+                        //.text(value.name)
+                    );
+                });
+                opt_group.appendTo(select);
+            }
+        }
+    };
+    /**
+	 * Очистка селекта
+     * @param select
+     */
+    $.fn.clearSelect = function(select) {
+        if (select.prop('tagName') === 'SELECT') {
+            select.prop('options').length = 0;
+        }
+    }
+})(jQuery);
+//$(document).ready(function () {
+$(function() {
 	// Функция записи в LocalStorage
 	if ( !Storage.prototype.setObj ) {
 		/**
@@ -25,7 +161,7 @@ $(document).ready(function () {
 			return JSON.parse(this.getItem(key));
 		}
 	}
-	// Функция проверли заполнения LocalStorage
+	// Функция проверки заполнения LocalStorage
 	function isQuotaExceeded(e) {
 		let quotaExceeded = false;
 		if (e) {
@@ -106,7 +242,7 @@ $(document).ready(function () {
 	}
 	// hex to decimal
 	function hex2dec (hex) {
-		console.log(hex);
+		//console.log(hex);
 		let hexColor = hex.length === 4 ? hex : rgb3to2(hex);
 		return convertBase(hexColor).from(16).to(10);
 	}
@@ -199,53 +335,149 @@ $(document).ready(function () {
 	});
 
 	//Кнопки + и -
+	let timeout = false;
+    $(document).on('mousedown','.minus',function(e) {
+        e.preventDefault();
+        let _this = $(this);
+        let count_interval = 0;
+        let time = 500;
+        timeout = setInterval(function(){
+            count_interval ++;
+            if(count_interval>3) {
+                time = time / 2;
+                count_interval = 0;
+            }
+            console.log(count_interval,time);
+            let $input = _this.parent().find('input');
+            let step = Number($input.attr("step"));
+            let min = Number($input.attr("min"));
+            let fixed = 0;
+            const f = x => ( (x.toString().includes('.')) ? (x.toString().split('.').pop().length) : (0) );
+            if (typeof min === typeof undefined && min === false)
+                min = 0;
+            if (typeof step !== typeof undefined && step !== false){
+                step = parseFloat(step);
+                fixed = f(step);
+            }else{
+                step = 1;
+            }
+            let count = Number($input.val()) - step;
+            count = count < min ? min : count;
+            if(count > min)
+                count =  count.toFixed(fixed);
+            //console.log(count,step);
+            $input.val(count);
+        }, time);
+        /*let $input = $(this).parent().find('input');
+        let step = $input.attr("step");
+        let min = $input.attr("min");
+        let fixed = 0;
+        const f = x => ( (x.toString().includes('.')) ? (x.toString().split('.').pop().length) : (0) );
+        if (typeof min === typeof undefined && min === false)
+            min = 0;
+        if (typeof step !== typeof undefined && step !== false){
+            step = parseFloat(step);
+            fixed = f(step);
+        }else{
+            step = 1;
+        }
+        let count = Number($input.val()) - step;
+        count = count < min ? min : count;
+        if(count > min)
+            count =  count.toFixed(fixed);
+        //console.log(count,step);
+        $input.val(count);*/
+        //$input.change();
+        //return false;
+    });
+    $(document).on('mouseup','.minus',function(e) {
+		e.preventDefault();
+        clearInterval(timeout);
+	});
 	$(document).on('click','.minus',function(e) {
+        e.preventDefault();
+        let $input = $(this).parent().find('input');
+        let step = Number($input.attr("step"));
+        let min = Number($input.attr("min"));
+        let fixed = 0;
+        const f = x => ( (x.toString().includes('.')) ? (x.toString().split('.').pop().length) : (0) );
+        if (typeof min === typeof undefined && min === false)
+            min = 0;
+        if (typeof step !== typeof undefined && step !== false){
+            step = parseFloat(step);
+            fixed = f(step);
+        }else{
+            step = 1;
+        }
+        let count = Number($input.val()) - step;
+        count = count < min ? min : count;
+        if(count > min)
+            count =  count.toFixed(fixed);
+        $input.val(count);
+    });
+	$(document).on('mousedown','.plus',function(e) {
+    //$(".plus").on('mouseup',function(e) {
 		e.preventDefault();
-		let $input = $(this).parent().find('input');
-		let step = $input.attr("step");
-		let min = $input.attr("min");
-		let fixed = 0;
-		const f = x => ( (x.toString().includes('.')) ? (x.toString().split('.').pop().length) : (0) );
-		if (typeof min === typeof undefined && min === false)
-			min = 0;
-		if (typeof step !== typeof undefined && step !== false){
-			step = parseFloat(step);
-			fixed = f(step);
-		}else{
-			step = 1;
-		}
-		let count = Number($input.val()) - step;
-		count = count < min ? min : count;
-		if(count > min)
-			count =  count.toFixed(fixed);
-		//console.log(count,step);
+        let _this = $(this);
+        let count_interval = 0;
+        let time = 500;
+        timeout = setInterval(function() {
+            count_interval++;
+            if (count_interval > 3) {
+                time = time / 2;
+                count_interval = 0;
+            }
+            let $input = _this.parent().find('input');
+            let step = Number($input.attr("step"));
+            let max = Number($input.attr("max"));
+            let fixed = 0;
+            const f = x => ((x.toString().includes('.')) ? (x.toString().split('.').pop().length) : (0));
+            if (typeof max === typeof undefined && max === false)
+                max = 100;
+            if (typeof step !== typeof undefined && step !== false) {
+                step = parseFloat(step);
+                fixed = f(step);
+            } else {
+                step = 1;
+            }
+            let count = Number($input.val()) + step;
+            count = count > max ? max : count;
+            count = count.toFixed(fixed);
+
+            $input.val(count);//
+            //$input.change();
+            //return false;
+        }, time);
+	});
+    $(document).on('mouseup','.plus',function(e) {
+        e.preventDefault();
+        clearInterval(timeout);
+    });
+    $(document).on('click','.plus',function(e) {
+        e.preventDefault();
+       // if(timeout === false) {
+        let $input = $(this).parent().find('input');
+        let step = Number($input.attr("step"));
+        let max = Number($input.attr("max"));
+        let fixed = 0;
+        const f = x => ((x.toString().includes('.')) ? (x.toString().split('.').pop().length) : (0));
+        if (typeof max === typeof undefined && max === false)
+            max = 100;
+        if (typeof step !== typeof undefined && step !== false) {
+            step = parseFloat(step);
+            fixed = f(step);
+        } else {
+            step = 1;
+        }
+        let count = Number($input.val()) + step;
+        count = count > max ? max : count;
+        console.log(count,step,fixed);
+        count = count.toFixed(fixed);
 		$input.val(count);
-		$input.change();
-		//return false;
-	});
-	$(document).on('click','.plus',function(e) {
-		e.preventDefault();
-		let $input = $(this).parent().find('input');
-		let step = $input.attr("step");
-		let max = $input.attr("max");
-		let fixed = 0;
-		const f = x => ( (x.toString().includes('.')) ? (x.toString().split('.').pop().length) : (0) );
-		if (typeof max === typeof undefined && max === false)
-			max = 100;
-		if (typeof step !== typeof undefined && step !== false){
-			step = parseFloat(step);
-			fixed = f(step);
-		}else{
-			step = 1;
-		}
-		let count = Number($input.val()) + step;
-		count = count > max ? max : count;
-		count =  count.toFixed(fixed);
-		//console.log(count,step);
-		$input.val(count);//
-		$input.change();
-		//return false;
-	});
+            //$input.change();
+            //return false;
+       // }
+    });
 	//Рендер HTML шаблонов
 	function renderTpl(props) {
 		return function(tok, i) {
@@ -257,65 +489,7 @@ $(document).ready(function () {
 			return tpl.split(/\$\{(.+?)\}/g).map(renderTpl(item)).join('');
 		}));
 	}
-	(function ($) {
-		/**
-		 * Проверка объекта на пустоту
-		 * @param obj - Объект
-		 * @param key - Проверять ключи в объекте
-		 * @returns {boolean}
-		 */
-		$.fn.objIsEmpty = function (obj,key) {
-			if(key) {
-				for (let k in obj) {
-					if (obj.hasOwnProperty(k) && obj[k] !== "") {
-						return false;
-					}
-				}
-			}else{
-				for (let i in obj) {
-					if (obj.hasOwnProperty(i)) {
-						return false;
-					}
-				}
-			}
-			return true;
-		};
-		/**
-		 * Убирает повторяющиеся значения из массива
-		 * @param arr
-		 * @returns {Array}
-		 */
-		$.fn.arrayUnique = function(arr){
-			let uniHash={}, outArr=[], i=arr.length;
-			while(i--) uniHash[arr[i]]=i;
-			for(i in uniHash) outArr.push(i);
-			return outArr
-		};
-		/**
-		 * Проверка массива на одинаковые значения (возвращает массив дублей)
-		 * @param arr
-		 * @returns {Array}
-		 */
-		$.fn.duplicateValues = function(arr){
-			let arr_res = [];
-			arr.sort();
-			for (let i=1; i < arr.length; i++) {
-				if (arr[i] === arr[i-1]) {
-					let is_unique = true;
-					for (let k=0; k < arr_res.length; k++) {
-						if (arr_res[k] === arr[i]) {
-							is_unique = false;
-							break;
-						}
-					}
-					if (is_unique) {
-						arr_res.push(arr[i]);
-					}
-				}
-			}
-			return arr_res;
-		}
-	})(jQuery);
+
 
 	//загружаем контент во вкладки
 	$('li.swipe-tab a').on('show.bs.tab', function (e) {
@@ -404,11 +578,33 @@ $(document).ready(function () {
 	$(document).on('click','#get_sensors',function(e) {
 		e.preventDefault();
 		let _this = $(this);
-		//refluxTest
 		sendRequest("sensorsOutSet",{},"json",getSensors,_this,$("#error_sensors"));
 	});
+
+	$(document).on('change',"#sensors_settings select",function () {
+        let arrSortSensors = [];
+        let _this = $(this);
+        let _this_val = _this.val();
+        /*if(_this_val !== ""){
+        	$('#sensors_settings select option[value="'+_this_val+'"]').hide();
+		}else{*/
+			$.each($('#sensors_settings select'),function (i,e) {
+				if($(e).val() !== ""){
+                    arrSortSensors.push($(e).val());
+				}
+            });
+            $('#sensors_settings select option').show();
+            $.each(arrSortSensors,function (i,e) {
+                $.each($('#sensors_settings select'),function (j,s) {
+                    if ($(s).val() !== e) {
+                        $('option[value="' + e + '"]',$(s)).hide();
+                    }
+                });
+            });
+		//}
+    });
 	function getSensors(data) {
-		console.log(data);
+		//console.log(data);
 		let sensors = data;
 		for (let key in sensors) {
 			if(sensors.hasOwnProperty(key)) {
@@ -432,7 +628,7 @@ $(document).ready(function () {
 		e.preventDefault();
 		let _this = $(this);
 		let nameError = false;
-		let count = 1;
+        let arrSortSensors = [1,2,3,4,5,6,7,8];
 		let sensorsSend = {};
 		for (let key in sensorsJson) {
 			if(sensorsJson.hasOwnProperty(key)){
@@ -442,19 +638,38 @@ $(document).ready(function () {
 					nameError = true;
 				sensorsSend[key]["name"] = sensorsJson[key]["name"] = $("#sensor_name_"+key).val();
 				sensorsSend[key]["color"] = sensorsJson[key]["color"] = (val_color !== "FFFFFF" && val_color !== "") ? hex2dec(val_color) : 0;
-				sensorsSend[key]["number"] = sensorsJson[key]["number"] = ($("#sensor_number_"+key).val()<=0 ? count : $("#sensor_number_"+key).val());
+
+                if(key !== "p1") {
+                	let sort_number = Number($("#sensor_number_"+key).val());
+                    if(sort_number !== 0)
+                        $.fn.arrayUnset(arrSortSensors, sort_number);
+                    sensorsSend[key]["number"] = sensorsJson[key]["number"] = sort_number;
+         	   }
+
 			}
-			count++;
+		}
+        let count = 0;
+        //console.log(arrSortSensors);
+		if(arrSortSensors.length > 0){
+            for (let key in sensorsJson) {
+                if (sensorsJson.hasOwnProperty(key) /*&& key !== "p1"*/) {
+                    if(sensorsSend[key]["number"] === 0){
+                        sensorsSend[key]["number"] = sensorsJson[key]["number"] = arrSortSensors[count];
+                        count++;
+                    }
+                }
+            }
 		}
 		if(nameError) {
 			$.fn.openModal('', '<p class="text-center text-danger"><strong>Заполните названия подключенных датчиков</strong></p>', "modal-sm", true, false);
 		}else {
+            //console.log(sensorsJson);
 			sendRequest("sensorsInSet", sensorsSend, "json", setSensors, _this, $("#error_sensors"));
 		}
 	});
 	function setSensors(data) {
 		//console.log(data);
-		//console.log(sensorsJson);
+        sendRequest("sensorsOutSet",{},"json",getSensors,$('#get_sensors'),$("#error_sensors"));
 		$.fn.openModal('', '<p class="text-center text-success"><strong>Тестовое сообщение, УРА!</strong></p>', "modal-sm", true, false);
 		localStorage.setObj('sensors', sensorsJson);
 	}
@@ -671,7 +886,7 @@ $(document).ready(function () {
 					tpl_delta_result = '<span id="reflux_delta_result_'+sensor_key+'"></span> <span class="hidden">&#176С</span>'
 				}
 				if (e["cutoff"]) {
-					tpl_delta = returnTplHtml([{id:"reflux_cutoff_"+sensor_key, value: e["allertValue"], min: '0', max: '105', step: '1'}], deltaTempl);
+					tpl_delta = returnTplHtml([{id:"reflux_cutoff_"+sensor_key, value: e["allertValue"], min: '0', max: '105', step: '0.5'}], deltaTempl);
 					tpl_delta_result = '<span id="reflux_cutoff_result_'+sensor_key+'"></span> <span class="hidden">&#176С</span>'
 				}
 				if(sensor_key !== "p1") {
