@@ -976,7 +976,7 @@ $(function() {
 		};
 		let flag_send = false;
 		let power_set = $("#power_set");
-		refluxSendData["process"]["allow"] = (refluxProcess["start"] ? 1 : 0);
+		refluxSendData["process"]["allow"] = (refluxProcess["start"] ? 2 : 0);
 		if(refluxProcess["power"] !== power_set.val())
 			flag_send = true;
 		refluxSendData["power"] = refluxProcess["power"] = power_set.val();
