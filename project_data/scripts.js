@@ -347,7 +347,7 @@ $(function() {
                 time = time / 2;
                 count_interval = 0;
             }
-            console.log(count_interval,time);
+            //console.log(count_interval,time);
             let $input = _this.parent().find('input');
             let step = Number($input.attr("step"));
             let min = Number($input.attr("min"));
@@ -471,7 +471,7 @@ $(function() {
         }
         let count = Number($input.val()) + step;
         count = count > max ? max : count;
-        console.log(count,step,fixed);
+        //console.log(count,step,fixed);
         count = count.toFixed(fixed);
 		$input.val(count);
             //$input.change();
@@ -575,6 +575,204 @@ $(function() {
 //////////////////////////////////////////////////////////////////////////
 	//Определение датчиков
 	var sensorsJson = {};
+	var globalSensorsJson = {};
+	var sensorsIntervalId = 0;
+	//Глобальный объект dtoReceiver служит для опроса МК.
+	var dtoReceiver = {
+		dtos: [],                               // Контейнер состояний в ОЗУ
+		frequencyRecordingToLocalStorage: 5,    // Частота архивации (Через сколько опросов осуществляется запись в localStorage)
+		reqestDelayDefalt: 1000,
+
+		dtoGet: function (json) {
+			const self = dtoReceiver;  // Для доступа к this в jquery
+			let requestCounter = 0;    // Счётчик запросов, служит для записи в localStorage каждые frequencyRecordingToLocalStorage раз
+
+			self.dtoCurrent = json;
+			self.dtoCurrent.dateTime = (new Date()).getTime();  // Пользуемся временем клиента, для несчастных без доступа к NTP
+
+			// Считывание предыдущих сохранённых значений
+			this.dtos = localStorage.getObj('dtos');
+
+			// Проверка на существование сохранённых значений
+			if (this.dtos == null) {
+				this.dtos = [];
+			}
+
+			self.dtos.push(self.dtoCurrent);
+
+			// Запись в хранилище
+			if ((requestCounter++ % self.frequencyRecordingToLocalStorage) === 0) {
+				localStorage.setObj('dtos', self.dtos);
+			}
+
+			// Вызов события что данные получены
+			$(document).trigger('newDTOreceived', [self.dtoCurrent]);
+		},
+
+		// Очистка LocalStorage
+		clearDeviceConditions: function() {
+			this.dtos = [];
+			localStorage.removeItem('dtos');
+		},
+		// Запуск опроса ESP
+		start: function (dtoJson) {
+			//let dtoJson = {};
+			//dtoJson["heaterPower"] = globalSensorsJson["power"];
+			//dtoJson["temperatures"] = globalSensorsJson["sensors"];
+			console.log(dtoJson);
+			this.dtoGet(dtoJson);
+		}
+	};
+
+	Highcharts.setOptions({
+		global: {
+			useUTC: false
+		}
+	});
+
+	var plot;
+	//TODO сделать передачу в «getPlot» ID контейнера, для вывода графиков в требуемом процессе, и скорее всего еще сами датчики (для каждого процесса разные) или он сам подтянет нужные?
+	$(document).one("newDTOreceived", function (e) {
+		console.log(e);
+		plot = getPlot();
+	});
+
+	$('#plotClear').click(function() {
+		dtoReceiver.clearDeviceConditions();
+		plot.series.forEach(function (s) { s.setData([]) });
+
+		plot.redraw();
+	});
+
+	/*$("#reqestDelay").val(window.dtoReceiver.reqestDelayDefalt / 1000);
+	$('#changeSpeed').click(function () {
+
+		let reqestDelay = $("#reqestDelay").val();
+
+		if (reqestDelay>=1) {
+			window.dtoReceiver.changeSpeed($("#reqestDelay").val() * 1000);
+		} else {
+			$("#reqestDelay").val(window.dtoReceiver.reqestDelayDefalt / 1000);
+			alert('Минимальный интервал 1 сек');
+		}
+	});*/
+
+	function getPlot() {
+		console.log("Запуск графиков!");
+
+		let plotNew = Highcharts.stockChart('viewPort', {
+			chart: {
+
+			},
+			xAxis: {
+				type: 'datetime'
+			},
+			yAxis: [{ // Primary yAxis
+				labels: {
+					format: '{value}°C',
+					style: {
+						color: 'black'
+					}
+				},
+				title: {
+					text: 'Температура(°C)',
+					style: {
+						color: 'black'
+					}
+				}
+
+			}, { // Secondary yAxis
+				gridLineWidth: 0,
+				title: {
+					text: 'Мощность',
+					style: {
+						color: 'black'
+					}
+				},
+				labels: {
+					format: '{value} %',
+					style: {
+						color: 'black'
+					},
+					align: 'left',
+					x: 10,
+				},
+				max: 100,
+				opposite: false
+			}
+			],
+
+			series: [
+				{
+					name: "Мощность", yAxis: 1, type: "area", step: 'left', fillOpacity: 0.05, color: "#f00000", lineWidth: 0, showInLegend: true,
+					data: dtoReceiver.dtos.map(function (dc) { return [dc.dateTime, dc.heaterPower] })
+				}
+			],
+			rangeSelector: {
+				buttons: [{
+					count: 1,
+					type: 'minute',
+					text: '1M'
+				}, {
+					count: 5,
+					type: 'minute',
+					text: '5M'
+				}, {
+					type: 'all',
+					text: 'All'
+				}],
+				inputEnabled: false,
+				selected: 2
+			},
+			/*plotOptions: {
+				line: {
+					dataLabels: {
+						enabled: true
+					},
+					enableMouseTracking: false
+				}
+			},*/
+			title: {
+				text: 'Данные температур'
+			},
+			legend: {
+				enabled: true
+			},
+			exporting: {
+				enabled: true
+			},
+		});
+
+		dtoReceiver.dtos[0].temperatures.forEach(function(t, i) {
+			//console.log(t, i);
+			if( t["key"] !== "p1") {
+				plotNew.addSeries({
+					name: t["name"],
+					color: "#"+dec2hex(t["color"]),
+					data: dtoReceiver.dtos.map(function (dc) {
+						//console.log(dc.temperatures[i]["value"]);
+						return [dc.dateTime, dc.temperatures[i]["value"]]
+					})
+				});
+			}
+		});
+
+
+		$(document).on("newDTOreceived", function (e, dto) {
+
+			plot.series[0].addPoint([dto.dateTime, dto.heaterPower], false);
+
+			dto.temperatures.forEach(function(t,i) {
+				//console.log(t,i);
+				if( t["key"] !== "p1")
+					plotNew.series[i + 1].addPoint([dto.dateTime, dto.temperatures[i]["value"]], false);
+			});
+			plotNew.redraw();
+		});
+
+		return plotNew;
+	}
+
 	$(document).on('click','#get_sensors',function(e) {
 		e.preventDefault();
 		let _this = $(this);
@@ -613,6 +811,8 @@ $(function() {
 					$("#sensor_name_" + key).val(sensors[key]["name"]);
 					$("#sensor_color_" + key).val(jscolor).next("button").css("background-color", "#" + jscolor);
 					$("#sensor_val_" + key).text(sensors[key]["value"]).parent().find(".hidden").removeClass("hidden").addClass("show");
+					$("#svg_sensor_" + key).html(sensors[key]["value"]+'&#176С');
+					$("#svg_sensor_color_" + key).css('fill',jscolor);
 				} else {
 					if (!$.fn.objIsEmpty(sensors[key]["name"], false))
 						$("#sensor_name_" + key).val("");
@@ -689,7 +889,7 @@ $(function() {
 		'<td></td>' +
 		'</tr>';
 	const deltaTempl =
-		'<div class="input-group number-group">' +
+		'<div class="input-group input-group-sm number-group">' +
 		'<span class="input-group-btn minus">' +
 		'<button type="button" class="btn btn-danger btn-number noSwipe" data-type="minus" data-field="count">' +
 		'<span class="glyphicon glyphicon-minus"></span>' +
@@ -823,7 +1023,7 @@ $(function() {
 								let color = (val_color !== "FFFFFF" && val_color !== "") ? hex2dec(val_color) : 0;
 								let delta = $("#delta_" + key).prop("checked");
 								let cutoff = $("#cutoff_" + key).prop("checked");
-								return {"key": key, "name": name, "delta": delta, "cutoff": cutoff, "color": color, "allertValue":0};
+								return {"key": key, "name": name, "delta": delta, "cutoff": cutoff, "color": color, "allertValue":0, "value":0};
 							}
 						});
 						//refluxProcess["sensors"] = reflux_sensors;
@@ -912,6 +1112,7 @@ $(function() {
 		$("#power_set").val(refluxProcess["power"]);
 		if(refluxProcess["start"] === true) {
 			getReflux();
+			//dtoReceiver.start();
 			//refluxStartProcess ()
 			$('#reflux_start').prop("disabled",true);
 		}else{
@@ -931,6 +1132,7 @@ $(function() {
 		//localStorage.setObj('reflux',refluxProcess);
 		setReflux();
 		setTimeout(getReflux, 1000);
+		//dtoReceiver.start();
 	});
 	$(document).on('click','#reflux_stop',function() {
 		let _this = $(this);
@@ -945,6 +1147,7 @@ $(function() {
 		//localStorage.setObj('reflux',refluxProcess);
 		//getReflux();
 		setReflux();
+		//dtoReceiver.stop();
 	});
 	/*function refluxStartProcess () {
 
@@ -1007,7 +1210,40 @@ $(function() {
 	}
 	function getReflux() {
 		setReflux();
-		$.ajax({
+		if(!$.fn.objIsEmpty(globalSensorsJson,false)) {
+			let dtoJson = {};
+			dtoJson["heaterPower"] = globalSensorsJson["power"];
+			dtoJson["temperatures"] = {};
+			$.each(globalSensorsJson["sensors"], function (i, e) {
+				let sensor_key = Object.keys(e).shift();
+				$.each(refluxProcess["sensors"], function (j, q) {
+					//console.log(j, q);
+					if(q["key"] === sensor_key){
+						q["value"] = globalSensorsJson["sensors"][i][sensor_key]["value"];
+					}
+				});
+				//if(refluxProcess["sensors"].hasOwnProperty(i) )
+					//console.log(refluxProcess["sensors"][i]);
+					//console.log(i,e,sensor_key);
+					//refluxProcess["sensors"][i][sensor_key]["value"] = globalSensorsJson["sensors"][i][sensor_key]["value"];
+				$("#reflux_" + sensor_key).text(globalSensorsJson["sensors"][i][sensor_key]["value"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
+				let allertValue = globalSensorsJson["sensors"][i][sensor_key]["allertValue"];
+				allertValue = allertValue > 0 ? allertValue.toFixed(2) : "";
+				if (allertValue > 0) {
+					$("#reflux_delta_result_" + sensor_key).text(allertValue).parent().find(".hidden").removeClass("hidden").addClass("show");
+					$("#reflux_cutoff_result_" + sensor_key).text(allertValue).parent().find(".hidden").removeClass("hidden").addClass("show");
+				}
+				if (sensor_key === "p1")
+					$("#reflux_pressure").text(globalSensorsJson["sensors"][i]["p1"]["value"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
+			});
+			dtoJson["temperatures"] = refluxProcess["sensors"];
+			dtoReceiver.start(dtoJson);
+		}
+		//console.log(globalSensorsJson);
+		//console.log(refluxProcess);
+		if(refluxProcess["start"] === true)
+			setTimeout(getReflux,2000);
+		/*$.ajax({
 			url: 'refluxModeSensorsOut',//'refluxModeSensorsIn',//'reflux.json',//refluxModeSensorsOut
 			data: {},
 			type: 'GET',
@@ -1032,20 +1268,55 @@ $(function() {
 				$("#reflux_alco_boil").text(msg["temperatureAlcoholBoil"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 				$("#power_value").text(msg["power"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 				//$("#power_cutoff_result").text(msg["power"].toFixed(2));
-				/*
-				if(msg["settingAlarm"] === false){
-					$("#reflux_status").removeClass("success").addClass("danger");
-				}else{
-					$("#reflux_status").removeClass("danger").addClass("success");
-				}*/
+
+				// if(msg["settingAlarm"] === false){
+				// 	$("#reflux_status").removeClass("success").addClass("danger");
+				// }else{
+				// 	$("#reflux_status").removeClass("danger").addClass("success");
+				// }
 				if(refluxProcess["start"] === true)
 					setTimeout(getReflux,2000);
 			}
-		});
+		});*/
 
 	}
 
+	function getIntervalSensors() {
+		$.ajax({
+			url: 'refluxModeSensorsOut',//'refluxModeSensorsIn',//'reflux.json',//refluxModeSensorsOut
+			data: {},
+			type: 'GET',
+			dataType: 'json',
+			success: function (msg) {
+				//console.log('Sensors',msg);
+				globalSensorsJson = msg;
+				/*$.each(msg["sensors"],function (i,e) {
+					let sensor_key = Object.keys(e).shift();
+					$("#reflux_"+sensor_key).text(msg["sensors"][i][sensor_key]["value"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
+					let allertValue = msg["sensors"][i][sensor_key]["allertValue"];
+					allertValue = allertValue > 0 ? allertValue.toFixed(2) : "";
+					if(allertValue > 0) {
+						$("#reflux_delta_result_" + sensor_key).text(allertValue).parent().find(".hidden").removeClass("hidden").addClass("show");
+						$("#reflux_cutoff_result_" + sensor_key).text(allertValue).parent().find(".hidden").removeClass("hidden").addClass("show");
+					}
+					if(sensor_key === "p1")
+						$("#reflux_pressure").text(msg["sensors"][i]["p1"]["value"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
+				});
+				//$("#reflux_delta").val(msg["delta"].toFixed(2));
+				//$("#reflux_delta_result").text(msg["delta_result"].toFixed(2));
 
+				$("#reflux_alco_boil").text(msg["temperatureAlcoholBoil"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
+				$("#power_value").text(msg["power"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
+				*/
+				//if(refluxProcess["start"] === true)
+					//setTimeout(getIntervalSensors,2000);
+			}
+		});
+	}
+	//clearInterval(sensorsIntervalId);
+	sensorsIntervalId = setInterval(getIntervalSensors,1000);
+
+////////////////////////////////////////////////////////////////
 
 
 

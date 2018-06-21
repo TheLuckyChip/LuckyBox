@@ -19,7 +19,7 @@
         plot.redraw();
     });
 
-    $("#reqestDelay").val(window.dtoReceiver.reqestDelayDefalt / 1000);
+    /*$("#reqestDelay").val(window.dtoReceiver.reqestDelayDefalt / 1000);
     $('#changeSpeed').click(function () {
 
         let reqestDelay = $("#reqestDelay").val();
@@ -30,10 +30,10 @@
             $("#reqestDelay").val(window.dtoReceiver.reqestDelayDefalt / 1000);
             alert('Минимальный интервал 1 сек');
         }
-    });
+    });*/
 
     function getPlot() {
-		//console.log("Запуск графиков!");
+		console.log("Запуск графиков!");
 
        var plotNew = Highcharts.stockChart('viewPort', {
             chart: {

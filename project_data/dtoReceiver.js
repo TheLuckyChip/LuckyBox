@@ -1,7 +1,7 @@
 ﻿/**
  * Глобальный объект dtoReceiver служит для опроса МК.
  */
-var dtoReceiver = {
+var dtoReceiver_ = {
     
     dtos: [],                               // Контейнер состояний в ОЗУ
     frequencyRecordingToLocalStorage: 5,    // Частота архивации (Через сколько опросов осуществляется запись в localStorage)
@@ -58,6 +58,13 @@ var dtoReceiver = {
 		this.start()
          //this.intervalId = setInterval(this.dtoGet, intervar);
     },
+
+	stop: function() {
+		clearInterval(this.intervalId);
+		//this.reqestDelayDefalt = intervar;
+		//this.start()
+		//this.intervalId = setInterval(this.dtoGet, intervar);
+	},
 
     // Запуск опроса ESP
     start: function () {
