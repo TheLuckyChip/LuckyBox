@@ -16,6 +16,9 @@ body {
 .input-number:focus{
 	-moz-appearance: textfield;
 }
+.input-sm{
+	padding: 5px 5px;
+}
 span.show {
 	display: inline-block !important;
 }
