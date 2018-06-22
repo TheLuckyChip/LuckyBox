@@ -627,6 +627,22 @@ $(function() {
 	Highcharts.setOptions({
 		global: {
 			useUTC: false
+		},
+		lang: {
+			loading: 'Загрузка...',
+			months: ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'],
+			weekdays: ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'],
+			shortMonths: ['Янв', 'Фев', 'Март', 'Апр', 'Май', 'Июнь', 'Июль', 'Авг', 'Сент', 'Окт', 'Нояб', 'Дек'],
+			exportButtonTitle: "Экспорт",
+			printButtonTitle: "Печать",
+			rangeSelectorFrom: "С",
+			rangeSelectorTo: "По",
+			rangeSelectorZoom: "Период",
+			downloadPNG: 'Скачать PNG',
+			downloadJPEG: 'Скачать JPEG',
+			downloadPDF: 'Скачать PDF',
+			downloadSVG: 'Скачать SVG',
+			printChart: 'Напечатать график'
 		}
 	});
 
@@ -661,11 +677,17 @@ $(function() {
 		console.log("Запуск графиков!");
 
 		let plotNew = Highcharts.stockChart('viewPort', {
+
 			chart: {
 
 			},
 			xAxis: {
-				type: 'datetime'
+				type: 'datetime',
+				dateTimeLabelFormats: {
+					day: "%e. %b",
+					month: "%b '%y",
+					year: "%Y"
+				}
 			},
 			yAxis: [{ // Primary yAxis
 				labels: {
@@ -675,7 +697,7 @@ $(function() {
 					}
 				},
 				title: {
-					text: 'Температура(°C)',
+					text: 'Температура',
 					style: {
 						color: 'black'
 					}
@@ -700,12 +722,62 @@ $(function() {
 				max: 100,
 				opposite: false
 			}
+				, { // Secondary yAxis
+					gridLineWidth: 0,
+					title: {
+						text: 'Атмосферное давление',
+						style: {
+							color: 'black'
+						}
+					},
+					labels:false,
+					/*labels: {
+						format: '{value} мм рт.ст.',
+						style: {
+							color: 'black'
+						},
+						align: 'left',
+						x: 10,
+					},*/
+					max: 800,
+					opposite: false
+				}
 			],
 
 			series: [
 				{
 					name: "Мощность", yAxis: 1, type: "area", step: 'left', fillOpacity: 0.05, color: "#f00000", lineWidth: 0, showInLegend: true,
 					data: dtoReceiver.dtos.map(function (dc) { return [dc.dateTime, dc.heaterPower] })
+				},
+				{
+					name: "Атмосферное давление", yAxis: 2, type: "area", step: 'left', fillOpacity: 0.05, color: "#00e4f0", lineWidth: 1, showInLegend: true,
+					data: dtoReceiver.dtos.map(function (dc) {
+						return [dc.dateTime, dc.pressure]
+					})
+					/*,
+					fillColor: {
+						linearGradient: {
+							x1: 0,
+							y1: 0,
+							x2: 0,
+							y2: 1
+						},
+						stops: [
+							[0, Highcharts.getOptions().colors[0]],
+							[1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
+						]
+					},
+					marker: {
+						radius: 2
+					}*/
+					//,
+					//lineWidth: 1,
+					// states: {
+					// 	hover: {
+					// 		lineWidth: 1
+					// 	}
+					// },
+					// threshold: null
 				}
 			],
 			rangeSelector: {
@@ -732,8 +804,34 @@ $(function() {
 					enableMouseTracking: false
 				}
 			},*/
+			/*plotOptions: {
+				area: {
+					fillColor: {
+						linearGradient: {
+							x1: 0,
+							y1: 0,
+							x2: 0,
+							y2: 1
+						},
+						stops: [
+							[0, Highcharts.getOptions().colors[0]],
+							[1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
+						]
+					},
+					marker: {
+						radius: 2
+					},
+					lineWidth: 1,
+					states: {
+						hover: {
+							lineWidth: 1
+						}
+					},
+					threshold: null
+				}
+			},*/
 			title: {
-				text: 'Данные температур'
+				text: 'Данные датчиков'
 			},
 			legend: {
 				enabled: true
@@ -754,6 +852,8 @@ $(function() {
 						return [dc.dateTime, dc.temperatures[i]["value"]]
 					})
 				});
+			//}else{
+
 			}
 		});
 
@@ -761,11 +861,17 @@ $(function() {
 		$(document).on("newDTOreceived", function (e, dto) {
 
 			plot.series[0].addPoint([dto.dateTime, dto.heaterPower], false);
-
+			plot.series[1].addPoint([dto.dateTime, dto.pressure], false);
+			let count = 1;
 			dto.temperatures.forEach(function(t,i) {
 				//console.log(t,i);
-				if( t["key"] !== "p1")
-					plotNew.series[i + 1].addPoint([dto.dateTime, dto.temperatures[i]["value"]], false);
+				if( t["key"] !== "p1"){
+					//plot.series[1].addPoint([dto.dateTime, dto.temperatures[i]["value"]], false);
+					//console.log(t,i);
+				//}else {
+					plotNew.series[count + 1].addPoint([dto.dateTime, dto.temperatures[i]["value"]], false);
+				}
+				count++;
 			});
 			plotNew.redraw();
 		});
@@ -1233,9 +1339,13 @@ $(function() {
 					$("#reflux_delta_result_" + sensor_key).text(allertValue).parent().find(".hidden").removeClass("hidden").addClass("show");
 					$("#reflux_cutoff_result_" + sensor_key).text(allertValue).parent().find(".hidden").removeClass("hidden").addClass("show");
 				}
-				if (sensor_key === "p1")
+				if (sensor_key === "p1") {
 					$("#reflux_pressure").text(globalSensorsJson["sensors"][i]["p1"]["value"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
+					dtoJson["pressure"] = globalSensorsJson["sensors"][i]["p1"]["value"];
+				}
 			});
+			$("#reflux_alco_boil").text(globalSensorsJson["temperatureAlcoholBoil"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
+			$("#power_value").text(globalSensorsJson["power"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 			dtoJson["temperatures"] = refluxProcess["sensors"];
 			dtoReceiver.start(dtoJson);
 		}
@@ -1280,7 +1390,31 @@ $(function() {
 		});*/
 
 	}
+	//заполнение разных полей данными датчиков
+	function fillSensorsData() {
+		if(!$.fn.objIsEmpty(globalSensorsJson,false)) {
+			$.each(globalSensorsJson["sensors"], function (i, e) {
+				let sensor_key = Object.keys(e).shift();
+				//заполнение вкладки датчики
+				if($("#sensor_val_" + sensor_key).length) {
+					$("#sensor_val_" + sensor_key).text(globalSensorsJson["sensors"][i][sensor_key]["value"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
+					$("#svg_sensor_" + sensor_key).html(globalSensorsJson["sensors"][i][sensor_key]["value"] + '&#176С');
+				}
+				//заполнение процесса ректификации
+				if(refluxProcess["start"] !== true && $("#reflux_pressure").length){
+					$("#reflux_" + sensor_key).text(globalSensorsJson["sensors"][i][sensor_key]["value"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
+					if (sensor_key === "p1") {
+						$("#reflux_pressure").text(globalSensorsJson["sensors"][i]["p1"]["value"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 
+						$("#reflux_alco_boil").text(globalSensorsJson["temperatureAlcoholBoil"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
+						$("#power_value").text(globalSensorsJson["power"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
+					}
+				}
+			});
+		}
+	}
+
+	//запрос постоянно всех датчиков
 	function getIntervalSensors() {
 		$.ajax({
 			url: 'refluxModeSensorsOut',//'refluxModeSensorsIn',//'reflux.json',//refluxModeSensorsOut
@@ -1290,6 +1424,7 @@ $(function() {
 			success: function (msg) {
 				//console.log('Sensors',msg);
 				globalSensorsJson = msg;
+				fillSensorsData();
 				/*$.each(msg["sensors"],function (i,e) {
 					let sensor_key = Object.keys(e).shift();
 					$("#reflux_"+sensor_key).text(msg["sensors"][i][sensor_key]["value"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
