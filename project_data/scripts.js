@@ -963,7 +963,7 @@ $(function() {
 		'</button>' +
 		'</span>' +
 		'</div>';
-	const powerTempl =
+	/*const powerTempl =
 		'<tr>' +
 		'<td>Мощность тена</td>' +
 		'<td><span id="power_value"></span> <span class="hidden">%</span></td>' +
@@ -971,7 +971,17 @@ $(function() {
 		returnTplHtml([{id:"power_set", value: '0', min: '0', max: '100', step: '1'}], deltaTempl) +
 		'</td>' +
 		'<td></td>' +
-		'</tr>';
+		'</tr>';*/
+	const powerTempl =
+		'<div class="row row-striped">' +
+		'<div class="pt-10 pb-10 clearfix">' +
+		'<div class="col-xs-12 col-sm-4 text-center-xs text-middle"><strong>Мощность тена</strong></div>' +
+		'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="power_value"></span><span class="hidden">%</span></strong></div>' +
+		'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 col-centered">' +
+		returnTplHtml([{id:"power_set", value: '0', min: '0', max: '100', step: '1'}], deltaTempl) +
+		'</div>' +
+		'</div>' +
+		'</div>';
 
 	$(document).on('click','#reflux_add_sensor',function(e) {
 		e.preventDefault();
@@ -1114,7 +1124,7 @@ $(function() {
 			radio_cutoff.prop("checked",false);
 		}
 	});
-	pasteRefluxSensors = function(sensors_select){
+	pasteRefluxSensorsOLD = function(sensors_select){
 		//let sensors = localStorage.getObj('sensors');//sensorsJson
 		let sensorsRefluxSend = {
 			"t1":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
@@ -1193,11 +1203,137 @@ $(function() {
 			refluxTemplate = powerTempl + refluxTemplate + pressureTemplate;
 			//refluxTemplate += pressureTemplate + powerTempl;
 			$("#reflux_start_group_button").removeClass("hidden");
+			$("#svg_reflux").show();
 		}else{
 			$("#reflux_start_group_button").addClass("hidden");
 		}
 		$("#reflux_process tbody").html(refluxTemplate);
 		$("#power_set").val(refluxProcess["power"]);
+		if(refluxProcess["start"] === true) {
+			getReflux();
+			//dtoReceiver.start();
+			//refluxStartProcess ()
+			$('#reflux_start').prop("disabled",true);
+		}else{
+			$('#reflux_stop').prop("disabled",true);
+		}
+	};
+
+	pasteRefluxSensors = function(sensors_select){
+		//let sensors = localStorage.getObj('sensors');//sensorsJson
+		let sensorsRefluxSend = {
+			"t1":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
+			"t2":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
+			"t3":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
+			"t4":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
+			"t5":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
+			"t6":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
+			"t7":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
+			"t8":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
+			"p1":{"value":760.00,"color":0,"member":0}
+		};
+		let refluxTemplate = '';
+		let localReflux = localStorage.getObj('reflux');
+		if(localReflux !== null)
+			refluxProcess = localReflux;
+		if(refluxProcess["sensors"].length > 0) {
+			let tpl_delta_thead = '<div class="col-xs-hidden col-sm-4"></div>' +
+				'<div class="col-xs-4 col-sm-3 text-center text-middle text-primary">Значение</div>' +
+				'<div class="col-xs-4 col-sm-3 text-center text-middle text-primary">Дельта</div>' +
+				'<div class="col-xs-4 col-sm-2 text-center text-middle text-primary">Уставка</div>';
+			let tpl_delta_body = '';
+			let tpl_cutoff_thead = //'<tr><th></th><th>Значение</th><th></th><th>Отсечка</th></tr>';
+				'<div class="col-xs-hidden col-sm-4"></div>' +
+				'<div class="col-xs-4 col-sm-3 text-center text-middle text-primary">Значение</div>' +
+				'<div class="col-xs-4 col-sm-3 text-center text-middle text-primary"></div>' +
+				'<div class="col-xs-4 col-sm-2 text-center text-middle text-primary">Отсечка</div>';
+			let tpl_cutoff_body = '';
+			let tpl_all_body = '';
+			$.each(refluxProcess["sensors"], function (i, e) {
+				//console.log(i,e);
+				let sensor_key = e["key"];
+				let name_sensor = e["name"];
+				if(sensorsRefluxSend[sensor_key].hasOwnProperty("name"))
+					sensorsRefluxSend[sensor_key]["name"] = name_sensor;
+				sensorsRefluxSend[sensor_key]["color"] = e["color"];
+				sensorsRefluxSend[sensor_key]["member"] = 1;
+				let tpl_delta = '';
+				let tpl_delta_result = '';
+				if (e["delta"]) {
+					tpl_delta = returnTplHtml([{id:"reflux_delta_"+sensor_key, value: e["allertValue"], min: '0', max: '1', step: '0.05'}], deltaTempl);
+					tpl_delta_result = '<span id="reflux_delta_result_'+sensor_key+'"></span>80<span class="hidden_">&#176С</span>';
+					tpl_delta_body +=
+					'<div class="row row-striped">' +
+					'<div class="pt-10 pb-10 clearfix">' +
+					//'<div class="col-xs-hidden"><em>' + tpl_delta_thead + '</em></div>' +
+					'<div class="col-xs-12 col-sm-4 text-center-xs"><strong>t&#176' + name_sensor + '</strong></div>' +
+					'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="reflux_' + sensor_key + '"></span><span class="hidden">&#176С</span></strong></div>' +
+					'<div class="col-xs-3 col-xs-offset-0 col-sm-3 col-sm-offset-0">' + tpl_delta + '</div>' +
+					'<div class="col-xs-4 col-xs-offset-1 col-sm-2 col-sm-offset-0 text-center text-middle"><strong>' + tpl_delta_result +
+					'</strong></div>' +
+					'</div>' +
+					'</div>';
+					/*tpl_delta_body += '<tr><td>t&#176' + name_sensor + '</td>' +
+						'<td><span id="reflux_' + sensor_key + '"></span> <span class="hidden">&#176С</span></td>' +
+						'<td>' + tpl_delta + '</td>' +
+						'<td>' + tpl_delta_result + '</td>' +
+						'</tr>'*/
+				}
+				let tpl_cutoff = '';
+				//let tpl_cutoff_result = '';
+				if (e["cutoff"]) {
+					tpl_cutoff = returnTplHtml([{id:"reflux_cutoff_"+sensor_key, value: e["allertValue"], min: '0', max: '105', step: '0.5'}], deltaTempl);
+					//tpl_cutoff_result = '<span id="reflux_cutoff_result_'+sensor_key+'"></span> <span class="hidden">&#176С</span>';
+					tpl_cutoff_body +=
+					'<div class="row row-striped">' +
+					'<div class="pt-10 pb-10 clearfix">' +
+					//'<div class="col-xs-hidden"><em>' + tpl_delta_thead + '</em></div>' +
+					'<div class="col-xs-12 col-sm-4 text-center-xs"><strong>t&#176' + name_sensor + '</strong></div>' +
+					'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="reflux_' + sensor_key + '"></span><span class="hidden">&#176С</span></strong></div>' +
+					'<div class="col-xs-3 col-sm-3"></div>' +
+					'<div class="col-xs-4 col-xs-offset-0 col-sm-3 col-sm-offset-0 text-center text-middle">' + tpl_cutoff +
+					'</div>' +
+					'</div>' +
+					'</div>';
+					/*tpl_cutoff_body += '<tr><td>t&#176' + name_sensor + '</td>' +
+						'<td><span id="reflux_' + sensor_key + '"></span> <span class="hidden">&#176С</span></td>' +
+						'<td></td>' +
+						'<td>' + tpl_cutoff + '</td>' +
+						'</tr>'*/
+				}
+				if(sensor_key !== "p1" && !e["delta"] && !e["cutoff"]) {
+					tpl_all_body += '<tr><td>t&#176' + name_sensor + '</td>' +
+						'<td><span id="reflux_' + sensor_key + '"></span> <span class="hidden">&#176С</span></td>' +
+						'<td></td>' +
+						'<td></td>' +
+						'</tr>'
+				}
+			});
+			//sensors["process"]["allow"] = 2;
+			if(tpl_delta_body !== '') {
+				refluxTemplate += tpl_delta_thead + tpl_delta_body;
+			}
+			if(tpl_cutoff_body !== '') {
+				refluxTemplate += tpl_cutoff_thead + tpl_cutoff_body;
+			}
+			if(tpl_all_body !== '') {
+				refluxTemplate += tpl_all_body;
+			}
+		}
+		if(refluxTemplate !== '') {
+			if(sensors_select)
+				sendRequest("refluxSensorsSetSave", sensorsRefluxSend, "json", false, false, $("#error_reflux"));
+			//localStorage.setObj('sensors', sensors);
+			refluxTemplate = powerTempl + refluxTemplate;// + pressureTemplate;
+			//refluxTemplate += pressureTemplate + powerTempl;
+			$("#reflux_start_group_button").removeClass("hidden");
+			$("#svg_reflux").show();
+		}else{
+			$("#reflux_start_group_button").addClass("hidden");
+		}
+		$("#reflux_process").html(refluxTemplate);
+		$("#power_set").val(refluxProcess["power"]);
+		//console.log(refluxProcess);
 		if(refluxProcess["start"] === true) {
 			getReflux();
 			//dtoReceiver.start();
@@ -1223,7 +1359,7 @@ $(function() {
 			});
 			plot.redraw();
 		}
-		//sendRequest("refluxModeSensorsIn", sendRefluxProcess, "json", refluxStartProcess, _this, $("#error_reflux"));
+		//sendRequest("SensorsIn", sendRefluxProcess, "json", refluxStartProcess, _this, $("#error_reflux"));
 		//refluxStartProcess ();
 		//localStorage.setObj('reflux',refluxProcess);
 		setReflux();
@@ -1234,6 +1370,7 @@ $(function() {
 		let _this = $(this);
 		_this.prop("disabled",true);
 		$('#reflux_start').prop("disabled",false);
+		$("#svg_reflux_start").css('stroke',"#000000");
 		//let sendRefluxProcess = refluxProcess;
 		//sendRefluxProcess["start"] = false;
 		//sendRequest("SetTempTest", sendRefluxProcess, "json", refluxStopProcess, _this, $("#error_reflux"));
@@ -1301,7 +1438,7 @@ $(function() {
 		if(flag_send) {
 			tmpRefluxFlag = false;
 			localStorage.setObj('reflux', refluxProcess);
-			sendRequest("refluxModeSensorsIn", refluxSendData, "json", false, false, $("#error_reflux"));
+			sendRequest("SensorsIn", refluxSendData, "json", false, false, $("#error_reflux"));
 		}
 	}
 	function getReflux() {
@@ -1350,7 +1487,7 @@ $(function() {
 		if(refluxProcess["start"] === true)
 			setTimeout(getReflux,2000);
 		/*$.ajax({
-			url: 'refluxModeSensorsOut',//'refluxModeSensorsIn',//'reflux.json',//refluxModeSensorsOut
+			url: 'SensorsOut',//'SensorsIn',//'reflux.json'
 			data: {},
 			type: 'GET',
 			dataType: 'json',
@@ -1388,6 +1525,7 @@ $(function() {
 	}
 	//заполнение разных полей данными датчиков
 	function fillSensorsData() {
+		//$("#width_page").css({"border-bottom":"solid 1px red","text-align":"center","color":"red"}).text("thisWidth: "+$("#width_page").outerWidth()+", documentWidth: "+$(document).width());
 		if(!$.fn.objIsEmpty(globalSensorsJson,false)) {
 			$.each(globalSensorsJson["sensors"], function (i, e) {
 				let sensor_key = Object.keys(e).shift();
@@ -1397,7 +1535,7 @@ $(function() {
 					$("#svg_sensor_" + sensor_key).html(globalSensorsJson["sensors"][i][sensor_key]["value"] + '&#176С');
 				}
 				//заполнение процесса ректификации
-				if(refluxProcess["start"] !== true && $("#reflux_pressure").length){
+				if(refluxProcess["start"] !== true /*&& $("#reflux_pressure").length*/){
 					$("#reflux_" + sensor_key).text(globalSensorsJson["sensors"][i][sensor_key]["value"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 					if (sensor_key === "p1") {
 						$("#reflux_pressure").text(globalSensorsJson["sensors"][i]["p1"]["value"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
@@ -1416,7 +1554,7 @@ $(function() {
 	//запрос постоянно всех датчиков
 	function getIntervalSensors() {
 		$.ajax({
-			url: 'refluxModeSensorsOut',//'refluxModeSensorsIn',//'reflux.json',//refluxModeSensorsOut
+			url: 'SensorsOut',//'SensorsIn',//'reflux.json'
 			data: {},
 			type: 'GET',
 			dataType: 'json',
