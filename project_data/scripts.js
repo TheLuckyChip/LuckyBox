@@ -729,7 +729,7 @@ $(function() {
 						color: 'black'
 					},
 					align: 'left',
-					x: 10,
+					x: 0,
 				},
 				max: 100,
 				opposite: false
@@ -737,7 +737,7 @@ $(function() {
 				, { // Secondary yAxis
 					gridLineWidth: 0,
 					title: {
-						text: 'Атмосферное давление',
+						text: 'Атм. давление',
 						style: {
 							color: 'black'
 						}
@@ -937,7 +937,7 @@ $(function() {
 	//Привязка датчиков к процессу ректификации, и запуск
 	var refluxProcess = {"sensors":[],"power":0,"start":false};
 	//localStorage.setObj('reflux',refluxProcess);
-	const pressureTemplate = '<tr>' +
+	/*const pressureTemplate = '<tr>' +
 		'<td>Атмосферное давление</td>' +
 		'<td><span id="reflux_pressure"></span> <span class="hidden">мм рт.ст.</span></td>' +
 		'<td></td>' +
@@ -948,7 +948,19 @@ $(function() {
 		'<td><span id="reflux_alco_boil"></span> <span class="hidden">&#176С</span></td>' +
 		'<td></td>' +
 		'<td></td>' +
-		'</tr>';
+		'</tr>';*/
+	const pressureTemplate =
+		'<div class="row row-striped">' +
+		'<div class="pt-10 clearfix">' +
+		'<div class="col-xs-12 col-sm-4 text-center-xs text-middle"><strong>Атмосферное давление</strong></div>' +
+		'<div class="col-xs-5 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="reflux_pressure"></span> <span class="hidden">мм рт.ст.</span></strong></div>' +
+		'</div>' +
+		//'<div class="row row-striped">' +
+		'<div class="pb-10 clearfix">' +
+		'<div class="col-xs-12 col-sm-4 text-center-xs text-middle"><strong>t&#176 кипения спирта при данном давлении</strong></div>' +
+		'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="reflux_alco_boil"></span><span class="hidden">&#176С</span></strong></div>' +
+		'</div>' +
+		'</div>';
 	const deltaTempl =
 		'<div class="input-group input-group-sm number-group">' +
 		'<span class="input-group-btn minus">' +
@@ -1261,14 +1273,14 @@ $(function() {
 				let tpl_delta_result = '';
 				if (e["delta"]) {
 					tpl_delta = returnTplHtml([{id:"reflux_delta_"+sensor_key, value: e["allertValue"], min: '0', max: '1', step: '0.05'}], deltaTempl);
-					tpl_delta_result = '<span id="reflux_delta_result_'+sensor_key+'"></span>80<span class="hidden_">&#176С</span>';
+					tpl_delta_result = '<span id="reflux_delta_result_'+sensor_key+'"></span><span class="hidden">&#176С</span>';
 					tpl_delta_body +=
-					'<div class="row row-striped">' +
+					'<div class="row row-xs row-striped">' +
 					'<div class="pt-10 pb-10 clearfix">' +
 					//'<div class="col-xs-hidden"><em>' + tpl_delta_thead + '</em></div>' +
 					'<div class="col-xs-12 col-sm-4 text-center-xs"><strong>t&#176' + name_sensor + '</strong></div>' +
 					'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="reflux_' + sensor_key + '"></span><span class="hidden">&#176С</span></strong></div>' +
-					'<div class="col-xs-3 col-xs-offset-0 col-sm-3 col-sm-offset-0">' + tpl_delta + '</div>' +
+					'<div class="col-xs-3 col-sm-3">' + tpl_delta + '</div>' +
 					'<div class="col-xs-4 col-xs-offset-1 col-sm-2 col-sm-offset-0 text-center text-middle"><strong>' + tpl_delta_result +
 					'</strong></div>' +
 					'</div>' +
@@ -1291,7 +1303,7 @@ $(function() {
 					'<div class="col-xs-12 col-sm-4 text-center-xs"><strong>t&#176' + name_sensor + '</strong></div>' +
 					'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="reflux_' + sensor_key + '"></span><span class="hidden">&#176С</span></strong></div>' +
 					'<div class="col-xs-3 col-sm-3"></div>' +
-					'<div class="col-xs-4 col-xs-offset-0 col-sm-3 col-sm-offset-0 text-center text-middle">' + tpl_cutoff +
+					'<div class="col-xs-4 col-sm-3 text-center text-middle">' + tpl_cutoff +
 					'</div>' +
 					'</div>' +
 					'</div>';
@@ -1302,11 +1314,20 @@ $(function() {
 						'</tr>'*/
 				}
 				if(sensor_key !== "p1" && !e["delta"] && !e["cutoff"]) {
-					tpl_all_body += '<tr><td>t&#176' + name_sensor + '</td>' +
+					tpl_all_body += '<div class="row row-striped">' +
+						'<div class="pt-10 pb-10 clearfix">' +
+						//'<div class="col-xs-hidden"><em>' + tpl_delta_thead + '</em></div>' +
+						'<div class="col-xs-12 col-sm-4 text-center-xs"><strong>t&#176' + name_sensor + '</strong></div>' +
+						'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="reflux_' + sensor_key + '"></span><span class="hidden">&#176С</span></strong></div>' +
+						'<div class="col-xs-3 col-sm-3"></div>' +
+						'<div class="col-xs-4 col-sm-3"></div>' +
+						'</div>' +
+						'</div>';
+					/*tpl_all_body += '<tr><td>t&#176' + name_sensor + '</td>' +
 						'<td><span id="reflux_' + sensor_key + '"></span> <span class="hidden">&#176С</span></td>' +
 						'<td></td>' +
 						'<td></td>' +
-						'</tr>'
+						'</tr>'*/
 				}
 			});
 			//sensors["process"]["allow"] = 2;
@@ -1324,7 +1345,7 @@ $(function() {
 			if(sensors_select)
 				sendRequest("refluxSensorsSetSave", sensorsRefluxSend, "json", false, false, $("#error_reflux"));
 			//localStorage.setObj('sensors', sensors);
-			refluxTemplate = powerTempl + refluxTemplate;// + pressureTemplate;
+			refluxTemplate = powerTempl + refluxTemplate + pressureTemplate;
 			//refluxTemplate += pressureTemplate + powerTempl;
 			$("#reflux_start_group_button").removeClass("hidden");
 			$("#svg_reflux").show();
