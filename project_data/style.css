@@ -369,21 +369,43 @@ span.show {
 	}
 }
 @media (max-width: 468px) {
+	.modal-body {
+		padding: 10px;
+	}
+	.modal-body .checkbox-inline{
+		padding-left: 0;
+	}
+	.modal-body input[type=text]{
+		padding-left: 4px;
+	}
+	.modal-body .table>tbody>tr>td{
+		padding: 6px;
+	}
 	.text-center-xs {
 		text-align: center;
 	}
-	.row-xs{
-		/*margin-left: -10px;*/
-		/*margin-right: -10px;*/
+	.row-xs:before{
+		content: " ";
+		display: table;
+		clear:both;
+		/*margin-left: 0;*/
+		/*margin-right:0;*/
+	}
+	.row-xs:after{
+		content: " ";
+		display: table;
+		clear:both;
 	}
 	.row-striped{
 		/*margin-left: -10px;*/
 		/*margin-right: -10px;*/
 	}
-	.row-striped:nth-of-type(odd){
+	.row-striped:nth-of-type(odd),
+	.row-striped:nth-of-type(odd) .row-xs{
 		background-color: #dcdcdc;
 	}
-	.row-striped:nth-of-type(even){
+	.row-striped:nth-of-type(even),
+	.row-striped:nth-of-type(even) .row-xs{
 		background-color: #ececec;
 	}
 

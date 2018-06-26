@@ -1,9 +1,11 @@
 <?
 header("Content-type:application/json; charset=utf-8");
+$t1 = 20.00;
+$t1 = $t1 + $_GET["t"];
 $json = '{
 	"process":{"allow":2,"number":0},
 	"sensors":[
-	{"t1":{"value":20.00,"name":"В царге","color":7905,"member":0,"priority":0,"allertValue":78.50}},
+	{"t1":{"value":'.$t1.',"name":"В царге","color":7905,"member":0,"priority":0,"allertValue":50.00}},
 	{"t2":{"value":35.25,"name":"В узле отбора","color":65504,"member":0,"priority":0,"allertValue":55.35}},
 	{"t3":{"value":50.00,"name":"В кубе","color":64588,"member":0,"priority":0,"allertValue":91}},
 	{"t4":{"value":25.00,"name":"Вода на выходе","color":16799,"member":0,"priority":0,"allertValue":30}},
@@ -33,4 +35,4 @@ $json = '{
 	"temperatureAlcoholBoil":78.15,
 	"temperatureStartPressure":78.00
 }';
-echo json;
+echo $json;
