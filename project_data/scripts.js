@@ -251,7 +251,13 @@ $(function() {
 	//console.log("13434741",dec2hex("13434741"));
 	//console.log("CCFF75",hex2dec("CCFF75"));
 
-	//заливка svg цветом, в зависимости от параметров датчиков
+	/**
+	 * заливка svg цветом, в зависимости от параметров датчиков
+	 * @param {string} color  - hex цвет
+	 * @param {number} current - текущее значение датчика
+	 * @param {number} max - максимально возможное значение датчика
+	 * @returns {string}
+	 */
 	function colorPersent(color,current,max)
 	{
 		let rgb = hexToRgb(color);
@@ -558,8 +564,9 @@ $(function() {
 	 * @param {function|boolean} success_action - действия после успешного отправления данных
 	 * @param {object|boolean} load_target - елемент «отправитель» (для лоадера)
 	 * @param {object|boolean} error_target - контейнер для вывода ошибок
+	 * @param {string|boolean} success_text - текстовое сообщение в диалоговое окно при успешной отправке данных
 	 */
-	function sendRequest(url,data,dataType,success_action,load_target,error_target) {
+	function sendRequest(url,data,dataType,success_action,load_target,error_target,success_text) {
 		//console.log(url,data,target);
 		$.ajax({
 			url: url,
@@ -568,11 +575,13 @@ $(function() {
 			dataType: dataType,
 			beforeSend: function(){
 				if(load_target !== false)
-					load_target.ajaxLoading({disabled:true});
+					$(load_target).ajaxLoading({disabled:true,color:"#FF0000"});
 			},
 			success: function (msg) {
 				if(success_action !== false)
-					success_action(msg)
+					success_action(msg);
+				if(success_text !== false)
+					$.fn.openModal('', success_text, "modal-sm", true, false);
 			},
 			error:function (err,exception) {
 				if(error_target !== false)
@@ -580,7 +589,7 @@ $(function() {
 			},
 			complete:function () {
 				if(load_target !== false)
-					load_target.ajaxLoading('stop');
+					$(load_target).ajaxLoading('stop');
 			}
 		});
 	}
@@ -595,11 +604,12 @@ $(function() {
 		frequencyRecordingToLocalStorage: 5,    // Частота архивации (Через сколько опросов осуществляется запись в localStorage)
 		reqestDelayDefalt: 1000,
 
-		dtoGet: function (json) {
+		dtoGet: function (json,target) {
 			const self = dtoReceiver;  // Для доступа к this в jquery
 			let requestCounter = 0;    // Счётчик запросов, служит для записи в localStorage каждые frequencyRecordingToLocalStorage раз
 
 			self.dtoCurrent = json;
+			self.dtoContainer = target;
 			self.dtoCurrent.dateTime = (new Date()).getTime();  // Пользуемся временем клиента, для несчастных без доступа к NTP
 
 			// Считывание предыдущих сохранённых значений
@@ -627,12 +637,12 @@ $(function() {
 			localStorage.removeItem('dtos');
 		},
 		// Запуск опроса ESP
-		start: function (dtoJson) {
+		start: function (dtoJson,target) {
 			//let dtoJson = {};
 			//dtoJson["heaterPower"] = globalSensorsJson["power"];
 			//dtoJson["temperatures"] = globalSensorsJson["sensors"];
 			//console.log(dtoJson);
-			this.dtoGet(dtoJson);
+			this.dtoGet(dtoJson,target);
 		}
 	};
 
@@ -659,10 +669,10 @@ $(function() {
 	});
 
 	var plot = {};
-	//TODO сделать передачу в «getPlot» ID контейнера, для вывода графиков в требуемом процессе, и скорее всего еще сами датчики (для каждого процесса разные) или он сам подтянет нужные?
 	$(document).one("newDTOreceived", function (e) {
 		//console.log(e);
-		plot = getPlot();
+		if(Number(globalSensorsJson["process"]["allow"]) !== 0)
+			plot = getPlot();
 	});
 
 	//очищаем по старту
@@ -782,9 +792,9 @@ $(function() {
 				enabled: true
 			},
 		};
-		let view_chart = "";
+
 		if(globalSensorsJson["process"]["allow"] === 2){
-			view_chart = 'view_reflux_chart';
+			//view_chart = 'view_reflux_chart';
 			jsonPlot.yAxis[2] = { // Secondary yAxis
 				gridLineWidth: 0,
 					title: {
@@ -812,38 +822,38 @@ $(function() {
 				})
 			};
 		}
+
+		let view_chart = dtoReceiver.dtoContainer;
 		let plotNew = Highcharts.stockChart(view_chart, jsonPlot);
 
-		dtoReceiver.dtos[0].temperatures.forEach(function(t, i) {
+		dtoReceiver.dtos[0].temperatures.forEach(function (t, i) {
 			//console.log(t, i);
-			if( t["key"] !== "p1") {
+			if (t["key"] !== "p1") {
 				plotNew.addSeries({
 					name: t["name"],
-					color: "#"+t["color"],
+					color: "#" + t["color"],
 					//color: "#"+dec2hex(t["color"]),
 					data: dtoReceiver.dtos.map(function (dc) {
 						//console.log(dc.temperatures[i]["value"]);
 						return [dc.dateTime, dc.temperatures[i]["value"]]
 					})
 				});
-			//}else{
-
 			}
 		});
 
-
 		$(document).on("newDTOreceived", function (e, dto) {
-
 			plot.series[0].addPoint([dto.dateTime, dto.heaterPower], false);
-			if(globalSensorsJson["process"]["allow"] === 2)
+			let count = 0;
+			if (globalSensorsJson["process"]["allow"] === 2) {
 				plot.series[1].addPoint([dto.dateTime, dto.pressure], false);
-			let count = 1;
-			dto.temperatures.forEach(function(t,i) {
+				count = 1;
+			}
+			dto.temperatures.forEach(function (t, i) {
 				//console.log(t,i);
-				if( t["key"] !== "p1"){
+				if (t["key"] !== "p1") {
 					//plot.series[1].addPoint([dto.dateTime, dto.temperatures[i]["value"]], false);
 					//console.log(t,i);
-				//}else {
+					//}else {
 					plotNew.series[count + 1].addPoint([dto.dateTime, dto.temperatures[i]["value"]], false);
 				}
 				count++;
@@ -854,47 +864,43 @@ $(function() {
 		return plotNew;
 	}
 
+	//опрос датчиков
 	$(document).on('click','#get_sensors',function(e) {
 		e.preventDefault();
 		let _this = $(this);
-		sendRequest("sensorsOutSet",{},"json",getSensors,_this,$("#error_sensors"));
+		sendRequest("sensorsOutSet",{},"json",getSensors,_this,$("#error_sensors"),false);
 	});
 
 	//сортировка датчиков
 	$(document).on('change',"#sensors_settings select",function () {
         let arrSortSensors = [];
-        let _this = $(this);
-        let _this_val = _this.val();
-        /*if(_this_val !== ""){
-        	$('#sensors_settings select option[value="'+_this_val+'"]').hide();
-		}else{*/
-			$.each($('#sensors_settings select'),function (i,e) {
-				if($(e).val() !== ""){
-                    arrSortSensors.push($(e).val());
+		$.each($('#sensors_settings select'),function (i,e) {
+			if($(e).val() !== ""){
+				arrSortSensors.push($(e).val());
+			}
+		});
+		$('#sensors_settings select option').show();
+		$.each(arrSortSensors,function (i,e) {
+			$.each($('#sensors_settings select'),function (j,s) {
+				if ($(s).val() !== e) {
+					$('option[value="' + e + '"]',$(s)).hide();
 				}
-            });
-            $('#sensors_settings select option').show();
-            $.each(arrSortSensors,function (i,e) {
-                $.each($('#sensors_settings select'),function (j,s) {
-                    if ($(s).val() !== e) {
-                        $('option[value="' + e + '"]',$(s)).hide();
-                    }
-                });
-            });
-		//}
+			});
+		});
     });
-	//заполнение вкладки датчики данными после запроса
+	//Заполнение вкладки датчики данными после запроса
 	function getSensors(data) {
 		//console.log(data);
 		let sensors = data;
 		for (let key in sensors) {
 			if(sensors.hasOwnProperty(key)) {
 				let jscolor = sensors[key]["color"] > 0 ? dec2hex(sensors[key]["color"]) : "FFFFFF";
-				if (sensors[key]["value"] < 150) {
+				let sensor_value =  sensors[key]["value"];
+				if (sensor_value < 150) {
 					$("#sensor_name_" + key).val(sensors[key]["name"]);
 					$("#sensor_color_" + key).val(jscolor).next("button").css("background-color", "#" + jscolor);
-					$("#sensor_val_" + key).text(sensors[key]["value"]).parent().find(".hidden").removeClass("hidden").addClass("show");
-					$("#svg_sensor_" + key).html(sensors[key]["value"]+'&#176С');
+					$("#sensor_val_" + key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
+					$("#svg_sensor_" + key).html(sensor_value.toFixed(0)+'&#176С');
 					$("#svg_sensor_color_" + key).css('fill',jscolor);
 				} else {
 					if (!$.fn.objIsEmpty(sensors[key]["name"], false))
@@ -905,8 +911,9 @@ $(function() {
 			}
 		}
 		sensorsJson = data;
-		//localStorage.setObj('dtos', self.dtos);
+		localStorage.setObj('sensors', sensorsJson);
 	}
+	//Сохранение датчиков и их сортировки
 	$(document).on('click','#set_sensors',function(e) {
 		e.preventDefault();
 		let _this = $(this);
@@ -946,17 +953,16 @@ $(function() {
 			$.fn.openModal('', '<p class="text-center text-danger"><strong>Заполните названия подключенных датчиков</strong></p>', "modal-sm", true, false);
 		}else {
             //console.log(sensorsJson);
-			sendRequest("sensorsInSet", sensorsSend, "json", setSensors, _this, $("#error_sensors"));
+			sendRequest("sensorsInSet", sensorsSend, "json", setSensors, _this, $("#error_sensors"),false);
 		}
 	});
 	function setSensors(data) {
 		//console.log(data);
-        sendRequest("sensorsOutSet",{},"json",getSensors,$('#get_sensors'),$("#error_sensors"));
-		$.fn.openModal('', '<p class="text-center text-success"><strong>Тестовое сообщение, УРА!</strong></p>', "modal-sm", true, false);
-		localStorage.setObj('sensors', sensorsJson);
+        sendRequest("sensorsOutSet",{},"json",getSensors,$('#get_sensors'),$("#error_sensors"),'<p class="text-center text-success"><strong>Настройки датчиков сохранены</strong></p>');
+		//$.fn.openModal('', '<p class="text-center text-success"><strong>Тестовое сообщение, УРА!</strong></p>', "modal-sm", true, false);
+		//localStorage.setObj('sensors', sensorsJson);
 	}
-	//Привязка датчиков к процессу ректификации, и запуск
-	var refluxProcess = {"sensors":[],"power":0,"start":false};
+	//Шаблоны
 	const pressureTemplate =
 		'<div class="row row-striped">' +
 		'<div class="pt-10 clearfix">' +
@@ -987,17 +993,18 @@ $(function() {
 		'<div class="row row-striped">' +
 		'<div class="pt-10 pb-10 clearfix">' +
 		'<div class="col-xs-12 col-sm-4 text-center-xs text-middle"><strong>Мощность тена</strong></div>' +
-		'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="power_value"></span><span class="hidden">%</span></strong></div>' +
+		'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="${id_value}"></span><span class="hidden">%</span></strong></div>' +
 		'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 col-centered">' +
-		returnTplHtml([{id:"power_set", value: '0', min: '0', max: '100', step: '1'}], deltaTempl) +
+		returnTplHtml([{id:"${id_set}", value: '0', min: '0', max: '100', step: '1'}], deltaTempl) +
 		'</div>' +
 		'</div>' +
 		'</div>';
-
+	//Привязка датчиков к процессу ректификации, и запуск
+	var refluxProcess = {"sensors":[],"power":0,"start":false};
 	$(document).on('click','#reflux_add_sensor',function(e) {
 		e.preventDefault();
 		let _this = $(this);
-		sendRequest("refluxSensorsSetLoad", {}, "json", selectSensorsReflus, _this, $("#error_reflux"));
+		sendRequest("refluxSensorsSetLoad", {}, "json", selectSensorsReflus, _this, $("#error_reflux"),false);
 	});
 	//Запрос датчиков для ректификации и вывод их в диалоговое окно
 	function selectSensorsReflus(data){
@@ -1055,7 +1062,7 @@ $(function() {
 						localStorage.setObj('reflux', refluxProcess);
 						//console.log(ar_sensors);
 						$(this).closest(".modal").modal("hide");
-						pasteRefluxSensors(true);
+						$.fn.pasteRefluxSensors(true);
 					}
 				},
 				{id: "modal_sensors_select"}
@@ -1079,7 +1086,7 @@ $(function() {
 		}
 	});
 
-	pasteRefluxSensors = function(sensors_select){
+	$.fn.pasteRefluxSensors = function(sensors_select){
 		//let sensors = localStorage.getObj('sensors');//sensorsJson
 		let sensorsRefluxSend = {
 			"t1":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
@@ -1179,16 +1186,16 @@ $(function() {
 		}
 		if(refluxTemplate !== '') {
 			if(sensors_select)
-				sendRequest("refluxSensorsSetSave", sensorsRefluxSend, "json", false, false, $("#error_reflux"));
+				sendRequest("refluxSensorsSetSave", sensorsRefluxSend, "json", false, false, $("#error_reflux"),false);
 			//localStorage.setObj('sensors', sensors);
-			refluxTemplate = powerTempl + refluxTemplate + pressureTemplate;
+			refluxTemplate = returnTplHtml([{id_value:"reflux_power_value",id_set:"reflux_power_set"}], powerTempl) + refluxTemplate + pressureTemplate;
 			$("#reflux_start_group_button").removeClass("hidden");
 			$("#svg_reflux").show();
 		}else{
 			$("#reflux_start_group_button").addClass("hidden");
 		}
 		$("#reflux_process").html(refluxTemplate);
-		$("#power_set").val(refluxProcess["power"]);
+		$("#reflux_power_set").val(refluxProcess["power"]);
 		//console.log(refluxProcess);
 		if(refluxProcess["start"] === true) {
 			getReflux();
@@ -1215,7 +1222,7 @@ $(function() {
 			});
 			plot.redraw();
 		}
-		//sendRequest("SensorsIn", sendRefluxProcess, "json", refluxStartProcess, _this, $("#error_reflux"));
+		//sendRequest("SensorsIn", sendRefluxProcess, "json", refluxStartProcess, _this, $("#error_reflux"),false);
 		//refluxStartProcess ();
 		//localStorage.setObj('reflux',refluxProcess);
 		setReflux();
@@ -1229,7 +1236,7 @@ $(function() {
 		$("#svg_reflux_start").css('stroke',"#000000");
 		//let sendRefluxProcess = refluxProcess;
 		//sendRefluxProcess["start"] = false;
-		//sendRequest("SetTempTest", sendRefluxProcess, "json", refluxStopProcess, _this, $("#error_reflux"));
+		//sendRequest("SetTempTest", sendRefluxProcess, "json", refluxStopProcess, _this, $("#error_reflux"),false);
 		//refluxStopProcess ();
 		tmpRefluxFlag = true;
 		refluxProcess["start"] = false;
@@ -1253,7 +1260,7 @@ $(function() {
 			"power":0
 		};
 		let flag_send = false;
-		let power_set = $("#power_set");
+		let power_set = $("#reflux_power_set");
 		refluxSendData["process"]["allow"] = (refluxProcess["start"] ? 2 : 0);
 		if(refluxProcess["power"] !== power_set.val())
 			flag_send = true;
@@ -1280,10 +1287,11 @@ $(function() {
 		if(flag_send) {
 			tmpRefluxFlag = false;
 			localStorage.setObj('reflux', refluxProcess);
-			sendRequest("SensorsIn", refluxSendData, "json", false, false, $("#error_reflux"));
+			sendRequest("SensorsIn", refluxSendData, "json", false, false, $("#error_reflux"),false);
 		}
 	}
 	function getReflux() {
+		//console.log("getReflux");
 		setReflux();
 		if(!$.fn.objIsEmpty(globalSensorsJson,false)) {
 			let dtoJson = {};
@@ -1291,28 +1299,35 @@ $(function() {
 			dtoJson["temperatures"] = {};
 			$.each(globalSensorsJson["sensors"], function (i, e) {
 				let sensor_key = Object.keys(e).shift();
-				let sensor_value =  globalSensorsJson["sensors"][i][sensor_key]["value"];
-				let alert_value =  globalSensorsJson["sensors"][i][sensor_key]["allertValue"];
+				let sensor_value = globalSensorsJson["sensors"][i][sensor_key]["value"];
+				let alert_value = globalSensorsJson["sensors"][i][sensor_key]["allertValue"];
 				$.each(refluxProcess["sensors"], function (j, q) {
 					//console.log(j, q);
-					if(q["key"] === sensor_key){
+					if (q["key"] === sensor_key) {
 						q["value"] = sensor_value;
 						if (sensor_key !== "p1") {
 							let color_value = q["color"];
 							let fillcolor = "#" + color_value;
-							if(Number(sensor_value)>=Number(alert_value)){
-								$("#alert_bg_"+sensor_key).addClass("bg-danger");
-								$("#alert_text_"+sensor_key).addClass("text-danger");
-								if (window.navigator && window.navigator.vibrate) {
-									// Вибрация поддерживается
+							if (Number(sensor_value) >= Number(alert_value)) {
+								$("#alert_bg_" + sensor_key).addClass("bg-danger");
+								$("#alert_text_" + sensor_key).addClass("text-danger");
+								// Вибрация поддерживается
+								/*if (window.navigator && window.navigator.vibrate) {
 									navigator.vibrate(1000);
-								}
-							}else{
-								$("#alert_bg_"+sensor_key).removeClass("bg-danger");
-								$("#alert_text_"+sensor_key).removeClass("text-danger");
+								}*/
+							} else {
+								$("#alert_bg_" + sensor_key).removeClass("bg-danger");
+								$("#alert_text_" + sensor_key).removeClass("text-danger");
 							}
 							//console.log(sensor_key, fillcolor,sensor_value,alert_value);
-							$("#svg_reflux_color_" + sensor_key).css('fill', colorPersent(fillcolor,sensor_value,alert_value));
+							if (q["delta"] === false) {
+								$("#svg_reflux_color_" + sensor_key).css('fill', colorPersent(fillcolor, sensor_value, alert_value));
+							} else {
+								let delta_alert = $("#reflux_delta_" + sensor_key).val();
+								let delta_value = (delta_alert - alert_value + sensor_value).toFixed(2);
+								//console.log(fillcolor, delta_value, delta_alert);
+								$("#svg_reflux_color_" + sensor_key).css('fill', colorPersent(fillcolor, delta_value, delta_alert));
+							}
 						}
 					}
 				});
@@ -1328,23 +1343,26 @@ $(function() {
 					dtoJson["pressure"] = globalSensorsJson["sensors"][i]["p1"]["value"];
 				}
 				//svg
-				$("#svg_reflux_" + sensor_key).html(sensor_value+'&#176С');
+				$("#svg_reflux_" + sensor_key).html(sensor_value.toFixed(0) + '&#176С');
 				//let fillcolor = temperaturePalette(sensor_value.toFixed(0));
 
 			});
 			$("#reflux_alco_boil").text(globalSensorsJson["temperatureAlcoholBoil"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
-			let power_value = globalSensorsJson["power"].toFixed(0);
-			$("#svg_ten_t").text(power_value+"%");
-			$("#svg_reflux_color_ten").css('fill', colorPersent("#FF0000",power_value,100));
+			let power_value = Number(globalSensorsJson["power"]);
+			$("#reflux_power_value").text(power_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
+			$("#svg_reflux_ten_t").text(power_value.toFixed(0) + "%");
+			$("#svg_reflux_color_ten").css('fill', colorPersent("#FF0000", power_value.toFixed(0), 100));
 			dtoJson["temperatures"] = refluxProcess["sensors"];
-			dtoReceiver.start(dtoJson);
+			dtoReceiver.start(dtoJson, 'view_reflux_chart');
 		}
-		console.log(globalSensorsJson);
+		//console.log(globalSensorsJson);
 		//console.log(refluxProcess);
-		if(refluxProcess["start"] === true) {
+		if (refluxProcess["start"] === true) {
 			setTimeout(getReflux, 2000);
-			$("#svg_reflux_start").css('stroke',"#02b500");
+			//dtoReceiver.start(dtoJson);
+			$("#svg_reflux_start").css('stroke', "#02b500");
 		}
+
 
 	}
 	//заполнение разных полей данными датчиков
@@ -1354,31 +1372,45 @@ $(function() {
 			$.each(globalSensorsJson["sensors"], function (i, e) {
 				let sensor_key = Object.keys(e).shift();
 				//заполнение вкладки датчики
-				if($("#sensor_val_" + sensor_key).length) {
-					$("#sensor_val_" + sensor_key).text(globalSensorsJson["sensors"][i][sensor_key]["value"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
-					$("#svg_sensor_" + sensor_key).html(globalSensorsJson["sensors"][i][sensor_key]["value"] + '&#176С');
+				let sensor_value = globalSensorsJson["sensors"][i][sensor_key]["value"];
+				if($("#sensor_val_" + sensor_key).length && sensor_value < 150) {
+					$("#sensor_val_" + sensor_key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
+					$("#svg_sensor_" + sensor_key).html(sensor_value.toFixed(0) + '&#176С');
 				}
 				//заполнение процесса ректификации
-				if(refluxProcess["start"] !== true /*&& $("#reflux_pressure").length*/){
-					$("#reflux_" + sensor_key).text(globalSensorsJson["sensors"][i][sensor_key]["value"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
+				let process = Number(globalSensorsJson["process"]["allow"]);
+				if(refluxProcess["start"] !== true && $.trim($("#reflux_process").html()) !== ""){
+					$("#reflux_" + sensor_key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 					if (sensor_key === "p1") {
 						$("#reflux_pressure").text(globalSensorsJson["sensors"][i]["p1"]["value"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 
 						$("#reflux_alco_boil").text(globalSensorsJson["temperatureAlcoholBoil"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
-						$("#power_value").text(globalSensorsJson["power"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
+						$("#reflux_power_value").text(globalSensorsJson["power"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 					}
 
-					$("#svg_reflux_" + sensor_key).html(globalSensorsJson["sensors"][i][sensor_key]["value"]+'&#176С');
-					$("#svg_ten_t").text(globalSensorsJson["power"]+'%');
+					$("#svg_reflux_" + sensor_key).html(sensor_value.toFixed(0)+'&#176С');
+					$("#svg_reflux_ten_t").text(globalSensorsJson["power"]+'%');
 
-					//$("#svg_reflux_color_" + sensor_key).css('fill',jscolor);
+					if(process === 2) {
+						$("#reflux_start").trigger("click");
+					}
+
+					if(process > 0 && process !== 2)
+						$("#reflux_start_group_button").addClass("hidden");
+					if(process === 0)
+						$("#reflux_start_group_button").removeClass("hidden");
+				}
+				if(refluxProcess["start"] === true){
+					if(process === 0) {
+						$("#reflux_stop").trigger("click");
+					}
 				}
 			});
 		}
 	}
 
 	//запрос постоянно всех датчиков
-	let tmpTime = 1;
+	//let tmpTime = 1;
 	function getIntervalSensors() {
 		$.ajax({
 			//url: 'sensors.php',
@@ -1432,7 +1464,7 @@ $(function() {
 		})/*.done()*/;
 	}
     //Обновление прошивки
-	$("#file_update").on("change",function (e) {
+	$("#file_update").on("change",function () {
 		let vidFileLength = $(this)[0].files.length;
 		if(vidFileLength !== 0) {
 			$("#settings_update").prop("disabled",false);
@@ -1478,25 +1510,21 @@ $(function() {
 		e.preventDefault();
 		let _this = $(this);
 		let ssdp = $("#settings_ssdp").val();
-		sendRequest("ssdp",{"ssdp":ssdp},"text",false,_this,$("#error_settings"));
+		sendRequest("ssdp",{"ssdp":ssdp},"text",false,_this,$("#error_settings"),false);
 	});
 	$("#settings_set_ssid").on("click",function (e) {
 		e.preventDefault();
 		let _this = $(this);
 		let ssid = $("#settings_ssid").val();
 		let pass = $("#settings_password").val();
-		sendRequest("ssid",{"ssid":ssid,"password":pass},"text",false,_this,$("#error_settings"));
-		//TODO сделать действия SUCCESS в sendRequest
-		$.fn.openModal('', 'Изменения вступят в силу после перезагрузки. Пожалуйста перезагрузите устройство.', "modal-sm", false, true);
+		sendRequest("ssid",{"ssid":ssid,"password":pass},"text",false,_this,$("#error_settings"),'<p class="text-center text-success"><strong>Изменения вступят в силу после перезагрузки. Пожалуйста перезагрузите устройство.</strong></p>');
 	});
 	$("#settings_set_ssidap").on("click",function (e) {
 		e.preventDefault();
 		let _this = $(this);
 		let ssidap = $("#settings_ssidap").val();
 		let pass = $("#settings_passwordap").val();
-		sendRequest("ssidap",{"ssidAP":ssidap,"passwordAP":pass},"text",false,_this,$("#error_settings"));
-		//TODO сделать действия SUCCESS в sendRequest
-		$.fn.openModal('', 'Изменения вступят в силу после перезагрузки. Пожалуйста перезагрузите устройство.', "modal-sm", false, true);
+		sendRequest("ssidap",{"ssidAP":ssidap,"passwordAP":pass},"text",false,_this,$("#error_settings"),'<p class="text-center text-success"><strong>Изменения вступят в силу после перезагрузки. Пожалуйста перезагрузите устройство.</strong></p>');
 	});
 	$("#settings_auto_timezone").on("click",function (e) {
 		e.preventDefault();
@@ -1504,24 +1532,24 @@ $(function() {
 		let date = new Date();
 		let timezone = Math.abs(date.getTimezoneOffset()/60);
 		$("#settings_timezone").val(timezone);
-		sendRequest("TimeZone",{"timezone":timezone},"text",false,_this,$("#error_settings"));
+		sendRequest("TimeZone",{"timezone":timezone},"text",false,_this,$("#error_settings"),'<p class="text-center text-success"><strong>Изменения временной зоны сохранены</strong></p>');
 	});
 	$("#settings_set_timezone").on("click",function (e) {
 		e.preventDefault();
 		let _this = $(this);
 		let timezone = $("#settings_timezone").val();
-		sendRequest("TimeZone",{"timezone":timezone},"text",false,_this,$("#error_settings"));
+		sendRequest("TimeZone",{"timezone":timezone},"text",false,_this,$("#error_settings"),'<p class="text-center text-success"><strong>Изменения временной зоны сохранены</strong></p>');
 	});
 	$("#settings_restart").on("click",function (e) {
 		e.preventDefault();
 		let _this = $(this);
-		$.fn.openModal('', '<h4 class="text-danger">Вы действительно хотите перезагрузить устройство?</h4>', "modal-sm", false, [{
+		$.fn.openModal('', '<p class="text-center text-danger">Вы действительно хотите перезагрузить устройство?</p>', "modal-sm", false, [{
 			text: "Да",
 			id: "return_restart",
 			class: "btn btn-primary btn-sm",
 			click: function () {
 				$(this).closest(".modal").modal("hide");
-				sendRequest("restart",{"device":"ok"},"text",false,_this,false);
+				sendRequest("restart",{"device":"ok"},"text",false,_this,false,false);
 			}
 		},
 			{
@@ -1535,6 +1563,7 @@ $(function() {
 	});
 
 
+	//TODO не используется все что ниже
 	//Дистиляция
 	function getDistillation() {
 		$.ajax({
@@ -1560,57 +1589,13 @@ $(function() {
 	$("#distillation_set_setting").on("click",function () {
 		let setting = Number($("#distillation_setting").val());
 
-		//TODO сделать действия SUCCESS в sendRequest
+		//
 		$("#distillation_get_setting").text(setting);
-		sendRequest("SetTempTank",{"SettingTank":setting},"text",false,$(this),$("#error_distillation"));
+		sendRequest("SetTempTank",{"SettingTank":setting},"text",false,$(this),$("#error_distillation"),false);
 	});
 
-	//Ректификация
-	/*function getReflux() {
-		$.ajax({
-			url: 'reflux.json',
-			data: {},
-			type: 'GET',
-			dataType: 'json',
-			success: function (msg) {
-				console.log('Reflux',msg);
-				$("#reflux_t_1").text(msg["temperature"].toFixed(2));
-				$("#reflux_t_2").text(msg["temperature2"].toFixed(2));
-				$("#reflux_t_3").text(msg["temperature3"].toFixed(2));
-				$("#reflux_t_4").text(msg["temperature4"].toFixed(2));
-				$("#reflux_setting").text(msg["setting"].toFixed(2));
-				$("#reflux_pressure").text(msg["pressure"].toFixed(2));
-				$("#reflux_alco_boil").text(msg["temperatureAlcoholBoil"].toFixed(2));
-				if(msg["settingAlarm"] === false){
-					$("#reflux_status").removeClass("success").addClass("danger");
-				}else{
-					$("#reflux_status").removeClass("danger").addClass("success");
-				}
-				setTimeout(getBrewing, 2000);
-			}
-		});
-	}
-	$("#reflux_set_delta").on("click",function () {
-		let delta = Number($("#reflux_delta").val());
-
-		let temp_2 = Number($("#reflux_t_2").text());
-		let temp_alco_boil = Number($("#reflux_alco_boil").text());
-
-		let setting = temp_2 + delta;
-		let data_send = {
-			delta:delta,
-			setting:setting,
-			temperatureAlcoholBoil:temp_alco_boil
-		};
-
-		//TODO сделать действия SUCCESS в sendRequest
-		$("#reflux_setting").text(setting);
-		sendRequest("SetTemp",data_send,"text",false,$(this),$("#error_reflux"));
-	});*/
-
-
 	//Затирание
-	//TODO нужно думать с этими переменными (согласовать с ардуино), что бы можно было запускать затирание с любого шага
+	// нужно думать с этими переменными (согласовать с ардуино), что бы можно было запускать затирание с любого шага
 	var start_brewing = 0;
 	var step_brewing = 0;
 	function getBrewing() {
@@ -1685,8 +1670,7 @@ $(function() {
 			pauseTime4:pauseTime4
 		};
 
-		//TODO сделать действия SUCCESS в sendRequest
-		sendRequest("SettingBrewing",data_send,"text",false,$(this),$("#error_brewing"));
+		sendRequest("SettingBrewing",data_send,"text",false,$(this),$("#error_brewing"),false);
 	}
 
 	function startBrewing(start,step){
@@ -1703,7 +1687,6 @@ $(function() {
 		settingsBrewing()
 	});
 
-	//TODO тут нужно будет передать из кнопки шаг затирания (сделать кнопку списком)
 	$("#start_brewing").on("click",function () {
 		startBrewing(1,1);
 	});
@@ -1712,7 +1695,7 @@ $(function() {
 		start_brewing = 0;
 		step_brewing = 0;
 		stopBrewing(1,1);
-		sendRequest("SetHeaterPower",{"heaterPower":0},"text",false,$(this),$("#error_brewing"));
+		sendRequest("SetHeaterPower",{"heaterPower":0},"text",false,$(this),$("#error_brewing"),false);
 	});
 
 	//мощность тэна
@@ -1735,11 +1718,9 @@ $(function() {
 		let pover = Number($("#heater_power").val());
 		pover = (pover > 0 ? pover : 0);
 
-		//TODO сделать действия SUCCESS в sendRequest
-		sendRequest("SetHeaterPower",{"heaterPower":pover},"text",false,$(this),$("#error_heater"));
+		sendRequest("SetHeaterPower",{"heaterPower":pover},"text",false,$(this),$("#error_heater"),false);
 	});
 
-	//TODO сейчас запускается каждая функция по очереди, потом переделать каждую на «старт/стоп»
 	setTimeout(getSettings, 2000);
 	//setInterval(getDistillation,2000);
 });

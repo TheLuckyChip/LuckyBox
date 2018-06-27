@@ -1,13 +1,11 @@
-<?
-header("Content-type:application/json; charset=utf-8");
-$json = '{
-	"process":{"allow":2,"number":0},
+{
+	"process":{"allow":0,"number":0},
 	"sensors":[
-	{"t1":{"value":20.00,"name":"В царге","color":7905,"member":0,"priority":0,"allertValue":78.50}},
-	{"t2":{"value":35.25,"name":"В узле отбора","color":65504,"member":0,"priority":0,"allertValue":55.35}},
-	{"t3":{"value":50.00,"name":"В кубе","color":64588,"member":0,"priority":0,"allertValue":91}},
+	{"t1":{"value":10.50,"name":"В кубе","color":64588,"member":0,"priority":0,"allertValue":78.50}},
+	{"t2":{"value":55.15,"name":"В царге","color":7905,"member":0,"priority":0,"allertValue":55.45}},
+	{"t3":{"value":78.00,"name":"В узле отбора","color":65504,"member":0,"priority":0,"allertValue":91}},
 	{"t4":{"value":25.00,"name":"Вода на выходе","color":16799,"member":0,"priority":0,"allertValue":30}},
-	{"t5":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0}},
+	{"t5":{"value":35.00,"name":"Левый датчик","color":33415,"member":0,"priority":0,"allertValue":0}},
 	{"t6":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0}},
 	{"t7":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0}},
 	{"t8":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0}},
@@ -32,5 +30,4 @@ $json = '{
 	"power":80,
 	"temperatureAlcoholBoil":78.15,
 	"temperatureStartPressure":78.00
-}';
-echo json;
+}
