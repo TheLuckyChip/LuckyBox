@@ -1362,9 +1362,208 @@ $(function() {
 			//dtoReceiver.start(dtoJson);
 			$("#svg_reflux_start").css('stroke', "#02b500");
 		}
-
-
 	}
+	//Привязка датчиков к процессу дистиляции, и запуск
+	var distillationProcess = {"sensors":[],"power":0,"start":false};
+	$(document).on('click','#distillation_add_sensor',function(e) {
+		e.preventDefault();
+		let _this = $(this);
+		sendRequest("distillationSensorsSetLoad", {}, "json", selectSensorsDistillation, _this, $("#error_distillation"),false);
+	});
+	//Запрос датчиков для дистиляции и вывод их в диалоговое окно
+	function selectSensorsDistillation(data){
+		let sensors = data;//sensorsJson
+		//console.log(sensors);
+		if(sensors !== null) {
+			let section = '<section id="distillation_sensors" class="table-responsive"><table class="table table-noborder">';
+			for (let key in sensors) {
+				if (sensors.hasOwnProperty(key) && key !== "p1") {
+					let sensor_name = (sensors[key].hasOwnProperty("name") ? sensors[key]["name"] : "");
+					//let sensor_delta = '<label class="checkbox-inline"><input disabled id="delta_' + key + '" name="distillation_radio_' + key + '" type="radio" value="Y">Уставка</label>';
+					let sensor_cutoff = '<label class="checkbox-inline"><input disabled id="cutoff_' + key + '" name="distillation_radio_' + key + '" type="radio" value="Y">Отсечка</label>';
+					/*if(key === "p1") {
+						sensor_delta = sensor_cutoff = '';
+						sensor_name = "Атмосферное давление";
+					}*/
+					let jscolor = sensors[key]["color"] > 0 ? dec2hex(sensors[key]["color"]) : "FFFFFF";
+					let disabled_check = "";
+					if(sensor_name === "")
+						disabled_check = "disabled";
+
+					section += '<tr><td>' +
+						'<div class="input-group input-group-sm">'+
+						'<span class="input-group-addon" style="background-color: #'+jscolor+'">' + key + '</span>'+
+						'<input id="distillation_name_' + key + '" class="form-control input-sm" type="text" value="' + sensor_name + '">'+
+						'<input type="hidden" id="distillation_color_' + key + '" value="'+jscolor+'">'+
+						'</div></td>'+
+						'<td><input '+disabled_check+' data-sensor="' + key + '" type="checkbox" value="' + key + '"></td>' +
+						//'<td>'+sensor_delta+'</td>' +
+						'<td>'+sensor_cutoff+'</td>' +
+						'</tr>';
+				}
+			}
+			section += '</table></section>';
+			$.fn.openModal('Выбор датчиков для дистиляции', section, "modal-md", false, {
+					text: "Выбрать",
+					id: "sensors_select",
+					class: "btn btn-success",
+					click: function () {
+						let sensors_select = $('#distillation_sensors input[type=checkbox]');
+						distillationProcess["sensors"] = $.map(sensors_select, function (e) {
+							if ($(e).is(":checked")) {
+								//console.log($(e).data("sensor"));
+								let key = $(e).data("sensor");
+								let name = $("#distillation_name_" + key).val();
+								let val_color = $("#distillation_color_" + key).val();
+								//let color = (val_color !== "FFFFFF" && val_color !== "") ? hex2dec(val_color) : 0;
+								let color = (val_color !== "FFFFFF" && val_color !== "") ? val_color : "FFFFFF";
+								//let delta = $("#delta_" + key).prop("checked");
+								let cutoff = $("#cutoff_" + key).prop("checked");
+								return {"key": key, "name": name, "cutoff": cutoff, "color": color, "allertValue":0, "value":0};
+								//return {"key": key, "name": name, "delta": delta, "cutoff": cutoff, "color": color, "allertValue":0, "value":0};
+							}
+						});
+						//distillationProcess["sensors"] = distillation_sensors;
+						localStorage.setObj('distillation', distillationProcess);
+						//console.log(ar_sensors);
+						$(this).closest(".modal").modal("hide");
+						$.fn.pasteDistillationSensors(true);
+					}
+				},
+				{id: "modal_sensors_select"}
+			);
+			//jscolor.installByClassName("jscolor");
+		}
+	}
+	$(document).on('click','#distillation_sensors input[type=checkbox]',function() {
+		let checked = !$(this).prop("checked");
+		//let radio_delta = $("#delta_"+$(this).data("sensor"));
+		let radio_cutoff = $("#cutoff_"+$(this).data("sensor"));
+		//radio_delta.prop("disabled",checked);
+		radio_cutoff.prop("disabled",checked);
+		if(checked) {
+			//radio_delta.prop("checked", false);
+			radio_cutoff.prop("checked",false);
+		}
+	});
+
+	$.fn.pasteDistillationSensors = function(sensors_select){
+		let sensorsDistillationSend = {
+			"t1":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
+			"t2":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
+			"t3":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
+			"t4":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
+			"t5":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
+			"t6":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
+			"t7":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
+			"t8":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0}/*,
+			"p1":{"value":760.00,"color":0,"member":0}*/
+		};
+		let distillationTemplate = '';
+		let localDistillation = localStorage.getObj('distillation');
+		if(localDistillation !== null)
+			distillationProcess = localDistillation;
+		if(distillationProcess["sensors"].length > 0) {
+			/*let tpl_delta_thead =
+				'<div class="row-xs">'+
+				'<div class="col-xs-4 col-xs-offset-0 col-sm-3 col-sm-offset-4 text-center text-middle text-primary">Значение</div>' +
+				'<div class="col-xs-4 col-sm-3 text-center text-middle text-primary">Дельта</div>' +
+				'<div class="col-xs-4 col-sm-2 text-center text-middle text-primary">Уставка</div>'+
+				'</div>';
+			let tpl_delta_body = '';*/
+			let tpl_cutoff_thead =
+				'<div class="row-xs">'+
+				'<div class="col-xs-4 col-xs-offset-0 col-sm-3 col-sm-offset-4 text-center text-middle text-primary">Значение</div>' +
+				'<div class="col-xs-4 col-xs-offset-4 col-sm-2 col-sm-offset-3 text-center text-middle text-primary">Отсечка</div>' +
+				'</div>';
+			let tpl_cutoff_body = '';
+			let tpl_all_body = '';
+			$.each(distillationProcess["sensors"], function (i, e) {
+				//console.log(i,e);
+				let sensor_key = e["key"];
+				let name_sensor = e["name"];
+				if(sensorsDistillationSend[sensor_key].hasOwnProperty("name"))
+					sensorsDistillationSend[sensor_key]["name"] = name_sensor;
+				sensorsDistillationSend[sensor_key]["color"] = hex2dec(e["color"]);
+				sensorsDistillationSend[sensor_key]["member"] = 1;
+				let tpl_delta = '';
+				let tpl_delta_result = '';
+				/*if (e["delta"]) {
+					tpl_delta = returnTplHtml([{id:"distillation_delta_"+sensor_key, value: e["allertValue"], min: '0', max: '1', step: '0.05'}], deltaTempl);
+					tpl_delta_result = '<span id="distillation_delta_result_'+sensor_key+'"></span><span class="hidden">&#176С</span>';
+					tpl_delta_body +=
+						'<div class="row row-striped">' + tpl_delta_thead +
+						'<div id="alert_bg_'+sensor_key+'" class="pt-10 pb-10 clearfix">' +
+						'<div id="alert_text_'+sensor_key+'" class="col-xs-12 col-sm-4 text-center-xs"><strong>t&#176' + name_sensor + '</strong></div>' +
+						'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="distillation_' + sensor_key + '"></span><span class="hidden">&#176С</span></strong></div>' +
+						'<div class="col-xs-3 col-sm-3">' + tpl_delta + '</div>' +
+						'<div class="col-xs-4 col-xs-offset-1 col-sm-2 col-sm-offset-0 text-center text-middle"><strong>' + tpl_delta_result +
+						'</strong></div>' +
+						'</div>' +
+						'</div>';
+
+					tpl_delta_thead = '';
+				}*/
+				let tpl_cutoff = '';
+				if (e["cutoff"]) {
+					tpl_cutoff = returnTplHtml([{id:"distillation_cutoff_"+sensor_key, value: e["allertValue"], min: '0', max: '105', step: '0.5'}], deltaTempl);
+					tpl_cutoff_body +=
+						'<div class="row row-striped">' + tpl_cutoff_thead +
+						'<div id="alert_bg_'+sensor_key+'" class="pt-10 pb-10 clearfix">' +
+						'<div id="alert_text_'+sensor_key+'" class="col-xs-12 col-sm-4 text-center-xs"><strong>t&#176' + name_sensor + '</strong></div>' +
+						'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="distillation_' + sensor_key + '"></span><span class="hidden">&#176С</span></strong></div>' +
+						//'<div class="col-xs-3 col-sm-3"></div>' +
+						'<div class="col-xs-4 col-xs-offset-3 col-sm-2 col-sm-offset-3">' + tpl_cutoff +
+						'</div>' +
+						'</div>' +
+						'</div>';
+
+					tpl_cutoff_thead = '';
+				}
+				if(sensor_key !== "p1" && !e["delta"] && !e["cutoff"]) {
+					tpl_all_body += '<div class="row row-striped">' +
+						'<div class="pt-10 pb-10 clearfix">' +
+						'<div class="col-xs-12 col-sm-4 text-center-xs"><strong>t&#176' + name_sensor + '</strong></div>' +
+						'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="distillation_' + sensor_key + '"></span><span class="hidden">&#176С</span></strong></div>' +
+						'<div class="col-xs-3 col-sm-3"></div>' +
+						'<div class="col-xs-4 col-sm-3"></div>' +
+						'</div>' +
+						'</div>';
+				}
+			});
+			//sensors["process"]["allow"] = 2;
+			/*if(tpl_delta_body !== '') {
+				distillationTemplate += tpl_delta_thead + tpl_delta_body;
+			}*/
+			if(tpl_cutoff_body !== '') {
+				distillationTemplate += tpl_cutoff_thead + tpl_cutoff_body;
+			}
+			if(tpl_all_body !== '') {
+				distillationTemplate += tpl_all_body;
+			}
+		}
+		if(distillationTemplate !== '') {
+			if(sensors_select)
+				sendRequest("distillationSensorsSetSave", sensorsDistillationSend, "json", false, false, $("#error_distillation"),false);
+			//localStorage.setObj('sensors', sensors);
+			distillationTemplate = returnTplHtml([{id_value:"distillation_power_value",id_set:"distillation_power_set"}], powerTempl) + distillationTemplate/* + pressureTemplate*/;
+			$("#distillation_start_group_button").removeClass("hidden");
+			$("#svg_distillation").show();
+		}else{
+			$("#distillation_start_group_button").addClass("hidden");
+		}
+		$("#distillation_process").html(distillationTemplate);
+		$("#distillation_power_set").val(distillationProcess["power"]);
+		//console.log(distillationProcess);
+		if(distillationProcess["start"] === true) {
+			getDistillation();
+			//dtoReceiver.start();
+			//distillationStartProcess ()
+			$('#distillation_start').prop("disabled",true);
+		}else{
+			$('#distillation_stop').prop("disabled",true);
+		}
+	};
 	//заполнение разных полей данными датчиков
 	function fillSensorsData() {
 		//$("#width_page").css({"border-bottom":"solid 1px red","text-align":"center","color":"red"}).text("thisWidth: "+$("#width_page").outerWidth()+", documentWidth: "+$(document).width());
@@ -1408,7 +1607,6 @@ $(function() {
 			});
 		}
 	}
-
 	//запрос постоянно всех датчиков
 	//let tmpTime = 1;
 	function getIntervalSensors() {
