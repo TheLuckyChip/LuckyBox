@@ -269,6 +269,27 @@ $(function() {
 		//return "#FF0000";
 	}
 
+	/**
+	 * Проверка на мобильную версию
+	 * @returns {boolean}
+	 */
+	function isMobile() {
+		try {
+			if(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Opera Mobile|Kindle|Windows Phone|PSP|AvantGo|Atomic Web Browser|Blazer|Chrome Mobile|Dolphin|Dolfin|Doris|GO Browser|Jasmine|MicroB|Mobile Firefox|Mobile Safari|Mobile Silk|Motorola Internet Browser|NetFront|NineSky|Nokia Web Browser|Obigo|Openwave Mobile Browser|Palm Pre web browser|Polaris|PS Vita browser|Puffin|QQbrowser|SEMC Browser|Skyfire|Tear|TeaShark|UC Browser|uZard Web|wOSBrowser|Yandex.Browser mobile/i.test(navigator.userAgent)) {
+				return true;
+			}
+			return false
+		}
+		catch(e){ console.log("Error in isMobile"); return false; }
+	}
+	/*function isMobile(){
+		let mobile = false;
+		if( /Android|webOS|iPhone|iPad|iPod|pocket|psp|kindle|avantgo|blazer|midori|Tablet|Palm|maemo|plucker|phone|BlackBerry|symbian|IEMobile|mobile|ZuneWP7|Windows Phone|Opera Mini/i.test(navigator.userAgent) ) {
+			mobile = true;
+		}
+		return mobile;
+	}*/
+
 	//Свайп вкладок
 	$(function() {
 		function widthOfList () {
@@ -595,11 +616,11 @@ $(function() {
 	}
 //////////////////////////////////////////////////////////////////////////
 	//Определение датчиков
-	var sensorsJson = {};
-	var globalSensorsJson = {};
-	var sensorsIntervalId = 0;
+	let sensorsJson = {};
+	let globalSensorsJson = {};
+	let sensorsIntervalId = 0;
 	//Глобальный объект dtoReceiver служит для опроса МК.
-	var dtoReceiver = {
+	let dtoReceiver = {
 		dtos: [],                               // Контейнер состояний в ОЗУ
 		frequencyRecordingToLocalStorage: 5,    // Частота архивации (Через сколько опросов осуществляется запись в localStorage)
 		reqestDelayDefalt: 1000,
@@ -642,6 +663,13 @@ $(function() {
 			//dtoJson["heaterPower"] = globalSensorsJson["power"];
 			//dtoJson["temperatures"] = globalSensorsJson["sensors"];
 			//console.log(dtoJson);
+			/*this.clearDeviceConditions();
+			if(plot.hasOwnProperty("series")) {
+				plot.series.forEach(function (s) {
+					s.setData([])
+				});
+				plot.redraw();
+			}*/
 			this.dtoGet(dtoJson,target);
 		}
 	};
@@ -668,8 +696,8 @@ $(function() {
 		}
 	});
 
-	var plot = {};
-	$(document).one("newDTOreceived", function (e) {
+	let plot = {};
+	$(document).one("newDTOreceived", function () {
 		//console.log(e);
 		if(Number(globalSensorsJson["process"]["allow"]) !== 0)
 			plot = getPlot();
@@ -923,11 +951,12 @@ $(function() {
 		for (let key in sensorsJson) {
 			if(sensorsJson.hasOwnProperty(key)){
 				sensorsSend[key] = {};
-				let val_color = $("#sensor_color_"+key).val();
-				if($("#sensor_name_"+key).val() === ""  && sensorsJson[key]["value"]<150)
+				let color_val = $("#sensor_color_"+key).val();
+				let sensor_val = $("#sensor_name_"+key).val();
+				if(sensor_val === ""  && sensorsJson[key]["value"]<150)
 					nameError = true;
-				sensorsSend[key]["name"] = sensorsJson[key]["name"] = $("#sensor_name_"+key).val();
-				sensorsSend[key]["color"] = sensorsJson[key]["color"] = (val_color !== "FFFFFF" && val_color !== "") ? hex2dec(val_color) : 0;
+				sensorsSend[key]["name"] = sensorsJson[key]["name"] = sensor_val;
+				sensorsSend[key]["color"] = sensorsJson[key]["color"] = (color_val !== "FFFFFF" && color_val !== "") ? hex2dec(color_val) : 0;
 
                 if(key !== "p1") {
                 	let sort_number = Number($("#sensor_number_"+key).val());
@@ -1000,7 +1029,7 @@ $(function() {
 		'</div>' +
 		'</div>';
 	//Привязка датчиков к процессу ректификации, и запуск
-	var refluxProcess = {"sensors":[],"power":0,"start":false};
+	let refluxProcess = {"sensors":[],"power":0,"start":false};
 	$(document).on('click','#reflux_add_sensor',function(e) {
 		e.preventDefault();
 		let _this = $(this);
@@ -1199,21 +1228,23 @@ $(function() {
 		//console.log(refluxProcess);
 		if(refluxProcess["start"] === true) {
 			getReflux();
-			//dtoReceiver.start();
-			//refluxStartProcess ()
 			$('#reflux_start').prop("disabled",true);
+			$('#reflux_add_sensor').prop("disabled",true);
 		}else{
+			$('#reflux_add_sensor').prop("disabled",false);
 			$('#reflux_stop').prop("disabled",true);
 		}
 	};
 
-	var tmpRefluxFlag = false;
+	//Флаг отправки данных процесса в МК
+	let flagSendProcess = false;
 	$(document).on('click','#reflux_start',function() {
 		let _this = $(this);
 		_this.prop("disabled",true);
+		$('#reflux_add_sensor').prop("disabled",true);
 		$('#reflux_stop').prop("disabled",false);
 		//let sendRefluxProcess = refluxProcess;
-		refluxProcess["start"] = tmpRefluxFlag = true;
+		refluxProcess["start"] = flagSendProcess = true;
 		//очищаем графики
 		dtoReceiver.clearDeviceConditions();
 		if(plot.hasOwnProperty("series")) {
@@ -1222,28 +1253,18 @@ $(function() {
 			});
 			plot.redraw();
 		}
-		//sendRequest("SensorsIn", sendRefluxProcess, "json", refluxStartProcess, _this, $("#error_reflux"),false);
-		//refluxStartProcess ();
-		//localStorage.setObj('reflux',refluxProcess);
 		setReflux();
 		setTimeout(getReflux, 1000);
-		//dtoReceiver.start();
 	});
 	$(document).on('click','#reflux_stop',function() {
 		let _this = $(this);
 		_this.prop("disabled",true);
+		$('#reflux_add_sensor').prop("disabled",false);
 		$('#reflux_start').prop("disabled",false);
 		$("#svg_reflux_start").css('stroke',"#000000");
-		//let sendRefluxProcess = refluxProcess;
-		//sendRefluxProcess["start"] = false;
-		//sendRequest("SetTempTest", sendRefluxProcess, "json", refluxStopProcess, _this, $("#error_reflux"),false);
-		//refluxStopProcess ();
-		tmpRefluxFlag = true;
+		flagSendProcess = true;
 		refluxProcess["start"] = false;
-		//localStorage.setObj('reflux',refluxProcess);
-		//getReflux();
 		setReflux();
-		//dtoReceiver.stop();
 	});
 	//Установка значений для ректификации
 	function setReflux() {
@@ -1259,11 +1280,11 @@ $(function() {
 			"t8":{"allertValue":0},
 			"power":0
 		};
-		let flag_send = false;
+		//let flag_send = false;
 		let power_set = $("#reflux_power_set");
 		refluxSendData["process"]["allow"] = (refluxProcess["start"] ? 2 : 0);
 		if(refluxProcess["power"] !== power_set.val())
-			flag_send = true;
+			flagSendProcess = true;
 		refluxSendData["power"] = refluxProcess["power"] = power_set.val();
 
 		$.each(refluxProcess["sensors"], function (i, e) {
@@ -1272,20 +1293,21 @@ $(function() {
 			let reflux_cutoff = $("#reflux_cutoff_"+sensor_key);
 			if(reflux_delta.length) {
 				if(e["allertValue"] !== reflux_delta.val())
-					flag_send = true;
+					flagSendProcess = true;
 				refluxSendData[sensor_key]["allertValue"] = e["allertValue"] = reflux_delta.val();
 			}
 			if(reflux_cutoff.length) {
 				if(e["allertValue"] !== reflux_cutoff.val())
-					flag_send = true;
+					flagSendProcess = true;
 				refluxSendData[sensor_key]["allertValue"] = e["allertValue"] = reflux_cutoff.val();
 			}
 		});
-		//console.log(refluxSendData);
-		if(tmpRefluxFlag)
-			flag_send = true;
-		if(flag_send) {
-			tmpRefluxFlag = false;
+		//console.log(flagSendProcess);
+		if(flagSendProcess) {
+			//tmpSendProcess = true;
+			//console.log(tmpSendProcess);
+			flagSendProcess = false;
+			//console.log(flagSendProcess);
 			localStorage.setObj('reflux', refluxProcess);
 			sendRequest("SensorsIn", refluxSendData, "json", false, false, $("#error_reflux"),false);
 		}
@@ -1353,18 +1375,18 @@ $(function() {
 			$("#svg_reflux_ten_t").text(power_value.toFixed(0) + "%");
 			$("#svg_reflux_color_ten").css('fill', colorPersent("#FF0000", power_value.toFixed(0), 100));
 			dtoJson["temperatures"] = refluxProcess["sensors"];
+			$("#view_distillation_chart").html("");
 			dtoReceiver.start(dtoJson, 'view_reflux_chart');
 		}
 		//console.log(globalSensorsJson);
 		//console.log(refluxProcess);
 		if (refluxProcess["start"] === true) {
 			setTimeout(getReflux, 2000);
-			//dtoReceiver.start(dtoJson);
 			$("#svg_reflux_start").css('stroke', "#02b500");
 		}
 	}
 	//Привязка датчиков к процессу дистиляции, и запуск
-	var distillationProcess = {"sensors":[],"power":0,"start":false};
+	let distillationProcess = {"sensors":[],"power":0,"start":false};
 	$(document).on('click','#distillation_add_sensor',function(e) {
 		e.preventDefault();
 		let _this = $(this);
@@ -1486,9 +1508,9 @@ $(function() {
 					sensorsDistillationSend[sensor_key]["name"] = name_sensor;
 				sensorsDistillationSend[sensor_key]["color"] = hex2dec(e["color"]);
 				sensorsDistillationSend[sensor_key]["member"] = 1;
-				let tpl_delta = '';
+				/*let tpl_delta = '';
 				let tpl_delta_result = '';
-				/*if (e["delta"]) {
+				if (e["delta"]) {
 					tpl_delta = returnTplHtml([{id:"distillation_delta_"+sensor_key, value: e["allertValue"], min: '0', max: '1', step: '0.05'}], deltaTempl);
 					tpl_delta_result = '<span id="distillation_delta_result_'+sensor_key+'"></span><span class="hidden">&#176С</span>';
 					tpl_delta_body +=
@@ -1557,13 +1579,155 @@ $(function() {
 		//console.log(distillationProcess);
 		if(distillationProcess["start"] === true) {
 			getDistillation();
-			//dtoReceiver.start();
-			//distillationStartProcess ()
 			$('#distillation_start').prop("disabled",true);
+			$('#distillation_add_sensor').prop("disabled",true);
 		}else{
 			$('#distillation_stop').prop("disabled",true);
+			$('#distillation_add_sensor').prop("disabled",false);
 		}
 	};
+	$(document).on('click','#distillation_start',function() {
+		let _this = $(this);
+		_this.prop("disabled",true);
+		$('#distillation_add_sensor').prop("disabled",true);
+		$('#distillation_stop').prop("disabled",false);
+		distillationProcess["start"] = flagSendProcess = true;
+		//очищаем графики
+		dtoReceiver.clearDeviceConditions();
+		if(plot.hasOwnProperty("series")) {
+			plot.series.forEach(function (s) {
+				s.setData([])
+			});
+			plot.redraw();
+		}
+		setDistillation();
+		setTimeout(getDistillation, 1000);
+	});
+	$(document).on('click','#distillation_stop',function() {
+		let _this = $(this);
+		_this.prop("disabled",true);
+		$('#distillation_add_sensor').prop("disabled",false);
+		$('#distillation_start').prop("disabled",false);
+		$("#svg_distillation_start").css('stroke',"#000000");
+		flagSendProcess = true;
+		distillationProcess["start"] = false;
+		setDistillation();
+	});
+	//Установка значений для дистиляции
+	function setDistillation() {
+		let distillationSendData = {
+			"process":{"allow":0,"number":0},
+			"t1":{"allertValue":0},
+			"t2":{"allertValue":0},
+			"t3":{"allertValue":0},
+			"t4":{"allertValue":0},
+			"t5":{"allertValue":0},
+			"t6":{"allertValue":0},
+			"t7":{"allertValue":0},
+			"t8":{"allertValue":0},
+			"power":0
+		};
+		//let flag_send = false;
+		let power_set = $("#distillation_power_set");
+		distillationSendData["process"]["allow"] = (distillationProcess["start"] ? 1 : 0);
+		if(distillationProcess["power"] !== power_set.val())
+			flagSendProcess = true;
+		distillationSendData["power"] = distillationProcess["power"] = power_set.val();
+
+		$.each(distillationProcess["sensors"], function (i, e) {
+			let sensor_key = e["key"];
+			//let distillation_delta = $("#distillation_delta_"+sensor_key);
+			let distillation_cutoff = $("#distillation_cutoff_"+sensor_key);
+			/*if(distillation_delta.length) {
+				if(e["allertValue"] !== distillation_delta.val())
+					flagSendProcess = true;
+				distillationSendData[sensor_key]["allertValue"] = e["allertValue"] = distillation_delta.val();
+			}*/
+			if(distillation_cutoff.length) {
+				if(e["allertValue"] !== distillation_cutoff.val())
+					flagSendProcess = true;
+				distillationSendData[sensor_key]["allertValue"] = e["allertValue"] = distillation_cutoff.val();
+			}
+		});
+		//console.log(flagSendProcess);
+		if(flagSendProcess) {
+			flagSendProcess = false;
+			localStorage.setObj('distillation', distillationProcess);
+			sendRequest("SensorsIn", distillationSendData, "json", false, false, $("#error_distillation"),false);
+		}
+	}
+	function getDistillation() {
+		//console.log("getDistillation");
+		setDistillation();
+		if(!$.fn.objIsEmpty(globalSensorsJson,false)) {
+			let dtoJson = {};
+			dtoJson["heaterPower"] = globalSensorsJson["power"];
+			dtoJson["temperatures"] = {};
+			$.each(globalSensorsJson["sensors"], function (i, e) {
+				let sensor_key = Object.keys(e).shift();
+				let sensor_value = globalSensorsJson["sensors"][i][sensor_key]["value"];
+				let alert_value = globalSensorsJson["sensors"][i][sensor_key]["allertValue"];
+				$.each(distillationProcess["sensors"], function (j, q) {
+					//console.log(j, q);
+					if (q["key"] === sensor_key) {
+						q["value"] = sensor_value;
+						if (sensor_key !== "p1") {
+							let color_value = q["color"];
+							let fillcolor = "#" + color_value;
+							if (Number(sensor_value) >= Number(alert_value)) {
+								$("#alert_bg_" + sensor_key).addClass("bg-danger");
+								$("#alert_text_" + sensor_key).addClass("text-danger");
+								// Вибрация поддерживается
+								/*if (window.navigator && window.navigator.vibrate) {
+									navigator.vibrate(1000);
+								}*/
+							} else {
+								$("#alert_bg_" + sensor_key).removeClass("bg-danger");
+								$("#alert_text_" + sensor_key).removeClass("text-danger");
+							}
+							//console.log(sensor_key, fillcolor,sensor_value,alert_value);
+							//if (q["delta"] === false) {
+								$("#svg_distillation_color_" + sensor_key).css('fill', colorPersent(fillcolor, sensor_value, alert_value));
+							/*} else {
+								let delta_alert = $("#distillation_delta_" + sensor_key).val();
+								let delta_value = (delta_alert - alert_value + sensor_value).toFixed(2);
+								//console.log(fillcolor, delta_value, delta_alert);
+								$("#svg_distillation_color_" + sensor_key).css('fill', colorPersent(fillcolor, delta_value, delta_alert));
+							}*/
+						}
+					}
+				});
+				$("#distillation_" + sensor_key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
+				let allertValue = globalSensorsJson["sensors"][i][sensor_key]["allertValue"];
+				allertValue = allertValue > 0 ? allertValue.toFixed(2) : "";
+				if (allertValue > 0) {
+					//$("#distillation_delta_result_" + sensor_key).text(allertValue).parent().find(".hidden").removeClass("hidden").addClass("show");
+					$("#distillation_cutoff_result_" + sensor_key).text(allertValue).parent().find(".hidden").removeClass("hidden").addClass("show");
+				}
+				/*if (sensor_key === "p1") {
+					$("#distillation_pressure").text(globalSensorsJson["sensors"][i]["p1"]["value"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
+					dtoJson["pressure"] = globalSensorsJson["sensors"][i]["p1"]["value"];
+				}*/
+				//svg
+				$("#svg_distillation_" + sensor_key).html(sensor_value.toFixed(0) + '&#176С');
+				//let fillcolor = temperaturePalette(sensor_value.toFixed(0));
+
+			});
+			//$("#distillation_alco_boil").text(globalSensorsJson["temperatureAlcoholBoil"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
+			let power_value = Number(globalSensorsJson["power"]);
+			$("#distillation_power_value").text(power_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
+			$("#svg_distillation_ten_t").text(power_value.toFixed(0) + "%");
+			$("#svg_distillation_color_ten").css('fill', colorPersent("#FF0000", power_value.toFixed(0), 100));
+			dtoJson["temperatures"] = distillationProcess["sensors"];
+			$("#view_reflux_chart").html("");
+			dtoReceiver.start(dtoJson, 'view_distillation_chart');
+		}
+		if (distillationProcess["start"] === true) {
+			setTimeout(getDistillation, 2000);
+			$("#svg_distillation_start").css('stroke', "#02b500");
+		}
+	}
+
 	//заполнение разных полей данными датчиков
 	function fillSensorsData() {
 		//$("#width_page").css({"border-bottom":"solid 1px red","text-align":"center","color":"red"}).text("thisWidth: "+$("#width_page").outerWidth()+", documentWidth: "+$(document).width());
@@ -1576,8 +1740,8 @@ $(function() {
 					$("#sensor_val_" + sensor_key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 					$("#svg_sensor_" + sensor_key).html(sensor_value.toFixed(0) + '&#176С');
 				}
-				//заполнение процесса ректификации
 				let process = Number(globalSensorsJson["process"]["allow"]);
+				//заполнение процесса ректификации
 				if(refluxProcess["start"] !== true && $.trim($("#reflux_process").html()) !== ""){
 					$("#reflux_" + sensor_key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 					if (sensor_key === "p1") {
@@ -1600,8 +1764,35 @@ $(function() {
 						$("#reflux_start_group_button").removeClass("hidden");
 				}
 				if(refluxProcess["start"] === true){
-					if(process === 0) {
+					if(process !== 2) {
 						$("#reflux_stop").trigger("click");
+					}
+				}
+				//заполнение процесса дистиляции
+				if(distillationProcess["start"] !== true && $.trim($("#distillation_process").html()) !== ""){
+					$("#distillation_" + sensor_key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
+					/*if (sensor_key === "p1") {
+						$("#distillation_pressure").text(globalSensorsJson["sensors"][i]["p1"]["value"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
+
+						$("#distillation_alco_boil").text(globalSensorsJson["temperatureAlcoholBoil"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
+
+					}*/
+					$("#distillation_power_value").text(globalSensorsJson["power"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
+					$("#svg_distillation_" + sensor_key).html(sensor_value.toFixed(0)+'&#176С');
+					$("#svg_distillation_ten_t").text(globalSensorsJson["power"]+'%');
+
+					if(process === 1) {
+						$("#distillation_start").trigger("click");
+					}
+
+					if(process > 0 && process !== 1)
+						$("#distillation_start_group_button").addClass("hidden");
+					if(process === 0)
+						$("#distillation_start_group_button").removeClass("hidden");
+				}
+				if(distillationProcess["start"] === true){
+					if(process !== 1) {
+						$("#distillation_stop").trigger("click");
 					}
 				}
 			});
@@ -1762,40 +1953,10 @@ $(function() {
 
 
 	//TODO не используется все что ниже
-	//Дистиляция
-	function getDistillation() {
-		$.ajax({
-			url: 'distillation.json',
-			data: {},
-			type: 'GET',
-			dataType: 'json',
-			success: function (msg) {
-				console.log('Distillation',msg);
-				$("#distillation_t_1").text(msg["temperature"]);
-				$("#distillation_t_2").text(msg["temperature2"]);
-				$("#distillation_t_3").text(msg["temperature3"]);
-				$("#distillation_t_4").text(msg["temperature4"]);
-				$("#distillation_get_setting").text(msg["settingTank"].toFixed(2));
-				if(msg["settingAlarmDistillation"] === false){
-					$("#distillation_status").removeClass("success").addClass("danger");
-				}else{
-					$("#distillation_status").removeClass("danger").addClass("success");
-				}
-			}
-		});
-	}
-	$("#distillation_set_setting").on("click",function () {
-		let setting = Number($("#distillation_setting").val());
-
-		//
-		$("#distillation_get_setting").text(setting);
-		sendRequest("SetTempTank",{"SettingTank":setting},"text",false,$(this),$("#error_distillation"),false);
-	});
-
 	//Затирание
 	// нужно думать с этими переменными (согласовать с ардуино), что бы можно было запускать затирание с любого шага
-	var start_brewing = 0;
-	var step_brewing = 0;
+	let start_brewing = 0;
+	let step_brewing = 0;
 	function getBrewing() {
 		$.ajax({
 			url: 'brewing.json',
