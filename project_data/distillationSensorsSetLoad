@@ -6,6 +6,5 @@
   "t5":{"value":35.00,"name":"Левый датчик","color":33415,"member":0,"priority":0,"allertValue":0},
   "t6":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
   "t7":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
-  "t8":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
-  "p1":{"value":760.00,"color":1887,"member":0}
+  "t8":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0}
 }
