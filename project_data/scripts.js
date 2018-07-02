@@ -703,18 +703,32 @@ $(function() {
 	});
 
 	let plot = {};
-	$(document).one("newDTOreceived", function () {
-		console.log(dtoReceiver.dtoContainer);
+	/*$(document).one("newDTOreceived", function (e) {
+		console.log(e,dtoReceiver.dtoContainer);
 		let process = Number(globalSensorsJson["process"]["allow"]);
-		/*let oldStartProcess = Number(localStorage.getItem('oldStartProcess'));
+		/!*let oldStartProcess = Number(localStorage.getItem('oldStartProcess'));
 		if(process > 0 && oldStartProcess !== process) {
 			clearChart();
-		}*/
+		}*!/
 		if(process !== 0)
 			plot = getPlot();
-	});
+	});*/
+
+	function startChart() {
+		$(document).one("newDTOreceived", function (e) {
+			console.log(e,dtoReceiver.dtoContainer);
+			let process = Number(globalSensorsJson["process"]["allow"]);
+			/*let oldStartProcess = Number(localStorage.getItem('oldStartProcess'));
+			if(process > 0 && oldStartProcess !== process) {
+				clearChart();
+			}*/
+			if(process !== 0)
+				plot = getPlot();
+		});
+	}
 
 	function clearChart() {
+		$(document).off("newDTOreceived");
 		plot = {};
 		console.log("clearChart");
 		dtoReceiver.clearDeviceConditions();
@@ -1074,27 +1088,29 @@ $(function() {
 			for (let key in sensors) {
 				if (sensors.hasOwnProperty(key)) {
 					let sensor_name = (sensors[key].hasOwnProperty("name") ? sensors[key]["name"] : "");
-					let sensor_delta = '<label class="checkbox-inline"><input disabled id="delta_' + key + '" name="reflux_radio_' + key + '" type="radio" value="Y">Уставка</label>';
-					let sensor_cutoff = '<label class="checkbox-inline"><input disabled id="cutoff_' + key + '" name="reflux_radio_' + key + '" type="radio" value="Y">Отсечка</label>';
-					if(key !== "p1") {
-						//sensor_delta = sensor_cutoff = '';
-						//sensor_name = "Атмосферное давление";
+					if(sensor_name !== "") {
+						let sensor_delta = '<label class="checkbox-inline"><input disabled id="delta_' + key + '" name="reflux_radio_' + key + '" type="radio" value="Y">Уставка</label>';
+						let sensor_cutoff = '<label class="checkbox-inline"><input disabled id="cutoff_' + key + '" name="reflux_radio_' + key + '" type="radio" value="Y">Отсечка</label>';
+						if (key !== "p1") {
+							//sensor_delta = sensor_cutoff = '';
+							//sensor_name = "Атмосферное давление";
 
-						let jscolor = sensors[key]["color"] > 0 ? dec2hex(sensors[key]["color"]) : "FFFFFF";
-						let disabled_check = "";
-						if (sensor_name === "")
-							disabled_check = "disabled";
+							let jscolor = sensors[key]["color"] > 0 ? dec2hex(sensors[key]["color"]) : "FFFFFF";
+							let disabled_check = "";
+							if (sensor_name === "")
+								disabled_check = "disabled";
 
-						section += '<tr><td>' +
-							'<div class="input-group input-group-sm">' +
-							'<span class="input-group-addon" style="background-color: #' + jscolor + '">' + key + '</span>' +
-							'<input id="reflux_name_' + key + '" class="form-control input-sm" type="text" value="' + sensor_name + '">' +
-							'<input type="hidden" id="reflux_color_' + key + '" value="' + jscolor + '">' +
-							'</div></td>' +
-							'<td><input ' + disabled_check + ' data-sensor="' + key + '" type="checkbox" value="' + key + '"></td>' +
-							'<td>' + sensor_delta + '</td>' +
-							'<td>' + sensor_cutoff + '</td>' +
-							'</tr>';
+							section += '<tr><td>' +
+								'<div class="input-group input-group-sm">' +
+								'<span class="input-group-addon" style="background-color: #' + jscolor + '">' + key + '</span>' +
+								'<input id="reflux_name_' + key + '" class="form-control input-sm" type="text" value="' + sensor_name + '">' +
+								'<input type="hidden" id="reflux_color_' + key + '" value="' + jscolor + '">' +
+								'</div></td>' +
+								'<td><input ' + disabled_check + ' data-sensor="' + key + '" type="checkbox" value="' + key + '"></td>' +
+								'<td>' + sensor_delta + '</td>' +
+								'<td>' + sensor_cutoff + '</td>' +
+								'</tr>';
+						}
 					}
 				}
 			}
@@ -1279,6 +1295,7 @@ $(function() {
 		refluxProcess["start"] = flagSendProcess = true;
 		//очищаем графики
 		clearChart();
+		startChart();
 		setReflux();
 		setTimeout(getReflux, 2000);
 	});
@@ -1636,6 +1653,7 @@ $(function() {
 		localStorage.setObj('oldStartProcess', 1);
 		//очищаем графики
 		clearChart();
+		startChart();
 		setDistillation();
 		setTimeout(getDistillation, 2000);
 	});
@@ -1778,7 +1796,164 @@ $(function() {
 			$("#svg_distillation_start").css('stroke', "#02b500");
 		}
 	}
+	//Привязка датчиков к процессу затирания, и запуск
+	let brewingProcess = {"sensors":[],"power":0,"start":false};
+	$(document).on('click','#brewing_add_sensor',function(e) {
+		e.preventDefault();
+		let _this = $(this);
+		sendRequest("brewingSensorsSetLoad", {}, "json", selectSensorsBrewing, _this, $("#error_brewing"),false);
+	});
+	//Запрос датчиков для затирания и вывод их в диалоговое окно
+	function selectSensorsBrewing(data){
+		let sensors = data;//sensorsJson
+		//console.log(sensors);
+		if(sensors !== null) {
+			let section = '<section id="brewing_sensors" class="table-responsive"><table class="table table-noborder">';
+			for (let key in sensors) {
+				if (sensors.hasOwnProperty(key)/* && key !== "p1"*/) {
+					let sensor_name = (sensors[key].hasOwnProperty("name") ? sensors[key]["name"] : "");
+					let sensor_cutoff = '<label class="checkbox-inline"><input disabled id="cutoff_' + key + '" name="brewing_radio_' + key + '" type="radio" value="Y">Отсечка</label>';
+					let jscolor = sensors[key]["color"] > 0 ? dec2hex(sensors[key]["color"]) : "FFFFFF";
+					let disabled_check = "";
+					if(sensor_name === "")
+						disabled_check = "disabled";
 
+					section += '<tr><td>' +
+						'<div class="input-group input-group-sm">'+
+						'<span class="input-group-addon" style="background-color: #'+jscolor+'">' + key + '</span>'+
+						'<input id="brewing_name_' + key + '" class="form-control input-sm" type="text" value="' + sensor_name + '">'+
+						'<input type="hidden" id="brewing_color_' + key + '" value="'+jscolor+'">'+
+						'</div></td>'+
+						'<td><input '+disabled_check+' data-sensor="' + key + '" type="checkbox" value="' + key + '"></td>' +
+						'<td>'+sensor_cutoff+'</td>' +
+						'</tr>';
+				}
+			}
+			section += '</table></section>';
+			$.fn.openModal('Выбор датчиков для затирания', section, "modal-md", false, {
+					text: "Выбрать",
+					id: "sensors_select",
+					class: "btn btn-success",
+					click: function () {
+						let sensors_select = $('#brewing_sensors input[type=checkbox]');
+						brewingProcess["sensors"] = $.map(sensors_select, function (e) {
+							if ($(e).is(":checked")) {
+								//console.log($(e).data("sensor"));
+								let key = $(e).data("sensor");
+								let name = $("#brewing_name_" + key).val();
+								let val_color = $("#brewing_color_" + key).val();
+								//let color = (val_color !== "FFFFFF" && val_color !== "") ? hex2dec(val_color) : 0;
+								let color = (val_color !== "FFFFFF" && val_color !== "") ? val_color : "FFFFFF";
+								let cutoff = $("#cutoff_" + key).prop("checked");
+								return {"key": key, "name": name, "cutoff": cutoff, "color": color, "allertValue":0, "value":0};
+							}
+						});
+						localStorage.setObj('brewing', brewingProcess);
+						//console.log(ar_sensors);
+						$(this).closest(".modal").modal("hide");
+						$.fn.pasteBrewingSensors(true);
+					}
+				},
+				{id: "modal_sensors_select"}
+			);
+		}
+	}
+	$(document).on('click','#brewing_sensors input[type=checkbox]',function() {
+		let checked = !$(this).prop("checked");
+		let radio_cutoff = $("#cutoff_"+$(this).data("sensor"));
+		radio_cutoff.prop("disabled",checked);
+		if(checked) {
+			radio_cutoff.prop("checked",false);
+		}
+	});
+	$.fn.pasteBrewingSensors = function(sensors_select){
+		let sensorsBrewingSend = {
+			"t1":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
+			"t2":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
+			"t3":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
+			"t4":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
+			"t5":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
+			"t6":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
+			"t7":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
+			"t8":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0}
+		};
+		let brewingTemplate = '';
+		let localBrewing = localStorage.getObj('brewing');
+		if(localBrewing !== null)
+			brewingProcess = localBrewing;
+		if(brewingProcess["sensors"].length > 0) {
+			let tpl_cutoff_thead =
+				'<div class="row-xs">'+
+				'<div class="col-xs-4 col-xs-offset-0 col-sm-3 col-sm-offset-4 text-center text-middle text-primary">Значение</div>' +
+				'<div class="col-xs-4 col-xs-offset-4 col-sm-2 col-sm-offset-3 text-center text-middle text-primary">Отсечка</div>' +
+				'</div>';
+			let tpl_cutoff_body = '';
+			let tpl_all_body = '';
+			$.each(brewingProcess["sensors"], function (i, e) {
+				//console.log(i,e);
+				let sensor_key = e["key"];
+				let name_sensor = e["name"];
+				if(sensorsBrewingSend[sensor_key].hasOwnProperty("name"))
+					sensorsBrewingSend[sensor_key]["name"] = name_sensor;
+				sensorsBrewingSend[sensor_key]["color"] = hex2dec(e["color"]);
+				sensorsBrewingSend[sensor_key]["member"] = 1;
+				let tpl_cutoff = '';
+				if (e["cutoff"]) {
+					tpl_cutoff = returnTplHtml([{id:"brewing_cutoff_"+sensor_key, value: e["allertValue"], min: '0', max: '105', step: '0.5'}], deltaTempl);
+					tpl_cutoff_body +=
+						'<div class="row row-striped">' + tpl_cutoff_thead +
+						'<div id="alert_bg_'+sensor_key+'" class="pt-10 pb-10 clearfix">' +
+						'<div id="alert_text_'+sensor_key+'" class="col-xs-12 col-sm-4 text-center-xs"><strong>t&#176' + name_sensor + '</strong></div>' +
+						'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="brewing_' + sensor_key + '"></span><span class="hidden">&#176С</span></strong></div>' +
+						//'<div class="col-xs-3 col-sm-3"></div>' +
+						'<div class="col-xs-4 col-xs-offset-3 col-sm-2 col-sm-offset-3">' + tpl_cutoff +
+						'</div>' +
+						'</div>' +
+						'</div>';
+
+					tpl_cutoff_thead = '';
+				}
+				if(/*sensor_key !== "p1" && */!e["delta"] && !e["cutoff"]) {
+					tpl_all_body += '<div class="row row-striped">' +
+						'<div class="pt-10 pb-10 clearfix">' +
+						'<div class="col-xs-12 col-sm-4 text-center-xs"><strong>t&#176' + name_sensor + '</strong></div>' +
+						'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="brewing_' + sensor_key + '"></span><span class="hidden">&#176С</span></strong></div>' +
+						'<div class="col-xs-3 col-sm-3"></div>' +
+						'<div class="col-xs-4 col-sm-3"></div>' +
+						'</div>' +
+						'</div>';
+				}
+			});
+			//sensors["process"]["allow"] = 2;
+			if(tpl_cutoff_body !== '') {
+				brewingTemplate += tpl_cutoff_thead + tpl_cutoff_body;
+			}
+			if(tpl_all_body !== '') {
+				brewingTemplate += tpl_all_body;
+			}
+		}
+		if(brewingTemplate !== '') {
+			if(sensors_select)
+				sendRequest("brewingSensorsSetSave", sensorsBrewingSend, "json", false, false, $("#error_brewing"),false);
+			//localStorage.setObj('sensors', sensors);
+			brewingTemplate = returnTplHtml([{id_value:"brewing_power_value",id_set:"brewing_power_set"}], powerTempl) + brewingTemplate/* + pressureTemplate*/;
+			$("#brewing_start_group_button").removeClass("hidden");
+			$("#svg_brewing").show();
+		}else{
+			$("#brewing_start_group_button").addClass("hidden");
+		}
+		$("#brewing_process").html(brewingTemplate);
+		$("#brewing_power_set").val(brewingProcess["power"]);
+		//console.log(brewingProcess);
+		if(brewingProcess["start"] === true) {
+			getBrewing();
+			$('#brewing_start').prop("disabled",true);
+			$('#brewing_add_sensor').prop("disabled",true);
+		}else{
+			$('#brewing_stop').prop("disabled",true);
+			$('#brewing_add_sensor').prop("disabled",false);
+		}
+	};
 	//заполнение разных полей данными датчиков
 	function fillSensorsData() {
 		//$("#width_page").css({"border-bottom":"solid 1px red","text-align":"center","color":"red"}).text("thisWidth: "+$("#width_page").outerWidth()+", documentWidth: "+$(document).width());
@@ -1909,17 +2084,8 @@ $(function() {
 				$("#settings_ssidap").val(msg["ssidAP"]);
 				$("#settings_passwordap").val(msg["passwordAP"]);
 				$("#settings_timezone").val(msg["timezone"]);
-
-
-				//sensorsConditions.push({
-				//        temperatures: msg["temperatures"]
-				//    }
-				//);
-
-				// setTimeout(getDistillation, 2000);
-				// setTimeout(getReflux, 2000);
 			}
-		})/*.done()*/;
+		});
 	}
     //Обновление прошивки
 	$("#file_update").on("change",function () {
@@ -1937,7 +2103,6 @@ $(function() {
 			url: 'update',
 			type: 'POST',
 			data: formData,
-			//async: false,
 			cache: false,
 			contentType: false,
 			enctype: 'multipart/form-data',

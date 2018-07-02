@@ -12,20 +12,20 @@
 	{"p1":{"value":760.00,"color":0,"member":0}}
 ],
 	"devices":[
-	{"out1":{"value":0,"member":0}},
-	{"out2":{"value":0,"member":0}},
-	{"out3":{"value":0,"member":0}},
-	{"out4":{"value":0,"member":0}},
-	{"out5":{"value":0,"member":0}},
-	{"out6":{"value":0,"member":0}},
-	{"out7":{"value":0,"member":0}},
-	{"out8":{"value":0,"member":0}}
+	{"out1":{"value":0,"member":0,"allert":0}},
+	{"out2":{"value":0,"member":0,"allert":0}},
+	{"out3":{"value":0,"member":0,"allert":0}},
+	{"out4":{"value":0,"member":0,"allert":0}},
+	{"out5":{"value":0,"member":0,"allert":0}},
+	{"out6":{"value":0,"member":0,"allert":0}},
+	{"out7":{"value":0,"member":0,"allert":0}},
+	{"out8":{"value":0,"member":0,"allert":0}}
 ],
 	"safety":[
-	{"in1":{"value":0,"allert":0}},
-	{"in2":{"value":0,"allert":0}},
-	{"in3":{"value":0,"allert":0}},
-	{"in4":{"value":0,"allert":0}}
+	{"in1":{"value":0,"member":0,"allert":0}},
+	{"in2":{"value":0,"member":0,"allert":0}},
+	{"in3":{"value":0,"member":0,"allert":0}},
+	{"in4":{"value":0,"member":0,"allert":0}}
 ],
 	"power":80,
 	"temperatureAlcoholBoil":78.15,
