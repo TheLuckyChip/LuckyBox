@@ -1082,37 +1082,76 @@ $(function() {
 	//Запрос датчиков для ректификации и вывод их в диалоговое окно
 	function selectSensorsReflus(data){
 		let sensors = data;//sensorsJson
-		//console.log(sensors);
+		console.log(sensors);
 		if(sensors !== null) {
 			let section = '<section id="reflux_sensors" class="table-responsive"><table class="table table-noborder">';
+			let tpl_temperature = '';
+			let tpl_devices = '';
+			let tpl_safety = '';
+			let re_t = new RegExp(/^t/);
+			let re_out = new RegExp(/^out/);
+			let re_in = new RegExp(/^in/);
 			for (let key in sensors) {
 				if (sensors.hasOwnProperty(key)) {
 					let sensor_name = (sensors[key].hasOwnProperty("name") ? sensors[key]["name"] : "");
 					if(sensor_name !== "") {
-						let sensor_delta = '<label class="checkbox-inline"><input disabled id="delta_' + key + '" name="reflux_radio_' + key + '" type="radio" value="Y">Уставка</label>';
-						let sensor_cutoff = '<label class="checkbox-inline"><input disabled id="cutoff_' + key + '" name="reflux_radio_' + key + '" type="radio" value="Y">Отсечка</label>';
-						if (key !== "p1") {
+						//if (key !== "p1") {
+						if (re_t.test(key)) {
+							let sensor_delta = '<label class="checkbox-inline"><input disabled id="delta_' + key + '" name="reflux_radio_' + key + '" type="radio" value="Y">Уставка</label>';
+							let sensor_cutoff = '<label class="checkbox-inline"><input disabled id="cutoff_' + key + '" name="reflux_radio_' + key + '" type="radio" value="Y">Отсечка</label>';
+							//console.log(sensor_name);
 							//sensor_delta = sensor_cutoff = '';
 							//sensor_name = "Атмосферное давление";
 
 							let jscolor = sensors[key]["color"] > 0 ? dec2hex(sensors[key]["color"]) : "FFFFFF";
-							let disabled_check = "";
-							if (sensor_name === "")
-								disabled_check = "disabled";
+							//let disabled_check = "";
+							//if (sensor_name === "")
+								//disabled_check = "disabled";
 
-							section += '<tr><td>' +
+							tpl_temperature += '<tr><td>' +
 								'<div class="input-group input-group-sm">' +
 								'<span class="input-group-addon" style="background-color: #' + jscolor + '">' + key + '</span>' +
 								'<input id="reflux_name_' + key + '" class="form-control input-sm" type="text" value="' + sensor_name + '">' +
 								'<input type="hidden" id="reflux_color_' + key + '" value="' + jscolor + '">' +
 								'</div></td>' +
-								'<td><input ' + disabled_check + ' data-sensor="' + key + '" type="checkbox" value="' + key + '"></td>' +
+								'<td><input data-sensor="' + key + '" type="checkbox" value="' + key + '"></td>' +
 								'<td>' + sensor_delta + '</td>' +
 								'<td>' + sensor_cutoff + '</td>' +
 								'</tr>';
 						}
+						if (re_out.test(key)) {
+							tpl_devices += '<tr><td>' +
+								'<div class="input-group input-group-sm">' +
+								'<span class="input-group-addon">' + key + '</span>' +
+								'<input id="reflux_name_' + key + '" class="form-control input-sm" type="text" value="' + sensor_name + '">' +
+								'</div></td>' +
+								'<td><input data-sensor="' + key + '" type="checkbox" value="' + key + '"></td>' +
+								'<td></td>' +
+								'<td></td>' +
+								'</tr>';
+						}
+						if (re_in.test(key)) {
+							tpl_safety += '<tr><td>' +
+								'<div class="input-group input-group-sm">' +
+								'<span class="input-group-addon">' + key + '</span>' +
+								'<input id="reflux_name_' + key + '" class="form-control input-sm" type="text" value="' + sensor_name + '">' +
+								'</div></td>' +
+								'<td><input data-sensor="' + key + '" type="checkbox" value="' + key + '"></td>' +
+								'<td></td>' +
+								'<td></td>' +
+								'</tr>';
+						}
 					}
 				}
+			}
+			if(tpl_temperature !== ''){
+				section += '<tr><td colspan="4" class="text-center text-strong">Датчики температуры</td></tr>' + tpl_temperature;
+			}
+			if(tpl_devices !== ''){
+				section += '<tr><td colspan="4" class="text-center text-strong">Клапана</td></tr>' + tpl_devices;
+			}
+			if(tpl_safety !== ''){
+				section += '<tr><td colspan="4" class="text-center text-strong">Датчики безопасности</td></tr>' + tpl_safety;
 			}
 			section += '</table></section>';
 			$.fn.openModal('Выбор датчиков для ректификации', section, "modal-md", false, {

@@ -44,6 +44,9 @@ span.show {
 	margin: 0 auto;
 	/*float: none;*/
 }
+.text-strong{
+	font-weight: bold;
+}
 .table-noborder td,
 .table-noborder th {
 	border: 0!important;
