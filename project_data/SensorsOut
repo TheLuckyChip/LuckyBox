@@ -1,5 +1,5 @@
 {
-	"process":{"allow":0,"number":0},
+	"process":{"allow":2,"number":0},
 	"sensors":[
 	{"t1":{"value":54.00,"name":"В кубе","color":64588,"member":0,"priority":0,"allertValue":78.50}},
 	{"t2":{"value":55.00,"name":"В царге","color":7905,"member":0,"priority":0,"allertValue":55.45}},

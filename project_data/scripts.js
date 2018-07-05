@@ -1,8 +1,8 @@
 (function ($) {
     /**
      * Проверка объекта на пустоту
-     * @param obj - Объект
-     * @param key - Проверять ключи в объекте
+     * @param {object} obj - Объект
+     * @param {boolean} key - Проверять ключи в объекте
      * @returns {boolean}
      */
     $.fn.objIsEmpty = function (obj,key) {
@@ -619,6 +619,10 @@ $(function() {
 	let sensorsJson = {};
 	let globalSensorsJson = {};
 	let sensorsIntervalId = 0;
+	//регекспы для датчиков
+	const re_t = new RegExp(/^t/);
+	const re_out = new RegExp(/^out/);
+	const re_in = new RegExp(/^in/);
 	//Глобальный объект dtoReceiver служит для опроса МК.
 	let dtoReceiver = {
 		dtos: [],                               // Контейнер состояний в ОЗУ
@@ -893,17 +897,18 @@ $(function() {
 
 		dtoReceiver.dtos[0].temperatures.forEach(function (t, i) {
 			console.log("plot",t, i);
-			if (t["key"] !== "p1") {
+			//if (t["key"] !== "p1") {
+			/*if (re_t.test(key)){
 				plotNew.addSeries({
 					name: t["name"],
-					color: "#" + t["color"],
-					//color: "#"+dec2hex(t["color"]),
+					//color: "#" + t["color"],
+					color: "#"+dec2hex(t["color"]),
 					data: dtoReceiver.dtos.map(function (dc) {
 						//console.log(dc.temperatures[i]["value"]);
 						return [dc.dateTime, dc.temperatures[i]["value"]]
 					})
 				});
-			}
+			}*/
 		});
 
 		$(document).on("newDTOreceived", function (e, dto) {
@@ -921,12 +926,12 @@ $(function() {
 				}*/
 				dto.temperatures.forEach(function (t, i) {
 					console.log("newDTOreceived", t, i);
-					if (t["key"] !== "p1") {
+					/*if (t["key"] !== "p1") {
 						//plot.series[1].addPoint([dto.dateTime, dto.temperatures[i]["value"]], false);
 						//console.log(t,i);
 						//}else {
 						plotNew.series[count + 1].addPoint([dto.dateTime, dto.temperatures[i]["value"]], false);
-					}
+					}*/
 					count++;
 				});
 			}
@@ -963,27 +968,35 @@ $(function() {
 	//Заполнение вкладки датчики данными после запроса
 	function getSensors(data) {
 		//console.log(data);
+		sensorsJson = data;
 		let sensors = data;
 		for (let key in sensors) {
 			if(sensors.hasOwnProperty(key)) {
-				let jscolor = sensors[key]["color"] > 0 ? dec2hex(sensors[key]["color"]) : "FFFFFF";
 				let sensor_value =  sensors[key]["value"];
-				if (sensor_value < 150) {
-					$("#sensor_name_" + key).val(sensors[key]["name"]);
-					$("#sensor_color_" + key).val(jscolor).next("button").css("background-color", "#" + jscolor);
-					$("#sensor_val_" + key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
-					$("#svg_sensor_" + key).html(sensor_value.toFixed(0)+'&#176С');
-					$("#svg_sensor_color_" + key).css('fill',jscolor);
-				} else {
-					if (!$.fn.objIsEmpty(sensors[key]["name"], false))
-						$("#sensor_name_" + key).val("");
-					$("#sensor_color_" + key).val(jscolor).next("button").css("background-color", "#" + jscolor);
-					$("#sensor_val_" + key).text("").parent().find(".show").removeClass("show").addClass("hidden");
+				if (re_t.test(key)) {
+					let jscolor = sensors[key]["color"] > 0 ? dec2hex(sensors[key]["color"]) : "FFFFFF";
+					if (sensor_value < 150) {
+						$("#sensor_name_" + key).val(sensors[key]["name"]);
+						$("#sensor_color_" + key).val(jscolor).next("button").css("background-color", "#" + jscolor);
+						$("#sensor_val_" + key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
+						$("#svg_sensor_" + key).html(sensor_value.toFixed(0) + '&#176С');
+						$("#svg_sensor_color_" + key).css('fill', jscolor);
+					} else {
+						if (!$.fn.objIsEmpty(sensors[key]["name"], false))
+							$("#sensor_name_" + key).val("");
+						$("#sensor_color_" + key).val(jscolor).next("button").css("background-color", "#" + jscolor);
+						$("#sensor_val_" + key).text("").parent().find(".show").removeClass("show").addClass("hidden");
+					}
+				}
+				if (re_out.test(key)) {
+					$("#device_name_" + key).val(sensors[key]["name"]);
+				}
+				if (re_in.test(key)) {
+					$("#safety_name_" + key).val(sensors[key]["name"]);
 				}
 			}
 		}
-		sensorsJson = data;
-		localStorage.setObj('sensors', sensorsJson);
+		//localStorage.setObj('sensors', sensorsJson);
 	}
 	//Сохранение датчиков и их сортировки
 	$(document).on('click','#set_sensors',function(e) {
@@ -995,19 +1008,28 @@ $(function() {
 		for (let key in sensorsJson) {
 			if(sensorsJson.hasOwnProperty(key)){
 				sensorsSend[key] = {};
-				let color_val = $("#sensor_color_"+key).val();
-				let sensor_val = $("#sensor_name_"+key).val();
-				if(sensor_val === ""  && sensorsJson[key]["value"]<150)
-					nameError = true;
-				sensorsSend[key]["name"] = sensorsJson[key]["name"] = sensor_val;
-				sensorsSend[key]["color"] = sensorsJson[key]["color"] = (color_val !== "FFFFFF" && color_val !== "") ? hex2dec(color_val) : 0;
+				if (re_t.test(key)) {
+					let color_val = $("#sensor_color_" + key).val();
+					let sensor_val = $("#sensor_name_" + key).val();
+					if (sensor_val === "" && sensorsJson[key]["value"] < 150)
+						nameError = true;
+					sensorsSend[key]["name"] = sensorsJson[key]["name"] = sensor_val;
+					//console.log(key,color_val);
+					sensorsSend[key]["color"] = sensorsJson[key]["color"] = (color_val !== "FFFFFF" && color_val !== "") ? hex2dec(color_val) : 0;
 
-                if(key !== "p1") {
-                	let sort_number = Number($("#sensor_number_"+key).val());
-                    if(sort_number !== 0)
-                        $.fn.arrayUnset(arrSortSensors, sort_number);
-                    sensorsSend[key]["number"] = sensorsJson[key]["number"] = sort_number;
-         	   }
+					if (key !== "p1") {
+						let sort_number = Number($("#sensor_number_" + key).val());
+						if (sort_number !== 0)
+							$.fn.arrayUnset(arrSortSensors, sort_number);
+						sensorsSend[key]["number"] = sensorsJson[key]["number"] = sort_number;
+					}
+				}
+				if (re_out.test(key)) {
+					sensorsSend[key]["name"] = sensorsJson[key]["name"] = $("#device_name_" + key).val();
+				}
+				if (re_in.test(key)) {
+					sensorsSend[key]["name"] = sensorsJson[key]["name"] = $("#safety_name_" + key).val();
+				}
 			}
 		}
         let count = 0;
@@ -1073,7 +1095,7 @@ $(function() {
 		'</div>' +
 		'</div>';
 	//Привязка датчиков к процессу ректификации, и запуск
-	let refluxProcess = {"sensors":[],"power":0,"start":false};
+	let refluxProcess = {"sensors":[],"power":0,"start":false};//"devices":[],"safety":[],
 	$(document).on('click','#reflux_add_sensor',function(e) {
 		e.preventDefault();
 		let _this = $(this);
@@ -1088,9 +1110,6 @@ $(function() {
 			let tpl_temperature = '';
 			let tpl_devices = '';
 			let tpl_safety = '';
-			let re_t = new RegExp(/^t/);
-			let re_out = new RegExp(/^out/);
-			let re_in = new RegExp(/^in/);
 			for (let key in sensors) {
 				if (sensors.hasOwnProperty(key)) {
 					let sensor_name = (sensors[key].hasOwnProperty("name") ? sensors[key]["name"] : "");
@@ -1164,17 +1183,28 @@ $(function() {
 							if ($(e).is(":checked")) {
 								//console.log($(e).data("sensor"));
 								let key = $(e).data("sensor");
+								let tmp = false;
+								if (re_t.test(key)) {
+									tmp = true;
+								}
 								let name = $("#reflux_name_" + key).val();
-								let val_color = $("#reflux_color_" + key).val();
+								let val_color = (tmp ? $("#reflux_color_" + key).val() : "");
 								//let color = (val_color !== "FFFFFF" && val_color !== "") ? hex2dec(val_color) : 0;
 								let color = (val_color !== "FFFFFF" && val_color !== "") ? val_color : "FFFFFF";
-								let delta = $("#delta_" + key).prop("checked");
-								let cutoff = $("#cutoff_" + key).prop("checked");
-								return {"key": key, "name": name, "delta": delta, "cutoff": cutoff, "color": color, "allertValue":0, "value":0};
+								let delta = (tmp ? $("#delta_" + key).prop("checked") : false);
+								let cutoff = (tmp ? $("#cutoff_" + key).prop("checked") : false);
+
+								let obj = {};
+								if(tmp) {
+									//"t1":{"value":54.00,"name":"В кубе","color":64588,"delta":false,"cutoff":true,"priority":0,"allertValue":53.00},
+									return obj[key] = {"name": name, "delta": delta, "cutoff": cutoff, "color": color, "allertValue": 0, "value": 0};
+								}else{
+									return obj[key] = {"name": name, "value": 0};
+								}
 							}
 						});
 						//refluxProcess["sensors"] = reflux_sensors;
-						localStorage.setObj('reflux', refluxProcess);
+						//localStorage.setObj('reflux', refluxProcess);
 						//console.log(ar_sensors);
 						$(this).closest(".modal").modal("hide");
 						$.fn.pasteRefluxSensors(true);
@@ -1204,21 +1234,48 @@ $(function() {
 	$.fn.pasteRefluxSensors = function(sensors_select){
 		//let sensors = localStorage.getObj('sensors');//sensorsJson
 		let sensorsRefluxSend = {
-			"t1":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
-			"t2":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
-			"t3":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
-			"t4":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
-			"t5":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
-			"t6":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
-			"t7":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
-			"t8":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0}
+			"t1":{"name":"","delta":false,"cutoff":false,"color":0,"member":0,"priority":0,"allertValue":0},
+			"t2":{"name":"","delta":false,"cutoff":false,"color":0,"member":0,"priority":0,"allertValue":0},
+			"t3":{"name":"","delta":false,"cutoff":false,"color":0,"member":0,"priority":0,"allertValue":0},
+			"t4":{"name":"","delta":false,"cutoff":false,"color":0,"member":0,"priority":0,"allertValue":0},
+			"t5":{"name":"","delta":false,"cutoff":false,"color":0,"member":0,"priority":0,"allertValue":0},
+			"t6":{"name":"","delta":false,"cutoff":false,"color":0,"member":0,"priority":0,"allertValue":0},
+			"t7":{"name":"","delta":false,"cutoff":false,"color":0,"member":0,"priority":0,"allertValue":0},
+			"t8":{"name":"","delta":false,"cutoff":false,"color":0,"member":0,"priority":0,"allertValue":0},
+			"out1":{"name":"","member":0},
+			"out2":{"name":"","member":0},
+			"out3":{"name":"","member":0},
+			"out4":{"name":"","member":0},
+			"out5":{"name":"","member":0},
+			"out6":{"name":"","member":0},
+			"out7":{"name":"","member":0},
+			"out8":{"name":"","member":0},
+			"in1":{"name":"","member":0},
+			"in2":{"name":"","member":0},
+			"in3":{"name":"","member":0},
+			"in4":{"name":"","member":0}
 			//,"p1":{"value":760.00,"color":0,"member":0}
 		};
 		let refluxTemplate = '';
-		let localReflux = localStorage.getObj('reflux');
-		if(localReflux !== null)
-			refluxProcess = localReflux;
-		if(refluxProcess["sensors"].length > 0) {
+		let tpl_devices_body = '';
+		let tpl_safety_body = '';
+		//let localReflux = localStorage.getObj('reflux');
+		//if(localReflux !== null) //refluxProcess = localReflux;
+		if(!sensors_select && $.fn.objIsEmpty(refluxProcess["sensors"],false)){
+			//console.log('empty');
+			$.ajax({
+				url: 'refluxSensorsGetTpl',
+				data: {},
+				type: 'GET',
+				dataType: 'json',
+				success: function(msg) {
+					refluxProcess["sensors"] = msg;
+					//console.log(refluxProcess["sensors"]);
+					$.fn.pasteRefluxSensors(false);
+				}
+			});
+		}
+		if(!$.fn.objIsEmpty(refluxProcess["sensors"],false)) {
 			let tpl_delta_thead = //'<div class="col-xs-hidden col-sm-4"></div>' +
 				'<div class="row-xs">'+
 				'<div class="col-xs-4 col-xs-offset-0 col-sm-3 col-sm-offset-4 text-center text-middle text-primary">Значение</div>' +
@@ -1237,55 +1294,73 @@ $(function() {
 			let tpl_all_body = '';
 			$.each(refluxProcess["sensors"], function (i, e) {
 				//console.log(i,e);
-				let sensor_key = e["key"];
+				let sensor_key = i;
 				let name_sensor = e["name"];
 				if(sensorsRefluxSend[sensor_key].hasOwnProperty("name"))
 					sensorsRefluxSend[sensor_key]["name"] = name_sensor;
-				sensorsRefluxSend[sensor_key]["color"] = hex2dec(e["color"]);
-				sensorsRefluxSend[sensor_key]["member"] = 1;
-				let tpl_delta = '';
-				let tpl_delta_result = '';
-				if (e["delta"]) {
-					tpl_delta = returnTplHtml([{id:"reflux_delta_"+sensor_key, value: e["allertValue"], min: '0', max: '1', step: '0.05'}], deltaTempl);
-					tpl_delta_result = '<span id="reflux_delta_result_'+sensor_key+'"></span><span class="hidden">&#176С</span>';
-					tpl_delta_body +=
-					'<div class="row row-striped">' + tpl_delta_thead +
-					'<div id="alert_bg_'+sensor_key+'" class="pt-10 pb-10 clearfix">' +
-					'<div id="alert_text_'+sensor_key+'" class="col-xs-12 col-sm-4 text-center-xs"><strong>t&#176' + name_sensor + '</strong></div>' +
-					'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="reflux_' + sensor_key + '"></span><span class="hidden">&#176С</span></strong></div>' +
-					'<div class="col-xs-3 col-sm-3">' + tpl_delta + '</div>' +
-					'<div class="col-xs-4 col-xs-offset-1 col-sm-2 col-sm-offset-0 text-center text-middle"><strong>' + tpl_delta_result +
-					'</strong></div>' +
-					'</div>' +
-					'</div>';
+				if (re_t.test(sensor_key) && Number(e["member"]) !== 0) {
+					sensorsRefluxSend[sensor_key]["color"] = e["color"];
+					sensorsRefluxSend[sensor_key]["member"] = 1;
+					let tpl_delta = '';
+					let tpl_delta_result = '';
+					if (e["delta"]) {
+						tpl_delta = returnTplHtml([{id: "reflux_delta_" + sensor_key, value: e["allertValue"], min: '0', max: '1', step: '0.05'}], deltaTempl);
+						tpl_delta_result = '<span id="reflux_delta_result_' + sensor_key + '"></span><span class="hidden">&#176С</span>';
+						tpl_delta_body +=
+							'<div class="row row-striped">' + tpl_delta_thead +
+							'<div id="alert_bg_' + sensor_key + '" class="pt-10 pb-10 clearfix">' +
+							'<div id="alert_text_' + sensor_key + '" class="col-xs-12 col-sm-4 text-center-xs"><strong>t&#176' + name_sensor + '</strong></div>' +
+							'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="reflux_' + sensor_key + '"></span><span class="hidden">&#176С</span></strong></div>' +
+							'<div class="col-xs-3 col-sm-3">' + tpl_delta + '</div>' +
+							'<div class="col-xs-4 col-xs-offset-1 col-sm-2 col-sm-offset-0 text-center text-middle"><strong>' + tpl_delta_result +
+							'</strong></div>' +
+							'</div>' +
+							'</div>';
 
-					tpl_delta_thead = '';
-				}
-				let tpl_cutoff = '';
-				if (e["cutoff"]) {
-					tpl_cutoff = returnTplHtml([{id:"reflux_cutoff_"+sensor_key, value: e["allertValue"], min: '0', max: '105', step: '0.5'}], deltaTempl);
-					tpl_cutoff_body +=
-					'<div class="row row-striped">' + tpl_cutoff_thead +
-					'<div id="alert_bg_'+sensor_key+'" class="pt-10 pb-10 clearfix">' +
-					'<div id="alert_text_'+sensor_key+'" class="col-xs-12 col-sm-4 text-center-xs"><strong>t&#176' + name_sensor + '</strong></div>' +
-					'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="reflux_' + sensor_key + '"></span><span class="hidden">&#176С</span></strong></div>' +
-					//'<div class="col-xs-3 col-sm-3"></div>' +
-					'<div class="col-xs-4 col-xs-offset-3 col-sm-2 col-sm-offset-3">' + tpl_cutoff +
-					'</div>' +
-					'</div>' +
-					'</div>';
+						tpl_delta_thead = '';
+					}
+					let tpl_cutoff = '';
+					if (e["cutoff"]) {
+						tpl_cutoff = returnTplHtml([{id: "reflux_cutoff_" + sensor_key, value: e["allertValue"], min: '0', max: '105', step: '0.5'}], deltaTempl);
+						tpl_cutoff_body +=
+							'<div class="row row-striped">' + tpl_cutoff_thead +
+							'<div id="alert_bg_' + sensor_key + '" class="pt-10 pb-10 clearfix">' +
+							'<div id="alert_text_' + sensor_key + '" class="col-xs-12 col-sm-4 text-center-xs"><strong>t&#176' + name_sensor + '</strong></div>' +
+							'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="reflux_' + sensor_key + '"></span><span class="hidden">&#176С</span></strong></div>' +
+							//'<div class="col-xs-3 col-sm-3"></div>' +
+							'<div class="col-xs-4 col-xs-offset-3 col-sm-2 col-sm-offset-3">' + tpl_cutoff +
+							'</div>' +
+							'</div>' +
+							'</div>';
 
-					tpl_cutoff_thead = '';
+						tpl_cutoff_thead = '';
+					}
+					if (/*sensor_key !== "p1" && */!e["delta"] && !e["cutoff"]) {
+						tpl_all_body += '<div class="row row-striped">' +
+							'<div class="pt-10 pb-10 clearfix">' +
+							'<div class="col-xs-12 col-sm-4 text-center-xs"><strong>t&#176' + name_sensor + '</strong></div>' +
+							'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="reflux_' + sensor_key + '"></span><span class="hidden">&#176С</span></strong></div>' +
+							'<div class="col-xs-3 col-sm-3"></div>' +
+							'<div class="col-xs-4 col-sm-3"></div>' +
+							'</div>' +
+							'</div>';
+					}
 				}
-				if(/*sensor_key !== "p1" && */!e["delta"] && !e["cutoff"]) {
-					tpl_all_body += '<div class="row row-striped">' +
-						'<div class="pt-10 pb-10 clearfix">' +
-						'<div class="col-xs-12 col-sm-4 text-center-xs"><strong>t&#176' + name_sensor + '</strong></div>' +
-						'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="reflux_' + sensor_key + '"></span><span class="hidden">&#176С</span></strong></div>' +
-						'<div class="col-xs-3 col-sm-3"></div>' +
-						'<div class="col-xs-4 col-sm-3"></div>' +
-						'</div>' +
-						'</div>';
+				if (re_out.test(sensor_key) && Number(e["member"]) !== 0) {
+					sensorsRefluxSend[sensor_key]["member"] = 1;
+					tpl_devices_body += '<div class="row row-striped">' +
+						'<div class="pt-10 clearfix">' +
+						'<div class="col-xs-12 col-sm-4 text-center-xs text-middle"><strong>' + name_sensor + '</strong></div>' +
+						'<div class="col-xs-5 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="reflux_' + sensor_key + '"></span> <span class="hidden"></span></strong></div>' +
+						'</div></div>';
+				}
+				if (re_in.test(sensor_key) && Number(e["member"]) !== 0) {
+					sensorsRefluxSend[sensor_key]["member"] = 1;
+					tpl_safety_body += '<div class="row row-striped">' +
+						'<div class="pt-10 clearfix">' +
+						'<div class="col-xs-12 col-sm-4 text-center-xs text-middle"><strong>' + name_sensor + '</strong></div>' +
+						'<div class="col-xs-5 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="reflux_' + sensor_key + '"></span> <span class="hidden"></span></strong></div>' +
+						'</div></div>';
 				}
 			});
 			//sensors["process"]["allow"] = 2;
@@ -1303,7 +1378,8 @@ $(function() {
 			if(sensors_select)
 				sendRequest("refluxSensorsSetSave", sensorsRefluxSend, "json", false, false, $("#error_reflux"),false);
 			//localStorage.setObj('sensors', sensors);
-			refluxTemplate = returnTplHtml([{id_value:"reflux_power_value",id_set:"reflux_power_set"}], powerTempl) + refluxTemplate + pressureTemplate;
+			refluxTemplate = returnTplHtml([{id_value:"reflux_power_value",id_set:"reflux_power_set"}], powerTempl) + refluxTemplate + pressureTemplate + tpl_devices_body + tpl_safety_body;
+
 			$("#reflux_start_group_button").removeClass("hidden");
 			$("#svg_reflux").show();
 		}else{
