@@ -679,7 +679,7 @@ $(function() {
 				});
 				plot.redraw();
 			}*/
-			console.log("startChart",target);
+			//console.log("startChart",target);
 			this.dtoGet(dtoJson,target);
 		}
 	};
@@ -720,7 +720,7 @@ $(function() {
 
 	function startChart() {
 		$(document).one("newDTOreceived", function (e) {
-			console.log(e,dtoReceiver.dtoContainer);
+			//console.log(e,dtoReceiver.dtoContainer);
 			let process = Number(globalSensorsJson["process"]["allow"]);
 			/*let oldStartProcess = Number(localStorage.getItem('oldStartProcess'));
 			if(process > 0 && oldStartProcess !== process) {
@@ -734,7 +734,7 @@ $(function() {
 	function clearChart() {
 		$(document).off("newDTOreceived");
 		plot = {};
-		console.log("clearChart");
+		//console.log("clearChart");
 		dtoReceiver.clearDeviceConditions();
 		if(plot.hasOwnProperty("series")) {
 			plot.series.forEach(function (s) {
@@ -895,10 +895,25 @@ $(function() {
 		let view_chart = dtoReceiver.dtoContainer;
 		let plotNew = Highcharts.stockChart(view_chart, jsonPlot);
 
-		dtoReceiver.dtos[0].temperatures.forEach(function (t, i) {
+		//console.log("plot",dtoReceiver.dtos[0].temperatures);
+		$.each(dtoReceiver.dtos[0].temperatures,function (key,t) {
+			//console.log("plot", key, t);
+			if (re_t.test(key)){
+				plotNew.addSeries({
+					name: t["name"],
+					color: t["color"],
+					//color: "#"+dec2hex(t["color"]),
+					data: dtoReceiver.dtos.map(function (dc) {
+						//console.log(dc.temperatures[i]["value"]);
+						return [dc.dateTime, dc.temperatures[key]["value"]]
+					})
+				});
+			}
+		});
+		/*dtoReceiver.dtos[0].temperatures.forEach(function (t, i) {
 			console.log("plot",t, i);
 			//if (t["key"] !== "p1") {
-			/*if (re_t.test(key)){
+			if (re_t.test(key)){
 				plotNew.addSeries({
 					name: t["name"],
 					//color: "#" + t["color"],
@@ -908,8 +923,8 @@ $(function() {
 						return [dc.dateTime, dc.temperatures[i]["value"]]
 					})
 				});
-			}*/
-		});
+			}
+		});*/
 
 		$(document).on("newDTOreceived", function (e, dto) {
 			if(plot.hasOwnProperty("series")) {
@@ -924,16 +939,33 @@ $(function() {
 				if(process > 0 && oldStartProcess !== process) {
 					clearChart();
 				}*/
-				dto.temperatures.forEach(function (t, i) {
+				//console.log("newDTOreceived", dto.temperatures);
+				$.each(dto.temperatures,function (key,t) {
+					//console.log("plot", key, t);
+					if (re_t.test(key)){
+						plotNew.series[count + 1].addPoint([dto.dateTime, t["value"]], false);
+						count++;
+						/*plotNew.addSeries({
+							name: t["name"],
+							color: t["color"],
+							//color: "#"+dec2hex(t["color"]),
+							data: dtoReceiver.dtos.map(function (dc) {
+								//console.log(dc.temperatures[i]["value"]);
+								return [dc.dateTime, dc.temperatures[key]["value"]]
+							})
+						});*/
+					}
+				});
+				/*dto.temperatures.forEach(function (t, i) {
 					console.log("newDTOreceived", t, i);
-					/*if (t["key"] !== "p1") {
+					if (t["key"] !== "p1") {
 						//plot.series[1].addPoint([dto.dateTime, dto.temperatures[i]["value"]], false);
 						//console.log(t,i);
 						//}else {
 						plotNew.series[count + 1].addPoint([dto.dateTime, dto.temperatures[i]["value"]], false);
-					}*/
+					}
 					count++;
-				});
+				});*/
 			}
 			plotNew.redraw();
 		});
@@ -1094,6 +1126,35 @@ $(function() {
 		'</div>' +
 		'</div>' +
 		'</div>';
+	/*var ooo =
+			'<div class="row row-striped">' + tpl_cutoff_thead +
+			'<div id="mashing_alert_bg_'+sensor_key+'" class="pt-10 pb-10 clearfix">' +
+			'<div id="mashing_alert_text_'+sensor_key+'" class="col-xs-12 col-sm-4 text-center-xs"><strong>t&#176' + name_sensor + '</strong></div>' +
+
+		'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="mashing_' + sensor_key + '"></span><span class="hidden">&#176С</span></strong></div>' +
+			//'<div class="col-xs-3 col-sm-3"></div>' +
+			'<div class="col-xs-4 col-xs-offset-3 col-sm-2 col-sm-offset-3">' + tpl_cutoff +
+			'</div>' +
+			'</div>' +
+			'</div>';*/
+	const pauseTempl =
+		'<div class="row row-striped">' +
+		'<div class="row-xs">' +
+		'<div class="col-xs-3 col-xs-offset-0 col-sm-3 col-sm-offset-3 text-center text-middle text-primary">Значение</div>' +
+		'<div class="col-xs-3 col-xs-offset-0 col-sm-3 col-sm-offset-0 text-center text-middle text-primary">Время паузы</div>' +
+		'<div class="col-xs-3 col-xs-offset-0 col-sm-3 col-sm-offset-0 text-center text-middle text-primary">Температура паузы</div>' +
+		'</div>' +
+		'<div id="${id_alert_bg}" class="pt-10 pb-10 clearfix">' +
+		'<div id="${id_alert_text}" class="col-xs-12 col-sm-3 text-center-xs text-middle"><strong>${pause_name}</strong></div>' +
+		'<div class="col-xs-3 col-xs-offset-0 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="${id_value}"></span><span class="hidden">&#176С</span></strong></div>' +
+		'<div class="col-xs-3 col-xs-offset-0 col-sm-3 col-sm-offset-0 col-centered">' +
+		returnTplHtml([{id:"${id_time}", value: '0', min: '0', max: '60', step: '1'}], deltaTempl) +
+		'</div>' +
+		'<div class="col-xs-3 col-xs-offset-0 col-sm-3 col-sm-offset-0 col-centered">' +
+		returnTplHtml([{id:"${id_set}", value: '0', min: '0', max: '100', step: '1'}], deltaTempl) +
+		'</div>' +
+		'</div>' //+ '</div>'
+	;
 	//Привязка датчиков к процессу ректификации, и запуск
 	let refluxProcess = {"sensors":[],"power":0,"start":false};//"devices":[],"safety":[],
 	$(document).on('click','#reflux_add_sensor',function(e) {
@@ -1104,7 +1165,7 @@ $(function() {
 	//Запрос датчиков для ректификации и вывод их в диалоговое окно
 	function selectSensorsReflus(data){
 		let sensors = data;//sensorsJson
-		console.log(sensors);
+		//console.log(sensors);
 		if(sensors !== null) {
 			let section = '<section id="reflux_sensors" class="table-responsive"><table class="table table-noborder">';
 			let tpl_temperature = '';
@@ -1179,8 +1240,10 @@ $(function() {
 					class: "btn btn-success",
 					click: function () {
 						let sensors_select = $('#reflux_sensors input[type=checkbox]');
-						refluxProcess["sensors"] = $.map(sensors_select, function (e) {
+						let flag_sensors_select = false;
+						$.map(sensors_select, function (e) {
 							if ($(e).is(":checked")) {
+								flag_sensors_select = true;
 								//console.log($(e).data("sensor"));
 								let key = $(e).data("sensor");
 								let tmp = false;
@@ -1194,18 +1257,20 @@ $(function() {
 								let delta = (tmp ? $("#delta_" + key).prop("checked") : false);
 								let cutoff = (tmp ? $("#cutoff_" + key).prop("checked") : false);
 
-								let obj = {};
+								refluxProcess["sensors"][key] = {};
 								if(tmp) {
-									//"t1":{"value":54.00,"name":"В кубе","color":64588,"delta":false,"cutoff":true,"priority":0,"allertValue":53.00},
-									return obj[key] = {"name": name, "delta": delta, "cutoff": cutoff, "color": color, "allertValue": 0, "value": 0};
+									refluxProcess["sensors"][key] = {"name": name, "delta": delta, "cutoff": cutoff, "color": color, "allertValue": 0, "value": 0};
 								}else{
-									return obj[key] = {"name": name, "value": 0};
+									refluxProcess["sensors"][key] = {"name": name, "value": 0};
 								}
 							}
 						});
 						//refluxProcess["sensors"] = reflux_sensors;
 						//localStorage.setObj('reflux', refluxProcess);
-						//console.log(ar_sensors);
+						//console.log("modal",refluxProcess["sensors"]);
+						if(!flag_sensors_select){
+							refluxProcess["sensors"] = {};
+						}
 						$(this).closest(".modal").modal("hide");
 						$.fn.pasteRefluxSensors(true);
 					}
@@ -1271,7 +1336,11 @@ $(function() {
 				success: function(msg) {
 					refluxProcess["sensors"] = msg;
 					//console.log(refluxProcess["sensors"]);
-					$.fn.pasteRefluxSensors(false);
+					if(!$.fn.objIsEmpty(refluxProcess["sensors"],false))
+						$.fn.pasteRefluxSensors(false);
+				},
+				error:function (err,exception) {
+					alertAjaxError(err,exception,$("#error_reflux"));
 				}
 			});
 		}
@@ -1292,6 +1361,7 @@ $(function() {
 				'</div>';
 			let tpl_cutoff_body = '';
 			let tpl_all_body = '';
+			//console.log(refluxProcess["sensors"]);
 			$.each(refluxProcess["sensors"], function (i, e) {
 				//console.log(i,e);
 				let sensor_key = i;
@@ -1308,8 +1378,8 @@ $(function() {
 						tpl_delta_result = '<span id="reflux_delta_result_' + sensor_key + '"></span><span class="hidden">&#176С</span>';
 						tpl_delta_body +=
 							'<div class="row row-striped">' + tpl_delta_thead +
-							'<div id="alert_bg_' + sensor_key + '" class="pt-10 pb-10 clearfix">' +
-							'<div id="alert_text_' + sensor_key + '" class="col-xs-12 col-sm-4 text-center-xs"><strong>t&#176' + name_sensor + '</strong></div>' +
+							'<div id="reflux_alert_bg_' + sensor_key + '" class="pt-10 pb-10 clearfix">' +
+							'<div id="reflux_alert_text_' + sensor_key + '" class="col-xs-12 col-sm-4 text-center-xs"><strong>t&#176' + name_sensor + '</strong></div>' +
 							'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="reflux_' + sensor_key + '"></span><span class="hidden">&#176С</span></strong></div>' +
 							'<div class="col-xs-3 col-sm-3">' + tpl_delta + '</div>' +
 							'<div class="col-xs-4 col-xs-offset-1 col-sm-2 col-sm-offset-0 text-center text-middle"><strong>' + tpl_delta_result +
@@ -1324,8 +1394,8 @@ $(function() {
 						tpl_cutoff = returnTplHtml([{id: "reflux_cutoff_" + sensor_key, value: e["allertValue"], min: '0', max: '105', step: '0.5'}], deltaTempl);
 						tpl_cutoff_body +=
 							'<div class="row row-striped">' + tpl_cutoff_thead +
-							'<div id="alert_bg_' + sensor_key + '" class="pt-10 pb-10 clearfix">' +
-							'<div id="alert_text_' + sensor_key + '" class="col-xs-12 col-sm-4 text-center-xs"><strong>t&#176' + name_sensor + '</strong></div>' +
+							'<div id="reflux_alert_bg_' + sensor_key + '" class="pt-10 pb-10 clearfix">' +
+							'<div id="reflux_alert_text_' + sensor_key + '" class="col-xs-12 col-sm-4 text-center-xs"><strong>t&#176' + name_sensor + '</strong></div>' +
 							'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="reflux_' + sensor_key + '"></span><span class="hidden">&#176С</span></strong></div>' +
 							//'<div class="col-xs-3 col-sm-3"></div>' +
 							'<div class="col-xs-4 col-xs-offset-3 col-sm-2 col-sm-offset-3">' + tpl_cutoff +
@@ -1381,7 +1451,7 @@ $(function() {
 			refluxTemplate = returnTplHtml([{id_value:"reflux_power_value",id_set:"reflux_power_set"}], powerTempl) + refluxTemplate + pressureTemplate + tpl_devices_body + tpl_safety_body;
 
 			$("#reflux_start_group_button").removeClass("hidden");
-			$("#svg_reflux").show();
+			//$("#svg_reflux").show();
 		}else{
 			$("#reflux_start_group_button").addClass("hidden");
 		}
@@ -1452,7 +1522,7 @@ $(function() {
 		refluxSendData["power"] = refluxProcess["power"] = power_set.val();
 
 		$.each(refluxProcess["sensors"], function (i, e) {
-			let sensor_key = e["key"];
+			let sensor_key = i;
 			let reflux_delta = $("#reflux_delta_"+sensor_key);
 			let reflux_cutoff = $("#reflux_cutoff_"+sensor_key);
 			if(reflux_delta.length) {
@@ -1472,7 +1542,7 @@ $(function() {
 			//console.log(tmpSendProcess);
 			flagSendProcess = false;
 			//console.log(flagSendProcess);
-			localStorage.setObj('reflux', refluxProcess);
+			//localStorage.setObj('reflux', refluxProcess);
 			sendRequest("SensorsIn", refluxSendData, "json", false, false, $("#error_reflux"),false);
 		}
 	}
@@ -1494,21 +1564,22 @@ $(function() {
 				let alert_value = Number(globalSensorsJson["sensors"][i][sensor_key]["allertValue"]);
 				$.each(refluxProcess["sensors"], function (j, q) {
 					//console.log(j, q);
-					if (q["key"] === sensor_key) {
+					//if (q["key"] === sensor_key) {
+					if(j === sensor_key && re_t.test(sensor_key)){
 						q["value"] = sensor_value;
-						if (sensor_key !== "p1") {
+						//if (sensor_key !== "p1") {
 							let color_value = q["color"];
-							let fillcolor = "#" + color_value;
+							let fillcolor = "#" + dec2hex(color_value);
 							if (alert_value > 0 && sensor_value >= alert_value) {
-								$("#alert_bg_" + sensor_key).addClass("bg-danger");
-								$("#alert_text_" + sensor_key).addClass("text-danger");
+								$("#reflux_alert_bg_" + sensor_key).addClass("bg-danger");
+								$("#reflux_alert_text_" + sensor_key).addClass("text-danger");
 								// Вибрация поддерживается
 								/*if (window.navigator && window.navigator.vibrate) {
 									navigator.vibrate(1000);
 								}*/
 							} else {
-								$("#alert_bg_" + sensor_key).removeClass("bg-danger");
-								$("#alert_text_" + sensor_key).removeClass("text-danger");
+								$("#reflux_alert_bg_" + sensor_key).removeClass("bg-danger");
+								$("#reflux_alert_text_" + sensor_key).removeClass("text-danger");
 							}
 							//console.log(sensor_key, fillcolor,sensor_value,alert_value);
 							if (q["delta"] === false) {
@@ -1519,7 +1590,9 @@ $(function() {
 								//console.log(fillcolor, delta_value, delta_alert);
 								$("#svg_reflux_color_" + sensor_key).css('fill', colorPersent(fillcolor, delta_value, delta_alert));
 							}
-						}
+						//}
+						if(Number(q["member"])!==0)
+							dtoJson["temperatures"][sensor_key] = {value: sensor_value, name: q["name"], color: fillcolor};
 					}
 				});
 				$("#reflux_" + sensor_key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
@@ -1543,10 +1616,11 @@ $(function() {
 			$("#reflux_power_value").text(power_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 			$("#svg_reflux_ten_t").text(power_value.toFixed(0) + "%");
 			$("#svg_reflux_color_ten").css('fill', colorPersent("#FF0000", power_value.toFixed(0), 100));
-			dtoJson["temperatures"] = refluxProcess["sensors"];
+			//dtoJson["temperatures"] = refluxProcess["sensors"];
 			$("#view_distillation_chart").html("");
 			//let oldStartProcess = Number(localStorage.getItem('oldStartProcess'));
 			//if(oldStartProcess === 2) {
+			if(!$.fn.objIsEmpty(dtoJson["temperatures"],false))
 				dtoReceiver.start(dtoJson, 'view_reflux_chart');
 			//}
 		}
@@ -1570,9 +1644,15 @@ $(function() {
 		//console.log(sensors);
 		if(sensors !== null) {
 			let section = '<section id="distillation_sensors" class="table-responsive"><table class="table table-noborder">';
+			let tpl_temperature = '';
+			let tpl_devices = '';
+			let tpl_safety = '';
 			for (let key in sensors) {
 				if (sensors.hasOwnProperty(key)/* && key !== "p1"*/) {
 					let sensor_name = (sensors[key].hasOwnProperty("name") ? sensors[key]["name"] : "");
+					if(sensor_name !== "") {
+						//if (key !== "p1") {
+						if (re_t.test(key)) {
 					//let sensor_delta = '<label class="checkbox-inline"><input disabled id="delta_' + key + '" name="distillation_radio_' + key + '" type="radio" value="Y">Уставка</label>';
 					let sensor_cutoff = '<label class="checkbox-inline"><input disabled id="cutoff_' + key + '" name="distillation_radio_' + key + '" type="radio" value="Y">Отсечка</label>';
 					/*if(key === "p1") {
@@ -1580,21 +1660,54 @@ $(function() {
 						sensor_name = "Атмосферное давление";
 					}*/
 					let jscolor = sensors[key]["color"] > 0 ? dec2hex(sensors[key]["color"]) : "FFFFFF";
-					let disabled_check = "";
-					if(sensor_name === "")
-						disabled_check = "disabled";
+					//let disabled_check = "";
+					//if(sensor_name === "")
+						//disabled_check = "disabled";
 
-					section += '<tr><td>' +
+					tpl_temperature += '<tr><td>' +
 						'<div class="input-group input-group-sm">'+
 						'<span class="input-group-addon" style="background-color: #'+jscolor+'">' + key + '</span>'+
 						'<input id="distillation_name_' + key + '" class="form-control input-sm" type="text" value="' + sensor_name + '">'+
 						'<input type="hidden" id="distillation_color_' + key + '" value="'+jscolor+'">'+
 						'</div></td>'+
-						'<td><input '+disabled_check+' data-sensor="' + key + '" type="checkbox" value="' + key + '"></td>' +
+						'<td><input data-sensor="' + key + '" type="checkbox" value="' + key + '"></td>' +
 						//'<td>'+sensor_delta+'</td>' +
 						'<td>'+sensor_cutoff+'</td>' +
 						'</tr>';
+						}
+						if (re_out.test(key)) {
+							tpl_devices += '<tr><td>' +
+								'<div class="input-group input-group-sm">' +
+								'<span class="input-group-addon">' + key + '</span>' +
+								'<input id="distillation_name_' + key + '" class="form-control input-sm" type="text" value="' + sensor_name + '">' +
+								'</div></td>' +
+								'<td><input data-sensor="' + key + '" type="checkbox" value="' + key + '"></td>' +
+								'<td></td>' +
+								'<td></td>' +
+								'</tr>';
+						}
+						if (re_in.test(key)) {
+							tpl_safety += '<tr><td>' +
+								'<div class="input-group input-group-sm">' +
+								'<span class="input-group-addon">' + key + '</span>' +
+								'<input id="distillation_name_' + key + '" class="form-control input-sm" type="text" value="' + sensor_name + '">' +
+								'</div></td>' +
+								'<td><input data-sensor="' + key + '" type="checkbox" value="' + key + '"></td>' +
+								'<td></td>' +
+								'<td></td>' +
+								'</tr>';
+						}
+					}
 				}
+			}
+			if(tpl_temperature !== ''){
+				section += '<tr><td colspan="4" class="text-center text-strong">Датчики температуры</td></tr>' + tpl_temperature;
+			}
+			if(tpl_devices !== ''){
+				section += '<tr><td colspan="4" class="text-center text-strong">Клапана</td></tr>' + tpl_devices;
+			}
+			if(tpl_safety !== ''){
+				section += '<tr><td colspan="4" class="text-center text-strong">Датчики безопасности</td></tr>' + tpl_safety;
 			}
 			section += '</table></section>';
 			$.fn.openModal('Выбор датчиков для дистиляции', section, "modal-md", false, {
@@ -1603,23 +1716,39 @@ $(function() {
 					class: "btn btn-success",
 					click: function () {
 						let sensors_select = $('#distillation_sensors input[type=checkbox]');
-						distillationProcess["sensors"] = $.map(sensors_select, function (e) {
+						let flag_sensors_select = false;
+						$.map(sensors_select, function (e) {
 							if ($(e).is(":checked")) {
+								flag_sensors_select = true;
 								//console.log($(e).data("sensor"));
 								let key = $(e).data("sensor");
+								let tmp = false;
+								if (re_t.test(key)) {
+									tmp = true;
+								}
 								let name = $("#distillation_name_" + key).val();
 								let val_color = $("#distillation_color_" + key).val();
 								//let color = (val_color !== "FFFFFF" && val_color !== "") ? hex2dec(val_color) : 0;
 								let color = (val_color !== "FFFFFF" && val_color !== "") ? val_color : "FFFFFF";
 								//let delta = $("#delta_" + key).prop("checked");
-								let cutoff = $("#cutoff_" + key).prop("checked");
-								return {"key": key, "name": name, "cutoff": cutoff, "color": color, "allertValue":0, "value":0};
+								let cutoff = (tmp ? $("#cutoff_" + key).prop("checked") : false);
+
+								distillationProcess["sensors"][key] = {};
+								if(tmp) {
+									distillationProcess["sensors"][key] = {"name": name, "cutoff": cutoff, "color": color, "allertValue": 0, "value": 0};
+								}else{
+									distillationProcess["sensors"][key] = {"name": name, "value": 0};
+								}
+								//return {"key": key, "name": name, "cutoff": cutoff, "color": color, "allertValue":0, "value":0};
 								//return {"key": key, "name": name, "delta": delta, "cutoff": cutoff, "color": color, "allertValue":0, "value":0};
 							}
 						});
 						//distillationProcess["sensors"] = distillation_sensors;
-						localStorage.setObj('distillation', distillationProcess);
+						//localStorage.setObj('distillation', distillationProcess);
 						//console.log(ar_sensors);
+						if(!flag_sensors_select){
+							distillationProcess["sensors"] = {};
+						}
 						$(this).closest(".modal").modal("hide");
 						$.fn.pasteDistillationSensors(true);
 					}
@@ -1643,21 +1772,52 @@ $(function() {
 
 	$.fn.pasteDistillationSensors = function(sensors_select){
 		let sensorsDistillationSend = {
-			"t1":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
-			"t2":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
-			"t3":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
-			"t4":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
-			"t5":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
-			"t6":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
-			"t7":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
-			"t8":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0}
+			"t1":{"name":"","cutoff":false,"color":0,"member":0,"priority":0,"allertValue":0},
+			"t2":{"name":"","cutoff":false,"color":0,"member":0,"priority":0,"allertValue":0},
+			"t3":{"name":"","cutoff":false,"color":0,"member":0,"priority":0,"allertValue":0},
+			"t4":{"name":"","cutoff":false,"color":0,"member":0,"priority":0,"allertValue":0},
+			"t5":{"name":"","cutoff":false,"color":0,"member":0,"priority":0,"allertValue":0},
+			"t6":{"name":"","cutoff":false,"color":0,"member":0,"priority":0,"allertValue":0},
+			"t7":{"name":"","cutoff":false,"color":0,"member":0,"priority":0,"allertValue":0},
+			"t8":{"name":"","cutoff":false,"color":0,"member":0,"priority":0,"allertValue":0},
+			"out1":{"name":"","member":0},
+			"out2":{"name":"","member":0},
+			"out3":{"name":"","member":0},
+			"out4":{"name":"","member":0},
+			"out5":{"name":"","member":0},
+			"out6":{"name":"","member":0},
+			"out7":{"name":"","member":0},
+			"out8":{"name":"","member":0},
+			"in1":{"name":"","member":0},
+			"in2":{"name":"","member":0},
+			"in3":{"name":"","member":0},
+			"in4":{"name":"","member":0}
 			//,"p1":{"value":760.00,"color":0,"member":0}
 		};
 		let distillationTemplate = '';
-		let localDistillation = localStorage.getObj('distillation');
-		if(localDistillation !== null)
-			distillationProcess = localDistillation;
-		if(distillationProcess["sensors"].length > 0) {
+		let tpl_devices_body = '';
+		let tpl_safety_body = '';
+		//let localDistillation = localStorage.getObj('distillation');
+		//if(localDistillation !== null) //distillationProcess = localDistillation;
+		if(!sensors_select && $.fn.objIsEmpty(distillationProcess["sensors"],false)){
+			//console.log('empty');
+			$.ajax({
+				url: 'distillationSensorsGetTpl',
+				data: {},
+				type: 'GET',
+				dataType: 'json',
+				success: function(msg) {
+					distillationProcess["sensors"] = msg;
+					//console.log(distillationProcess["sensors"]);
+					if(!$.fn.objIsEmpty(distillationProcess["sensors"],false))
+						$.fn.pasteDistillationSensors(false);
+				},
+				error:function (err,exception) {
+					alertAjaxError(err,exception,$("#error_distillation"));
+				}
+			});
+		}
+		if(!$.fn.objIsEmpty(distillationProcess["sensors"],false)) {
 			/*let tpl_delta_thead =
 				'<div class="row-xs">'+
 				'<div class="col-xs-4 col-xs-offset-0 col-sm-3 col-sm-offset-4 text-center text-middle text-primary">Значение</div>' +
@@ -1674,11 +1834,12 @@ $(function() {
 			let tpl_all_body = '';
 			$.each(distillationProcess["sensors"], function (i, e) {
 				//console.log(i,e);
-				let sensor_key = e["key"];
+				let sensor_key = i;
 				let name_sensor = e["name"];
 				if(sensorsDistillationSend[sensor_key].hasOwnProperty("name"))
 					sensorsDistillationSend[sensor_key]["name"] = name_sensor;
-				sensorsDistillationSend[sensor_key]["color"] = hex2dec(e["color"]);
+				if (re_t.test(sensor_key) && Number(e["member"]) !== 0) {
+				sensorsDistillationSend[sensor_key]["color"] = e["color"];
 				sensorsDistillationSend[sensor_key]["member"] = 1;
 				/*let tpl_delta = '';
 				let tpl_delta_result = '';
@@ -1703,8 +1864,8 @@ $(function() {
 					tpl_cutoff = returnTplHtml([{id:"distillation_cutoff_"+sensor_key, value: e["allertValue"], min: '0', max: '105', step: '0.5'}], deltaTempl);
 					tpl_cutoff_body +=
 						'<div class="row row-striped">' + tpl_cutoff_thead +
-						'<div id="alert_bg_'+sensor_key+'" class="pt-10 pb-10 clearfix">' +
-						'<div id="alert_text_'+sensor_key+'" class="col-xs-12 col-sm-4 text-center-xs"><strong>t&#176' + name_sensor + '</strong></div>' +
+						'<div id="distillation_alert_bg_'+sensor_key+'" class="pt-10 pb-10 clearfix">' +
+						'<div id="distillation_alert_text_'+sensor_key+'" class="col-xs-12 col-sm-4 text-center-xs"><strong>t&#176' + name_sensor + '</strong></div>' +
 						'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="distillation_' + sensor_key + '"></span><span class="hidden">&#176С</span></strong></div>' +
 						//'<div class="col-xs-3 col-sm-3"></div>' +
 						'<div class="col-xs-4 col-xs-offset-3 col-sm-2 col-sm-offset-3">' + tpl_cutoff +
@@ -1724,6 +1885,23 @@ $(function() {
 						'</div>' +
 						'</div>';
 				}
+			}
+			if (re_out.test(sensor_key) && Number(e["member"]) !== 0) {
+					sensorsDistillationSend[sensor_key]["member"] = 1;
+					tpl_devices_body += '<div class="row row-striped">' +
+						'<div class="pt-10 clearfix">' +
+						'<div class="col-xs-12 col-sm-4 text-center-xs text-middle"><strong>' + name_sensor + '</strong></div>' +
+						'<div class="col-xs-5 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="distillation_' + sensor_key + '"></span> <span class="hidden"></span></strong></div>' +
+						'</div></div>';
+				}
+				if (re_in.test(sensor_key) && Number(e["member"]) !== 0) {
+					sensorsDistillationSend[sensor_key]["member"] = 1;
+					tpl_safety_body += '<div class="row row-striped">' +
+						'<div class="pt-10 clearfix">' +
+						'<div class="col-xs-12 col-sm-4 text-center-xs text-middle"><strong>' + name_sensor + '</strong></div>' +
+						'<div class="col-xs-5 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="distillation_' + sensor_key + '"></span> <span class="hidden"></span></strong></div>' +
+						'</div></div>';
+				}
 			});
 			//sensors["process"]["allow"] = 2;
 			/*if(tpl_delta_body !== '') {
@@ -1740,9 +1918,9 @@ $(function() {
 			if(sensors_select)
 				sendRequest("distillationSensorsSetSave", sensorsDistillationSend, "json", false, false, $("#error_distillation"),false);
 			//localStorage.setObj('sensors', sensors);
-			distillationTemplate = returnTplHtml([{id_value:"distillation_power_value",id_set:"distillation_power_set"}], powerTempl) + distillationTemplate/* + pressureTemplate*/;
+			distillationTemplate = returnTplHtml([{id_value:"distillation_power_value",id_set:"distillation_power_set"}], powerTempl) + distillationTemplate+ tpl_devices_body + tpl_safety_body;
 			$("#distillation_start_group_button").removeClass("hidden");
-			$("#svg_distillation").show();
+			//$("#svg_distillation").show();
 		}else{
 			$("#distillation_start_group_button").addClass("hidden");
 		}
@@ -1810,7 +1988,7 @@ $(function() {
 		distillationSendData["power"] = distillationProcess["power"] = power_set.val();
 
 		$.each(distillationProcess["sensors"], function (i, e) {
-			let sensor_key = e["key"];
+			let sensor_key = i;
 			//let distillation_delta = $("#distillation_delta_"+sensor_key);
 			let distillation_cutoff = $("#distillation_cutoff_"+sensor_key);
 			/*if(distillation_delta.length) {
@@ -1827,7 +2005,7 @@ $(function() {
 		//console.log(flagSendProcess);
 		if(flagSendProcess) {
 			flagSendProcess = false;
-			localStorage.setObj('distillation', distillationProcess);
+			//localStorage.setObj('distillation', distillationProcess);
 			sendRequest("SensorsIn", distillationSendData, "json", false, false, $("#error_distillation"),false);
 		}
 	}
@@ -1849,21 +2027,22 @@ $(function() {
 				let alert_value = Number(globalSensorsJson["sensors"][i][sensor_key]["allertValue"]);
 				$.each(distillationProcess["sensors"], function (j, q) {
 					//console.log(j, q);
-					if (q["key"] === sensor_key) {
+					//if (q["key"] === sensor_key) {
+					if(j === sensor_key && re_t.test(sensor_key)){
 						q["value"] = sensor_value;
-						if (sensor_key !== "p1") {
+						//if (sensor_key !== "p1") {
 							let color_value = q["color"];
-							let fillcolor = "#" + color_value;
+							let fillcolor = "#" + dec2hex(color_value);
 							if (alert_value > 0 && sensor_value >= alert_value) {
-								$("#alert_bg_" + sensor_key).addClass("bg-danger");
-								$("#alert_text_" + sensor_key).addClass("text-danger");
+								$("#distillation_alert_bg_" + sensor_key).addClass("bg-danger");
+								$("#distillation_alert_text_" + sensor_key).addClass("text-danger");
 								// Вибрация поддерживается
 								/*if (window.navigator && window.navigator.vibrate) {
 									navigator.vibrate(1000);
 								}*/
 							} else {
-								$("#alert_bg_" + sensor_key).removeClass("bg-danger");
-								$("#alert_text_" + sensor_key).removeClass("text-danger");
+								$("#distillation_alert_bg_" + sensor_key).removeClass("bg-danger");
+								$("#distillation_alert_text_" + sensor_key).removeClass("text-danger");
 							}
 							//console.log(sensor_key, fillcolor,sensor_value,alert_value);
 							//if (q["delta"] === false) {
@@ -1874,7 +2053,9 @@ $(function() {
 								//console.log(fillcolor, delta_value, delta_alert);
 								$("#svg_distillation_color_" + sensor_key).css('fill', colorPersent(fillcolor, delta_value, delta_alert));
 							}*/
-						}
+						//}
+						if(Number(q["member"])!==0)
+							dtoJson["temperatures"][sensor_key] = {value: sensor_value, name: q["name"], color: fillcolor};
 					}
 				});
 				$("#distillation_" + sensor_key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
@@ -1898,12 +2079,12 @@ $(function() {
 			$("#distillation_power_value").text(power_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 			$("#svg_distillation_ten_t").text(power_value.toFixed(0) + "%");
 			$("#svg_distillation_color_ten").css('fill', colorPersent("#FF0000", power_value.toFixed(0), 100));
-			dtoJson["temperatures"] = distillationProcess["sensors"];
+			//dtoJson["temperatures"] = distillationProcess["sensors"];
 			$("#view_reflux_chart").html("");
 			//let oldStartProcess = Number(localStorage.getItem('oldStartProcess'));
 			//if(oldStartProcess === 1) {
-				//clearChart();
-				dtoReceiver.start(dtoJson, 'view_distillation_chart');
+				if(!$.fn.objIsEmpty(dtoJson["temperatures"],false))
+					dtoReceiver.start(dtoJson, 'view_distillation_chart');
 			//}
 		}
 		if (distillationProcess["start"] === true) {
@@ -1912,37 +2093,75 @@ $(function() {
 		}
 	}
 	//Привязка датчиков к процессу затирания, и запуск
-	let brewingProcess = {"sensors":[],"power":0,"start":false};
-	$(document).on('click','#brewing_add_sensor',function(e) {
+	let mashingProcess = {"sensors":[],"power":0,"start":false};
+	$(document).on('click','#mashing_add_sensor',function(e) {
 		e.preventDefault();
 		let _this = $(this);
-		sendRequest("brewingSensorsSetLoad", {}, "json", selectSensorsBrewing, _this, $("#error_brewing"),false);
+		sendRequest("mashingSensorsSetLoad", {}, "json", selectSensorsMashing, _this, $("#error_mashing"),false);
 	});
 	//Запрос датчиков для затирания и вывод их в диалоговое окно
-	function selectSensorsBrewing(data){
+	function selectSensorsMashing(data){
 		let sensors = data;//sensorsJson
 		//console.log(sensors);
 		if(sensors !== null) {
-			let section = '<section id="brewing_sensors" class="table-responsive"><table class="table table-noborder">';
+			let section = '<section id="mashing_sensors" class="table-responsive"><table class="table table-noborder">';
+			let tpl_temperature = '';
+			let tpl_devices = '';
+			let tpl_safety = '';
 			for (let key in sensors) {
 				if (sensors.hasOwnProperty(key)/* && key !== "p1"*/) {
 					let sensor_name = (sensors[key].hasOwnProperty("name") ? sensors[key]["name"] : "");
-					let sensor_cutoff = '<label class="checkbox-inline"><input disabled id="cutoff_' + key + '" name="brewing_radio_' + key + '" type="radio" value="Y">Отсечка</label>';
+					if(sensor_name !== "") {
+						//if (key !== "p1") {
+						if (re_t.test(key)) {
+					let sensor_cutoff = '<label class="checkbox-inline"><input disabled id="cutoff_' + key + '" name="mashing_radio_' + key + '" type="radio" value="Y">Отсечка</label>';
 					let jscolor = sensors[key]["color"] > 0 ? dec2hex(sensors[key]["color"]) : "FFFFFF";
-					let disabled_check = "";
-					if(sensor_name === "")
-						disabled_check = "disabled";
+					//let disabled_check = "";
+					//if(sensor_name === "")disabled_check = "disabled";
 
-					section += '<tr><td>' +
+					tpl_temperature += '<tr><td>' +
 						'<div class="input-group input-group-sm">'+
 						'<span class="input-group-addon" style="background-color: #'+jscolor+'">' + key + '</span>'+
-						'<input id="brewing_name_' + key + '" class="form-control input-sm" type="text" value="' + sensor_name + '">'+
-						'<input type="hidden" id="brewing_color_' + key + '" value="'+jscolor+'">'+
+						'<input id="mashing_name_' + key + '" class="form-control input-sm" type="text" value="' + sensor_name + '">'+
+						'<input type="hidden" id="mashing_color_' + key + '" value="'+jscolor+'">'+
 						'</div></td>'+
-						'<td><input '+disabled_check+' data-sensor="' + key + '" type="checkbox" value="' + key + '"></td>' +
+						'<td><input data-sensor="' + key + '" type="checkbox" value="' + key + '"></td>' +
 						'<td>'+sensor_cutoff+'</td>' +
 						'</tr>';
+						}
+						if (re_out.test(key)) {
+						tpl_devices += '<tr><td>' +
+							'<div class="input-group input-group-sm">' +
+							'<span class="input-group-addon">' + key + '</span>' +
+							'<input id="mashing_name_' + key + '" class="form-control input-sm" type="text" value="' + sensor_name + '">' +
+							'</div></td>' +
+							'<td><input data-sensor="' + key + '" type="checkbox" value="' + key + '"></td>' +
+							'<td></td>' +
+							'<td></td>' +
+							'</tr>';
+					}
+					if (re_in.test(key)) {
+						tpl_safety += '<tr><td>' +
+							'<div class="input-group input-group-sm">' +
+							'<span class="input-group-addon">' + key + '</span>' +
+							'<input id="mashing_name_' + key + '" class="form-control input-sm" type="text" value="' + sensor_name + '">' +
+							'</div></td>' +
+							'<td><input data-sensor="' + key + '" type="checkbox" value="' + key + '"></td>' +
+							'<td></td>' +
+							'<td></td>' +
+							'</tr>';
+					}
+					}
 				}
+			}
+			if(tpl_temperature !== ''){
+				section += '<tr><td colspan="4" class="text-center text-strong">Датчики температуры</td></tr>' + tpl_temperature;
+			}
+			if(tpl_devices !== ''){
+				section += '<tr><td colspan="4" class="text-center text-strong">Клапана</td></tr>' + tpl_devices;
+			}
+			if(tpl_safety !== ''){
+				section += '<tr><td colspan="4" class="text-center text-strong">Датчики безопасности</td></tr>' + tpl_safety;
 			}
 			section += '</table></section>';
 			$.fn.openModal('Выбор датчиков для затирания', section, "modal-md", false, {
@@ -1950,30 +2169,46 @@ $(function() {
 					id: "sensors_select",
 					class: "btn btn-success",
 					click: function () {
-						let sensors_select = $('#brewing_sensors input[type=checkbox]');
-						brewingProcess["sensors"] = $.map(sensors_select, function (e) {
+						let sensors_select = $('#mashing_sensors input[type=checkbox]');
+						let flag_sensors_select = false;
+						$.map(sensors_select, function (e) {
 							if ($(e).is(":checked")) {
+								flag_sensors_select = true;
 								//console.log($(e).data("sensor"));
 								let key = $(e).data("sensor");
-								let name = $("#brewing_name_" + key).val();
-								let val_color = $("#brewing_color_" + key).val();
+								let tmp = false;
+								if (re_t.test(key)) {
+									tmp = true;
+								}
+								let name = $("#mashing_name_" + key).val();
+								let val_color = $("#mashing_color_" + key).val();
 								//let color = (val_color !== "FFFFFF" && val_color !== "") ? hex2dec(val_color) : 0;
 								let color = (val_color !== "FFFFFF" && val_color !== "") ? val_color : "FFFFFF";
-								let cutoff = $("#cutoff_" + key).prop("checked");
-								return {"key": key, "name": name, "cutoff": cutoff, "color": color, "allertValue":0, "value":0};
+								let cutoff = (tmp ? $("#cutoff_" + key).prop("checked") : false);
+
+								mashingProcess["sensors"][key] = {};
+								if(tmp) {
+									mashingProcess["sensors"][key] = {"name": name, "cutoff": cutoff, "color": color, "allertValue": 0, "value": 0};
+								}else{
+									mashingProcess["sensors"][key] = {"name": name, "value": 0};
+								}
+								//return {"key": key, "name": name, "cutoff": cutoff, "color": color, "allertValue":0, "value":0};
 							}
 						});
-						localStorage.setObj('brewing', brewingProcess);
+						//localStorage.setObj('mashing', mashingProcess);
 						//console.log(ar_sensors);
+						if(!flag_sensors_select){
+							mashingProcess["sensors"] = {};
+						}
 						$(this).closest(".modal").modal("hide");
-						$.fn.pasteBrewingSensors(true);
+						$.fn.pasteMashingSensors(true);
 					}
 				},
 				{id: "modal_sensors_select"}
 			);
 		}
 	}
-	$(document).on('click','#brewing_sensors input[type=checkbox]',function() {
+	$(document).on('click','#mashing_sensors input[type=checkbox]',function() {
 		let checked = !$(this).prop("checked");
 		let radio_cutoff = $("#cutoff_"+$(this).data("sensor"));
 		radio_cutoff.prop("disabled",checked);
@@ -1981,22 +2216,53 @@ $(function() {
 			radio_cutoff.prop("checked",false);
 		}
 	});
-	$.fn.pasteBrewingSensors = function(sensors_select){
-		let sensorsBrewingSend = {
-			"t1":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
-			"t2":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
-			"t3":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
-			"t4":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
-			"t5":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
-			"t6":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
-			"t7":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
-			"t8":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0}
+	$.fn.pasteMashingSensors = function(sensors_select){
+		let sensorsMashingSend = {
+			"t1":{"name":"","cutoff":false,"color":0,"member":0,"priority":0,"allertValue":0},
+			"t2":{"name":"","cutoff":false,"color":0,"member":0,"priority":0,"allertValue":0},
+			"t3":{"name":"","cutoff":false,"color":0,"member":0,"priority":0,"allertValue":0},
+			"t4":{"name":"","cutoff":false,"color":0,"member":0,"priority":0,"allertValue":0},
+			"t5":{"name":"","cutoff":false,"color":0,"member":0,"priority":0,"allertValue":0},
+			"t6":{"name":"","cutoff":false,"color":0,"member":0,"priority":0,"allertValue":0},
+			"t7":{"name":"","cutoff":false,"color":0,"member":0,"priority":0,"allertValue":0},
+			"t8":{"name":"","cutoff":false,"color":0,"member":0,"priority":0,"allertValue":0},
+			"out1":{"name":"","member":0},
+			"out2":{"name":"","member":0},
+			"out3":{"name":"","member":0},
+			"out4":{"name":"","member":0},
+			"out5":{"name":"","member":0},
+			"out6":{"name":"","member":0},
+			"out7":{"name":"","member":0},
+			"out8":{"name":"","member":0},
+			"in1":{"name":"","member":0},
+			"in2":{"name":"","member":0},
+			"in3":{"name":"","member":0},
+			"in4":{"name":"","member":0}
 		};
-		let brewingTemplate = '';
-		let localBrewing = localStorage.getObj('brewing');
-		if(localBrewing !== null)
-			brewingProcess = localBrewing;
-		if(brewingProcess["sensors"].length > 0) {
+		let mashingTemplate = '';
+		let tpl_devices_body = '';
+		let tpl_safety_body = '';
+		//let localMashing = localStorage.getObj('mashing');
+		//if(localMashing !== null)mashingProcess = localMashing;
+		if(!sensors_select && $.fn.objIsEmpty(mashingProcess["sensors"],false)){
+			//console.log('empty');
+			$.ajax({
+				url: 'mashingSensorsGetTpl',
+				data: {},
+				type: 'GET',
+				dataType: 'json',
+				success: function(msg) {
+					mashingProcess["sensors"] = msg;
+					//console.log(mashingProcess["sensors"]);
+					if(!$.fn.objIsEmpty(mashingProcess["sensors"],false))
+						$.fn.pasteMashingSensors(false);
+				},
+				error:function (err,exception) {
+					alertAjaxError(err,exception,$("#error_mashing"));
+				}
+			});
+		}
+		if(!$.fn.objIsEmpty(mashingProcess["sensors"],false)) {
 			let tpl_cutoff_thead =
 				'<div class="row-xs">'+
 				'<div class="col-xs-4 col-xs-offset-0 col-sm-3 col-sm-offset-4 text-center text-middle text-primary">Значение</div>' +
@@ -2004,22 +2270,23 @@ $(function() {
 				'</div>';
 			let tpl_cutoff_body = '';
 			let tpl_all_body = '';
-			$.each(brewingProcess["sensors"], function (i, e) {
+			$.each(mashingProcess["sensors"], function (i, e) {
 				//console.log(i,e);
-				let sensor_key = e["key"];
+				let sensor_key = i;
 				let name_sensor = e["name"];
-				if(sensorsBrewingSend[sensor_key].hasOwnProperty("name"))
-					sensorsBrewingSend[sensor_key]["name"] = name_sensor;
-				sensorsBrewingSend[sensor_key]["color"] = hex2dec(e["color"]);
-				sensorsBrewingSend[sensor_key]["member"] = 1;
+				if(sensorsMashingSend[sensor_key].hasOwnProperty("name"))
+					sensorsMashingSend[sensor_key]["name"] = name_sensor;
+				if (re_t.test(sensor_key) && Number(e["member"]) !== 0) {
+				sensorsMashingSend[sensor_key]["color"] = e["color"];
+				sensorsMashingSend[sensor_key]["member"] = 1;
 				let tpl_cutoff = '';
 				if (e["cutoff"]) {
-					tpl_cutoff = returnTplHtml([{id:"brewing_cutoff_"+sensor_key, value: e["allertValue"], min: '0', max: '105', step: '0.5'}], deltaTempl);
+					tpl_cutoff = returnTplHtml([{id:"mashing_cutoff_"+sensor_key, value: e["allertValue"], min: '0', max: '105', step: '0.5'}], deltaTempl);
 					tpl_cutoff_body +=
 						'<div class="row row-striped">' + tpl_cutoff_thead +
-						'<div id="alert_bg_'+sensor_key+'" class="pt-10 pb-10 clearfix">' +
-						'<div id="alert_text_'+sensor_key+'" class="col-xs-12 col-sm-4 text-center-xs"><strong>t&#176' + name_sensor + '</strong></div>' +
-						'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="brewing_' + sensor_key + '"></span><span class="hidden">&#176С</span></strong></div>' +
+						'<div id="mashing_alert_bg_'+sensor_key+'" class="pt-10 pb-10 clearfix">' +
+						'<div id="mashing_alert_text_'+sensor_key+'" class="col-xs-12 col-sm-4 text-center-xs"><strong>t&#176' + name_sensor + '</strong></div>' +
+						'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="mashing_' + sensor_key + '"></span><span class="hidden">&#176С</span></strong></div>' +
 						//'<div class="col-xs-3 col-sm-3"></div>' +
 						'<div class="col-xs-4 col-xs-offset-3 col-sm-2 col-sm-offset-3">' + tpl_cutoff +
 						'</div>' +
@@ -2028,47 +2295,222 @@ $(function() {
 
 					tpl_cutoff_thead = '';
 				}
-				if(/*sensor_key !== "p1" && */!e["delta"] && !e["cutoff"]) {
+				if(!e["delta"] && !e["cutoff"]) {
 					tpl_all_body += '<div class="row row-striped">' +
 						'<div class="pt-10 pb-10 clearfix">' +
 						'<div class="col-xs-12 col-sm-4 text-center-xs"><strong>t&#176' + name_sensor + '</strong></div>' +
-						'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="brewing_' + sensor_key + '"></span><span class="hidden">&#176С</span></strong></div>' +
+						'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="mashing_' + sensor_key + '"></span><span class="hidden">&#176С</span></strong></div>' +
 						'<div class="col-xs-3 col-sm-3"></div>' +
 						'<div class="col-xs-4 col-sm-3"></div>' +
 						'</div>' +
 						'</div>';
 				}
+				}
+				if (re_out.test(sensor_key) && Number(e["member"]) !== 0) {
+					sensorsMashingSend[sensor_key]["member"] = 1;
+					tpl_devices_body += '<div class="row row-striped">' +
+						'<div class="pt-10 clearfix">' +
+						'<div class="col-xs-12 col-sm-4 text-center-xs text-middle"><strong>' + name_sensor + '</strong></div>' +
+						'<div class="col-xs-5 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="mashing_' + sensor_key + '"></span> <span class="hidden"></span></strong></div>' +
+						'</div></div>';
+				}
+				if (re_in.test(sensor_key) && Number(e["member"]) !== 0) {
+					sensorsMashingSend[sensor_key]["member"] = 1;
+					tpl_safety_body += '<div class="row row-striped">' +
+						'<div class="pt-10 clearfix">' +
+						'<div class="col-xs-12 col-sm-4 text-center-xs text-middle"><strong>' + name_sensor + '</strong></div>' +
+						'<div class="col-xs-5 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="mashing_' + sensor_key + '"></span> <span class="hidden"></span></strong></div>' +
+						'</div></div>';
+				}
 			});
 			//sensors["process"]["allow"] = 2;
 			if(tpl_cutoff_body !== '') {
-				brewingTemplate += tpl_cutoff_thead + tpl_cutoff_body;
+				mashingTemplate += tpl_cutoff_thead + tpl_cutoff_body;
 			}
 			if(tpl_all_body !== '') {
-				brewingTemplate += tpl_all_body;
+				mashingTemplate += tpl_all_body;
 			}
 		}
-		if(brewingTemplate !== '') {
+		if(mashingTemplate !== '') {
+			//console.log(mashingTemplate);
 			if(sensors_select)
-				sendRequest("brewingSensorsSetSave", sensorsBrewingSend, "json", false, false, $("#error_brewing"),false);
+				sendRequest("mashingSensorsSetSave", sensorsMashingSend, "json", false, false, $("#error_mashing"),false);
 			//localStorage.setObj('sensors', sensors);
-			brewingTemplate = returnTplHtml([{id_value:"brewing_power_value",id_set:"brewing_power_set"}], powerTempl) + brewingTemplate/* + pressureTemplate*/;
-			$("#brewing_start_group_button").removeClass("hidden");
-			$("#svg_brewing").show();
+			mashingTemplate = returnTplHtml([{id_value:"mashing_power_value",id_set:"mashing_power_set"}], powerTempl) + mashingTemplate + tpl_devices_body + tpl_safety_body;
+			mashingTemplate += returnTplHtml([{pause_name:"Пауза",id_value:"mashing_value_t1",id_time:"mashing_time1",id_set:"mashing_set_t1"}],pauseTempl);
+			$("#mashing_start_group_button").removeClass("hidden");
+			//$("#svg_mashing").show();
 		}else{
-			$("#brewing_start_group_button").addClass("hidden");
+			$("#mashing_start_group_button").addClass("hidden");
 		}
-		$("#brewing_process").html(brewingTemplate);
-		$("#brewing_power_set").val(brewingProcess["power"]);
-		//console.log(brewingProcess);
-		if(brewingProcess["start"] === true) {
-			getBrewing();
-			$('#brewing_start').prop("disabled",true);
-			$('#brewing_add_sensor').prop("disabled",true);
+		$("#mashing_process").html(mashingTemplate);
+		$("#mashing_power_set").val(mashingProcess["power"]);
+		//console.log(mashingProcess);
+		if(mashingProcess["start"] === true) {
+			getMashing();
+			$('#mashing_start').prop("disabled",true);
+			$('#mashing_add_sensor').prop("disabled",true);
 		}else{
-			$('#brewing_stop').prop("disabled",true);
-			$('#brewing_add_sensor').prop("disabled",false);
+			$('#mashing_stop').prop("disabled",true);
+			$('#mashing_add_sensor').prop("disabled",false);
 		}
 	};
+	$(document).on('click','#mashing_start',function() {
+		let _this = $(this);
+		_this.prop("disabled",true);
+		$('#mashing_add_sensor').prop("disabled",true);
+		$('#mashing_stop').prop("disabled",false);
+		mashingProcess["start"] = flagSendProcess = true;
+		//curStartProcess = 1;
+		localStorage.setObj('oldStartProcess', 3);
+		//очищаем графики
+		clearChart();
+		startChart();
+		setMashing();
+		setTimeout(getMashing, 2000);
+	});
+	$(document).on('click','#mashing_stop',function() {
+		let _this = $(this);
+		_this.prop("disabled",true);
+		$('#mashing_add_sensor').prop("disabled",false);
+		$('#mashing_start').prop("disabled",false);
+		$("#svg_mashing_start").css('stroke',"#000000");
+		flagSendProcess = true;
+		mashingProcess["start"] = false;
+		//запущенный процесс в текущее время и предыдущий запущенный процесс
+		let oldStartProcess = Number(localStorage.getItem('oldStartProcess'));
+		if(oldStartProcess !== 3){
+			//clearChart();
+		}else {
+			setMashing();
+		}
+	});
+	//Установка значений для затирания
+	function setMashing() {
+		let mashingSendData = {
+			"process":{"allow":0,"number":0},
+			"t1":{"allertValue":0},
+			"t2":{"allertValue":0},
+			"t3":{"allertValue":0},
+			"t4":{"allertValue":0},
+			"t5":{"allertValue":0},
+			"t6":{"allertValue":0},
+			"t7":{"allertValue":0},
+			"t8":{"allertValue":0},
+			"power":0
+		};
+		//let flag_send = false;
+		let power_set = $("#mashing_power_set");
+		mashingSendData["process"]["allow"] = (mashingProcess["start"] ? 1 : 0);
+		if(mashingProcess["power"] !== power_set.val())
+			flagSendProcess = true;
+		mashingSendData["power"] = mashingProcess["power"] = power_set.val();
+
+		$.each(mashingProcess["sensors"], function (i, e) {
+			let sensor_key = i;
+			//let mashing_delta = $("#mashing_delta_"+sensor_key);
+			let mashing_cutoff = $("#mashing_cutoff_"+sensor_key);
+			/*if(mashing_delta.length) {
+				if(e["allertValue"] !== mashing_delta.val())
+					flagSendProcess = true;
+				mashingSendData[sensor_key]["allertValue"] = e["allertValue"] = mashing_delta.val();
+			}*/
+			if(mashing_cutoff.length) {
+				if(e["allertValue"] !== mashing_cutoff.val())
+					flagSendProcess = true;
+				mashingSendData[sensor_key]["allertValue"] = e["allertValue"] = mashing_cutoff.val();
+			}
+		});
+		//console.log(flagSendProcess);
+		if(flagSendProcess) {
+			flagSendProcess = false;
+			//localStorage.setObj('mashing', mashingProcess);
+			sendRequest("SensorsIn", mashingSendData, "json", false, false, $("#error_mashing"),false);
+		}
+	}
+	function getMashing() {
+		//console.log("getMashing");
+		//очистка данных графиков
+		let oldStartProcess = Number(localStorage.getItem('oldStartProcess'));
+		if(oldStartProcess !== 1) {
+			//clearChart();
+		}
+		setMashing();
+		if(!$.fn.objIsEmpty(globalSensorsJson,false)) {
+			let dtoJson = {};
+			dtoJson["heaterPower"] = globalSensorsJson["power"];
+			dtoJson["temperatures"] = {};
+			$.each(globalSensorsJson["sensors"], function (i, e) {
+				let sensor_key = Object.keys(e).shift();
+				let sensor_value = Number(globalSensorsJson["sensors"][i][sensor_key]["value"]);
+				let alert_value = Number(globalSensorsJson["sensors"][i][sensor_key]["allertValue"]);
+				$.each(mashingProcess["sensors"], function (j, q) {
+					//console.log(j, q);
+					//if (q["key"] === sensor_key) {
+					if(j === sensor_key && re_t.test(sensor_key)){
+						q["value"] = sensor_value;
+						//if (sensor_key !== "p1") {
+						let color_value = q["color"];
+						let fillcolor = "#" + dec2hex(color_value);
+						if (alert_value > 0 && sensor_value >= alert_value) {
+							$("#mashing_alert_bg_" + sensor_key).addClass("bg-danger");
+							$("#mashing_alert_text_" + sensor_key).addClass("text-danger");
+							// Вибрация поддерживается
+							/*if (window.navigator && window.navigator.vibrate) {
+								navigator.vibrate(1000);
+							}*/
+						} else {
+							$("#mashing_alert_bg_" + sensor_key).removeClass("bg-danger");
+							$("#mashing_alert_text_" + sensor_key).removeClass("text-danger");
+						}
+						//console.log(sensor_key, fillcolor,sensor_value,alert_value);
+						//if (q["delta"] === false) {
+						$("#svg_mashing_color_" + sensor_key).css('fill', colorPersent(fillcolor, sensor_value, alert_value));
+						/*} else {
+							let delta_alert = $("#mashing_delta_" + sensor_key).val();
+							let delta_value = (delta_alert - alert_value + sensor_value).toFixed(2);
+							//console.log(fillcolor, delta_value, delta_alert);
+							$("#svg_mashing_color_" + sensor_key).css('fill', colorPersent(fillcolor, delta_value, delta_alert));
+						}*/
+						//}
+						if(Number(q["member"])!==0)
+							dtoJson["temperatures"][sensor_key] = {value: sensor_value, name: q["name"], color: fillcolor};
+					}
+				});
+				$("#mashing_" + sensor_key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
+				let allertValue = globalSensorsJson["sensors"][i][sensor_key]["allertValue"];
+				allertValue = allertValue > 0 ? allertValue.toFixed(2) : "";
+				if (allertValue > 0) {
+					//$("#mashing_delta_result_" + sensor_key).text(allertValue).parent().find(".hidden").removeClass("hidden").addClass("show");
+					$("#mashing_cutoff_result_" + sensor_key).text(allertValue).parent().find(".hidden").removeClass("hidden").addClass("show");
+				}
+				/*if (sensor_key === "p1") {
+					$("#mashing_pressure").text(globalSensorsJson["sensors"][i]["p1"]["value"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
+					dtoJson["pressure"] = globalSensorsJson["sensors"][i]["p1"]["value"];
+				}*/
+				//svg
+				$("#svg_mashing_" + sensor_key).html(sensor_value.toFixed(0) + '&#176С');
+				//let fillcolor = temperaturePalette(sensor_value.toFixed(0));
+
+			});
+			//$("#mashing_alco_boil").text(globalSensorsJson["temperatureAlcoholBoil"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
+			let power_value = Number(globalSensorsJson["power"]);
+			$("#mashing_power_value").text(power_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
+			$("#svg_mashing_ten_t").text(power_value.toFixed(0) + "%");
+			$("#svg_mashing_color_ten").css('fill', colorPersent("#FF0000", power_value.toFixed(0), 100));
+			//dtoJson["temperatures"] = mashingProcess["sensors"];
+			$("#view_reflux_chart").html("");
+			//let oldStartProcess = Number(localStorage.getItem('oldStartProcess'));
+			//if(oldStartProcess === 1) {
+			if(!$.fn.objIsEmpty(dtoJson["temperatures"],false))
+				dtoReceiver.start(dtoJson, 'view_mashing_chart');
+			//}
+		}
+		if (mashingProcess["start"] === true) {
+			setTimeout(getMashing, 2000);
+			$("#svg_mashing_start").css('stroke', "#02b500");
+		}
+	}
 	//заполнение разных полей данными датчиков
 	function fillSensorsData() {
 		//$("#width_page").css({"border-bottom":"solid 1px red","text-align":"center","color":"red"}).text("thisWidth: "+$("#width_page").outerWidth()+", documentWidth: "+$(document).width());
@@ -2143,6 +2585,23 @@ $(function() {
 						$("#distillation_stop").trigger("click");
 					}
 				}
+				//заполнение процесса затирания
+				if(mashingProcess["start"] !== true /*&& $.trim($("#mashing_process").html()) !== ""*/){
+					$("#mashing_" + sensor_key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
+					$("#mashing_power_value").text(globalSensorsJson["power"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
+					$("#svg_mashing_" + sensor_key).html(sensor_value.toFixed(0)+'&#176С');
+					$("#svg_mashing_ten_t").text(globalSensorsJson["power"]+'%');
+
+					if(process === 3) {
+						$('li.swipe-tab a[data-target="#mashing"]').tab('show');
+						$("#mashing_start").trigger("click");
+					}
+				}
+				if(mashingProcess["start"] === true){
+					if(process !== 3) {
+						$("#mashing_stop").trigger("click");
+					}
+				}
 
 				if(process > 0 && process !== 2) {
 					$("#reflux_start_group_button").addClass("hidden");
@@ -2150,9 +2609,16 @@ $(function() {
 				if(process > 0 && process !== 1) {
 					$("#distillation_start_group_button").addClass("hidden");
 				}
+				if(process > 0 && process !== 3) {
+					$("#mashing_start_group_button").addClass("hidden");
+				}
 				if(process === 0) {
-					$("#reflux_start_group_button").removeClass("hidden");
-					$("#distillation_start_group_button").removeClass("hidden");
+					if($.trim($("#reflux_process").html()) !== "")
+						$("#reflux_start_group_button").removeClass("hidden");
+					if($.trim($("#distillation_process").html()) !== "")
+						$("#distillation_start_group_button").removeClass("hidden");
+					if($.trim($("#mashing_process").html()) !== "")
+						$("#mashing_start_group_button").removeClass("hidden");
 				}
 			});
 		}

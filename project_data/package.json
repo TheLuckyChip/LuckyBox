@@ -7,7 +7,7 @@
     "build-css-lib":"ngzip bootstrap.min.css > ../data/bootstrap.min.css.gz",
     "build-js": "ngzip scripts.js > ../data/scripts.js.gz",
     "build-css": "ngzip style.css > ../data/style.css.gz",
-    "build-htm": "html-minifier index.htm --output ../data/index.htm --collapse-whitespace & html-minifier distillation.htm --output ../data/distillation.htm --collapse-whitespace & html-minifier reflux.htm --output ../data/reflux.htm --collapse-whitespace & html-minifier brewing.htm --output ../data/brewing.htm --collapse-whitespace & html-minifier heater.htm --output ../data/heater.htm --collapse-whitespace & html-minifier sensors.htm --output ../data/sensors.htm --collapse-whitespace",
+    "build-htm": "html-minifier index.htm --output ../data/index.htm --collapse-whitespace & html-minifier distillation.htm --output ../data/distillation.htm --collapse-whitespace & html-minifier reflux.htm --output ../data/reflux.htm --collapse-whitespace & html-minifier mashing.htm --output ../data/mashing.htm --collapse-whitespace & html-minifier brewing.htm --output ../data/brewing.htm --collapse-whitespace & html-minifier heater.htm --output ../data/heater.htm --collapse-whitespace & html-minifier sensors.htm --output ../data/sensors.htm --collapse-whitespace",
     "build": "npm run build-js && npm run build-css && npm run build-htm"
   },
   "devDependencies": {
