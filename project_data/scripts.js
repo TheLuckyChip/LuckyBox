@@ -620,6 +620,7 @@ $(function() {
 	let globalSensorsJson = {};
 	let sensorsIntervalId = 0;
 	//регекспы для датчиков
+	const re_p = new RegExp(/^p/);
 	const re_t = new RegExp(/^t/);
 	const re_out = new RegExp(/^out/);
 	const re_in = new RegExp(/^in/);
@@ -1005,6 +1006,10 @@ $(function() {
 		for (let key in sensors) {
 			if(sensors.hasOwnProperty(key)) {
 				let sensor_value =  sensors[key]["value"];
+				if (re_p.test(key)) {
+					let jscolor = sensors[key]["color"] > 0 ? dec2hex(sensors[key]["color"]) : "FFFFFF";
+					$("#sensor_color_" + key).val(jscolor).next("button").css("background-color", "#" + jscolor);
+				}
 				if (re_t.test(key)) {
 					let jscolor = sensors[key]["color"] > 0 ? dec2hex(sensors[key]["color"]) : "FFFFFF";
 					if (sensor_value < 150) {
@@ -1040,6 +1045,11 @@ $(function() {
 		for (let key in sensorsJson) {
 			if(sensorsJson.hasOwnProperty(key)){
 				sensorsSend[key] = {};
+				if (re_p.test(key)) {
+					let color_val = $("#sensor_color_" + key).val();
+					sensorsSend[key]["color"] = sensorsJson[key]["color"] = (color_val !== "FFFFFF" && color_val !== "") ? hex2dec(color_val) : 0;
+					//console.log(key,color_val);
+				}
 				if (re_t.test(key)) {
 					let color_val = $("#sensor_color_" + key).val();
 					let sensor_val = $("#sensor_name_" + key).val();
@@ -1049,12 +1059,12 @@ $(function() {
 					//console.log(key,color_val);
 					sensorsSend[key]["color"] = sensorsJson[key]["color"] = (color_val !== "FFFFFF" && color_val !== "") ? hex2dec(color_val) : 0;
 
-					if (key !== "p1") {
+					//if (key !== "p1") {
 						let sort_number = Number($("#sensor_number_" + key).val());
 						if (sort_number !== 0)
 							$.fn.arrayUnset(arrSortSensors, sort_number);
 						sensorsSend[key]["number"] = sensorsJson[key]["number"] = sort_number;
-					}
+					//}
 				}
 				if (re_out.test(key)) {
 					sensorsSend[key]["name"] = sensorsJson[key]["name"] = $("#device_name_" + key).val();
@@ -1079,7 +1089,7 @@ $(function() {
 		if(nameError) {
 			$.fn.openModal('', '<p class="text-center text-danger"><strong>Заполните названия подключенных датчиков</strong></p>', "modal-sm", true, false);
 		}else {
-            //console.log(sensorsJson);
+            //console.log(sensorsJson,sensorsSend);
 			sendRequest("sensorsInSet", sensorsSend, "json", setSensors, _this, $("#error_sensors"),false);
 		}
 	});
@@ -1191,7 +1201,7 @@ $(function() {
 							tpl_temperature += '<tr><td>' +
 								'<div class="input-group input-group-sm">' +
 								'<span class="input-group-addon" style="background-color: #' + jscolor + '">' + key + '</span>' +
-								'<input id="reflux_name_' + key + '" class="form-control input-sm" type="text" value="' + sensor_name + '">' +
+								'<input readonly id="reflux_name_' + key + '" class="form-control input-sm" type="text" value="' + sensor_name + '">' +
 								'<input type="hidden" id="reflux_color_' + key + '" value="' + jscolor + '">' +
 								'</div></td>' +
 								'<td><input data-sensor="' + key + '" type="checkbox" value="' + key + '"></td>' +
@@ -1203,7 +1213,7 @@ $(function() {
 							tpl_devices += '<tr><td>' +
 								'<div class="input-group input-group-sm">' +
 								'<span class="input-group-addon">' + key + '</span>' +
-								'<input id="reflux_name_' + key + '" class="form-control input-sm" type="text" value="' + sensor_name + '">' +
+								'<input readonly id="reflux_name_' + key + '" class="form-control input-sm" type="text" value="' + sensor_name + '">' +
 								'</div></td>' +
 								'<td><input data-sensor="' + key + '" type="checkbox" value="' + key + '"></td>' +
 								'<td></td>' +
@@ -1214,7 +1224,7 @@ $(function() {
 							tpl_safety += '<tr><td>' +
 								'<div class="input-group input-group-sm">' +
 								'<span class="input-group-addon">' + key + '</span>' +
-								'<input id="reflux_name_' + key + '" class="form-control input-sm" type="text" value="' + sensor_name + '">' +
+								'<input readonly id="reflux_name_' + key + '" class="form-control input-sm" type="text" value="' + sensor_name + '">' +
 								'</div></td>' +
 								'<td><input data-sensor="' + key + '" type="checkbox" value="' + key + '"></td>' +
 								'<td></td>' +
@@ -1239,12 +1249,13 @@ $(function() {
 					id: "sensors_select",
 					class: "btn btn-success",
 					click: function () {
+						refluxProcess["sensors"] = {};
 						let sensors_select = $('#reflux_sensors input[type=checkbox]');
-						let flag_sensors_select = false;
+						//let flag_sensors_select = false;
 						$.map(sensors_select, function (e) {
 							if ($(e).is(":checked")) {
-								flag_sensors_select = true;
-								//console.log($(e).data("sensor"));
+								//flag_sensors_select = true;
+								//console.log(e);
 								let key = $(e).data("sensor");
 								let tmp = false;
 								if (re_t.test(key)) {
@@ -1252,10 +1263,11 @@ $(function() {
 								}
 								let name = $("#reflux_name_" + key).val();
 								let val_color = (tmp ? $("#reflux_color_" + key).val() : "");
-								//let color = (val_color !== "FFFFFF" && val_color !== "") ? hex2dec(val_color) : 0;
-								let color = (val_color !== "FFFFFF" && val_color !== "") ? val_color : "FFFFFF";
-								let delta = (tmp ? $("#delta_" + key).prop("checked") : false);
-								let cutoff = (tmp ? $("#cutoff_" + key).prop("checked") : false);
+								let color = (val_color !== "FFFFFF" && val_color !== "") ? Number(hex2dec(val_color)) : 0;
+								//console.log(key,color);
+								//let color = (val_color !== "FFFFFF" && val_color !== "") ? val_color : "FFFFFF";
+								let delta = (tmp ? Number($("#delta_" + key).prop("checked")) : 0);
+								let cutoff = (tmp ? Number($("#cutoff_" + key).prop("checked")) : 0);
 
 								refluxProcess["sensors"][key] = {};
 								if(tmp) {
@@ -1268,9 +1280,9 @@ $(function() {
 						//refluxProcess["sensors"] = reflux_sensors;
 						//localStorage.setObj('reflux', refluxProcess);
 						//console.log("modal",refluxProcess["sensors"]);
-						if(!flag_sensors_select){
+						/*if(!flag_sensors_select){
 							refluxProcess["sensors"] = {};
-						}
+						}*/
 						$(this).closest(".modal").modal("hide");
 						$.fn.pasteRefluxSensors(true);
 					}
@@ -1299,14 +1311,14 @@ $(function() {
 	$.fn.pasteRefluxSensors = function(sensors_select){
 		//let sensors = localStorage.getObj('sensors');//sensorsJson
 		let sensorsRefluxSend = {
-			"t1":{"name":"","delta":false,"cutoff":false,"color":0,"member":0,"priority":0,"allertValue":0},
-			"t2":{"name":"","delta":false,"cutoff":false,"color":0,"member":0,"priority":0,"allertValue":0},
-			"t3":{"name":"","delta":false,"cutoff":false,"color":0,"member":0,"priority":0,"allertValue":0},
-			"t4":{"name":"","delta":false,"cutoff":false,"color":0,"member":0,"priority":0,"allertValue":0},
-			"t5":{"name":"","delta":false,"cutoff":false,"color":0,"member":0,"priority":0,"allertValue":0},
-			"t6":{"name":"","delta":false,"cutoff":false,"color":0,"member":0,"priority":0,"allertValue":0},
-			"t7":{"name":"","delta":false,"cutoff":false,"color":0,"member":0,"priority":0,"allertValue":0},
-			"t8":{"name":"","delta":false,"cutoff":false,"color":0,"member":0,"priority":0,"allertValue":0},
+			"t1":{"name":"","delta":0,"cutoff":0,"color":0,"member":0,"priority":0,"allertValue":0},
+			"t2":{"name":"","delta":0,"cutoff":0,"color":0,"member":0,"priority":0,"allertValue":0},
+			"t3":{"name":"","delta":0,"cutoff":0,"color":0,"member":0,"priority":0,"allertValue":0},
+			"t4":{"name":"","delta":0,"cutoff":0,"color":0,"member":0,"priority":0,"allertValue":0},
+			"t5":{"name":"","delta":0,"cutoff":0,"color":0,"member":0,"priority":0,"allertValue":0},
+			"t6":{"name":"","delta":0,"cutoff":0,"color":0,"member":0,"priority":0,"allertValue":0},
+			"t7":{"name":"","delta":0,"cutoff":0,"color":0,"member":0,"priority":0,"allertValue":0},
+			"t8":{"name":"","delta":0,"cutoff":0,"color":0,"member":0,"priority":0,"allertValue":0},
 			"out1":{"name":"","member":0},
 			"out2":{"name":"","member":0},
 			"out3":{"name":"","member":0},
@@ -1369,11 +1381,12 @@ $(function() {
 				if(sensorsRefluxSend[sensor_key].hasOwnProperty("name"))
 					sensorsRefluxSend[sensor_key]["name"] = name_sensor;
 				if (re_t.test(sensor_key) && Number(e["member"]) !== 0) {
-					sensorsRefluxSend[sensor_key]["color"] = e["color"];
+					sensorsRefluxSend[sensor_key]["color"] = e["color"];//hex2dec(e["color"]);
 					sensorsRefluxSend[sensor_key]["member"] = 1;
 					let tpl_delta = '';
 					let tpl_delta_result = '';
 					if (e["delta"]) {
+						sensorsRefluxSend[sensor_key]["delta"] = 1;
 						tpl_delta = returnTplHtml([{id: "reflux_delta_" + sensor_key, value: e["allertValue"], min: '0', max: '1', step: '0.05'}], deltaTempl);
 						tpl_delta_result = '<span id="reflux_delta_result_' + sensor_key + '"></span><span class="hidden">&#176С</span>';
 						tpl_delta_body +=
@@ -1391,6 +1404,7 @@ $(function() {
 					}
 					let tpl_cutoff = '';
 					if (e["cutoff"]) {
+						sensorsRefluxSend[sensor_key]["cutoff"] = 1;
 						tpl_cutoff = returnTplHtml([{id: "reflux_cutoff_" + sensor_key, value: e["allertValue"], min: '0', max: '105', step: '0.5'}], deltaTempl);
 						tpl_cutoff_body +=
 							'<div class="row row-striped">' + tpl_cutoff_thead +
@@ -1445,8 +1459,11 @@ $(function() {
 			}
 		}
 		if(refluxTemplate !== '') {
-			if(sensors_select)
-				sendRequest("refluxSensorsSetSave", sensorsRefluxSend, "json", false, false, $("#error_reflux"),false);
+			//console.log(sensorsRefluxSend);
+			if(sensors_select) {
+				sendRequest("refluxSensorsSetSave", sensorsRefluxSend, "json", false, false, $("#error_reflux"), false);
+				//console.log("refluxSensorsSetSave",sensorsRefluxSend);
+			}
 			//localStorage.setObj('sensors', sensors);
 			refluxTemplate = returnTplHtml([{id_value:"reflux_power_value",id_set:"reflux_power_set"}], powerTempl) + refluxTemplate + pressureTemplate + tpl_devices_body + tpl_safety_body;
 
@@ -1667,7 +1684,7 @@ $(function() {
 					tpl_temperature += '<tr><td>' +
 						'<div class="input-group input-group-sm">'+
 						'<span class="input-group-addon" style="background-color: #'+jscolor+'">' + key + '</span>'+
-						'<input id="distillation_name_' + key + '" class="form-control input-sm" type="text" value="' + sensor_name + '">'+
+						'<input readonly id="distillation_name_' + key + '" class="form-control input-sm" type="text" value="' + sensor_name + '">'+
 						'<input type="hidden" id="distillation_color_' + key + '" value="'+jscolor+'">'+
 						'</div></td>'+
 						'<td><input data-sensor="' + key + '" type="checkbox" value="' + key + '"></td>' +
@@ -1679,7 +1696,7 @@ $(function() {
 							tpl_devices += '<tr><td>' +
 								'<div class="input-group input-group-sm">' +
 								'<span class="input-group-addon">' + key + '</span>' +
-								'<input id="distillation_name_' + key + '" class="form-control input-sm" type="text" value="' + sensor_name + '">' +
+								'<input readonly id="distillation_name_' + key + '" class="form-control input-sm" type="text" value="' + sensor_name + '">' +
 								'</div></td>' +
 								'<td><input data-sensor="' + key + '" type="checkbox" value="' + key + '"></td>' +
 								'<td></td>' +
@@ -1690,7 +1707,7 @@ $(function() {
 							tpl_safety += '<tr><td>' +
 								'<div class="input-group input-group-sm">' +
 								'<span class="input-group-addon">' + key + '</span>' +
-								'<input id="distillation_name_' + key + '" class="form-control input-sm" type="text" value="' + sensor_name + '">' +
+								'<input readonly id="distillation_name_' + key + '" class="form-control input-sm" type="text" value="' + sensor_name + '">' +
 								'</div></td>' +
 								'<td><input data-sensor="' + key + '" type="checkbox" value="' + key + '"></td>' +
 								'<td></td>' +
@@ -1715,11 +1732,12 @@ $(function() {
 					id: "sensors_select",
 					class: "btn btn-success",
 					click: function () {
+					distillationProcess["sensors"] = {};
 						let sensors_select = $('#distillation_sensors input[type=checkbox]');
-						let flag_sensors_select = false;
+						//let flag_sensors_select = false;
 						$.map(sensors_select, function (e) {
 							if ($(e).is(":checked")) {
-								flag_sensors_select = true;
+								//flag_sensors_select = true;
 								//console.log($(e).data("sensor"));
 								let key = $(e).data("sensor");
 								let tmp = false;
@@ -1727,11 +1745,12 @@ $(function() {
 									tmp = true;
 								}
 								let name = $("#distillation_name_" + key).val();
-								let val_color = $("#distillation_color_" + key).val();
-								//let color = (val_color !== "FFFFFF" && val_color !== "") ? hex2dec(val_color) : 0;
-								let color = (val_color !== "FFFFFF" && val_color !== "") ? val_color : "FFFFFF";
-								//let delta = $("#delta_" + key).prop("checked");
-								let cutoff = (tmp ? $("#cutoff_" + key).prop("checked") : false);
+								let val_color = (tmp ? $("#distillation_color_" + key).val() : "");
+								let color = (val_color !== "FFFFFF" && val_color !== "") ? Number(hex2dec(val_color)) : 0;
+								//let color = (val_color !== "FFFFFF" && val_color !== "") ? val_color : "FFFFFF";
+								//console.log(key,color);
+								//let delta = (tmp ? Number($("#delta_" + key).prop("checked")) : 0);
+								let cutoff = (tmp ? Number($("#cutoff_" + key).prop("checked")) : 0);
 
 								distillationProcess["sensors"][key] = {};
 								if(tmp) {
@@ -1746,9 +1765,9 @@ $(function() {
 						//distillationProcess["sensors"] = distillation_sensors;
 						//localStorage.setObj('distillation', distillationProcess);
 						//console.log(ar_sensors);
-						if(!flag_sensors_select){
+						/*if(!flag_sensors_select){
 							distillationProcess["sensors"] = {};
-						}
+						}*/
 						$(this).closest(".modal").modal("hide");
 						$.fn.pasteDistillationSensors(true);
 					}
@@ -1772,14 +1791,14 @@ $(function() {
 
 	$.fn.pasteDistillationSensors = function(sensors_select){
 		let sensorsDistillationSend = {
-			"t1":{"name":"","cutoff":false,"color":0,"member":0,"priority":0,"allertValue":0},
-			"t2":{"name":"","cutoff":false,"color":0,"member":0,"priority":0,"allertValue":0},
-			"t3":{"name":"","cutoff":false,"color":0,"member":0,"priority":0,"allertValue":0},
-			"t4":{"name":"","cutoff":false,"color":0,"member":0,"priority":0,"allertValue":0},
-			"t5":{"name":"","cutoff":false,"color":0,"member":0,"priority":0,"allertValue":0},
-			"t6":{"name":"","cutoff":false,"color":0,"member":0,"priority":0,"allertValue":0},
-			"t7":{"name":"","cutoff":false,"color":0,"member":0,"priority":0,"allertValue":0},
-			"t8":{"name":"","cutoff":false,"color":0,"member":0,"priority":0,"allertValue":0},
+			"t1":{"name":"","cutoff":0,"color":0,"member":0,"priority":0,"allertValue":0},
+			"t2":{"name":"","cutoff":0,"color":0,"member":0,"priority":0,"allertValue":0},
+			"t3":{"name":"","cutoff":0,"color":0,"member":0,"priority":0,"allertValue":0},
+			"t4":{"name":"","cutoff":0,"color":0,"member":0,"priority":0,"allertValue":0},
+			"t5":{"name":"","cutoff":0,"color":0,"member":0,"priority":0,"allertValue":0},
+			"t6":{"name":"","cutoff":0,"color":0,"member":0,"priority":0,"allertValue":0},
+			"t7":{"name":"","cutoff":0,"color":0,"member":0,"priority":0,"allertValue":0},
+			"t8":{"name":"","cutoff":0,"color":0,"member":0,"priority":0,"allertValue":0},
 			"out1":{"name":"","member":0},
 			"out2":{"name":"","member":0},
 			"out3":{"name":"","member":0},
@@ -1792,7 +1811,6 @@ $(function() {
 			"in2":{"name":"","member":0},
 			"in3":{"name":"","member":0},
 			"in4":{"name":"","member":0}
-			//,"p1":{"value":760.00,"color":0,"member":0}
 		};
 		let distillationTemplate = '';
 		let tpl_devices_body = '';
@@ -1861,6 +1879,7 @@ $(function() {
 				}*/
 				let tpl_cutoff = '';
 				if (e["cutoff"]) {
+					sensorsDistillationSend[sensor_key]["cutoff"] = 1;
 					tpl_cutoff = returnTplHtml([{id:"distillation_cutoff_"+sensor_key, value: e["allertValue"], min: '0', max: '105', step: '0.5'}], deltaTempl);
 					tpl_cutoff_body +=
 						'<div class="row row-striped">' + tpl_cutoff_thead +
@@ -1915,8 +1934,11 @@ $(function() {
 			}
 		}
 		if(distillationTemplate !== '') {
-			if(sensors_select)
+			//console.log(sensorsDistillationSend);
+			if(sensors_select){
 				sendRequest("distillationSensorsSetSave", sensorsDistillationSend, "json", false, false, $("#error_distillation"),false);
+				//console.log("distillationSensorsSetSave",sensorsDistillationSend);
+			}
 			//localStorage.setObj('sensors', sensors);
 			distillationTemplate = returnTplHtml([{id_value:"distillation_power_value",id_set:"distillation_power_set"}], powerTempl) + distillationTemplate+ tpl_devices_body + tpl_safety_body;
 			$("#distillation_start_group_button").removeClass("hidden");
@@ -2122,7 +2144,7 @@ $(function() {
 					tpl_temperature += '<tr><td>' +
 						'<div class="input-group input-group-sm">'+
 						'<span class="input-group-addon" style="background-color: #'+jscolor+'">' + key + '</span>'+
-						'<input id="mashing_name_' + key + '" class="form-control input-sm" type="text" value="' + sensor_name + '">'+
+						'<input readonly id="mashing_name_' + key + '" class="form-control input-sm" type="text" value="' + sensor_name + '">'+
 						'<input type="hidden" id="mashing_color_' + key + '" value="'+jscolor+'">'+
 						'</div></td>'+
 						'<td><input data-sensor="' + key + '" type="checkbox" value="' + key + '"></td>' +
@@ -2133,7 +2155,7 @@ $(function() {
 						tpl_devices += '<tr><td>' +
 							'<div class="input-group input-group-sm">' +
 							'<span class="input-group-addon">' + key + '</span>' +
-							'<input id="mashing_name_' + key + '" class="form-control input-sm" type="text" value="' + sensor_name + '">' +
+							'<input readonly id="mashing_name_' + key + '" class="form-control input-sm" type="text" value="' + sensor_name + '">' +
 							'</div></td>' +
 							'<td><input data-sensor="' + key + '" type="checkbox" value="' + key + '"></td>' +
 							'<td></td>' +
@@ -2144,7 +2166,7 @@ $(function() {
 						tpl_safety += '<tr><td>' +
 							'<div class="input-group input-group-sm">' +
 							'<span class="input-group-addon">' + key + '</span>' +
-							'<input id="mashing_name_' + key + '" class="form-control input-sm" type="text" value="' + sensor_name + '">' +
+							'<input readonly id="mashing_name_' + key + '" class="form-control input-sm" type="text" value="' + sensor_name + '">' +
 							'</div></td>' +
 							'<td><input data-sensor="' + key + '" type="checkbox" value="' + key + '"></td>' +
 							'<td></td>' +
@@ -2169,11 +2191,12 @@ $(function() {
 					id: "sensors_select",
 					class: "btn btn-success",
 					click: function () {
+					mashingProcess["sensors"] = {};
 						let sensors_select = $('#mashing_sensors input[type=checkbox]');
-						let flag_sensors_select = false;
+						//let flag_sensors_select = false;
 						$.map(sensors_select, function (e) {
 							if ($(e).is(":checked")) {
-								flag_sensors_select = true;
+								//flag_sensors_select = true;
 								//console.log($(e).data("sensor"));
 								let key = $(e).data("sensor");
 								let tmp = false;
@@ -2181,9 +2204,9 @@ $(function() {
 									tmp = true;
 								}
 								let name = $("#mashing_name_" + key).val();
-								let val_color = $("#mashing_color_" + key).val();
-								//let color = (val_color !== "FFFFFF" && val_color !== "") ? hex2dec(val_color) : 0;
-								let color = (val_color !== "FFFFFF" && val_color !== "") ? val_color : "FFFFFF";
+								let val_color = (tmp ? $("#mashing_color_" + key).val() : "");
+								let color = (val_color !== "FFFFFF" && val_color !== "") ? Number(hex2dec(val_color)) : 0;
+								//let color = (val_color !== "FFFFFF" && val_color !== "") ? val_color : "FFFFFF";
 								let cutoff = (tmp ? $("#cutoff_" + key).prop("checked") : false);
 
 								mashingProcess["sensors"][key] = {};
@@ -2197,9 +2220,9 @@ $(function() {
 						});
 						//localStorage.setObj('mashing', mashingProcess);
 						//console.log(ar_sensors);
-						if(!flag_sensors_select){
+						/*if(!flag_sensors_select){
 							mashingProcess["sensors"] = {};
-						}
+						}*/
 						$(this).closest(".modal").modal("hide");
 						$.fn.pasteMashingSensors(true);
 					}
@@ -2218,14 +2241,14 @@ $(function() {
 	});
 	$.fn.pasteMashingSensors = function(sensors_select){
 		let sensorsMashingSend = {
-			"t1":{"name":"","cutoff":false,"color":0,"member":0,"priority":0,"allertValue":0},
-			"t2":{"name":"","cutoff":false,"color":0,"member":0,"priority":0,"allertValue":0},
-			"t3":{"name":"","cutoff":false,"color":0,"member":0,"priority":0,"allertValue":0},
-			"t4":{"name":"","cutoff":false,"color":0,"member":0,"priority":0,"allertValue":0},
-			"t5":{"name":"","cutoff":false,"color":0,"member":0,"priority":0,"allertValue":0},
-			"t6":{"name":"","cutoff":false,"color":0,"member":0,"priority":0,"allertValue":0},
-			"t7":{"name":"","cutoff":false,"color":0,"member":0,"priority":0,"allertValue":0},
-			"t8":{"name":"","cutoff":false,"color":0,"member":0,"priority":0,"allertValue":0},
+			"t1":{"name":"","cutoff":0,"color":0,"member":0,"priority":0,"allertValue":0},
+			"t2":{"name":"","cutoff":0,"color":0,"member":0,"priority":0,"allertValue":0},
+			"t3":{"name":"","cutoff":0,"color":0,"member":0,"priority":0,"allertValue":0},
+			"t4":{"name":"","cutoff":0,"color":0,"member":0,"priority":0,"allertValue":0},
+			"t5":{"name":"","cutoff":0,"color":0,"member":0,"priority":0,"allertValue":0},
+			"t6":{"name":"","cutoff":0,"color":0,"member":0,"priority":0,"allertValue":0},
+			"t7":{"name":"","cutoff":0,"color":0,"member":0,"priority":0,"allertValue":0},
+			"t8":{"name":"","cutoff":0,"color":0,"member":0,"priority":0,"allertValue":0},
 			"out1":{"name":"","member":0},
 			"out2":{"name":"","member":0},
 			"out3":{"name":"","member":0},
@@ -2637,7 +2660,11 @@ $(function() {
 				//console.log('Sensors',msg);
 				globalSensorsJson = msg;
 				fillSensorsData();
-			}
+			},
+			error:function (err,exception) {
+				$.fn.openModal('', '<p class="text-center text-danger"><strong>Ошибка загрузки данных датчиков, проверьте питание контроллера и обновите страницу</strong></p>', "modal-sm",false,true);
+				clearInterval(sensorsIntervalId);
+			},
 		});
 		//if(tmpTime<100 && refluxProcess["start"] === true)
 			//tmpTime ++;
