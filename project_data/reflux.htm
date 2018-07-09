@@ -87,6 +87,9 @@
 </div>
 <script>
     $(function() {
-		$.fn.pasteRefluxSensors(false);
+		$("#reflux_add_sensor").prop("disabled",true);
+		setTimeout(function () {
+			$.fn.pasteRefluxSensors(false);
+		}, 1000);
 	});
 </script>

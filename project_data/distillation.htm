@@ -87,6 +87,9 @@
 </div>
 <script>
 	$(function() {
-		$.fn.pasteDistillationSensors(false);
+		$("#distillation_add_sensor").prop("disabled",true);
+		setTimeout(function () {
+			$.fn.pasteDistillationSensors(false);
+		}, 1000);
 	});
 </script>

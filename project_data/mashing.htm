@@ -30,6 +30,9 @@
 	<text id="svg_mashing_t5" transform="matrix(1 0 0 1 105 166.25)" font-size="12"></text>
 </g>
 <g>
+	<path id="svg_mashing_white_ten" fill="#FFFFFF" stroke="#000000" stroke-miterlimit="10" d="M65,268h20c1.1,0,2,0.9,2,2l0,0c0,1.1-0.9,2-2,2H65
+	c-1.1,0-2-0.9-2-2l0,0C63,268.9,63.9,268,65,268z M65,259h20c1.1,0,2,0.9,2,2l0,0c0,1.1-0.9,2-2,2H65c-1.1,0-2-0.9-2-2l0,0
+	C63,259.9,63.9,259,65,259z M65,277h33c1.1,0,2,0.9,2,2l0,0c0,1.1-0.9,2-2,2H65c-1.1,0-2-0.9-2-2l0,0C63,277.9,63.9,277,65,277z"></path>
 	<path id="svg_mashing_color_ten" fill="#FFFFFF" stroke="#000000" stroke-miterlimit="10" d="M65,268h20c1.1,0,2,0.9,2,2l0,0c0,1.1-0.9,2-2,2H65
 	c-1.1,0-2-0.9-2-2l0,0C63,268.9,63.9,268,65,268z M65,259h20c1.1,0,2,0.9,2,2l0,0c0,1.1-0.9,2-2,2H65c-1.1,0-2-0.9-2-2l0,0
 	C63,259.9,63.9,259,65,259z M65,277h33c1.1,0,2,0.9,2,2l0,0c0,1.1-0.9,2-2,2H65c-1.1,0-2-0.9-2-2l0,0C63,277.9,63.9,277,65,277z"></path>
@@ -63,6 +66,9 @@
 </div>
 <script>
 	$(function() {
-		$.fn.pasteMashingSensors(false);
+		$("#mashing_add_sensor").prop("disabled",true);
+		setTimeout(function () {
+			$.fn.pasteMashingSensors(false);
+		}, 1000);
 	});
 </script>

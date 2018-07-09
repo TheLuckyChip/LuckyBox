@@ -1,16 +1,37 @@
 {
 	"process":{"allow":0,"number":0},
 	"sensors":[
-	{"t1":{"value":50.00,"name":"В кубе","color":64588,"member":0,"priority":0,"allertValue":78.50}},
-	{"t2":{"value":55.00,"name":"В царге","color":7905,"member":0,"priority":0,"allertValue":55.45}},
-	{"t3":{"value":78.00,"name":"В узле отбора","color":65504,"member":0,"priority":0,"allertValue":91}},
-	{"t4":{"value":25.00,"name":"Вода на выходе","color":16799,"member":0,"priority":0,"allertValue":30}},
-	{"t5":{"value":35.00,"name":"Левый датчик","color":33415,"member":0,"priority":0,"allertValue":0}},
+	{"t1":{"value":50.00,"name":"В кубе","color":64588,"member":1,"priority":0,"allertValue":0}},
+	{"t2":{"value":55.00,"name":"В царге","color":7905,"member":0,"priority":0,"allertValue":0}},
+	{"t3":{"value":78.00,"name":"В узле отбора","color":65504,"member":0,"priority":0,"allertValue":0}},
+	{"t4":{"value":25.00,"name":"Вода на выходе","color":16799,"member":0,"priority":0,"allertValue":0}},
+	{"t5":{"value":35.00,"name":"Датчик в струе","color":64870,"member":1,"priority":1,"allertValue":0}},
 	{"t6":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0}},
 	{"t7":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0}},
 	{"t8":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0}},
 	{"p1":{"value":760.00,"color":0,"member":0}}
 ],
+    "mashing":[
+    {"pause1":{"time":20,"name":"Внесение солода","temperature":45,"stop":0}},
+    {"pause2":{"time":20,"name":"Белковая пауза","temperature":55,"stop":0}},
+    {"pause3":{"time":40,"name":"Осахаривание","temperature":65,"stop":0}},
+    {"pause4":{"time":100,"name":"Мэш аут","temperature":72,"stop":0}}
+],
+   "brewing":[
+   {"pause1":{"time":60,"name":"Кислотная пауза","temperature":40,"stop":0,"member":0}},
+   {"pause2":{"time":20,"name":"Бета-глюкановая пауза","temperature":45,"stop":0,"member":0}},
+   {"pause3":{"time":20,"name":"Белковая пауза","temperature":55,"stop":0,"member":0}},
+   {"pause4":{"time":30,"name":"Мальтозная пауза","temperature":63,"stop":0,"member":0}},
+   {"pause5":{"time":60,"name":"Осахаривание","temperature":67,"stop":0,"member":0}},
+   {"pause6":{"time":20,"name":"Декстриновая пауза","temperature":72,"stop":0,"member":0}},
+   {"pause7":{"time":5,"name":"Мэш аут","temperature":78,"stop":0,"member":0}},
+   {"hop1":{"time":60,"name":"Хмель 1","temperature":100,"stop":0,"member":0}},
+   {"hop2":{"time":20,"name":"Хмель 2","temperature":100,"stop":0,"member":0}},
+   {"hop3":{"time":20,"name":"Хмель 3","temperature":100,"stop":0,"member":0}},
+   {"hop4":{"time":10,"name":"Хмель 4","temperature":100,"stop":0,"member":0}},
+   {"whirlpool":{"time":10,"name":"Вирпул","temperature":0,"stop":0,"member":0}},
+   {"cooling":{"time":30,"name":"Охлаждение","temperature":26,"stop":0,"member":0}}
+  ],
 	"devices":[
 	{"out1":{"value":0,"name":"Клапан давления","member":0,"allert":0}},
 	{"out2":{"value":0,"name":"","member":0,"allert":0}},
@@ -27,7 +48,7 @@
 	{"in3":{"value":0,"name":"","member":0,"allert":0}},
 	{"in4":{"value":0,"name":"","member":0,"allert":0}}
 ],
-	"power":80,
+	"power":70,
 	"temperatureAlcoholBoil":78.15,
 	"temperatureStartPressure":78.00,
 	"time":0
