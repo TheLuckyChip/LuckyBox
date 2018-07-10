@@ -1500,6 +1500,7 @@ $(function () {
 		//очищаем графики
 		clearChart();
 		startChart();
+		clearInterval(sensorsProcessId);
 		sensorsProcessId = setInterval(getReflux, 2000);
 		//setReflux();
 		//setTimeout(getReflux, 2000);
@@ -1515,12 +1516,12 @@ $(function () {
 		clearInterval(sensorsProcessId);
 		getReflux();
 		//запущенный процесс в текущее время и предыдущий запущенный процесс
-		let oldStartProcess = Number(localStorage.getItem('oldStartProcess'));
+		/*let oldStartProcess = Number(localStorage.getItem('oldStartProcess'));
 		if (oldStartProcess !== 2) {
 			//clearChart();
 		} else {
 			setReflux();
-		}
+		}*/
 	});
 
 	//Установка значений для ректификации
@@ -1651,7 +1652,7 @@ $(function () {
 		//console.log(globalSensorsJson);
 		//console.log(refluxProcess);
 		if (refluxProcess["start"] === true) {
-			setTimeout(getReflux, 2000);
+			//setTimeout(getReflux, 2000);
 			$("#svg_reflux_start").css('stroke', "#02b500");
 		}
 	}
@@ -1991,6 +1992,7 @@ $(function () {
 		//console.log("distillation_start");
 		//setDistillation();
 		//getDistillation();
+		clearInterval(sensorsProcessId);
 		sensorsProcessId = setInterval(getDistillation, 2000);
 		//setTimeout(getDistillation, 2000);
 	});
@@ -2005,12 +2007,12 @@ $(function () {
 		clearInterval(sensorsProcessId);
 		getDistillation();
 		//запущенный процесс в текущее время и предыдущий запущенный процесс
-		let oldStartProcess = Number(localStorage.getItem('oldStartProcess'));
-		if (oldStartProcess !== 1) {
+		//let oldStartProcess = Number(localStorage.getItem('oldStartProcess'));
+		/*if (oldStartProcess !== 1) {
 			//clearChart();
 		} else {
 			setDistillation();
-		}
+		}*/
 	});
 
 	//Установка значений для дистиляции
@@ -2056,10 +2058,10 @@ $(function () {
 			sendRequest("SensorsIn", distillationSendData, "json", false, false, $("#error_distillation"), false);
 		}
 	}
-	let startDistillation = 0;
+	//let startDistillation = 0;
 	function getDistillation() {
 		//let sek= parseInt(+new Date()/1000);
-		//console.log("getDistillation",sek);
+		//console.log("getDistillation");
 		//очистка данных графиков
 		/*let oldStartProcess = Number(localStorage.getItem('oldStartProcess'));
 		if(oldStartProcess !== 1) {
@@ -2437,6 +2439,7 @@ $(function () {
 		clearChart();
 		startChart();
 		//setMashing();
+		clearInterval(sensorsProcessId);
 		sensorsProcessId = setInterval(getMashing, 2000);
 		//setTimeout(getMashing, 2000);
 	});
@@ -2451,12 +2454,12 @@ $(function () {
 		clearInterval(sensorsProcessId);
 		getMashing();
 		//запущенный процесс в текущее время и предыдущий запущенный процесс
-		let oldStartProcess = Number(localStorage.getItem('oldStartProcess'));
-		if (oldStartProcess !== 3) {
+		//let oldStartProcess = Number(localStorage.getItem('oldStartProcess'));
+		/*if (oldStartProcess !== 3) {
 			//clearChart();
 		} else {
 			setMashing();
-		}
+		}*/
 	});
 
 	//Установка значений для затирания
