@@ -7,7 +7,7 @@
   "t6":{"value":150.00,"name":"","color":0,"member":0,"cutoff":0,"priority":0,"allertValue":0},
   "t7":{"value":150.00,"name":"","color":0,"member":0,"cutoff":0,"priority":0,"allertValue":0},
   "t8":{"value":150.00,"name":"","color":0,"member":0,"cutoff":0,"priority":0,"allertValue":0},
-  "pause1":{"name":"Внесение солода","time":20,"temperature":45,"stop":1},
+  "pause1":{"name":"Внесение солода","time":20,"temperature":45,"stop":0},
   "pause2":{"name":"Белковая пауза","time":20,"temperature":55,"stop":0},
   "pause3":{"name":"Осахаривание","time":40,"temperature":65,"stop":0},
   "pause4":{"name":"Мэш аут","time":10,"temperature":72,"stop":0}

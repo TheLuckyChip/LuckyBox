@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build-js-lib": "ngzip jquery.min.js > ../data/jquery.min.js.gz & ngzip jquery.touchSwipe.min.js > ../data/jquery.touchSwipe.min.js.gz & ngzip ajaxloader.js > ../data/ajaxloader.js.gz & ngzip bootstrap.min.js > ../data/bootstrap.min.js.gz & ngzip export-data.js > ../data/export-data.js.gz & ngzip exporting.js > ../data/exporting.js.gz & ngzip highstock.js > ../data/highstock.js.gz & ngzip dialog.js > ../data/dialog.js.gz & ngzip jscolor.js > ../data/jscolor.js.gz",
+    "build-js-lib": "ngzip jquery.min.js > ../data/jquery.min.js.gz & ngzip jquery.touchSwipe.min.js > ../data/jquery.touchSwipe.min.js.gz & ngzip ajaxloader.js > ../data/ajaxloader.js.gz & ngzip bootstrap.min.js > ../data/bootstrap.min.js.gz & ngzip export-data.js > ../data/export-data.js.gz & ngzip exporting.js > ../data/exporting.js.gz & ngzip highstock.js > ../data/highstock.js.gz & ngzip dialog.js > ../data/dialog.js.gz & ngzip jscolor.js > ../data/jscolor.js.gz & ngzip jquery.debounce.js > ../data/jquery.debounce.js.gz",
     "build-css-lib":"ngzip bootstrap.min.css > ../data/bootstrap.min.css.gz",
     "build-js": "ngzip scripts.js > ../data/scripts.js.gz",
     "build-css": "ngzip style.css > ../data/style.css.gz",

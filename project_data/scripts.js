@@ -378,9 +378,11 @@ $(function () {
 	});
 
 	//Кнопки + и -
+	let flagSendProcess = false;
 	let timeout = false;
 	$(document).on('mousedown', '.minus', function (e) {
 		e.preventDefault();
+		flagSendProcess = true;
 		let _this = $(this);
 		let count_interval = 0;
 		let time = 500;
@@ -414,6 +416,8 @@ $(function () {
 	});
 	$(document).on('mouseup', '.minus', function (e) {
 		e.preventDefault();
+		let $input = $(this).parent().find('input');
+		$input.change();
 		clearInterval(timeout);
 	});
 	$(document).on('click', '.minus', function (e) {
@@ -436,10 +440,12 @@ $(function () {
 		if (count > min)
 			count = count.toFixed(fixed);
 		$input.val(count);
+		//$input.change();
 	});
 	$(document).on('mousedown', '.plus', function (e) {
 		//$(".plus").on('mouseup',function(e) {
 		e.preventDefault();
+		flagSendProcess = true;
 		let _this = $(this);
 		let count_interval = 0;
 		let time = 500;
@@ -473,6 +479,8 @@ $(function () {
 	});
 	$(document).on('mouseup', '.plus', function (e) {
 		e.preventDefault();
+		let $input = $(this).parent().find('input');
+		$input.change();
 		clearInterval(timeout);
 	});
 	$(document).on('click', '.plus', function (e) {
@@ -572,9 +580,13 @@ $(function () {
 	 * @param {object|boolean} error_target - контейнер для вывода ошибок
 	 * @param {string|boolean} success_text - текстовое сообщение в диалоговое окно при успешной отправке данных
 	 */
+	let ajax_get = false;
 	function sendRequest(url, data, dataType, success_action, load_target, error_target, success_text) {
 		//console.log(url,data,target);
-		$.ajax({
+		if (ajax_get) {
+			ajax_get.abort();
+		}
+		ajax_get = $.ajax({
 			url: url,
 			data: data,
 			type: 'GET',
@@ -606,7 +618,7 @@ $(function () {
 	let globalSensorsJson = {};
 	let sensorsIntervalId = 0;
 	//Флаг отправки данных процесса в МК
-	let flagSendProcess = false;
+	//let flagSendProcess = false;
 	//Интервал запуска процесса
 	let sensorsProcessId = false;
 	//регекспы для датчиков
@@ -1146,9 +1158,9 @@ $(function () {
 			'</div>';*/
 	const pauseTempl =
 		'<div class="row row-striped">' +
-		'<div class="row-xs">${pause_thead}</div>' +
-		'<div id="${id_alert_bg}" class="pt-10 pb-10 clearfix">' +
-		'<div id="${id_alert_text}" class="col-xs-12 col-sm-3 text-center-xs text-middle"><strong>${pause_name}</strong></div>' +
+		'<div class="row-xs clearfix">${pause_thead}</div>' +
+		'<div id="${id_step_bg}" class="pt-10 pb-10 clearfix">' +
+		'<div id="${id_step_text}" class="col-xs-12 col-sm-3 text-center-xs text-middle"><strong>${pause_name}</strong></div>' +
 		'<div class="col-xs-3 col-xs-offset-0 col-sm-3 col-sm-offset-0 col-centered">' +
 		returnTplHtml([{id: "${id_time}", value: "${value_time}", min: '0', max: '360', step: '1'}], deltaTempl) +
 		'</div>' +
@@ -1361,7 +1373,7 @@ $(function () {
 		}
 		if (!$.fn.objIsEmpty(refluxProcess["sensors"], false)) {
 			let tpl_delta_thead = //'<div class="col-xs-hidden col-sm-4"></div>' +
-				'<div class="row-xs">' +
+				'<div class="row-xs clearfix">' +
 				'<div class="col-xs-4 col-xs-offset-0 col-sm-3 col-sm-offset-4 text-center text-middle text-primary">Значение</div>' +
 				'<div class="col-xs-4 col-sm-3 text-center text-middle text-primary">Дельта</div>' +
 				'<div class="col-xs-4 col-sm-2 text-center text-middle text-primary">Уставка</div>' +
@@ -1369,7 +1381,7 @@ $(function () {
 			let tpl_delta_body = '';
 			let tpl_cutoff_thead =
 				//'<div class="col-xs-hidden col-sm-4"></div>' +
-				'<div class="row-xs">' +
+				'<div class="row-xs clearfix">' +
 				'<div class="col-xs-4 col-xs-offset-0 col-sm-3 col-sm-offset-4 text-center text-middle text-primary">Значение</div>' +
 				//'<div class="col-xs-4 col-sm-3 text-center text-middle text-primary"></div>' +
 				'<div class="col-xs-4 col-xs-offset-4 col-sm-2 col-sm-offset-3 text-center text-middle text-primary">Отсечка</div>' +
@@ -1514,7 +1526,7 @@ $(function () {
 		flagSendProcess = true;
 		refluxProcess["start"] = false;
 		clearInterval(sensorsProcessId);
-		getReflux();
+		startReflux();
 		//запущенный процесс в текущее время и предыдущий запущенный процесс
 		/*let oldStartProcess = Number(localStorage.getItem('oldStartProcess'));
 		if (oldStartProcess !== 2) {
@@ -1567,8 +1579,11 @@ $(function () {
 			flagSendProcess = false;
 			//console.log(flagSendProcess);
 			//localStorage.setObj('reflux', refluxProcess);
-			sendRequest("SensorsIn", refluxSendData, "json", false, false, $("#error_reflux"), false);
+			sendRequest("SensorsIn", refluxSendData, "json", startReflux, false, $("#error_reflux"), false);
 		}
+	}
+	function startReflux() {
+		sensorsProcessId = setInterval(getReflux, 2000);
 	}
 
 	function getReflux() {
@@ -1861,7 +1876,7 @@ $(function () {
 				'</div>';
 			let tpl_delta_body = '';*/
 			let tpl_cutoff_thead =
-				'<div class="row-xs">' +
+				'<div class="row-xs clearfix">' +
 				'<div class="col-xs-4 col-xs-offset-0 col-sm-3 col-sm-offset-4 text-center text-middle text-primary">Значение</div>' +
 				'<div class="col-xs-4 col-xs-offset-4 col-sm-2 col-sm-offset-3 text-center text-middle text-primary">Отсечка</div>' +
 				'</div>';
@@ -1993,7 +2008,8 @@ $(function () {
 		//setDistillation();
 		//getDistillation();
 		clearInterval(sensorsProcessId);
-		sensorsProcessId = setInterval(getDistillation, 2000);
+		startDistillation();
+		//sensorsProcessId = setInterval(getDistillation, 2000);
 		//setTimeout(getDistillation, 2000);
 	});
 	$(document).on('click', '#distillation_stop', function () {
@@ -2054,9 +2070,12 @@ $(function () {
 		//console.log(flagSendProcess);
 		if (flagSendProcess) {
 			flagSendProcess = false;
-			//localStorage.setObj('distillation', distillationProcess);
-			sendRequest("SensorsIn", distillationSendData, "json", false, false, $("#error_distillation"), false);
+			clearInterval(sensorsProcessId);
+			sendRequest("SensorsIn", distillationSendData, "json", startDistillation, false, $("#error_distillation"), false);
 		}
+	}
+	function startDistillation() {
+		sensorsProcessId = setInterval(getDistillation, 2000);
 	}
 	//let startDistillation = 0;
 	function getDistillation() {
@@ -2258,11 +2277,6 @@ $(function () {
 							mashingProcess["sensors"]["pause4"] = {"time":10,"name":"Мэш аут","temperature":72,"stop":0};
 
 						}
-						//localStorage.setObj('mashing', mashingProcess);
-						//console.log(ar_sensors);
-						/*if(!flag_sensors_select){
-							mashingProcess["sensors"] = {};
-						}*/
 						$(this).closest(".modal").modal("hide");
 						$.fn.pasteMashingSensors(true);
 					}
@@ -2305,10 +2319,6 @@ $(function () {
 		let pause_thead = '<div class="col-xs-3 col-xs-offset-0 col-sm-3 col-sm-offset-3 text-center text-middle text-primary">Время паузы</div>' +
 			'<div class="col-xs-3 col-xs-offset-0 col-sm-3 col-sm-offset-0 text-center text-middle text-primary">Температура паузы</div>' +
 			'<div class="col-xs-3 col-xs-offset-0 col-sm-3 col-sm-offset-0 text-center text-middle text-primary">Стоп в конце</div>';
-		//let tpl_devices_body = '';
-		//let tpl_safety_body = '';
-		//let localMashing = localStorage.getObj('mashing');
-		//if(localMashing !== null)mashingProcess = localMashing;
 		//console.log(mashingProcess["sensors"]);
 		if (!sensors_select && $.fn.objIsEmpty(mashingProcess["sensors"], false)) {
 			//console.log('empty');
@@ -2329,42 +2339,30 @@ $(function () {
 			});
 		}
 		if (!$.fn.objIsEmpty(mashingProcess["sensors"], false)) {
-			/*let tpl_cutoff_thead =
-				'<div class="row-xs">'+
-				'<div class="col-xs-4 col-xs-offset-0 col-sm-3 col-sm-offset-4 text-center text-middle text-primary">Значение</div>' +
-				'<div class="col-xs-4 col-xs-offset-4 col-sm-2 col-sm-offset-3 text-center text-middle text-primary">Отсечка</div>' +
-				'</div>';*/
-			//let tpl_cutoff_body = '';
 			let tpl_all_body = '';
 			$.each(mashingProcess["sensors"], function (i, e) {
 				//console.log(i,e);
 				let sensor_key = i;
 				let name_sensor = e["name"];
+				let stop = Number(e["stop"]);
+				let time = e["time"];
+				let temperature = e["temperature"];
+				$.each(globalSensorsJson["mashing"], function (j, q) {
+					let pause_key = Object.keys(q).shift();
+					if(sensor_key === pause_key) {
+						stop = e["stop"] = Number(q[pause_key]["stop"]);
+						time = e["time"] = Number(q[pause_key]["time"]);
+						temperature = e["temperature"] = Number(q[pause_key]["temperature"]);
+					}
+				});
 				if (sensorsMashingSend[sensor_key].hasOwnProperty("name"))
 					sensorsMashingSend[sensor_key]["name"] = name_sensor;
 				if (re_t.test(sensor_key) && Number(e["member"]) !== 0) {
 					sensorsMashingSend[sensor_key]["color"] = e["color"];
 					sensorsMashingSend[sensor_key]["member"] = 1;
-					/*let tpl_cutoff = '';
-					if (e["cutoff"]) {
-						tpl_cutoff = returnTplHtml([{id:"mashing_cutoff_"+sensor_key, value: e["allertValue"], min: '0', max: '105', step: '0.5'}], deltaTempl);
-						tpl_cutoff_body +=
-							'<div class="row row-striped">' + tpl_cutoff_thead +
-							'<div id="mashing_alert_bg_'+sensor_key+'" class="pt-10 pb-10 clearfix">' +
-							'<div id="mashing_alert_text_'+sensor_key+'" class="col-xs-12 col-sm-4 text-center-xs"><strong>t&#176' + name_sensor + '</strong></div>' +
-							'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="mashing_' + sensor_key + '"></span><span class="hidden">&#176С</span></strong></div>' +
-							//'<div class="col-xs-3 col-sm-3"></div>' +
-							'<div class="col-xs-4 col-xs-offset-3 col-sm-2 col-sm-offset-3">' + tpl_cutoff +
-							'</div>' +
-							'</div>' +
-							'</div>';
-
-						tpl_cutoff_thead = '';
-					}*/
-					//if(!e["cutoff"]) {
 					tpl_all_body += '<div class="row row-striped">' +
 						'<div class="pt-10 pb-10 clearfix">' +
-						'<div class="col-xs-12 col-sm-4 text-center-xs"><strong>t&#176' + name_sensor + '</strong></div>' +
+						'<div class="col-xs-12 col-sm-4 text-center-xs" id="mashing_step_text_'+sensor_key+'"><strong>t&#176' + name_sensor + '</strong></div>' +
 						'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="mashing_' + sensor_key + '"></span><span class="hidden">&#176С</span></strong></div>' +
 						'<div class="col-xs-3 col-sm-3"></div>' +
 						'<div class="col-xs-4 col-sm-3"></div>' +
@@ -2373,7 +2371,7 @@ $(function () {
 					//}
 				}
 				if (re_pause.test(sensor_key)) {
-					tpl_pause_body += returnTplHtml([{pause_thead:pause_thead, pause_name: name_sensor, id_stop: "mashing_stop_"+sensor_key, checked_stop: (Number(e["stop"]) === 1 ? "checked" : ''), id_time: "mashing_time_"+sensor_key, value_time:e["time"],  id_temperature: "mashing_temperature_"+sensor_key,value_temperature:e["temperature"],}], pauseTempl);
+					tpl_pause_body += returnTplHtml([{pause_thead:pause_thead, pause_name: name_sensor, id_stop: "mashing_stop_"+sensor_key, checked_stop: (stop === 1 ? "checked" : ''), id_time: "mashing_time_"+sensor_key, value_time:time,  id_temperature: "mashing_temperature_"+sensor_key,value_temperature:temperature,id_step_bg:"mashing_step_bg_"+sensor_key,id_step_text:"mashing_step_text_"+sensor_key}], pauseTempl);
 					pause_thead = '';
 				}
 				/*if (re_out.test(sensor_key) && Number(e["member"]) !== 0) {
@@ -2393,31 +2391,22 @@ $(function () {
 						'</div></div>';
 				}*/
 			});
-			//sensors["process"]["allow"] = 2;
-			/*if(tpl_cutoff_body !== '') {
-				mashingTemplate += tpl_cutoff_thead + tpl_cutoff_body;
-			}*/
 			if (tpl_all_body !== '') {
 				mashingTemplate += tpl_all_body;
 			}
 		}
 		if (mashingTemplate !== '') {
-			//console.log("mashingProcess",mashingProcess);
 			if (sensors_select)
 				sendRequest("mashingSensorsSetSave", sensorsMashingSend, "json", false, false, $("#error_mashing"), false);
-			//localStorage.setObj('sensors', sensors);
-			mashingTemplate = returnTplHtml([{id_value: "mashing_power_value", id_set: "mashing_power_set"}], powerTempl) + mashingTemplate + tpl_pause_body;
-			//+ tpl_devices_body + tpl_safety_body;
-			//mashingTemplate += returnTplHtml([{pause_name: "Пауза", id_value: "mashing_value_t1", id_time: "mashing_time1", id_set: "mashing_set_t1"}], pauseTempl);
+			//returnTplHtml([{id_value: "mashing_power_value", id_set: "mashing_power_set"}], powerTempl)
+			mashingTemplate = mashingTemplate + tpl_pause_body;
 			$("#mashing_start_group_button").removeClass("hidden");
-			//$("#svg_mashing").show();
 		} else {
 			$("#mashing_start_group_button").addClass("hidden");
 		}
-		mashingProcess["power"] = Number(globalSensorsJson["power"]);
+		//mashingProcess["power"] = Number(globalSensorsJson["power"]);
 		$("#mashing_process").html(mashingTemplate);
-		$("#mashing_power_set").val(mashingProcess["power"]);
-		//console.log(mashingProcess);
+		//$("#mashing_power_set").val(mashingProcess["power"]);
 		if (mashingProcess["start"] === true) {
 			getMashing();
 			$('#mashing_start').prop("disabled", true);
@@ -2433,15 +2422,13 @@ $(function () {
 		$('#mashing_add_sensor').prop("disabled", true);
 		$('#mashing_stop').prop("disabled", false);
 		mashingProcess["start"] = flagSendProcess = true;
-		//curStartProcess = 1;
 		localStorage.setObj('oldStartProcess', 3);
 		//очищаем графики
 		clearChart();
 		startChart();
-		//setMashing();
 		clearInterval(sensorsProcessId);
-		sensorsProcessId = setInterval(getMashing, 2000);
-		//setTimeout(getMashing, 2000);
+		setMashing();
+		//startMashing();
 	});
 	$(document).on('click', '#mashing_stop', function () {
 		let _this = $(this);
@@ -2453,31 +2440,24 @@ $(function () {
 		mashingProcess["start"] = false;
 		clearInterval(sensorsProcessId);
 		getMashing();
-		//запущенный процесс в текущее время и предыдущий запущенный процесс
-		//let oldStartProcess = Number(localStorage.getItem('oldStartProcess'));
-		/*if (oldStartProcess !== 3) {
-			//clearChart();
-		} else {
-			setMashing();
-		}*/
 	});
 
 	//Установка значений для затирания
 	function setMashing() {
+		console.log("setMashing");
 		let mashingSendData = {
 			"process": {"allow": 0, "number": 0},
 			"pause1":{"time":0,"temperature":0,"stop":0},
 			"pause2":{"time":0,"temperature":0,"stop":0},
 			"pause3":{"time":0,"temperature":0,"stop":0},
-			"pause4":{"time":0,"temperature":0,"stop":0},
-			"power": 0
+			"pause4":{"time":0,"temperature":0,"stop":0}
+			//,"power": 0
 		};
-		//let flag_send = false;
-		let power_set = $("#mashing_power_set");
 		mashingSendData["process"]["allow"] = (mashingProcess["start"] ? 3 : 0);
-		if (mashingProcess["power"] !== power_set.val())
-			flagSendProcess = true;
-		mashingSendData["power"] = mashingProcess["power"] = power_set.val();
+		//let power_set = $("#mashing_power_set");
+		//if (mashingProcess["power"] !== power_set.val())
+			//flagSendProcess = true;
+		//mashingSendData["power"] = mashingProcess["power"] = power_set.val();
 
 		$.each(mashingProcess["sensors"], function (i, e) {
 			let sensor_key = i;
@@ -2500,35 +2480,48 @@ $(function () {
 					flagSendProcess = true;
 				mashingSendData[sensor_key]["stop"] = e["stop"] = stop;
 			}
-			//let mashing_delta = $("#mashing_delta_"+sensor_key);
-			//let mashing_cutoff = $("#mashing_cutoff_" + sensor_key);
-			/*if(mashing_delta.length) {
-				if(e["allertValue"] !== mashing_delta.val())
-					flagSendProcess = true;
-				mashingSendData[sensor_key]["allertValue"] = e["allertValue"] = mashing_delta.val();
-			}*/
-			/*if (mashing_cutoff.length) {
-				if (e["allertValue"] !== mashing_cutoff.val())
-					flagSendProcess = true;
-				mashingSendData[sensor_key]["allertValue"] = e["allertValue"] = mashing_cutoff.val();
-			}*/
 		});
 		if (flagSendProcess) {
 			flagSendProcess = false;
-			//console.log(mashingProcess,mashingSendData);
-			//localStorage.setObj('mashing', mashingProcess);
-			sendRequest("SensorsIn", mashingSendData, "json", false, false, $("#error_mashing"), false);
+			clearInterval(sensorsProcessId);
+			//setTimeout(function() {
+				sendRequest("SensorsIn", mashingSendData, "json", startMashing, false, $("#error_mashing"), false);
+			//},1000);
+
 		}
+	}
+	/*$(document).on('change',"#mashing_process input", function () {
+		flagSendProcess = true;
+		//clearInterval(sensorsProcessId);
+		//console.log(sensorsProcessId);
+		setMashing();
+	});*/
+	$(document).on('mousedown',"#mashing_process input", function () {
+		flagSendProcess = true;
+		//clearInterval(sensorsProcessId);
+		//console.log(sensorsProcessId);
+		//setMashing();
+	});
+
+	$(document).on('change',"#mashing_process input",
+		$.debounce(function() {
+			flagSendProcess = true;
+			//clearInterval(sensorsProcessId);
+			//console.log(sensorsProcessId);
+			setMashing();
+		}, 300)
+	);
+
+	function startMashing() {
+		flagSendProcess = false;
+		//clearInterval(sensorsProcessId);
+		sensorsProcessId = setInterval(getMashing, 2000);
 	}
 
 	function getMashing() {
-		//console.log("getMashing");
-		//очистка данных графиков
-		/*let oldStartProcess = Number(localStorage.getItem('oldStartProcess'));
-		if(oldStartProcess !== 1) {
-			//clearChart();
-		}*/
-		setMashing();
+		//let sek= parseInt(+new Date()/1000);
+		//console.log(flagSendProcess,"getMashing"+sek);
+		//setMashing();
 		if (!$.fn.objIsEmpty(globalSensorsJson, false)) {
 			let dtoJson = {};
 			dtoJson["heaterPower"] = globalSensorsJson["power"];
@@ -2536,71 +2529,53 @@ $(function () {
 			$.each(globalSensorsJson["sensors"], function (i, e) {
 				let sensor_key = Object.keys(e).shift();
 				let sensor_value = Number(globalSensorsJson["sensors"][i][sensor_key]["value"]);
-				let alert_value = Number(globalSensorsJson["sensors"][i][sensor_key]["allertValue"]);
 				$.each(mashingProcess["sensors"], function (j, q) {
-					//console.log(j, q);
-					//if (q["key"] === sensor_key) {
 					if (j === sensor_key && re_t.test(sensor_key)) {
 						q["value"] = sensor_value;
-						//if (sensor_key !== "p1") {
 						let color_value = q["color"];
 						let fillcolor = "#" + dec2hex(color_value);
-						// if (alert_value > 0 && sensor_value >= alert_value) {
-						// 	$("#mashing_alert_bg_" + sensor_key).addClass("bg-danger");
-						// 	$("#mashing_alert_text_" + sensor_key).addClass("text-danger");
-						// 	// Вибрация поддерживается
-						// 	/*if (window.navigator && window.navigator.vibrate) {
-						// 		navigator.vibrate(1000);
-						// 	}*/
-						// } else {
-						// 	$("#mashing_alert_bg_" + sensor_key).removeClass("bg-danger");
-						// 	$("#mashing_alert_text_" + sensor_key).removeClass("text-danger");
-						// }
-						//console.log(sensor_key, fillcolor,sensor_value,alert_value);
-						//if (q["delta"] === false) {
-						$("#svg_mashing_color_" + sensor_key).css('fill', colorPersent(fillcolor, sensor_value, alert_value));
-						/*} else {
-							let delta_alert = $("#mashing_delta_" + sensor_key).val();
-							let delta_value = (delta_alert - alert_value + sensor_value).toFixed(2);
-							//console.log(fillcolor, delta_value, delta_alert);
-							$("#svg_mashing_color_" + sensor_key).css('fill', colorPersent(fillcolor, delta_value, delta_alert));
-						}*/
-						//}
+						$("#svg_mashing_color_" + sensor_key).css('fill', colorPersent(fillcolor, sensor_value, 0));
 						if (Number(q["member"]) !== 0)
 							dtoJson["temperatures"][sensor_key] = {value: sensor_value, name: q["name"], color: fillcolor};
 					}
 				});
 				$("#mashing_" + sensor_key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
-				let allertValue = globalSensorsJson["sensors"][i][sensor_key]["allertValue"];
-				allertValue = allertValue > 0 ? allertValue.toFixed(2) : "";
-				if (allertValue > 0) {
-					//$("#mashing_delta_result_" + sensor_key).text(allertValue).parent().find(".hidden").removeClass("hidden").addClass("show");
-					$("#mashing_cutoff_result_" + sensor_key).text(allertValue).parent().find(".hidden").removeClass("hidden").addClass("show");
-				}
-				/*if (sensor_key === "p1") {
-					$("#mashing_pressure").text(globalSensorsJson["sensors"][i]["p1"]["value"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
-					dtoJson["pressure"] = globalSensorsJson["sensors"][i]["p1"]["value"];
-				}*/
 				//svg
 				$("#svg_mashing_" + sensor_key).html(sensor_value.toFixed(0) + '&#176С');
-				//let fillcolor = temperaturePalette(sensor_value.toFixed(0));
+			});
+			$.each(globalSensorsJson["mashing"], function (i, e) {
+				let pause_key = Object.keys(e).shift();
+				let step = Number(e[pause_key]["step"]);
+				let time = Number(e[pause_key]["time"]);
+				let temperature = Number(e[pause_key]["temperature"]);
+				let stop = Number(e[pause_key]["stop"]);
+				if(!flagSendProcess) {
+					$("#mashing_time_" + pause_key).val(time);
+					$("#mashing_temperature_" + pause_key).val(temperature);
+					if (stop > 0) {
+						$("#mashing_stop_" + pause_key).prop("checked", true);
+					} else {
+						$("#mashing_stop_" + pause_key).prop("checked", false);
+					}
+				}
+				if(step>0) {
+					$("#mashing_step_bg_" + pause_key).addClass("bg-success");
+					$("#mashing_step_text_" + pause_key).addClass("text-success");
+				}else{
+					$("#mashing_step_bg_" + pause_key).removeClass("bg-success");
+					$("#mashing_step_text_" + pause_key).removeClass("text-success");
+				}
 
 			});
-			//$("#mashing_alco_boil").text(globalSensorsJson["temperatureAlcoholBoil"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 			let power_value = Number(globalSensorsJson["power"]);
 			$("#mashing_power_value").text(power_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 			$("#svg_mashing_ten_t").text(power_value.toFixed(0) + "%");
 			$("#svg_mashing_color_ten").css('fill', colorPersent("#FF0000", power_value.toFixed(0), 100));
-			//dtoJson["temperatures"] = mashingProcess["sensors"];
 			$("#view_reflux_chart").html("");
-			//let oldStartProcess = Number(localStorage.getItem('oldStartProcess'));
-			//if(oldStartProcess === 1) {
 			if (!$.fn.objIsEmpty(dtoJson["temperatures"], false))
 				dtoReceiver.start(dtoJson, 'view_mashing_chart');
-			//}
 		}
 		if (mashingProcess["start"] === true) {
-			//setTimeout(getMashing, 2000);
 			$("#svg_mashing_start").css('stroke', "#02b500");
 		}
 	}
