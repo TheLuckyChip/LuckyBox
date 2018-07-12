@@ -40,6 +40,9 @@ span.show {
 .text-middle{
 	padding-top: 0.3em;
 }
+.text-middle input[type=checkbox]{
+	margin-top: -8px;
+}
 .col-centered{
 	margin: 0 auto;
 	/*float: none;*/

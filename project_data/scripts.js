@@ -377,138 +377,6 @@ $(function () {
 		}
 	});
 
-	//Кнопки + и -
-	let flagSendProcess = false;
-	let timeout = false;
-	$(document).on('mousedown', '.minus', function (e) {
-		e.preventDefault();
-		flagSendProcess = true;
-		let _this = $(this);
-		let count_interval = 0;
-		let time = 500;
-		timeout = setInterval(function () {
-			count_interval++;
-			if (count_interval > 3) {
-				time = time / 2;
-				count_interval = 0;
-			}
-			//console.log(count_interval,time);
-			let $input = _this.parent().find('input');
-			let step = Number($input.attr("step"));
-			let min = Number($input.attr("min"));
-			let fixed = 0;
-			const f = x => ((x.toString().includes('.')) ? (x.toString().split('.').pop().length) : (0));
-			if (typeof min === typeof undefined && min === false)
-				min = 0;
-			if (typeof step !== typeof undefined && step !== false) {
-				step = parseFloat(step);
-				fixed = f(step);
-			} else {
-				step = 1;
-			}
-			let count = Number($input.val()) - step;
-			count = count < min ? min : count;
-			if (count > min)
-				count = count.toFixed(fixed);
-			//console.log(count,step);
-			$input.val(count);
-		}, time);
-	});
-	$(document).on('mouseup', '.minus', function (e) {
-		e.preventDefault();
-		let $input = $(this).parent().find('input');
-		$input.change();
-		clearInterval(timeout);
-	});
-	$(document).on('click', '.minus', function (e) {
-		e.preventDefault();
-		let $input = $(this).parent().find('input');
-		let step = Number($input.attr("step"));
-		let min = Number($input.attr("min"));
-		let fixed = 0;
-		const f = x => ((x.toString().includes('.')) ? (x.toString().split('.').pop().length) : (0));
-		if (typeof min === typeof undefined && min === false)
-			min = 0;
-		if (typeof step !== typeof undefined && step !== false) {
-			step = parseFloat(step);
-			fixed = f(step);
-		} else {
-			step = 1;
-		}
-		let count = Number($input.val()) - step;
-		count = count < min ? min : count;
-		if (count > min)
-			count = count.toFixed(fixed);
-		$input.val(count);
-		//$input.change();
-	});
-	$(document).on('mousedown', '.plus', function (e) {
-		//$(".plus").on('mouseup',function(e) {
-		e.preventDefault();
-		flagSendProcess = true;
-		let _this = $(this);
-		let count_interval = 0;
-		let time = 500;
-		timeout = setInterval(function () {
-			count_interval++;
-			if (count_interval > 3) {
-				time = time / 2;
-				count_interval = 0;
-			}
-			let $input = _this.parent().find('input');
-			let step = Number($input.attr("step"));
-			let max = Number($input.attr("max"));
-			let fixed = 0;
-			const f = x => ((x.toString().includes('.')) ? (x.toString().split('.').pop().length) : (0));
-			if (typeof max === typeof undefined && max === false)
-				max = 100;
-			if (typeof step !== typeof undefined && step !== false) {
-				step = parseFloat(step);
-				fixed = f(step);
-			} else {
-				step = 1;
-			}
-			let count = Number($input.val()) + step;
-			count = count > max ? max : count;
-			count = count.toFixed(fixed);
-
-			$input.val(count);//
-			//$input.change();
-			//return false;
-		}, time);
-	});
-	$(document).on('mouseup', '.plus', function (e) {
-		e.preventDefault();
-		let $input = $(this).parent().find('input');
-		$input.change();
-		clearInterval(timeout);
-	});
-	$(document).on('click', '.plus', function (e) {
-		e.preventDefault();
-		// if(timeout === false) {
-		let $input = $(this).parent().find('input');
-		let step = Number($input.attr("step"));
-		let max = Number($input.attr("max"));
-		let fixed = 0;
-		const f = x => ((x.toString().includes('.')) ? (x.toString().split('.').pop().length) : (0));
-		if (typeof max === typeof undefined && max === false)
-			max = 100;
-		if (typeof step !== typeof undefined && step !== false) {
-			step = parseFloat(step);
-			fixed = f(step);
-		} else {
-			step = 1;
-		}
-		let count = Number($input.val()) + step;
-		count = count > max ? max : count;
-		//console.log(count,step,fixed);
-		count = count.toFixed(fixed);
-		$input.val(count);
-		//$input.change();
-		//return false;
-		// }
-	});
-
 	//Рендер HTML шаблонов
 	function renderTpl(props) {
 		return function (tok, i) {
@@ -546,7 +414,7 @@ $(function () {
 		let msg = '';
 
 		if (err.status === 0) {
-			msg = 'Not connect.\n Verify Network.';
+			msg = 'Not connect. Verify Network.';
 		} else if (err.status === 404) {
 			msg = 'Requested page not found. [404]';
 		} else if (err.status === 500) {
@@ -558,7 +426,7 @@ $(function () {
 		} else if (exception === 'abort') {
 			msg = 'Ajax request aborted.';
 		} else {
-			msg = 'Uncaught Error.\n' + err.responseText;
+			msg = 'Uncaught Error.' + err.responseText;
 		}
 		let error_alert = '<div class="alert alert-danger alert-dismissible fade in mt-10" role="alert">' +
 			'<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
@@ -580,13 +448,13 @@ $(function () {
 	 * @param {object|boolean} error_target - контейнер для вывода ошибок
 	 * @param {string|boolean} success_text - текстовое сообщение в диалоговое окно при успешной отправке данных
 	 */
-	let ajax_get = false;
+	//let ajax_get = false;
 	function sendRequest(url, data, dataType, success_action, load_target, error_target, success_text) {
 		//console.log(url,data,target);
-		if (ajax_get) {
+		/*if (ajax_get) {
 			ajax_get.abort();
 		}
-		ajax_get = $.ajax({
+		ajax_get = */$.ajax({
 			url: url,
 			data: data,
 			type: 'GET',
@@ -611,6 +479,138 @@ $(function () {
 			}
 		});
 	}
+	//Кнопки + и -
+	let flagSendProcess = false;
+	let timeout = false;
+	$(document).on('mousedown', '.minus', function (e) {
+		e.preventDefault();
+		flagSendProcess = true;
+		let _this = $(this);
+		let count_interval = 0;
+		let time = 500;
+		let $input = _this.parent().find('input');
+		let step = Number($input.attr("step"));
+		let min = Number($input.attr("min"));
+		timeout = setInterval(function () {
+			count_interval++;
+			let fixed = 0;
+			const f = x => ((x.toString().includes('.')) ? (x.toString().split('.').pop().length) : (0));
+			if (typeof min === typeof undefined && min === false)
+				min = 0;
+			if (typeof step !== typeof undefined && step !== false) {
+				step = parseFloat(step);
+				fixed = f(step);
+			} else {
+				step = 1;
+			}
+			if (count_interval > 3) {
+				time = time / 2;
+				step = step * 2;
+				count_interval = 0;
+			}
+			let count = Number($input.val()) - step;
+			count = count < min ? min : count;
+			if (count > min)
+				count = count.toFixed(fixed);
+			//console.log(count,step);
+			$input.val(count);
+		}, time);
+	});
+	$(document).on('mouseup', '.minus', function (e) {
+		e.preventDefault();
+		let $input = $(this).parent().find('input');
+		$input.change();
+		clearInterval(timeout);
+		setTimeout(function() {flagSendProcess = false;}, 500);
+	});
+	$(document).on('click', '.minus', function (e) {
+		e.preventDefault();
+		let $input = $(this).parent().find('input');
+		let step = Number($input.attr("step"));
+		let min = Number($input.attr("min"));
+		let fixed = 0;
+		const f = x => ((x.toString().includes('.')) ? (x.toString().split('.').pop().length) : (0));
+		if (typeof min === typeof undefined && min === false)
+			min = 0;
+		if (typeof step !== typeof undefined && step !== false) {
+			step = parseFloat(step);
+			fixed = f(step);
+		} else {
+			step = 1;
+		}
+		let count = Number($input.val()) - step;
+		count = count < min ? min : count;
+		if (count > min)
+			count = count.toFixed(fixed);
+		$input.val(count);
+		//$input.change();
+	});
+	$(document).on('mousedown', '.plus', function (e) {
+		//$(".plus").on('mouseup',function(e) {
+		e.preventDefault();
+		flagSendProcess = true;
+		let _this = $(this);
+		let count_interval = 0;
+		let time = 500;
+		let $input = _this.parent().find('input');
+		let step = Number($input.attr("step"));
+		let max = Number($input.attr("max"));
+		timeout = setInterval(function () {
+			count_interval++;
+			let fixed = 0;
+			const f = x => ((x.toString().includes('.')) ? (x.toString().split('.').pop().length) : (0));
+			if (typeof max === typeof undefined && max === false)
+				max = 100;
+			if (typeof step !== typeof undefined && step !== false) {
+				step = parseFloat(step);
+				fixed = f(step);
+			} else {
+				step = 1;
+			}
+			if (count_interval > 3) {
+				time = time / 2;
+				step = step * 2;
+				count_interval = 0;
+			}
+			//console.log(time,step);
+			let count = Number($input.val()) + step;
+			count = count > max ? max : count;
+			count = count.toFixed(fixed);
+
+			$input.val(count);//
+			//$input.change();
+			//return false;
+		}, time);
+	});
+	$(document).on('mouseup', '.plus', function (e) {
+		e.preventDefault();
+		let $input = $(this).parent().find('input');
+		$input.change();
+		clearInterval(timeout);
+		setTimeout(function() {flagSendProcess = false;}, 500);
+	});
+	$(document).on('click', '.plus', function (e) {
+		e.preventDefault();
+		let $input = $(this).parent().find('input');
+		let step = Number($input.attr("step"));
+		let max = Number($input.attr("max"));
+		let fixed = 0;
+		const f = x => ((x.toString().includes('.')) ? (x.toString().split('.').pop().length) : (0));
+		if (typeof max === typeof undefined && max === false)
+			max = 100;
+		if (typeof step !== typeof undefined && step !== false) {
+			step = parseFloat(step);
+			fixed = f(step);
+		} else {
+			step = 1;
+		}
+		let count = Number($input.val()) + step;
+		count = count > max ? max : count;
+		//console.log(count,step,fixed);
+		count = count.toFixed(fixed);
+		$input.val(count);
+		//$input.change();
+	});
 
 //////////////////////////////////////////////////////////////////////////
 	//Определение датчиков
@@ -985,6 +985,27 @@ $(function () {
 		let _this = $(this);
 		sendRequest("sensorsOutSet", {}, "json", getSensors, _this, $("#error_sensors"), false);
 	});
+	$(document).on('click', '#reset_sensors', function (e) {
+		e.preventDefault();
+		let _this = $(this);
+		$.fn.openModal('', '<p class="text-center text-danger">Вы действительно хотите сбросить все настройки?</p>', "modal-sm", false, [{
+			text: "Да",
+			id: "return_restart",
+			class: "btn btn-primary btn-sm",
+			click: function () {
+				$(this).closest(".modal").modal("hide");
+				sendRequest("resetData", {"reset":1}, "json", getSensors, _this, $("#error_sensors"), false);
+			}
+		},
+			{
+				text: "Нет",
+				id: "return_tab",
+				class: "btn btn-danger btn-sm",
+				click: function () {
+					$(this).closest(".modal").modal("hide");
+				}
+			}], {buttons: "replace"});
+	});
 
 	//сортировка датчиков
 	$(document).on('change', "#sensors_settings select", function () {
@@ -1161,13 +1182,13 @@ $(function () {
 		'<div class="row-xs clearfix">${pause_thead}</div>' +
 		'<div id="${id_step_bg}" class="pt-10 pb-10 clearfix">' +
 		'<div id="${id_step_text}" class="col-xs-12 col-sm-3 text-center-xs text-middle"><strong>${pause_name}</strong></div>' +
-		'<div class="col-xs-3 col-xs-offset-0 col-sm-3 col-sm-offset-0 col-centered">' +
+		'<div class="col-xs-5 col-xs-offset-0 col-sm-3 col-sm-offset-0 col-centered">' +
 		returnTplHtml([{id: "${id_time}", value: "${value_time}", min: '0', max: '360', step: '1'}], deltaTempl) +
 		'</div>' +
-		'<div class="col-xs-3 col-xs-offset-0 col-sm-3 col-sm-offset-0 col-centered">' +
+		'<div class="col-xs-5 col-xs-offset-0 col-sm-3 col-sm-offset-0 col-centered">' +
 		returnTplHtml([{id: "${id_temperature}", value: "${value_temperature}", min: '0', max: '100', step: '1'}], deltaTempl) +
 		'</div>' +
-		'<div class="col-xs-3 col-xs-offset-0 col-sm-3 col-sm-offset-0 text-center text-middle">' +
+		'<div class="col-xs-2 col-xs-offset-0 col-sm-3 col-sm-offset-0 text-center text-middle">' +
 		'<label class="checkbox-inline"><input ${checked_stop} id="${id_stop}" type="checkbox" value="Y"></label>'+
 		'</div>' +
 		'</div></div>'
@@ -1513,8 +1534,8 @@ $(function () {
 		clearChart();
 		startChart();
 		clearInterval(sensorsProcessId);
-		sensorsProcessId = setInterval(getReflux, 2000);
-		//setReflux();
+		//sensorsProcessId = setInterval(getReflux, 2000);
+		setReflux();
 		//setTimeout(getReflux, 2000);
 	});
 	$(document).on('click', '#reflux_stop', function () {
@@ -1526,7 +1547,8 @@ $(function () {
 		flagSendProcess = true;
 		refluxProcess["start"] = false;
 		clearInterval(sensorsProcessId);
-		startReflux();
+		setReflux();
+		//startReflux();
 		//запущенный процесс в текущее время и предыдущий запущенный процесс
 		/*let oldStartProcess = Number(localStorage.getItem('oldStartProcess'));
 		if (oldStartProcess !== 2) {
@@ -1538,6 +1560,7 @@ $(function () {
 
 	//Установка значений для ректификации
 	function setReflux() {
+	console.log("setReflux");
 		let refluxSendData = {
 			"process": {"allow": 0, "number": 0},
 			"t1": {"allertValue": 0},
@@ -1577,23 +1600,32 @@ $(function () {
 			//tmpSendProcess = true;
 			//console.log(tmpSendProcess);
 			flagSendProcess = false;
+			clearInterval(sensorsProcessId);
 			//console.log(flagSendProcess);
 			//localStorage.setObj('reflux', refluxProcess);
 			sendRequest("SensorsIn", refluxSendData, "json", startReflux, false, $("#error_reflux"), false);
 		}
 	}
+	$(document).on('mousedown',"#reflux_process input", function () {
+		flagSendProcess = true;
+	});
+	$(document).on('change',"#reflux_process input",
+		$.debounce(function() {
+			flagSendProcess = true;
+			if(refluxProcess["start"] === true)
+				startReflux();
+		}, 300)
+	);
 	function startReflux() {
-		sensorsProcessId = setInterval(getReflux, 2000);
+		console.log("startReflux");
+		if(refluxProcess["start"] === true)
+			sensorsProcessId = setInterval(getReflux, 2000);
 	}
 
 	function getReflux() {
-		//console.log("getReflux");
-		//очистка данных графиков
-		/*let oldStartProcess = Number(localStorage.getItem('oldStartProcess'));
-		if(oldStartProcess !== 2) {
-			//clearChart();
-		}*/
-		setReflux();
+		let sek= parseInt(+new Date()/1000);
+		console.log(flagSendProcess,"getReflux"+sek);
+		//setReflux();
 		if (!$.fn.objIsEmpty(globalSensorsJson, false)) {
 			let dtoJson = {};
 			dtoJson["heaterPower"] = globalSensorsJson["power"];
@@ -1630,34 +1662,47 @@ $(function () {
 							//console.log(fillcolor, delta_value, delta_alert);
 							$("#svg_reflux_color_" + sensor_key).css('fill', colorPersent(fillcolor, delta_value, delta_alert));
 						}
-						//}
+						if(!flagSendProcess) {
+							$("#reflux_delta_" + sensor_key).val(alert_value.toFixed(0));
+							$("#reflux_cutoff_" + sensor_key).val(alert_value.toFixed(0));
+						}
+						$("#reflux_" + sensor_key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
+						let allertValue = alert_value;
+						allertValue = allertValue > 0 ? allertValue.toFixed(2) : "";
+						if (allertValue !== "") {
+							$("#reflux_delta_result_" + sensor_key).text(allertValue).parent().find(".hidden").removeClass("hidden").addClass("show");
+							$("#reflux_cutoff_result_" + sensor_key).text(allertValue).parent().find(".hidden").removeClass("hidden").addClass("show");
+						}else{
+							$("#reflux_delta_result_" + sensor_key).text(allertValue).parent().find(".show").removeClass("show").addClass("hidden");
+							$("#reflux_cutoff_result_" + sensor_key).text(allertValue).parent().find(".show").removeClass("show").addClass("hidden");
+					}
+						//svg
+						$("#svg_reflux_" + sensor_key).html(sensor_value.toFixed(0) + '&#176С');
+
 						if (Number(q["member"]) !== 0)
 							dtoJson["temperatures"][sensor_key] = {value: sensor_value, name: q["name"], color: fillcolor};
 					}
 				});
-				$("#reflux_" + sensor_key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
-				let allertValue = globalSensorsJson["sensors"][i][sensor_key]["allertValue"];
-				allertValue = allertValue > 0 ? allertValue.toFixed(2) : "";
-				if (allertValue > 0) {
-					$("#reflux_delta_result_" + sensor_key).text(allertValue).parent().find(".hidden").removeClass("hidden").addClass("show");
-					$("#reflux_cutoff_result_" + sensor_key).text(allertValue).parent().find(".hidden").removeClass("hidden").addClass("show");
-				}
-				if (sensor_key === "p1") {
+
+				if (re_p.test(sensor_key)) {
 					$("#reflux_pressure").text(globalSensorsJson["sensors"][i]["p1"]["value"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 					dtoJson["pressure"] = globalSensorsJson["sensors"][i]["p1"]["value"];
 				}
-				//svg
-				$("#svg_reflux_" + sensor_key).html(sensor_value.toFixed(0) + '&#176С');
+
 				//let fillcolor = temperaturePalette(sensor_value.toFixed(0));
 
 			});
 			$("#reflux_alco_boil").text(globalSensorsJson["temperatureAlcoholBoil"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 			let power_value = Number(globalSensorsJson["power"]);
+			if(!flagSendProcess) {
+				$("#reflux_power_set").val(power_value.toFixed(0));
+			}
 			$("#reflux_power_value").text(power_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 			$("#svg_reflux_ten_t").text(power_value.toFixed(0) + "%");
 			$("#svg_reflux_color_ten").css('fill', colorPersent("#FF0000", power_value.toFixed(0), 100));
 			//dtoJson["temperatures"] = refluxProcess["sensors"];
 			$("#view_distillation_chart").html("");
+			$("#view_mashing_chart").html("");
 			//let oldStartProcess = Number(localStorage.getItem('oldStartProcess'));
 			//if(oldStartProcess === 2) {
 			if (!$.fn.objIsEmpty(dtoJson["temperatures"], false))
@@ -1999,18 +2044,12 @@ $(function () {
 		$('#distillation_add_sensor').prop("disabled", true);
 		$('#distillation_stop').prop("disabled", false);
 		distillationProcess["start"] = flagSendProcess = true;
-		//curStartProcess = 1;
 		localStorage.setObj('oldStartProcess', 1);
 		//очищаем графики
 		clearChart();
 		startChart();
-		//console.log("distillation_start");
-		//setDistillation();
-		//getDistillation();
 		clearInterval(sensorsProcessId);
-		startDistillation();
-		//sensorsProcessId = setInterval(getDistillation, 2000);
-		//setTimeout(getDistillation, 2000);
+		setDistillation();
 	});
 	$(document).on('click', '#distillation_stop', function () {
 		let _this = $(this);
@@ -2021,18 +2060,12 @@ $(function () {
 		flagSendProcess = true;
 		distillationProcess["start"] = false;
 		clearInterval(sensorsProcessId);
-		getDistillation();
-		//запущенный процесс в текущее время и предыдущий запущенный процесс
-		//let oldStartProcess = Number(localStorage.getItem('oldStartProcess'));
-		/*if (oldStartProcess !== 1) {
-			//clearChart();
-		} else {
-			setDistillation();
-		}*/
+		setDistillation();
 	});
 
 	//Установка значений для дистиляции
 	function setDistillation() {
+		console.log("setDistillation");
 		let distillationSendData = {
 			"process": {"allow": 0, "number": 0},
 			"t1": {"allertValue": 0},
@@ -2074,19 +2107,26 @@ $(function () {
 			sendRequest("SensorsIn", distillationSendData, "json", startDistillation, false, $("#error_distillation"), false);
 		}
 	}
+	$(document).on('mousedown',"#distillation_process input", function () {
+		flagSendProcess = true;
+	});
+	$(document).on('change',"#distillation_process input",
+		$.debounce(function() {
+			flagSendProcess = true;
+			if(distillationProcess["start"] === true)
+				startDistillation();
+		}, 300)
+	);
 	function startDistillation() {
-		sensorsProcessId = setInterval(getDistillation, 2000);
+		console.log("startDistillation");
+		if(distillationProcess["start"] === true)
+			sensorsProcessId = setInterval(getDistillation, 2000);
 	}
-	//let startDistillation = 0;
+
 	function getDistillation() {
-		//let sek= parseInt(+new Date()/1000);
-		//console.log("getDistillation");
-		//очистка данных графиков
-		/*let oldStartProcess = Number(localStorage.getItem('oldStartProcess'));
-		if(oldStartProcess !== 1) {
-			//clearChart();
-		}*/
-		setDistillation();
+		let sek= parseInt(+new Date()/1000);
+		console.log(flagSendProcess,"getDistillation"+sek);
+		//setDistillation();
 		if (!$.fn.objIsEmpty(globalSensorsJson, false)) {
 			let dtoJson = {};
 			dtoJson["heaterPower"] = globalSensorsJson["power"];
@@ -2097,10 +2137,8 @@ $(function () {
 				let alert_value = Number(globalSensorsJson["sensors"][i][sensor_key]["allertValue"]);
 				$.each(distillationProcess["sensors"], function (j, q) {
 					//console.log(j, q);
-					//if (q["key"] === sensor_key) {
 					if (j === sensor_key && re_t.test(sensor_key)) {
 						q["value"] = sensor_value;
-						//if (sensor_key !== "p1") {
 						let color_value = q["color"];
 						let fillcolor = "#" + dec2hex(color_value);
 						if (alert_value > 0 && sensor_value >= alert_value) {
@@ -2115,42 +2153,37 @@ $(function () {
 							$("#distillation_alert_text_" + sensor_key).removeClass("text-danger");
 						}
 						//console.log(sensor_key, fillcolor,sensor_value,alert_value);
-						//if (q["delta"] === false) {
 						$("#svg_distillation_color_" + sensor_key).css('fill', colorPersent(fillcolor, sensor_value, alert_value));
-						/*} else {
-							let delta_alert = $("#distillation_delta_" + sensor_key).val();
-							let delta_value = (delta_alert - alert_value + sensor_value).toFixed(2);
-							//console.log(fillcolor, delta_value, delta_alert);
-							$("#svg_distillation_color_" + sensor_key).css('fill', colorPersent(fillcolor, delta_value, delta_alert));
-						}*/
-						//}
 						if (Number(q["member"]) !== 0)
 							dtoJson["temperatures"][sensor_key] = {value: sensor_value, name: q["name"], color: fillcolor};
+
+						$("#distillation_" + sensor_key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
+						if(!flagSendProcess) {
+							$("#distillation_cutoff_" + sensor_key).val(alert_value.toFixed(0));
+							//$("#mashing_temperature_" + sensor_key).val(temperature);
+						}
+						let allertValue = alert_value;
+						allertValue = allertValue > 0 ? allertValue.toFixed(2) : "";
+						if (allertValue !== "") {
+							$("#distillation_cutoff_result_" + sensor_key).text(allertValue).parent().find(".hidden").removeClass("hidden").addClass("show");
+						}else{
+							$("#distillation_cutoff_result_" + sensor_key).text(allertValue).parent().find(".show").removeClass("show").addClass("hidden");
+						}
+						//svg
+						$("#svg_distillation_" + sensor_key).html(sensor_value.toFixed(0) + '&#176С');
 					}
 				});
-				$("#distillation_" + sensor_key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
-				let allertValue = globalSensorsJson["sensors"][i][sensor_key]["allertValue"];
-				allertValue = allertValue > 0 ? allertValue.toFixed(2) : "";
-				if (allertValue > 0) {
-					//$("#distillation_delta_result_" + sensor_key).text(allertValue).parent().find(".hidden").removeClass("hidden").addClass("show");
-					$("#distillation_cutoff_result_" + sensor_key).text(allertValue).parent().find(".hidden").removeClass("hidden").addClass("show");
-				}
-				/*if (sensor_key === "p1") {
-					$("#distillation_pressure").text(globalSensorsJson["sensors"][i]["p1"]["value"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
-					dtoJson["pressure"] = globalSensorsJson["sensors"][i]["p1"]["value"];
-				}*/
-				//svg
-				$("#svg_distillation_" + sensor_key).html(sensor_value.toFixed(0) + '&#176С');
-				//let fillcolor = temperaturePalette(sensor_value.toFixed(0));
-
 			});
-			//$("#distillation_alco_boil").text(globalSensorsJson["temperatureAlcoholBoil"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 			let power_value = Number(globalSensorsJson["power"]);
+			if(!flagSendProcess) {
+				$("#distillation_power_set").val(power_value.toFixed(0));
+			}
 			$("#distillation_power_value").text(power_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 			$("#svg_distillation_ten_t").text(power_value.toFixed(0) + "%");
 			$("#svg_distillation_color_ten").css('fill', colorPersent("#FF0000", power_value.toFixed(0), 100));
 			//dtoJson["temperatures"] = distillationProcess["sensors"];
 			$("#view_reflux_chart").html("");
+			$("#view_mashing_chart").html("");
 			//let oldStartProcess = Number(localStorage.getItem('oldStartProcess'));
 			//if(oldStartProcess === 1) {
 			if (!$.fn.objIsEmpty(dtoJson["temperatures"], false))
@@ -2316,9 +2349,17 @@ $(function () {
 		};
 		let mashingTemplate = '';
 		let tpl_pause_body = '';
-		let pause_thead = '<div class="col-xs-3 col-xs-offset-0 col-sm-3 col-sm-offset-3 text-center text-middle text-primary">Время паузы</div>' +
-			'<div class="col-xs-3 col-xs-offset-0 col-sm-3 col-sm-offset-0 text-center text-middle text-primary">Температура паузы</div>' +
-			'<div class="col-xs-3 col-xs-offset-0 col-sm-3 col-sm-offset-0 text-center text-middle text-primary">Стоп в конце</div>';
+		let pause_thead = '<div class="col-xs-5 col-xs-offset-0 col-sm-3 col-sm-offset-3 text-center text-middle text-primary">Время паузы</div>' +
+			'<div class="col-xs-5 col-xs-offset-0 col-sm-3 col-sm-offset-0 text-center text-middle text-primary">Температура паузы</div>' +
+			'<div class="col-xs-2 col-xs-offset-0 col-sm-3 col-sm-offset-0 text-center text-middle text-primary">Стоп в конце</div>';
+		let tpl_timer_body = '<div class="row row-striped">' +
+			'<div class="pt-10 pb-10 clearfix">' +
+			'<div class="col-xs-12 col-sm-4 text-center-xs"><strong>Время до конца паузы</strong></div>' +
+			'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="mashing_timer_text"></span><span class="hidden">&nbsp;мин.</span></strong></div>' +
+			'<div class="col-xs-3 col-sm-3"></div>' +
+			'<div class="col-xs-4 col-sm-3"></div>' +
+			'</div>' +
+			'</div>';
 		//console.log(mashingProcess["sensors"]);
 		if (!sensors_select && $.fn.objIsEmpty(mashingProcess["sensors"], false)) {
 			//console.log('empty');
@@ -2363,9 +2404,10 @@ $(function () {
 					tpl_all_body += '<div class="row row-striped">' +
 						'<div class="pt-10 pb-10 clearfix">' +
 						'<div class="col-xs-12 col-sm-4 text-center-xs" id="mashing_step_text_'+sensor_key+'"><strong>t&#176' + name_sensor + '</strong></div>' +
-						'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="mashing_' + sensor_key + '"></span><span class="hidden">&#176С</span></strong></div>' +
-						'<div class="col-xs-3 col-sm-3"></div>' +
-						'<div class="col-xs-4 col-sm-3"></div>' +
+						'<div class="col-xs-12 col-xs-offset-0 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="mashing_' + sensor_key + '"></span><span' +
+						' class="hidden">&#176С</span></strong></div>' +
+						'<div class="col-xs-0 col-sm-3"></div>' +
+						'<div class="col-xs-0 col-sm-3"></div>' +
 						'</div>' +
 						'</div>';
 					//}
@@ -2399,7 +2441,7 @@ $(function () {
 			if (sensors_select)
 				sendRequest("mashingSensorsSetSave", sensorsMashingSend, "json", false, false, $("#error_mashing"), false);
 			//returnTplHtml([{id_value: "mashing_power_value", id_set: "mashing_power_set"}], powerTempl)
-			mashingTemplate = mashingTemplate + tpl_pause_body;
+			mashingTemplate = mashingTemplate + tpl_timer_body + tpl_pause_body;
 			$("#mashing_start_group_button").removeClass("hidden");
 		} else {
 			$("#mashing_start_group_button").addClass("hidden");
@@ -2439,12 +2481,18 @@ $(function () {
 		flagSendProcess = true;
 		mashingProcess["start"] = false;
 		clearInterval(sensorsProcessId);
-		getMashing();
+		setMashing();
+		//getMashing();
 	});
 
 	//Установка значений для затирания
 	function setMashing() {
 		console.log("setMashing");
+		/*if (setMashing.caller == null) {
+			console.log('Эта функция была вызвана из верхнего уровня!');
+		} else {
+			console.log('Эта функция была вызвана из ' + setMashing.caller);
+		}*/
 		let mashingSendData = {
 			"process": {"allow": 0, "number": 0},
 			"pause1":{"time":0,"temperature":0,"stop":0},
@@ -2490,37 +2538,31 @@ $(function () {
 
 		}
 	}
-	/*$(document).on('change',"#mashing_process input", function () {
-		flagSendProcess = true;
-		//clearInterval(sensorsProcessId);
-		//console.log(sensorsProcessId);
-		setMashing();
-	});*/
 	$(document).on('mousedown',"#mashing_process input", function () {
 		flagSendProcess = true;
 		//clearInterval(sensorsProcessId);
 		//console.log(sensorsProcessId);
 		//setMashing();
 	});
-
 	$(document).on('change',"#mashing_process input",
 		$.debounce(function() {
 			flagSendProcess = true;
 			//clearInterval(sensorsProcessId);
 			//console.log(sensorsProcessId);
-			setMashing();
+			if(mashingProcess["start"] === true)
+				setMashing();
 		}, 300)
 	);
-
 	function startMashing() {
 		flagSendProcess = false;
 		//clearInterval(sensorsProcessId);
-		sensorsProcessId = setInterval(getMashing, 2000);
+		console.log("startMashing");
+		if(mashingProcess["start"] === true)
+			sensorsProcessId = setInterval(getMashing, 2000);
 	}
-
 	function getMashing() {
-		//let sek= parseInt(+new Date()/1000);
-		//console.log(flagSendProcess,"getMashing"+sek);
+		let sek= parseInt(+new Date()/1000);
+		console.log(flagSendProcess,"getMashing"+sek);
 		//setMashing();
 		if (!$.fn.objIsEmpty(globalSensorsJson, false)) {
 			let dtoJson = {};
@@ -2543,10 +2585,16 @@ $(function () {
 				//svg
 				$("#svg_mashing_" + sensor_key).html(sensor_value.toFixed(0) + '&#176С');
 			});
+			let time_cur_pause = 0;
+			let time_pause = 0;
 			$.each(globalSensorsJson["mashing"], function (i, e) {
 				let pause_key = Object.keys(e).shift();
 				let step = Number(e[pause_key]["step"]);
 				let time = Number(e[pause_key]["time"]);
+				if(step>0){
+					time_cur_pause = time;
+					time_pause = 1;
+				}
 				let temperature = Number(e[pause_key]["temperature"]);
 				let stop = Number(e[pause_key]["stop"]);
 				if(!flagSendProcess) {
@@ -2568,10 +2616,22 @@ $(function () {
 
 			});
 			let power_value = Number(globalSensorsJson["power"]);
-			$("#mashing_power_value").text(power_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
+			let global_time = (Number(globalSensorsJson["process"]["time"])/60).toFixed(0);
+			let timer_value = (time_cur_pause - global_time).toFixed(1);
+			if(timer_value > 0 && global_time > 0) {
+				$("#mashing_timer_text").text(timer_value).parent().find(".hidden").removeClass("hidden").addClass("show");
+			}
+			if(time_cur_pause > 0 && time_pause > 0){
+				$("#mashing_timer_text").text(">"+time_cur_pause).parent().find(".hidden").removeClass("hidden").addClass("show");
+			}
+			if(time_pause > 0 && global_time === 0){
+				$("#mashing_timer_text").text("Пауза").parent().find(".hidden").removeClass("hidden").addClass("show");
+			}
+			//$("#mashing_power_value").text(power_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 			$("#svg_mashing_ten_t").text(power_value.toFixed(0) + "%");
 			$("#svg_mashing_color_ten").css('fill', colorPersent("#FF0000", power_value.toFixed(0), 100));
 			$("#view_reflux_chart").html("");
+			$("#view_distillation_chart").html("");
 			if (!$.fn.objIsEmpty(dtoJson["temperatures"], false))
 				dtoReceiver.start(dtoJson, 'view_mashing_chart');
 		}
@@ -2711,6 +2771,7 @@ $(function () {
 			error: function (err, exception) {
 				$.fn.openModal('', '<p class="text-center text-danger"><strong>Ошибка загрузки данных датчиков, проверьте питание контроллера и обновите страницу</strong></p>', "modal-sm", false, true);
 				clearInterval(sensorsIntervalId);
+				clearInterval(sensorsProcessId);
 			},
 		});
 		//if(tmpTime<100 && refluxProcess["start"] === true)
