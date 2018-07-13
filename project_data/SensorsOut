@@ -12,10 +12,10 @@
 	{"p1":{"value":760.00,"color":0,"member":0}}
 ],
     "mashing":[
-    {"pause1":{"time":20,"name":"Внесение солода","temperature":45,"stop":0,"step":1}},
-    {"pause2":{"time":20,"name":"Белковая пауза","temperature":55,"stop":0,"step":0}},
+    {"pause1":{"time":20,"name":"Внесение солода","temperature":45,"stop":0,"step":0}},
+    {"pause2":{"time":30,"name":"Белковая пауза","temperature":55,"stop":0,"step":0}},
     {"pause3":{"time":40,"name":"Осахаривание","temperature":65,"stop":0,"step":0}},
-    {"pause4":{"time":10,"name":"Мэш аут","temperature":72,"stop":1,"step":0}}
+    {"pause4":{"time":10,"name":"Мэш аут","temperature":72,"stop":0,"step":1}}
 ],
    "brewing":[
    {"pause1":{"time":60,"name":"Кислотная пауза","temperature":40,"stop":0,"member":0,"step":0}},
@@ -48,7 +48,7 @@
 	{"in3":{"value":0,"name":"","member":0,"allert":0}},
 	{"in4":{"value":0,"name":"","member":0,"allert":0}}
 ],
-	"power":80,
+	"power":90,
 	"temperatureAlcoholBoil":78.15,
 	"temperatureStartPressure":78.00,
 	"time":0

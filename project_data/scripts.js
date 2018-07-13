@@ -149,7 +149,7 @@ $(function () {
 				return this.setItem(key, JSON.stringify(obj));
 			} catch (e) {
 				if (isQuotaExceeded(e)) {
-					$.fn.openModal('', 'Превышен лимит localStorage', "modal-sm", false, true);
+					$.fn.openModal('', '<p class="text-center text-danger text-strong">Превышен лимит localStorage</p>', "modal-sm", false, true);
 				}
 				return null;
 			}
@@ -400,7 +400,7 @@ $(function () {
 			$(target).ajaxLoading();
 			$(target).load(url, function (response, status, xhr) {
 				if (status === "error") {
-					$.fn.openModal('', '<p class="text-center text-danger"><strong>Ошибка загрузки вкладки</strong></p><p>' + xhr.status + ' ' + xhr.statusText + '</p>', "modal-sm", false, true);
+					$.fn.openModal('', '<p class="text-center text-danger text-strong">Ошибка загрузки вкладки</p><p>' + xhr.status + ' ' + xhr.statusText + '</p>', "modal-sm", false, true);
 				}
 				$(target).ajaxLoading('stop');
 				tab.tab('show');
@@ -432,7 +432,7 @@ $(function () {
 			'<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
 			'<span aria-hidden="true">&times;</span>' +
 			'</button>' +
-			'<strong>' + msg + '</strong>' +
+			'<span class="text-strong">' + msg + '</span>' +
 			'</div>';
 		container.html(error_alert);
 		//alert(msg);
@@ -988,7 +988,7 @@ $(function () {
 	$(document).on('click', '#reset_sensors', function (e) {
 		e.preventDefault();
 		let _this = $(this);
-		$.fn.openModal('', '<p class="text-center text-danger">Вы действительно хотите сбросить все настройки?</p>', "modal-sm", false, [{
+		$.fn.openModal('', '<p class="text-center text-danger text-strong">Вы действительно хотите сбросить все настройки?</p>', "modal-sm", false, [{
 			text: "Да",
 			id: "return_restart",
 			class: "btn btn-primary btn-sm",
@@ -1115,7 +1115,7 @@ $(function () {
 			}
 		}
 		if (nameError) {
-			$.fn.openModal('', '<p class="text-center text-danger"><strong>Заполните названия подключенных датчиков</strong></p>', "modal-sm", true, false);
+			$.fn.openModal('', '<p class="text-center text-danger <p class="text-center text-danger text-strong">Заполните названия подключенных датчиков</p>', "modal-sm", true, false);
 		} else {
 			//console.log(sensorsJson,sensorsSend);
 			sendRequest("sensorsInSet", sensorsSend, "json", setSensors, _this, $("#error_sensors"), false);
@@ -1124,8 +1124,8 @@ $(function () {
 
 	function setSensors(data) {
 		//console.log(data);
-		sendRequest("sensorsOutSet", {}, "json", getSensors, $('#get_sensors'), $("#error_sensors"), '<p class="text-center text-success"><strong>Настройки датчиков сохранены</strong></p>');
-		//$.fn.openModal('', '<p class="text-center text-success"><strong>Тестовое сообщение, УРА!</strong></p>', "modal-sm", true, false);
+		sendRequest("sensorsOutSet", {}, "json", getSensors, $('#get_sensors'), $("#error_sensors"), '<p class="text-center text-success  text-strong">Настройки датчиков сохранены</p>');
+		//$.fn.openModal('', '<p class="text-center text-success text-strong">Тестовое сообщение, УРА!</p>', "modal-sm", true, false);
 		//localStorage.setObj('sensors', sensorsJson);
 	}
 
@@ -1133,13 +1133,13 @@ $(function () {
 	const pressureTemplate =
 		'<div class="row row-striped">' +
 		'<div class="pt-10 clearfix">' +
-		'<div class="col-xs-12 col-sm-4 text-center-xs text-middle"><strong>Атмосферное давление</strong></div>' +
-		'<div class="col-xs-5 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="reflux_pressure"></span> <span class="hidden">мм рт.ст.</span></strong></div>' +
+		'<div class="col-xs-12 col-sm-4 text-center-xs text-middle text-strong">Атмосферное давление</div>' +
+		'<div class="col-xs-5 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle text-strong"><span id="reflux_pressure"></span> <span class="hidden">мм рт.ст.</span></div>' +
 		'</div>' +
 		//'<div class="row row-striped">' +
 		'<div class="pb-10 clearfix">' +
-		'<div class="col-xs-12 col-sm-4 text-center-xs text-middle"><strong>t&#176 кипения спирта при данном давлении</strong></div>' +
-		'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="reflux_alco_boil"></span><span class="hidden">&#176С</span></strong></div>' +
+		'<div class="col-xs-12 col-sm-4 text-center-xs text-middle text-strong">t&#176 кипения спирта при данном давлении</div>' +
+		'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle text-strong"><span id="reflux_alco_boil"></span><span class="hidden">&#176С</span></div>' +
 		'</div>' +
 		'</div>';
 	const deltaTempl =
@@ -1159,8 +1159,8 @@ $(function () {
 	const powerTempl =
 		'<div class="row row-striped">' +
 		'<div class="pt-10 pb-10 clearfix">' +
-		'<div class="col-xs-12 col-sm-4 text-center-xs text-middle"><strong>Мощность тена</strong></div>' +
-		'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="${id_value}"></span><span class="hidden">%</span></strong></div>' +
+		'<div class="col-xs-12 col-sm-4 text-center-xs text-middle text-strong">Мощность тена</div>' +
+		'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle text-strong"><span id="${id_value}"></span><span class="hidden">%</span></div>' +
 		'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 col-centered">' +
 		returnTplHtml([{id: "${id_set}", value: '0', min: '0', max: '100', step: '1'}], deltaTempl) +
 		'</div>' +
@@ -1169,9 +1169,9 @@ $(function () {
 	/*var ooo =
 			'<div class="row row-striped">' + tpl_cutoff_thead +
 			'<div id="mashing_alert_bg_'+sensor_key+'" class="pt-10 pb-10 clearfix">' +
-			'<div id="mashing_alert_text_'+sensor_key+'" class="col-xs-12 col-sm-4 text-center-xs"><strong>t&#176' + name_sensor + '</strong></div>' +
+			'<div id="mashing_alert_text_'+sensor_key+'" class="col-xs-12 col-sm-4 text-center-xs text-strong">t&#176' + name_sensor + '</div>' +
 
-		'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="mashing_' + sensor_key + '"></span><span class="hidden">&#176С</span></strong></div>' +
+		'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle text-strong"><span id="mashing_' + sensor_key + '"></span><span class="hidden">&#176С</span></div>' +
 			//'<div class="col-xs-3 col-sm-3"></div>' +
 			'<div class="col-xs-4 col-xs-offset-3 col-sm-2 col-sm-offset-3">' + tpl_cutoff +
 			'</div>' +
@@ -1181,7 +1181,7 @@ $(function () {
 		'<div class="row row-striped">' +
 		'<div class="row-xs clearfix">${pause_thead}</div>' +
 		'<div id="${id_step_bg}" class="pt-10 pb-10 clearfix">' +
-		'<div id="${id_step_text}" class="col-xs-12 col-sm-3 text-center-xs text-middle"><strong>${pause_name}</strong></div>' +
+		'<div id="${id_step_text}" class="col-xs-12 col-sm-3 text-center-xs text-middle text-strong">${pause_name}</div>' +
 		'<div class="col-xs-5 col-xs-offset-0 col-sm-3 col-sm-offset-0 col-centered">' +
 		returnTplHtml([{id: "${id_time}", value: "${value_time}", min: '0', max: '360', step: '1'}], deltaTempl) +
 		'</div>' +
@@ -1428,11 +1428,11 @@ $(function () {
 						tpl_delta_body +=
 							'<div class="row row-striped">' + tpl_delta_thead +
 							'<div id="reflux_alert_bg_' + sensor_key + '" class="pt-10 pb-10 clearfix">' +
-							'<div id="reflux_alert_text_' + sensor_key + '" class="col-xs-12 col-sm-4 text-center-xs"><strong>t&#176' + name_sensor + '</strong></div>' +
-							'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="reflux_' + sensor_key + '"></span><span class="hidden">&#176С</span></strong></div>' +
+							'<div id="reflux_alert_text_' + sensor_key + '" class="col-xs-12 col-sm-4 text-center-xs text-strong">t&#176' + name_sensor + '</div>' +
+							'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle text-strong"><span id="reflux_' + sensor_key + '"></span><span class="hidden">&#176С</span></div>' +
 							'<div class="col-xs-3 col-sm-3">' + tpl_delta + '</div>' +
-							'<div class="col-xs-4 col-xs-offset-1 col-sm-2 col-sm-offset-0 text-center text-middle"><strong>' + tpl_delta_result +
-							'</strong></div>' +
+							'<div class="col-xs-4 col-xs-offset-1 col-sm-2 col-sm-offset-0 text-center text-middle text-strong">' + tpl_delta_result +
+							'</div>' +
 							'</div>' +
 							'</div>';
 
@@ -1445,8 +1445,8 @@ $(function () {
 						tpl_cutoff_body +=
 							'<div class="row row-striped">' + tpl_cutoff_thead +
 							'<div id="reflux_alert_bg_' + sensor_key + '" class="pt-10 pb-10 clearfix">' +
-							'<div id="reflux_alert_text_' + sensor_key + '" class="col-xs-12 col-sm-4 text-center-xs"><strong>t&#176' + name_sensor + '</strong></div>' +
-							'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="reflux_' + sensor_key + '"></span><span class="hidden">&#176С</span></strong></div>' +
+							'<div id="reflux_alert_text_' + sensor_key + '" class="col-xs-12 col-sm-4 text-center-xs text-strong">t&#176' + name_sensor + '</div>' +
+							'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle text-strong"><span id="reflux_' + sensor_key + '"></span><span class="hidden">&#176С</span></div>' +
 							//'<div class="col-xs-3 col-sm-3"></div>' +
 							'<div class="col-xs-4 col-xs-offset-3 col-sm-2 col-sm-offset-3">' + tpl_cutoff +
 							'</div>' +
@@ -1458,8 +1458,8 @@ $(function () {
 					if (/*sensor_key !== "p1" && */!e["delta"] && !e["cutoff"]) {
 						tpl_all_body += '<div class="row row-striped">' +
 							'<div class="pt-10 pb-10 clearfix">' +
-							'<div class="col-xs-12 col-sm-4 text-center-xs"><strong>t&#176' + name_sensor + '</strong></div>' +
-							'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="reflux_' + sensor_key + '"></span><span class="hidden">&#176С</span></strong></div>' +
+							'<div class="col-xs-12 col-sm-4 text-center-xs text-strong">t&#176' + name_sensor + '></div>' +
+							'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle text-strong"><span id="reflux_' + sensor_key + '"></span><span class="hidden">&#176С</span></div>' +
 							'<div class="col-xs-3 col-sm-3"></div>' +
 							'<div class="col-xs-4 col-sm-3"></div>' +
 							'</div>' +
@@ -1470,16 +1470,16 @@ $(function () {
 					sensorsRefluxSend[sensor_key]["member"] = 1;
 					tpl_devices_body += '<div class="row row-striped">' +
 						'<div class="pt-10 clearfix">' +
-						'<div class="col-xs-12 col-sm-4 text-center-xs text-middle"><strong>' + name_sensor + '</strong></div>' +
-						'<div class="col-xs-5 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="reflux_' + sensor_key + '"></span> <span class="hidden"></span></strong></div>' +
+						'<div class="col-xs-12 col-sm-4 text-center-xs text-middle text-strong">' + name_sensor + '></div>' +
+						'<div class="col-xs-5 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle text-strong"><span id="reflux_' + sensor_key + '"></span> <span class="hidden"></span></div>' +
 						'</div></div>';
 				}
 				if (re_in.test(sensor_key) && Number(e["member"]) !== 0) {
 					sensorsRefluxSend[sensor_key]["member"] = 1;
 					tpl_safety_body += '<div class="row row-striped">' +
 						'<div class="pt-10 clearfix">' +
-						'<div class="col-xs-12 col-sm-4 text-center-xs text-middle"><strong>' + name_sensor + '</strong></div>' +
-						'<div class="col-xs-5 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="reflux_' + sensor_key + '"></span> <span class="hidden"></span></strong></div>' +
+						'<div class="col-xs-12 col-sm-4 text-center-xs text-middle text-strong">' + name_sensor + '</div>' +
+						'<div class="col-xs-5 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle text-strong"><span id="reflux_' + sensor_key + '"></span> <span class="hidden"></span></div>' +
 						'</div></div>';
 				}
 			});
@@ -1539,8 +1539,27 @@ $(function () {
 		//setTimeout(getReflux, 2000);
 	});
 	$(document).on('click', '#reflux_stop', function () {
-		let _this = $(this);
-		_this.prop("disabled", true);
+		$.fn.openModal('', '<p class="text-center text-danger text-strong">Вы действительно хотите остановить процесс ректификации?</p>', "modal-sm", false, [{
+			text: "Да",
+			id: "return_restart",
+			class: "btn btn-primary btn-sm",
+			click: function () {
+				$(this).closest(".modal").modal("hide");
+				stopReflux()
+			}
+		},
+			{
+				text: "Нет",
+				id: "return_tab",
+				class: "btn btn-danger btn-sm",
+				click: function () {
+					$(this).closest(".modal").modal("hide");
+				}
+			}], {buttons: "replace"});
+
+	});
+	function stopReflux(){
+		$('#reflux_stop').prop("disabled", true);
 		$('#reflux_add_sensor').prop("disabled", false);
 		$('#reflux_start').prop("disabled", false);
 		$("#svg_reflux_start").css('stroke', "#000000");
@@ -1548,19 +1567,20 @@ $(function () {
 		refluxProcess["start"] = false;
 		clearInterval(sensorsProcessId);
 		setReflux();
-		//startReflux();
-		//запущенный процесс в текущее время и предыдущий запущенный процесс
-		/*let oldStartProcess = Number(localStorage.getItem('oldStartProcess'));
-		if (oldStartProcess !== 2) {
-			//clearChart();
-		} else {
-			setReflux();
-		}*/
+	}
+
+	$(document).on('stop-event','#reflux_stop', function(e) {
+		stopReflux()
 	});
 
 	//Установка значений для ректификации
 	function setReflux() {
 	console.log("setReflux");
+		if ($.fn.objIsEmpty(refluxProcess["sensors"], false)){
+			setTimeout(function () {
+				setReflux();
+			}, 1000);
+		}
 		let refluxSendData = {
 			"process": {"allow": 0, "number": 0},
 			"t1": {"allertValue": 0},
@@ -1601,6 +1621,7 @@ $(function () {
 			//console.log(tmpSendProcess);
 			flagSendProcess = false;
 			clearInterval(sensorsProcessId);
+			clearInterval(sensorsIntervalId);
 			//console.log(flagSendProcess);
 			//localStorage.setObj('reflux', refluxProcess);
 			sendRequest("SensorsIn", refluxSendData, "json", startReflux, false, $("#error_reflux"), false);
@@ -1613,18 +1634,19 @@ $(function () {
 		$.debounce(function() {
 			flagSendProcess = true;
 			if(refluxProcess["start"] === true)
-				startReflux();
+				setReflux();
 		}, 300)
 	);
 	function startReflux() {
 		console.log("startReflux");
+		sensorsIntervalId = setInterval(getIntervalSensors, 1000);
 		if(refluxProcess["start"] === true)
 			sensorsProcessId = setInterval(getReflux, 2000);
 	}
 
 	function getReflux() {
-		let sek= parseInt(+new Date()/1000);
-		console.log(flagSendProcess,"getReflux"+sek);
+		//let sek= parseInt(+new Date()/1000);
+		//console.log(flagSendProcess,"getReflux"+sek);
 		//setReflux();
 		if (!$.fn.objIsEmpty(globalSensorsJson, false)) {
 			let dtoJson = {};
@@ -1662,10 +1684,11 @@ $(function () {
 							//console.log(fillcolor, delta_value, delta_alert);
 							$("#svg_reflux_color_" + sensor_key).css('fill', colorPersent(fillcolor, delta_value, delta_alert));
 						}
-						if(!flagSendProcess) {
-							$("#reflux_delta_" + sensor_key).val(alert_value.toFixed(0));
+						//убрал пока
+						/*if(!flagSendProcess) {
+							$("#reflux_delta_" + sensor_key).val(alert_value);
 							$("#reflux_cutoff_" + sensor_key).val(alert_value.toFixed(0));
-						}
+						}*/
 						$("#reflux_" + sensor_key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 						let allertValue = alert_value;
 						allertValue = allertValue > 0 ? allertValue.toFixed(2) : "";
@@ -1694,9 +1717,10 @@ $(function () {
 			});
 			$("#reflux_alco_boil").text(globalSensorsJson["temperatureAlcoholBoil"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 			let power_value = Number(globalSensorsJson["power"]);
-			if(!flagSendProcess) {
+			//убрал пока
+			/*if(!flagSendProcess) {
 				$("#reflux_power_set").val(power_value.toFixed(0));
-			}
+			}*/
 			$("#reflux_power_value").text(power_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 			$("#svg_reflux_ten_t").text(power_value.toFixed(0) + "%");
 			$("#svg_reflux_color_ten").css('fill', colorPersent("#FF0000", power_value.toFixed(0), 100));
@@ -1903,7 +1927,7 @@ $(function () {
 				dataType: 'json',
 				success: function (msg) {
 					distillationProcess["sensors"] = msg;
-					//console.log(distillationProcess["sensors"]);
+					//console.log('distillationSensorsGetTpl',distillationProcess["sensors"]);
 					if (!$.fn.objIsEmpty(distillationProcess["sensors"], false))
 						$.fn.pasteDistillationSensors(false);
 				},
@@ -1944,11 +1968,11 @@ $(function () {
 						tpl_delta_body +=
 							'<div class="row row-striped">' + tpl_delta_thead +
 							'<div id="alert_bg_'+sensor_key+'" class="pt-10 pb-10 clearfix">' +
-							'<div id="alert_text_'+sensor_key+'" class="col-xs-12 col-sm-4 text-center-xs"><strong>t&#176' + name_sensor + '</strong></div>' +
-							'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="distillation_' + sensor_key + '"></span><span class="hidden">&#176С</span></strong></div>' +
+							'<div id="alert_text_'+sensor_key+'" class="col-xs-12 col-sm-4 text-center-xs text-strong">t&#176' + name_sensor + '</div>' +
+							'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle text-strong"><span id="distillation_' + sensor_key + '"></span><span class="hidden">&#176С</span></div>' +
 							'<div class="col-xs-3 col-sm-3">' + tpl_delta + '</div>' +
-							'<div class="col-xs-4 col-xs-offset-1 col-sm-2 col-sm-offset-0 text-center text-middle"><strong>' + tpl_delta_result +
-							'</strong></div>' +
+							'<div class="col-xs-4 col-xs-offset-1 col-sm-2 col-sm-offset-0 text-center text-middle text-strong">' + tpl_delta_result +
+							'</div>' +
 							'</div>' +
 							'</div>';
 
@@ -1961,8 +1985,8 @@ $(function () {
 						tpl_cutoff_body +=
 							'<div class="row row-striped">' + tpl_cutoff_thead +
 							'<div id="distillation_alert_bg_' + sensor_key + '" class="pt-10 pb-10 clearfix">' +
-							'<div id="distillation_alert_text_' + sensor_key + '" class="col-xs-12 col-sm-4 text-center-xs"><strong>t&#176' + name_sensor + '</strong></div>' +
-							'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="distillation_' + sensor_key + '"></span><span class="hidden">&#176С</span></strong></div>' +
+							'<div id="distillation_alert_text_' + sensor_key + '" class="col-xs-12 col-sm-4 text-center-xs text-strong">t&#176' + name_sensor + '</div>' +
+							'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle text-strong"><span id="distillation_' + sensor_key + '"></span><span class="hidden">&#176С</span></div>' +
 							//'<div class="col-xs-3 col-sm-3"></div>' +
 							'<div class="col-xs-4 col-xs-offset-3 col-sm-2 col-sm-offset-3">' + tpl_cutoff +
 							'</div>' +
@@ -1974,8 +1998,8 @@ $(function () {
 					if (/*sensor_key !== "p1" && */!e["delta"] && !e["cutoff"]) {
 						tpl_all_body += '<div class="row row-striped">' +
 							'<div class="pt-10 pb-10 clearfix">' +
-							'<div class="col-xs-12 col-sm-4 text-center-xs"><strong>t&#176' + name_sensor + '</strong></div>' +
-							'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="distillation_' + sensor_key + '"></span><span class="hidden">&#176С</span></strong></div>' +
+							'<div class="col-xs-12 col-sm-4 text-center-xs text-strong">t&#176' + name_sensor + '</div>' +
+							'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle text-strong"><span id="distillation_' + sensor_key + '"></span><span class="hidden">&#176С</span></div>' +
 							'<div class="col-xs-3 col-sm-3"></div>' +
 							'<div class="col-xs-4 col-sm-3"></div>' +
 							'</div>' +
@@ -1986,16 +2010,16 @@ $(function () {
 					sensorsDistillationSend[sensor_key]["member"] = 1;
 					tpl_devices_body += '<div class="row row-striped">' +
 						'<div class="pt-10 clearfix">' +
-						'<div class="col-xs-12 col-sm-4 text-center-xs text-middle"><strong>' + name_sensor + '</strong></div>' +
-						'<div class="col-xs-5 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="distillation_' + sensor_key + '"></span> <span class="hidden"></span></strong></div>' +
+						'<div class="col-xs-12 col-sm-4 text-center-xs text-middle text-strong">' + name_sensor + '</div>' +
+						'<div class="col-xs-5 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle text-strong"><span id="distillation_' + sensor_key + '"></span> <span class="hidden"></span></div>' +
 						'</div></div>';
 				}
 				if (re_in.test(sensor_key) && Number(e["member"]) !== 0) {
 					sensorsDistillationSend[sensor_key]["member"] = 1;
 					tpl_safety_body += '<div class="row row-striped">' +
 						'<div class="pt-10 clearfix">' +
-						'<div class="col-xs-12 col-sm-4 text-center-xs text-middle"><strong>' + name_sensor + '</strong></div>' +
-						'<div class="col-xs-5 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="distillation_' + sensor_key + '"></span> <span class="hidden"></span></strong></div>' +
+						'<div class="col-xs-12 col-sm-4 text-center-xs text-middle text-strong">' + name_sensor + '</div>' +
+						'<div class="col-xs-5 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle text-strong"><span id="distillation_' + sensor_key + '"></span> <span class="hidden"></span></div>' +
 						'</div></div>';
 				}
 			});
@@ -2052,8 +2076,29 @@ $(function () {
 		setDistillation();
 	});
 	$(document).on('click', '#distillation_stop', function () {
-		let _this = $(this);
-		_this.prop("disabled", true);
+		//e.preventDefault();
+		//let _this = $(this);
+		$.fn.openModal('', '<p class="text-center text-danger text-strong">Вы действительно хотите остановить процесс дистиляции?</p>', "modal-sm", false, [{
+			text: "Да",
+			id: "return_restart",
+			class: "btn btn-primary btn-sm",
+			click: function () {
+				$(this).closest(".modal").modal("hide");
+				stopDistillation()
+			}
+		},
+			{
+				text: "Нет",
+				id: "return_tab",
+				class: "btn btn-danger btn-sm",
+				click: function () {
+					$(this).closest(".modal").modal("hide");
+				}
+			}], {buttons: "replace"});
+
+	});
+	function stopDistillation(){
+		$('#distillation_stop').prop("disabled", true);
 		$('#distillation_add_sensor').prop("disabled", false);
 		$('#distillation_start').prop("disabled", false);
 		$("#svg_distillation_start").css('stroke', "#000000");
@@ -2061,11 +2106,31 @@ $(function () {
 		distillationProcess["start"] = false;
 		clearInterval(sensorsProcessId);
 		setDistillation();
+	}
+
+	$(document).on('stop-event','#distillation_stop', function(e) {
+		stopDistillation()
 	});
+	/*$(document).on('click', '#distillation_test', function (e) {
+		if(typeof e.originalEvent !== "undefined" /!*&& e.originalEvent.hasOwnProperty("MouseEvent")*!/) {
+			let event_prop = e.originalEvent;
+			console.log(e);
+			console.log(event_prop);
+			let evetn_mouse = Object.keys(event_prop);
+			console.log(evetn_mouse);
+			if(evetn_mouse === "MouseEvent")
+				console.log("MouseEvent");
+		}
+	});*/
 
 	//Установка значений для дистиляции
 	function setDistillation() {
 		console.log("setDistillation");
+		if ($.fn.objIsEmpty(distillationProcess["sensors"], false)){
+			setTimeout(function () {
+				setDistillation();
+			}, 1000);
+		}
 		let distillationSendData = {
 			"process": {"allow": 0, "number": 0},
 			"t1": {"allertValue": 0},
@@ -2104,6 +2169,7 @@ $(function () {
 		if (flagSendProcess) {
 			flagSendProcess = false;
 			clearInterval(sensorsProcessId);
+			clearInterval(sensorsIntervalId);
 			sendRequest("SensorsIn", distillationSendData, "json", startDistillation, false, $("#error_distillation"), false);
 		}
 	}
@@ -2114,18 +2180,19 @@ $(function () {
 		$.debounce(function() {
 			flagSendProcess = true;
 			if(distillationProcess["start"] === true)
-				startDistillation();
+				setDistillation();
 		}, 300)
 	);
 	function startDistillation() {
 		console.log("startDistillation");
+		sensorsIntervalId = setInterval(getIntervalSensors, 1000);
 		if(distillationProcess["start"] === true)
 			sensorsProcessId = setInterval(getDistillation, 2000);
 	}
 
 	function getDistillation() {
-		let sek= parseInt(+new Date()/1000);
-		console.log(flagSendProcess,"getDistillation"+sek);
+		//let sek= parseInt(+new Date()/1000);
+		//console.log(flagSendProcess,"getDistillation"+sek);
 		//setDistillation();
 		if (!$.fn.objIsEmpty(globalSensorsJson, false)) {
 			let dtoJson = {};
@@ -2158,10 +2225,11 @@ $(function () {
 							dtoJson["temperatures"][sensor_key] = {value: sensor_value, name: q["name"], color: fillcolor};
 
 						$("#distillation_" + sensor_key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
-						if(!flagSendProcess) {
+						//убрал пока
+						/*if(!flagSendProcess) {
 							$("#distillation_cutoff_" + sensor_key).val(alert_value.toFixed(0));
 							//$("#mashing_temperature_" + sensor_key).val(temperature);
-						}
+						}*/
 						let allertValue = alert_value;
 						allertValue = allertValue > 0 ? allertValue.toFixed(2) : "";
 						if (allertValue !== "") {
@@ -2175,9 +2243,10 @@ $(function () {
 				});
 			});
 			let power_value = Number(globalSensorsJson["power"]);
-			if(!flagSendProcess) {
+			//убрал пока
+			/*if(!flagSendProcess) {
 				$("#distillation_power_set").val(power_value.toFixed(0));
-			}
+			}*/
 			$("#distillation_power_value").text(power_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 			$("#svg_distillation_ten_t").text(power_value.toFixed(0) + "%");
 			$("#svg_distillation_color_ten").css('fill', colorPersent("#FF0000", power_value.toFixed(0), 100));
@@ -2192,8 +2261,6 @@ $(function () {
 		}
 		if (distillationProcess["start"] === true) {
 			//console.log("setTimeout","getDistillation");
-			//startDistillation = sek+2;
-			//setTimeout(getDistillation, 2000);
 			$("#svg_distillation_start").css('stroke', "#02b500");
 		}
 	}
@@ -2354,8 +2421,8 @@ $(function () {
 			'<div class="col-xs-2 col-xs-offset-0 col-sm-3 col-sm-offset-0 text-center text-middle text-primary">Стоп в конце</div>';
 		let tpl_timer_body = '<div class="row row-striped">' +
 			'<div class="pt-10 pb-10 clearfix">' +
-			'<div class="col-xs-12 col-sm-4 text-center-xs"><strong>Время до конца паузы</strong></div>' +
-			'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="mashing_timer_text"></span><span class="hidden">&nbsp;мин.</span></strong></div>' +
+			'<div class="col-xs-12 col-sm-4 text-center-xs text-strong">Время до конца паузы</div>' +
+			'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle text-strong"><span id="mashing_timer_text"></span><span class="hidden">&nbsp;мин.</span></div>' +
 			'<div class="col-xs-3 col-sm-3"></div>' +
 			'<div class="col-xs-4 col-sm-3"></div>' +
 			'</div>' +
@@ -2403,9 +2470,9 @@ $(function () {
 					sensorsMashingSend[sensor_key]["member"] = 1;
 					tpl_all_body += '<div class="row row-striped">' +
 						'<div class="pt-10 pb-10 clearfix">' +
-						'<div class="col-xs-12 col-sm-4 text-center-xs" id="mashing_step_text_'+sensor_key+'"><strong>t&#176' + name_sensor + '</strong></div>' +
-						'<div class="col-xs-12 col-xs-offset-0 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="mashing_' + sensor_key + '"></span><span' +
-						' class="hidden">&#176С</span></strong></div>' +
+						'<div class="col-xs-12 col-sm-4 text-center-xs text-strong" id="mashing_step_text_'+sensor_key+'">t&#176' + name_sensor + '</div>' +
+						'<div class="col-xs-12 col-xs-offset-0 col-sm-3 col-sm-offset-0 text-center text-middle text-strong"><span id="mashing_' + sensor_key + '"></span><span' +
+						' class="hidden">&#176С</span></div>' +
 						'<div class="col-xs-0 col-sm-3"></div>' +
 						'<div class="col-xs-0 col-sm-3"></div>' +
 						'</div>' +
@@ -2420,16 +2487,16 @@ $(function () {
 					sensorsMashingSend[sensor_key]["member"] = 1;
 					tpl_devices_body += '<div class="row row-striped">' +
 						'<div class="pt-10 clearfix">' +
-						'<div class="col-xs-12 col-sm-4 text-center-xs text-middle"><strong>' + name_sensor + '</strong></div>' +
-						'<div class="col-xs-5 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="mashing_' + sensor_key + '"></span> <span class="hidden"></span></strong></div>' +
+						'<div class="col-xs-12 col-sm-4 text-center-xs text-middle text-strong">' + name_sensor + '</div>' +
+						'<div class="col-xs-5 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle text-strong"><span id="mashing_' + sensor_key + '"></span> <span class="hidden"></span></div>' +
 						'</div></div>';
 				}
 				if (re_in.test(sensor_key) && Number(e["member"]) !== 0) {
 					sensorsMashingSend[sensor_key]["member"] = 1;
 					tpl_safety_body += '<div class="row row-striped">' +
 						'<div class="pt-10 clearfix">' +
-						'<div class="col-xs-12 col-sm-4 text-center-xs text-middle"><strong>' + name_sensor + '</strong></div>' +
-						'<div class="col-xs-5 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle"><strong><span id="mashing_' + sensor_key + '"></span> <span class="hidden"></span></strong></div>' +
+						'<div class="col-xs-12 col-sm-4 text-center-xs text-middle text-strong">' + name_sensor + '</div>' +
+						'<div class="col-xs-5 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle text-strong"><span id="mashing_' + sensor_key + '"></span> <span class="hidden"></span></div>' +
 						'</div></div>';
 				}*/
 			});
@@ -2473,8 +2540,27 @@ $(function () {
 		//startMashing();
 	});
 	$(document).on('click', '#mashing_stop', function () {
-		let _this = $(this);
-		_this.prop("disabled", true);
+		$.fn.openModal('', '<p class="text-center text-danger text-strong">Вы действительно хотите остановить процесс затирания?</p>', "modal-sm", false, [{
+			text: "Да",
+			id: "return_restart",
+			class: "btn btn-primary btn-sm",
+			click: function () {
+				$(this).closest(".modal").modal("hide");
+				stopMashing()
+			}
+		},
+			{
+				text: "Нет",
+				id: "return_tab",
+				class: "btn btn-danger btn-sm",
+				click: function () {
+					$(this).closest(".modal").modal("hide");
+				}
+			}], {buttons: "replace"});
+
+	});
+	function stopMashing(){
+		$('#mashing_stop').prop("disabled", true);
 		$('#mashing_add_sensor').prop("disabled", false);
 		$('#mashing_start').prop("disabled", false);
 		$("#svg_mashing_start").css('stroke', "#000000");
@@ -2482,7 +2568,10 @@ $(function () {
 		mashingProcess["start"] = false;
 		clearInterval(sensorsProcessId);
 		setMashing();
-		//getMashing();
+	}
+
+	$(document).on('stop-event','#mashing_stop', function(e) {
+		stopMashing()
 	});
 
 	//Установка значений для затирания
@@ -2493,6 +2582,11 @@ $(function () {
 		} else {
 			console.log('Эта функция была вызвана из ' + setMashing.caller);
 		}*/
+		if ($.fn.objIsEmpty(mashingProcess["sensors"], false)){
+			setTimeout(function () {
+				setMashing();
+			}, 1000);
+		}
 		let mashingSendData = {
 			"process": {"allow": 0, "number": 0},
 			"pause1":{"time":0,"temperature":0,"stop":0},
@@ -2506,6 +2600,8 @@ $(function () {
 		//if (mashingProcess["power"] !== power_set.val())
 			//flagSendProcess = true;
 		//mashingSendData["power"] = mashingProcess["power"] = power_set.val();
+
+		//console.log(mashingProcess);
 
 		$.each(mashingProcess["sensors"], function (i, e) {
 			let sensor_key = i;
@@ -2532,6 +2628,7 @@ $(function () {
 		if (flagSendProcess) {
 			flagSendProcess = false;
 			clearInterval(sensorsProcessId);
+			clearInterval(sensorsIntervalId);
 			//setTimeout(function() {
 				sendRequest("SensorsIn", mashingSendData, "json", startMashing, false, $("#error_mashing"), false);
 			//},1000);
@@ -2557,12 +2654,13 @@ $(function () {
 		flagSendProcess = false;
 		//clearInterval(sensorsProcessId);
 		console.log("startMashing");
+		sensorsIntervalId = setInterval(getIntervalSensors, 1000);
 		if(mashingProcess["start"] === true)
 			sensorsProcessId = setInterval(getMashing, 2000);
 	}
 	function getMashing() {
-		let sek= parseInt(+new Date()/1000);
-		console.log(flagSendProcess,"getMashing"+sek);
+		//let sek= parseInt(+new Date()/1000);
+		//console.log(flagSendProcess,"getMashing"+sek);
 		//setMashing();
 		if (!$.fn.objIsEmpty(globalSensorsJson, false)) {
 			let dtoJson = {};
@@ -2586,20 +2684,26 @@ $(function () {
 				$("#svg_mashing_" + sensor_key).html(sensor_value.toFixed(0) + '&#176С');
 			});
 			let time_cur_pause = 0;
-			let time_pause = 0;
+			let step_pause = 0;
+			let stop_pause = 0;
 			$.each(globalSensorsJson["mashing"], function (i, e) {
 				let pause_key = Object.keys(e).shift();
 				let step = Number(e[pause_key]["step"]);
+				let stop = Number(e[pause_key]["stop"]);
 				let time = Number(e[pause_key]["time"]);
 				if(step>0){
 					time_cur_pause = time;
-					time_pause = 1;
+					step_pause = 1;
+					if(stop>0){
+						stop_pause = 1;
+					}
 				}
+
 				let temperature = Number(e[pause_key]["temperature"]);
-				let stop = Number(e[pause_key]["stop"]);
+				//убрал пока
 				if(!flagSendProcess) {
-					$("#mashing_time_" + pause_key).val(time);
-					$("#mashing_temperature_" + pause_key).val(temperature);
+					//$("#mashing_time_" + pause_key).val(time);
+					//$("#mashing_temperature_" + pause_key).val(temperature);
 					if (stop > 0) {
 						$("#mashing_stop_" + pause_key).prop("checked", true);
 					} else {
@@ -2616,16 +2720,17 @@ $(function () {
 
 			});
 			let power_value = Number(globalSensorsJson["power"]);
-			let global_time = (Number(globalSensorsJson["process"]["time"])/60).toFixed(0);
+			let global_time = (Number(globalSensorsJson["process"]["time"])/60).toFixed(1);
 			let timer_value = (time_cur_pause - global_time).toFixed(1);
+			console.log(time_cur_pause,timer_value,global_time);
+			if(time_cur_pause > 0 && step_pause > 0){
+				$("#mashing_timer_text").text(">"+time_cur_pause).parent().find(".hidden").removeClass("hidden").addClass("show");
+			}
 			if(timer_value > 0 && global_time > 0) {
 				$("#mashing_timer_text").text(timer_value).parent().find(".hidden").removeClass("hidden").addClass("show");
 			}
-			if(time_cur_pause > 0 && time_pause > 0){
-				$("#mashing_timer_text").text(">"+time_cur_pause).parent().find(".hidden").removeClass("hidden").addClass("show");
-			}
-			if(time_pause > 0 && global_time === 0){
-				$("#mashing_timer_text").text("Пауза").parent().find(".hidden").removeClass("hidden").addClass("show");
+			if(step_pause > 0 && stop_pause > 0 && timer_value < 0){
+				$("#mashing_timer_text").text("Пауза").parent().find(".show").removeClass("show").addClass("hidden");
 			}
 			//$("#mashing_power_value").text(power_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 			$("#svg_mashing_ten_t").text(power_value.toFixed(0) + "%");
@@ -2673,7 +2778,9 @@ $(function () {
 
 					if (process === 2) {
 						$('li.swipe-tab a[data-target="#reflux"]').tab('show');
-						$("#reflux_start").trigger("click");
+						setTimeout(function () {
+							$("#reflux_start").trigger("click");
+						}, 2000);
 					}
 
 					/*if(process > 0 && process !== 2)
@@ -2683,7 +2790,8 @@ $(function () {
 				}
 				if (refluxProcess["start"] === true) {
 					if (process !== 2) {
-						$("#reflux_stop").trigger("click");
+						$("#reflux_stop").trigger("stop-event");
+						//$("#reflux_stop").trigger("click");
 					}
 				}
 				//заполнение процесса дистиляции
@@ -2700,8 +2808,10 @@ $(function () {
 					$("#svg_distillation_ten_t").text(globalSensorsJson["power"] + '%');
 
 					if (process === 1) {
-						$('li.swipe-tab a[data-target="#distillation"]').tab('show');//$("#distillation").tab('show');
-						$("#distillation_start").trigger("click");
+						$('li.swipe-tab a[data-target="#distillation"]').tab('show');
+						setTimeout(function () {
+							$("#distillation_start").trigger("click");
+						}, 2000);
 					}
 
 					/*if(process > 0 && process !== 1)
@@ -2711,7 +2821,8 @@ $(function () {
 				}
 				if (distillationProcess["start"] === true) {
 					if (process !== 1) {
-						$("#distillation_stop").trigger("click");
+						$("#distillation_stop").trigger("stop-event");
+						//$("#distillation_stop").trigger("click");
 					}
 				}
 				//заполнение процесса затирания
@@ -2723,12 +2834,15 @@ $(function () {
 
 					if (process === 3) {
 						$('li.swipe-tab a[data-target="#mashing"]').tab('show');
-						$("#mashing_start").trigger("click");
+						setTimeout(function () {
+							$("#mashing_start").trigger("click");
+						}, 2000);
 					}
 				}
 				if (mashingProcess["start"] === true) {
 					if (process !== 3) {
-						$("#mashing_stop").trigger("click");
+						$("#mashing_stop").trigger("stop-event");
+						//$("#mashing_stop").trigger("click");
 					}
 				}
 
@@ -2769,7 +2883,7 @@ $(function () {
 				fillSensorsData();
 			},
 			error: function (err, exception) {
-				$.fn.openModal('', '<p class="text-center text-danger"><strong>Ошибка загрузки данных датчиков, проверьте питание контроллера и обновите страницу</strong></p>', "modal-sm", false, true);
+				$.fn.openModal('', '<p class="text-center text-danger text-strong">Ошибка загрузки данных датчиков, проверьте питание контроллера и обновите страницу</p>', "modal-sm", false, true);
 				clearInterval(sensorsIntervalId);
 				clearInterval(sensorsProcessId);
 			},
@@ -2859,7 +2973,7 @@ $(function () {
 		sendRequest("ssid", {
 			"ssid": ssid,
 			"password": pass
-		}, "text", false, _this, $("#error_settings"), '<p class="text-center text-success"><strong>Изменения вступят в силу после перезагрузки. Пожалуйста перезагрузите устройство.</strong></p>');
+		}, "text", false, _this, $("#error_settings"), '<p class="text-center text-success text-strong">Изменения вступят в силу после перезагрузки. Пожалуйста перезагрузите устройство.</p>');
 	});
 	$("#settings_set_ssidap").on("click", function (e) {
 		e.preventDefault();
@@ -2869,7 +2983,7 @@ $(function () {
 		sendRequest("ssidap", {
 			"ssidAP": ssidap,
 			"passwordAP": pass
-		}, "text", false, _this, $("#error_settings"), '<p class="text-center text-success"><strong>Изменения вступят в силу после перезагрузки. Пожалуйста перезагрузите устройство.</strong></p>');
+		}, "text", false, _this, $("#error_settings"), '<p class="text-center text-success text-strong">Изменения вступят в силу после перезагрузки. Пожалуйста перезагрузите устройство.</p>');
 	});
 	$("#settings_auto_timezone").on("click", function (e) {
 		e.preventDefault();
@@ -2877,18 +2991,18 @@ $(function () {
 		let date = new Date();
 		let timezone = Math.abs(date.getTimezoneOffset() / 60);
 		$("#settings_timezone").val(timezone);
-		sendRequest("TimeZone", {"timezone": timezone}, "text", false, _this, $("#error_settings"), '<p class="text-center text-success"><strong>Изменения временной зоны сохранены</strong></p>');
+		sendRequest("TimeZone", {"timezone": timezone}, "text", false, _this, $("#error_settings"), '<p class="text-center text-success text-strong">Изменения временной зоны сохранены</p>');
 	});
 	$("#settings_set_timezone").on("click", function (e) {
 		e.preventDefault();
 		let _this = $(this);
 		let timezone = $("#settings_timezone").val();
-		sendRequest("TimeZone", {"timezone": timezone}, "text", false, _this, $("#error_settings"), '<p class="text-center text-success"><strong>Изменения временной зоны сохранены</strong></p>');
+		sendRequest("TimeZone", {"timezone": timezone}, "text", false, _this, $("#error_settings"), '<p class="text-center text-success text-strong">Изменения временной зоны сохранены</p>');
 	});
 	$("#settings_restart").on("click", function (e) {
 		e.preventDefault();
 		let _this = $(this);
-		$.fn.openModal('', '<p class="text-center text-danger">Вы действительно хотите перезагрузить устройство?</p>', "modal-sm", false, [{
+		$.fn.openModal('', '<p class="text-center text-danger text-strong">Вы действительно хотите перезагрузить устройство?</p>', "modal-sm", false, [{
 			text: "Да",
 			id: "return_restart",
 			class: "btn btn-primary btn-sm",
