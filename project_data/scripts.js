@@ -28,8 +28,12 @@
 	 */
 	$.fn.arrayUnique = function (arr) {
 		let uniHash = {}, outArr = [], i = arr.length;
-		while (i--) uniHash[arr[i]] = i;
-		for (i in uniHash) outArr.push(i);
+		while (i--){
+			uniHash[arr[i]] = i
+		}
+		for (let j in uniHash){
+			outArr.push(j)
+		}
 		return outArr
 	};
 	/**
@@ -79,7 +83,7 @@
 	 * @param optgroup
 	 */
 	$.fn.fillSelect = function (select, dataArray, optgroup) {
-		if (optgroup === undefined) optgroup = false;
+		if (optgroup === undefined){ optgroup = false}
 
 		if (select.prop('tagName') === 'SELECT') {
 			if (!optgroup) {
@@ -344,27 +348,29 @@ $(function () {
 
 					$tab.find('a').tab('show');
 					//console.log(hiddenWidth, listWidth, leftTab, containerWidth, (listWidth-Math.abs(posList.left)));
-					if ((listWidth - Math.abs(posList.left)) > containerWidth)
-					//if(hiddenWidth < listWidth)
+					if ((listWidth - Math.abs(posList.left)) > containerWidth) {
+						//if(hiddenWidth < listWidth)
 						$('.list-tab').animate({left: "-=" + leftTab + "px"}, 'slow');
-					//$('.list-tab').animate({left:"+="+widthOfHidden()+"px"},'slow');
+						//$('.list-tab').animate({left:"+="+widthOfHidden()+"px"},'slow');
+					}
 				}
 			},
 			swipeRight: function (event, distance, duration, fingerCount, fingerData, currentDirection) {
-				let listWidth = widthOfList();
-				let hiddenWidth = widthOfHidden();
-				let containerWidth = $('.wrapper-nav').outerWidth();
+				//let listWidth = widthOfList();
+				//let hiddenWidth = widthOfHidden();
+				//let containerWidth = $('.wrapper-nav').outerWidth();
 				let $tab = $('.list-tab .active').prev();
 				if ($tab.length > 0) {
 					let posTab = $tab.offset();
-					let posList = $('.list-tab').offset();
+					//let posList = $('.list-tab').offset();
 					let leftTab = posTab.left - 10;
 					$tab.find('a').tab('show');
 					//console.log(hiddenWidth, listWidth, leftTab, containerWidth, (listWidth-Math.abs(posList.left)));
-					if (leftTab < 0)
-					//if(hiddenWidth < listWidth)
+					if (leftTab < 0) {
+						//if(hiddenWidth < listWidth)
 						$('.list-tab').animate({left: "-=" + leftTab + "px"}, 'slow');
-					//$('.list-tab').animate({left:"-="+getLeftPos()+"px"},'slow');
+						//$('.list-tab').animate({left:"-="+getLeftPos()+"px"},'slow');
+					}
 				}
 			},
 			allowPageScroll: "auto"
@@ -460,22 +466,27 @@ $(function () {
 			type: 'GET',
 			dataType: dataType,
 			beforeSend: function () {
-				if (load_target !== false)
+				if (load_target !== false) {
 					$(load_target).ajaxLoading({disabled: true, color: "#FF0000"});
+				}
 			},
 			success: function (msg) {
-				if (success_action !== false)
+				if (success_action !== false) {
 					success_action(msg);
-				if (success_text !== false)
+				}
+				if (success_text !== false) {
 					$.fn.openModal('', success_text, "modal-sm", true, false);
+				}
 			},
 			error: function (err, exception) {
-				if (error_target !== false)
+				if (error_target !== false) {
 					alertAjaxError(err, exception, error_target);
+				}
 			},
 			complete: function () {
-				if (load_target !== false)
+				if (load_target !== false) {
 					$(load_target).ajaxLoading('stop');
+				}
 			}
 		});
 	}
@@ -495,8 +506,9 @@ $(function () {
 			count_interval++;
 			let fixed = 0;
 			const f = x => ((x.toString().includes('.')) ? (x.toString().split('.').pop().length) : (0));
-			if (typeof min === typeof undefined && min === false)
+			if (typeof min === typeof undefined && min === false) {
 				min = 0;
+			}
 			if (typeof step !== typeof undefined && step !== false) {
 				step = parseFloat(step);
 				fixed = f(step);
@@ -510,8 +522,9 @@ $(function () {
 			}
 			let count = Number($input.val()) - step;
 			count = count < min ? min : count;
-			if (count > min)
+			if (count > min) {
 				count = count.toFixed(fixed);
+			}
 			//console.log(count,step);
 			$input.val(count);
 		}, time);
@@ -530,8 +543,9 @@ $(function () {
 		let min = Number($input.attr("min"));
 		let fixed = 0;
 		const f = x => ((x.toString().includes('.')) ? (x.toString().split('.').pop().length) : (0));
-		if (typeof min === typeof undefined && min === false)
+		if (typeof min === typeof undefined && min === false) {
 			min = 0;
+		}
 		if (typeof step !== typeof undefined && step !== false) {
 			step = parseFloat(step);
 			fixed = f(step);
@@ -540,8 +554,9 @@ $(function () {
 		}
 		let count = Number($input.val()) - step;
 		count = count < min ? min : count;
-		if (count > min)
+		if (count > min) {
 			count = count.toFixed(fixed);
+		}
 		$input.val(count);
 		//$input.change();
 	});
@@ -559,8 +574,9 @@ $(function () {
 			count_interval++;
 			let fixed = 0;
 			const f = x => ((x.toString().includes('.')) ? (x.toString().split('.').pop().length) : (0));
-			if (typeof max === typeof undefined && max === false)
+			if (typeof max === typeof undefined && max === false) {
 				max = 100;
+			}
 			if (typeof step !== typeof undefined && step !== false) {
 				step = parseFloat(step);
 				fixed = f(step);
@@ -596,8 +612,9 @@ $(function () {
 		let max = Number($input.attr("max"));
 		let fixed = 0;
 		const f = x => ((x.toString().includes('.')) ? (x.toString().split('.').pop().length) : (0));
-		if (typeof max === typeof undefined && max === false)
+		if (typeof max === typeof undefined && max === false) {
 			max = 100;
+		}
 		if (typeof step !== typeof undefined && step !== false) {
 			step = parseFloat(step);
 			fixed = f(step);
@@ -731,8 +748,9 @@ $(function () {
 			if(process > 0 && oldStartProcess !== process) {
 				clearChart();
 			}*/
-			if (process !== 0)
+			if (process !== 0) {
 				plot = getPlot();
+			}
 		});
 	}
 
@@ -1046,8 +1064,9 @@ $(function () {
 						$("#svg_sensor_" + key).html(sensor_value.toFixed(0) + '&#176С');
 						$("#svg_sensor_color_" + key).css('fill', jscolor);
 					} else {
-						if (!$.fn.objIsEmpty(sensors[key]["name"], false))
+						if (!$.fn.objIsEmpty(sensors[key]["name"], false)) {
 							$("#sensor_name_" + key).val("");
+						}
 						$("#sensor_color_" + key).val(jscolor).next("button").css("background-color", "#" + jscolor);
 						$("#sensor_val_" + key).text("").parent().find(".show").removeClass("show").addClass("hidden");
 					}
@@ -1081,16 +1100,18 @@ $(function () {
 				if (re_t.test(key)) {
 					let color_val = $("#sensor_color_" + key).val();
 					let sensor_val = $("#sensor_name_" + key).val();
-					if (sensor_val === "" && sensorsJson[key]["value"] < 150)
+					if (sensor_val === "" && sensorsJson[key]["value"] < 150) {
 						nameError = true;
+					}
 					sensorsSend[key]["name"] = sensorsJson[key]["name"] = sensor_val;
 					//console.log(key,color_val);
 					sensorsSend[key]["color"] = sensorsJson[key]["color"] = (color_val !== "FFFFFF" && color_val !== "") ? hex2dec(color_val) : 0;
 
 					//if (key !== "p1") {
 					let sort_number = Number($("#sensor_number_" + key).val());
-					if (sort_number !== 0)
+					if (sort_number !== 0) {
 						$.fn.arrayUnset(arrSortSensors, sort_number);
+					}
 					sensorsSend[key]["number"] = sensorsJson[key]["number"] = sort_number;
 					//}
 				}
@@ -1384,8 +1405,9 @@ $(function () {
 				success: function (msg) {
 					refluxProcess["sensors"] = msg;
 					//console.log(refluxProcess["sensors"]);
-					if (!$.fn.objIsEmpty(refluxProcess["sensors"], false))
+					if (!$.fn.objIsEmpty(refluxProcess["sensors"], false)) {
 						$.fn.pasteRefluxSensors(false);
+					}
 				},
 				error: function (err, exception) {
 					alertAjaxError(err, exception, $("#error_reflux"));
@@ -1414,8 +1436,9 @@ $(function () {
 				//console.log(i,e);
 				let sensor_key = i;
 				let name_sensor = e["name"];
-				if (sensorsRefluxSend[sensor_key].hasOwnProperty("name"))
+				if (sensorsRefluxSend[sensor_key].hasOwnProperty("name")) {
 					sensorsRefluxSend[sensor_key]["name"] = name_sensor;
+				}
 				if (re_t.test(sensor_key) && Number(e["member"]) !== 0) {
 					sensorsRefluxSend[sensor_key]["color"] = e["color"];//hex2dec(e["color"]);
 					sensorsRefluxSend[sensor_key]["member"] = 1;
@@ -1596,8 +1619,9 @@ $(function () {
 		//let flag_send = false;
 		let power_set = $("#reflux_power_set");
 		refluxSendData["process"]["allow"] = (refluxProcess["start"] ? 2 : 0);
-		if (refluxProcess["power"] !== power_set.val())
+		if (refluxProcess["power"] !== power_set.val()) {
 			flagSendProcess = true;
+		}
 		refluxSendData["power"] = refluxProcess["power"] = power_set.val();
 
 		$.each(refluxProcess["sensors"], function (i, e) {
@@ -1605,13 +1629,15 @@ $(function () {
 			let reflux_delta = $("#reflux_delta_" + sensor_key);
 			let reflux_cutoff = $("#reflux_cutoff_" + sensor_key);
 			if (reflux_delta.length) {
-				if (e["allertValue"] !== reflux_delta.val())
+				if (e["allertValue"] !== reflux_delta.val()) {
 					flagSendProcess = true;
+				}
 				refluxSendData[sensor_key]["allertValue"] = e["allertValue"] = reflux_delta.val();
 			}
 			if (reflux_cutoff.length) {
-				if (e["allertValue"] !== reflux_cutoff.val())
+				if (e["allertValue"] !== reflux_cutoff.val()) {
 					flagSendProcess = true;
+				}
 				refluxSendData[sensor_key]["allertValue"] = e["allertValue"] = reflux_cutoff.val();
 			}
 		});
@@ -1633,15 +1659,17 @@ $(function () {
 	$(document).on('change',"#reflux_process input",
 		$.debounce(function() {
 			flagSendProcess = true;
-			if(refluxProcess["start"] === true)
+			if(refluxProcess["start"] === true) {
 				setReflux();
+			}
 		}, 300)
 	);
 	function startReflux() {
 		console.log("startReflux");
 		sensorsIntervalId = setInterval(getIntervalSensors, 1000);
-		if(refluxProcess["start"] === true)
+		if(refluxProcess["start"] === true) {
 			sensorsProcessId = setInterval(getReflux, 2000);
+		}
 	}
 
 	function getReflux() {
@@ -1702,8 +1730,9 @@ $(function () {
 						//svg
 						$("#svg_reflux_" + sensor_key).html(sensor_value.toFixed(0) + '&#176С');
 
-						if (Number(q["member"]) !== 0)
+						if (Number(q["member"]) !== 0) {
 							dtoJson["temperatures"][sensor_key] = {value: sensor_value, name: q["name"], color: fillcolor};
+						}
 					}
 				});
 
@@ -1729,9 +1758,9 @@ $(function () {
 			$("#view_mashing_chart").html("");
 			//let oldStartProcess = Number(localStorage.getItem('oldStartProcess'));
 			//if(oldStartProcess === 2) {
-			if (!$.fn.objIsEmpty(dtoJson["temperatures"], false))
+			if (!$.fn.objIsEmpty(dtoJson["temperatures"], false)){
 				dtoReceiver.start(dtoJson, 'view_reflux_chart');
-			//}
+			}
 		}
 		//console.log(globalSensorsJson);
 		//console.log(refluxProcess);
@@ -1928,8 +1957,9 @@ $(function () {
 				success: function (msg) {
 					distillationProcess["sensors"] = msg;
 					//console.log('distillationSensorsGetTpl',distillationProcess["sensors"]);
-					if (!$.fn.objIsEmpty(distillationProcess["sensors"], false))
+					if (!$.fn.objIsEmpty(distillationProcess["sensors"], false)) {
 						$.fn.pasteDistillationSensors(false);
+					}
 				},
 				error: function (err, exception) {
 					alertAjaxError(err, exception, $("#error_distillation"));
@@ -1955,8 +1985,9 @@ $(function () {
 				//console.log(i,e);
 				let sensor_key = i;
 				let name_sensor = e["name"];
-				if (sensorsDistillationSend[sensor_key].hasOwnProperty("name"))
+				if (sensorsDistillationSend[sensor_key].hasOwnProperty("name")) {
 					sensorsDistillationSend[sensor_key]["name"] = name_sensor;
+				}
 				if (re_t.test(sensor_key) && Number(e["member"]) !== 0) {
 					sensorsDistillationSend[sensor_key]["color"] = e["color"];
 					sensorsDistillationSend[sensor_key]["member"] = 1;
@@ -2146,8 +2177,9 @@ $(function () {
 		//let flag_send = false;
 		let power_set = $("#distillation_power_set");
 		distillationSendData["process"]["allow"] = (distillationProcess["start"] ? 1 : 0);
-		if (distillationProcess["power"] !== power_set.val())
+		if (distillationProcess["power"] !== power_set.val()) {
 			flagSendProcess = true;
+		}
 		distillationSendData["power"] = distillationProcess["power"] = power_set.val();
 
 		$.each(distillationProcess["sensors"], function (i, e) {
@@ -2160,8 +2192,9 @@ $(function () {
 				distillationSendData[sensor_key]["allertValue"] = e["allertValue"] = distillation_delta.val();
 			}*/
 			if (distillation_cutoff.length) {
-				if (e["allertValue"] !== distillation_cutoff.val())
+				if (e["allertValue"] !== distillation_cutoff.val()) {
 					flagSendProcess = true;
+				}
 				distillationSendData[sensor_key]["allertValue"] = e["allertValue"] = distillation_cutoff.val();
 			}
 		});
@@ -2179,15 +2212,17 @@ $(function () {
 	$(document).on('change',"#distillation_process input",
 		$.debounce(function() {
 			flagSendProcess = true;
-			if(distillationProcess["start"] === true)
+			if(distillationProcess["start"] === true) {
 				setDistillation();
+			}
 		}, 300)
 	);
 	function startDistillation() {
 		console.log("startDistillation");
 		sensorsIntervalId = setInterval(getIntervalSensors, 1000);
-		if(distillationProcess["start"] === true)
+		if(distillationProcess["start"] === true) {
 			sensorsProcessId = setInterval(getDistillation, 2000);
+		}
 	}
 
 	function getDistillation() {
@@ -2221,8 +2256,9 @@ $(function () {
 						}
 						//console.log(sensor_key, fillcolor,sensor_value,alert_value);
 						$("#svg_distillation_color_" + sensor_key).css('fill', colorPersent(fillcolor, sensor_value, alert_value));
-						if (Number(q["member"]) !== 0)
+						if (Number(q["member"]) !== 0) {
 							dtoJson["temperatures"][sensor_key] = {value: sensor_value, name: q["name"], color: fillcolor};
+						}
 
 						$("#distillation_" + sensor_key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 						//убрал пока
@@ -2255,9 +2291,9 @@ $(function () {
 			$("#view_mashing_chart").html("");
 			//let oldStartProcess = Number(localStorage.getItem('oldStartProcess'));
 			//if(oldStartProcess === 1) {
-			if (!$.fn.objIsEmpty(dtoJson["temperatures"], false))
+			if (!$.fn.objIsEmpty(dtoJson["temperatures"], false)){
 				dtoReceiver.start(dtoJson, 'view_distillation_chart');
-			//}
+			}
 		}
 		if (distillationProcess["start"] === true) {
 			//console.log("setTimeout","getDistillation");
@@ -2438,8 +2474,9 @@ $(function () {
 				success: function (msg) {
 					mashingProcess["sensors"] = msg;
 					//console.log("mashingSensorsGetTpl",mashingProcess["sensors"]);
-					if (!$.fn.objIsEmpty(mashingProcess["sensors"], false))
+					if (!$.fn.objIsEmpty(mashingProcess["sensors"], false)) {
 						$.fn.pasteMashingSensors(false);
+					}
 				},
 				error: function (err, exception) {
 					alertAjaxError(err, exception, $("#error_mashing"));
@@ -2463,8 +2500,9 @@ $(function () {
 						temperature = e["temperature"] = Number(q[pause_key]["temperature"]);
 					}
 				});
-				if (sensorsMashingSend[sensor_key].hasOwnProperty("name"))
+				if (sensorsMashingSend[sensor_key].hasOwnProperty("name")) {
 					sensorsMashingSend[sensor_key]["name"] = name_sensor;
+				}
 				if (re_t.test(sensor_key) && Number(e["member"]) !== 0) {
 					sensorsMashingSend[sensor_key]["color"] = e["color"];
 					sensorsMashingSend[sensor_key]["member"] = 1;
@@ -2505,8 +2543,9 @@ $(function () {
 			}
 		}
 		if (mashingTemplate !== '') {
-			if (sensors_select)
+			if (sensors_select) {
 				sendRequest("mashingSensorsSetSave", sensorsMashingSend, "json", false, false, $("#error_mashing"), false);
+			}
 			//returnTplHtml([{id_value: "mashing_power_value", id_set: "mashing_power_set"}], powerTempl)
 			mashingTemplate = mashingTemplate + tpl_timer_body + tpl_pause_body;
 			$("#mashing_start_group_button").removeClass("hidden");
@@ -2609,19 +2648,22 @@ $(function () {
 			let mashing_temperature = $("#mashing_temperature_"+sensor_key);
 			let mashing_stop = $("#mashing_stop_"+sensor_key);
 			if(mashing_time.length) {
-				if(e["time"] !== mashing_time.val())
+				if(e["time"] !== mashing_time.val()) {
 					flagSendProcess = true;
+				}
 				mashingSendData[sensor_key]["time"] = e["time"] = mashing_time.val();
 			}
 			if(mashing_temperature.length) {
-				if(e["temperature"] !== mashing_temperature.val())
+				if(e["temperature"] !== mashing_temperature.val()) {
 					flagSendProcess = true;
+				}
 				mashingSendData[sensor_key]["temperature"] = e["temperature"] = mashing_temperature.val();
 			}
 			if(mashing_stop.length) {
 				let stop = Number(mashing_stop.prop("checked"));
-				if(e["stop"] !== stop)
+				if(e["stop"] !== stop) {
 					flagSendProcess = true;
+				}
 				mashingSendData[sensor_key]["stop"] = e["stop"] = stop;
 			}
 		});
@@ -2646,8 +2688,9 @@ $(function () {
 			flagSendProcess = true;
 			//clearInterval(sensorsProcessId);
 			//console.log(sensorsProcessId);
-			if(mashingProcess["start"] === true)
+			if(mashingProcess["start"] === true) {
 				setMashing();
+			}
 		}, 300)
 	);
 	function startMashing() {
@@ -2655,8 +2698,9 @@ $(function () {
 		//clearInterval(sensorsProcessId);
 		console.log("startMashing");
 		sensorsIntervalId = setInterval(getIntervalSensors, 1000);
-		if(mashingProcess["start"] === true)
+		if(mashingProcess["start"] === true) {
 			sensorsProcessId = setInterval(getMashing, 2000);
+		}
 	}
 	function getMashing() {
 		//let sek= parseInt(+new Date()/1000);
@@ -2675,8 +2719,9 @@ $(function () {
 						let color_value = q["color"];
 						let fillcolor = "#" + dec2hex(color_value);
 						$("#svg_mashing_color_" + sensor_key).css('fill', colorPersent(fillcolor, sensor_value, 0));
-						if (Number(q["member"]) !== 0)
+						if (Number(q["member"]) !== 0) {
 							dtoJson["temperatures"][sensor_key] = {value: sensor_value, name: q["name"], color: fillcolor};
+						}
 					}
 				});
 				$("#mashing_" + sensor_key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
@@ -2737,8 +2782,9 @@ $(function () {
 			$("#svg_mashing_color_ten").css('fill', colorPersent("#FF0000", power_value.toFixed(0), 100));
 			$("#view_reflux_chart").html("");
 			$("#view_distillation_chart").html("");
-			if (!$.fn.objIsEmpty(dtoJson["temperatures"], false))
+			if (!$.fn.objIsEmpty(dtoJson["temperatures"], false)) {
 				dtoReceiver.start(dtoJson, 'view_mashing_chart');
+			}
 		}
 		if (mashingProcess["start"] === true) {
 			$("#svg_mashing_start").css('stroke', "#02b500");
@@ -2856,12 +2902,15 @@ $(function () {
 					$("#mashing_start_group_button").addClass("hidden");
 				}
 				if (process === 0) {
-					if ($.trim($("#reflux_process").html()) !== "")
+					if ($.trim($("#reflux_process").html()) !== "") {
 						$("#reflux_start_group_button").removeClass("hidden");
-					if ($.trim($("#distillation_process").html()) !== "")
+					}
+					if ($.trim($("#distillation_process").html()) !== "") {
 						$("#distillation_start_group_button").removeClass("hidden");
-					if ($.trim($("#mashing_process").html()) !== "")
+					}
+					if ($.trim($("#mashing_process").html()) !== "") {
 						$("#mashing_start_group_button").removeClass("hidden");
+					}
 				}
 			});
 		}
@@ -3068,8 +3117,9 @@ $(function () {
 						break;
 
 				}
-				if (step > 0)
+				if (step > 0) {
 					$("#brewing_status_" + step).addClass('success');
+				}
 
 				setTimeout(getPower, 2000);
 			}

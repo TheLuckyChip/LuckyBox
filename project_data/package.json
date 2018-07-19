@@ -3,15 +3,26 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build-js-lib": "ngzip jquery.min.js > ../data/jquery.min.js.gz & ngzip jquery.touchSwipe.min.js > ../data/jquery.touchSwipe.min.js.gz & ngzip ajaxloader.js > ../data/ajaxloader.js.gz & ngzip bootstrap.min.js > ../data/bootstrap.min.js.gz & ngzip export-data.js > ../data/export-data.js.gz & ngzip exporting.js > ../data/exporting.js.gz & ngzip highstock.js > ../data/highstock.js.gz & ngzip dialog.js > ../data/dialog.js.gz & ngzip jscolor.js > ../data/jscolor.js.gz & ngzip jquery.debounce.js > ../data/jquery.debounce.js.gz",
-    "build-css-lib":"ngzip bootstrap.min.css > ../data/bootstrap.min.css.gz",
-    "build-js": "ngzip scripts.js > ../data/scripts.js.gz",
-    "build-css": "ngzip style.css > ../data/style.css.gz",
-    "build-htm": "html-minifier index.htm --output ../data/index.htm --collapse-whitespace & html-minifier distillation.htm --output ../data/distillation.htm --collapse-whitespace & html-minifier reflux.htm --output ../data/reflux.htm --collapse-whitespace & html-minifier mashing.htm --output ../data/mashing.htm --collapse-whitespace & html-minifier brewing.htm --output ../data/brewing.htm --collapse-whitespace & html-minifier heater.htm --output ../data/heater.htm --collapse-whitespace & html-minifier sensors.htm --output ../data/sensors.htm --collapse-whitespace",
-    "build": "npm run build-js && npm run build-css && npm run build-htm"
+    "build-js-lib": "ngzip jquery.min.js > ../data/jquery.min.js.gz & ngzip jquery.touchSwipe.min.js > ../data/jquery.touchSwipe.min.js.gz & node-minify --compressor babel-minify --input ajaxloader.js --output ../data/ajaxloader.js & ngzip ../data/ajaxloader.js > ../data/ajaxloader.js.gz & ngzip bootstrap.min.js > ../data/bootstrap.min.js.gz & ngzip export-data.js > ../data/export-data.js.gz & ngzip exporting.js > ../data/exporting.js.gz & ngzip highstock.js > ../data/highstock.js.gz & node-minify --compressor babel-minify --input dialog.js --output ../data/dialog.js & ngzip ../data/dialog.js > ../data/dialog.js.gz & node-minify --compressor babel-minify --input jscolor.js --output ../data/jscolor.js & ngzip ../data/jscolor.js > ../data/jscolor.js.gz & ngzip jquery.debounce.js > ../data/jquery.debounce.js.gz",
+    "build-css-lib": "ngzip bootstrap.min.css > ../data/bootstrap.min.css.gz",
+    "build-del-lib": "trash  ../data/jscolor.js  ../data/dialog.js ../data/ajaxloader.js",
+    "build-js": "node-minify --compressor babel-minify --input scripts.js --output ../data/scripts.js & ngzip ../data/scripts.js > ../data/scripts.js.gz",
+    "build-css": "node-minify --compressor clean-css --input style.css --output ../data/style.css & ngzip ../data/style.css > ../data/style.css.gz",
+    "build-htm": "html-minifier index.htm --output ../data/index.htm --collapse-whitespace --remove-comments & html-minifier distillation.htm --output ../data/distillation.htm --collapse-whitespace --remove-comments & html-minifier reflux.htm --output ../data/reflux.htm --collapse-whitespace --remove-comments & html-minifier mashing.htm --output ../data/mashing.htm --collapse-whitespace --remove-comments & html-minifier brewing.htm --output ../data/brewing.htm --collapse-whitespace --remove-comments & html-minifier heater.htm --output ../data/heater.htm --collapse-whitespace --remove-comments & html-minifier sensors.htm --output ../data/sensors.htm --collapse-whitespace --remove-comments",
+    "build-del": "trash  ../data/scripts.js ../data/style.css",
+    "build-lib": "npm run build-js-lib && npm run build-del-lib",
+    "build": "npm run build-js && npm run build-css && npm run build-htm && npm run build-del"
   },
   "devDependencies": {
+    "html-minifier": "^3.5.15",
     "ngzip": "^1.1.3",
-    "html-minifier": "^3.5.15"
+    "node-minify": "^3.1.0",
+    "trash-cli": "^1.4.0"
+  },
+  "dependencies": {
+    "html-minifier": "^3.5.15",
+    "ngzip": "^1.1.3",
+    "node-minify": "^3.1.0",
+    "trash-cli": "^1.4.0"
   }
 }
