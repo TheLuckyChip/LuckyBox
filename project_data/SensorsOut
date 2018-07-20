@@ -48,6 +48,12 @@
 	{"in3":{"value":0,"name":"","member":0,"allert":0}},
 	{"in4":{"value":0,"name":"","member":0,"allert":0}}
 ],
+	"pid":[
+	{"Kp":{"userSetValue":0}},
+	{"Ki":{"userSetValue":0}},
+	{"Kd":{"userSetValue":0}},
+	{"t1":{"userSetValue":0}}
+	],
 	"power":90,
 	"temperatureAlcoholBoil":78.15,
 	"temperatureStartPressure":78.00,

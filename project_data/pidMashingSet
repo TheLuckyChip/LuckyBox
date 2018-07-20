@@ -1,0 +1,9 @@
+{
+  "process":{"allow":0,"save":0},
+  "settings":[
+    {"Kp":{"userSetValue":0,"deviceOutValue":0}},
+    {"Ki":{"userSetValue":0,"deviceOutValue":0}},
+    {"Kd":{"userSetValue":0,"deviceOutValue":0}},
+    {"t1":{"userSetValue":0,"deviceOutValue":0}}
+  ]
+}

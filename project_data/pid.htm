@@ -1,10 +1,10 @@
 <div class="container">
 	<div class="row">
-		<div id="error_heater" class="col-md-offset-2 col-md-8"></div>
+		<div id="error_pid" class="col-md-offset-2 col-md-8"></div>
 	</div>
 	<div class="row mt-10">
 		<div class="col-md-12 fill-height">
-			<div class="row">
+			<div class="row" id="pid_process">
 				<div class="col-xs-12 col-xs-offset-0 col-md-10 col-md-offset-1">
 					<div class="row-xs clearfix mt-10 hidden-xs">
 						<div class="col-xs-12 col-sm-4 text-center text-middle text-strong">Kp</div>
@@ -20,7 +20,7 @@
 								<span class="glyphicon glyphicon-minus"></span>
 							</button>
 						</span>
-								<input id="pid_kp" class="form-control input-number noSwipe" type="number" value="0" min="0" max="100" step="1" size="4">
+								<input id="pid_Kp" class="form-control input-number noSwipe" type="number" value="0" min="0" max="100" step="1" size="4">
 								<span class="input-group-btn plus">
 							<button type="button" class="btn btn-success btn-number noSwipe" data-type="plus" data-field="count">
 								<span class="glyphicon glyphicon-plus"></span>
@@ -38,7 +38,7 @@
 								<span class="glyphicon glyphicon-minus"></span>
 							</button>
 						</span>
-								<input id="pid_ki" class="form-control input-number noSwipe" type="number" value="0" min="0" max="10" step="0.01" size="4">
+								<input id="pid_Ki" class="form-control input-number noSwipe" type="number" value="0" min="0" max="10" step="0.01" size="4">
 								<span class="input-group-btn plus">
 							<button type="button" class="btn btn-success btn-number noSwipe" data-type="plus" data-field="count">
 								<span class="glyphicon glyphicon-plus"></span>
@@ -56,7 +56,7 @@
 								<span class="glyphicon glyphicon-minus"></span>
 							</button>
 						</span>
-								<input id="pid_kd" class="form-control input-number noSwipe" type="number" value="0" min="0" max="100" step="1" size="4">
+								<input id="pid_Kd" class="form-control input-number noSwipe" type="number" value="0" min="0" max="100" step="1" size="4">
 								<span class="input-group-btn plus">
 							<button type="button" class="btn btn-success btn-number noSwipe" data-type="plus" data-field="count">
 								<span class="glyphicon glyphicon-plus"></span>
@@ -69,7 +69,7 @@
 						<div class="pb-10 clearfix">
 							<div class="col-xs-12 col-sm-4 text-center text-middle text-strong">t&#176 в Кубе</div>
 							<div class="col-xs-6 col-sm-4 text-center text-middle text-strong">
-								<span id="pid_sensor_value">68.00</span><span class="show">&#176</span>
+								<span id="pid_value_t1"></span><span class="hidden">&#176</span>
 							</div>
 							<div class="col-xs-6 col-sm-4 col-centered">
 								<div class="input-group input-group-sm number-group">
@@ -78,7 +78,7 @@
 									<span class="glyphicon glyphicon-minus"></span>
 								</button>
 							</span>
-									<input id="pid_sensor_set" class="form-control input-number noSwipe" type="number" value="0" min="0" max="100" step="1" size="4">
+									<input id="pid_t1" class="form-control input-number noSwipe" type="number" value="0" min="0" max="100" step="1" size="4">
 									<span class="input-group-btn plus">
 								<button type="button" class="btn btn-success btn-number noSwipe" data-type="plus" data-field="count">
 									<span class="glyphicon glyphicon-plus"></span>
@@ -88,7 +88,7 @@
 							</div>
 						</div>
 					</div>
-					<div class="row" id="pid_start_group_button">
+					<div class="row hidden" id="pid_start_group_button">
 						<div class="col-xs-8 col-xs-offset-0 col-sm-7 col-sm-offset-1 form-group pt-10 pb-10 clearfix" >
 							<button id="pid_stop" type="button" class="btn btn-danger btn-sm pull-left noSwipe">СТОР</button>
 							<button id="pid_start" type="button" class="btn btn-success btn-sm pull-right noSwipe">СТАРТ</button>
@@ -104,6 +104,18 @@
 					<div class="bg-info noSwipe" id="view_pid_chart"></div>
 				</div>
 			</div>
+			<div class="row mt-10">
+				<div class="col-xs-12">
+					<p>Текст помощь для настроек</p>
+				</div>
+			</div>
 		</div>
 	</div>
 </div>
+<script>
+	$(function() {
+		setTimeout(function () {
+			$.fn.pastePidSensors(false);
+		}, 1000);
+	});
+</script>
