@@ -1247,7 +1247,7 @@ $(function () {
 		returnTplHtml([{id: "${id_temperature}", value: "${value_temperature}", min: '0', max: '100', step: '1'}], deltaTempl) +
 		'</div>' +
 		'<div class="col-xs-2 col-xs-offset-0 col-sm-3 col-sm-offset-0 text-center text-middle">' +
-		'<label class="checkbox-inline"><input checked="${checked_stop}" id="${id_stop}" type="checkbox" value="Y"></label>'+
+		'<label class="checkbox-inline"><input ${checked_stop} id="${id_stop}" type="checkbox" value="Y"></label>'+
 		'</div>' +
 		'</div></div>'
 	;
@@ -2448,7 +2448,7 @@ $(function () {
 						if (!$.fn.objIsEmpty(mashingProcess["sensors"], false)) {
 							mashingProcess["sensors"]["pause1"] = {"time":20,"name":"Внесение солода","temperature":45,"stop":0};
 							mashingProcess["sensors"]["pause2"] = {"time":20,"name":"Белковая пауза","temperature":55,"stop":0};
-							mashingProcess["sensors"]["pause3"] = {"time":40,"name":"Осахаривание","temperature":65,"stop":0};
+							mashingProcess["sensors"]["pause3"] = {"time":120,"name":"Осахаривание","temperature":65,"stop":0};
 							mashingProcess["sensors"]["pause4"] = {"time":10,"name":"Мэш аут","temperature":72,"stop":0};
 
 						}
@@ -2512,7 +2512,7 @@ $(function () {
 				dataType: 'json',
 				success: function (msg) {
 					mashingProcess["sensors"] = msg;
-					//console.log("mashingSensorsGetTpl",mashingProcess["sensors"]);
+					console.log("mashingSensorsGetTpl",mashingProcess["sensors"]);
 					if (!$.fn.objIsEmpty(mashingProcess["sensors"], false)) {
 						$.fn.pasteMashingSensors(false);
 					}
@@ -2878,7 +2878,7 @@ $(function () {
 	$(document).on('click','#set_pid',function (e) {
 		e.preventDefault();
 		let _this = $(this);
-		let pidSend = {};
+		let pidSend = {"save":1};
 
 		if (!$.fn.objIsEmpty(pidProcess["pid"],false)) {
 			$.each(pidProcess["pid"], function (j,q) {
@@ -2935,7 +2935,7 @@ $(function () {
 			"Kd":{"userSetValue":0},
 			"t1":{"userSetValue":0}
 		};
-		pidSendData["process"]["allow"] = (pidSendData["start"] ? 4 : 0);
+		pidSendData["process"]["allow"] = (pidProcess["start"] ? 4 : 0);
 
 		$.each(pidProcess["pid"], function (i, e) {
 			let sensor_key = i;
@@ -2987,6 +2987,15 @@ $(function () {
 		if (!$.fn.objIsEmpty(globalSensorsJson, false)) {
 			let dtoJson = {};
 			dtoJson["temperatures"] = {};
+			$.each(globalSensorsJson["pid"], function (j, q) {
+				let pid_key = Object.keys(q).shift();
+				if (!re_t.test(pid_key)) {
+					let pid_value = Number(globalSensorsJson["pid"][j][pid_key]["deviceOutValue"]);
+					if(pid_value > 0) {
+						$(".pid_device_" + pid_key).text(pid_value.toFixed(0));
+					}
+				}
+			});
 			$.each(globalSensorsJson["sensors"], function (i, e) {
 				let sensor_key = Object.keys(e).shift();
 				let sensor_value = Number(globalSensorsJson["sensors"][i][sensor_key]["value"]);
@@ -3011,7 +3020,7 @@ $(function () {
 				let pid_value = Number(e[pid_key]["userSetValue"]);
 				if(!flagSendProcess) {
 					//убрал пока
-					//$("#pid_" + pid_key).val(pid_value);
+					$("#pid_" + pid_key).val(pid_value);
 				}
 
 			});
@@ -3030,6 +3039,21 @@ $(function () {
 	function fillSensorsData() {
 		//$("#width_page").css({"border-bottom":"solid 1px red","text-align":"center","color":"red"}).text("thisWidth: "+$("#width_page").outerWidth()+", documentWidth: "+$(document).width());
 		if (!$.fn.objIsEmpty(globalSensorsJson, false)) {
+			if (pidProcess["start"] !== true) {
+				$.each(globalSensorsJson["pid"], function (j, q) {
+					let pid_key = Object.keys(q).shift();
+					//if (!re_t.test(pid_key)) {
+						let pid_value = Number(globalSensorsJson["pid"][j][pid_key]["deviceOutValue"]);
+						let user_value = Number(globalSensorsJson["pid"][j][pid_key]["userSetValue"]);
+						if(pid_value > 0) {
+							$(".pid_device_" + pid_key).text(pid_value.toFixed(0));
+						}
+						if(user_value > 0 && Number($("#pid_" + pid_key).val()) === 0) {
+							$("#pid_" + pid_key).val(user_value.toFixed(0));
+						}
+					//}
+				});
+			}
 			$.each(globalSensorsJson["sensors"], function (i, e) {
 				let sensor_key = Object.keys(e).shift();
 				//заполнение вкладки датчики

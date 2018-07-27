@@ -14,8 +14,8 @@
     "mashing":[
     {"pause1":{"time":20,"name":"Внесение солода","temperature":45,"stop":0,"step":0}},
     {"pause2":{"time":30,"name":"Белковая пауза","temperature":55,"stop":0,"step":0}},
-    {"pause3":{"time":40,"name":"Осахаривание","temperature":65,"stop":0,"step":0}},
-    {"pause4":{"time":10,"name":"Мэш аут","temperature":72,"stop":0,"step":1}}
+    {"pause3":{"time":120,"name":"Осахаривание","temperature":65,"stop":0,"step":0}},
+    {"pause4":{"time":10,"name":"Мэш аут","temperature":72,"stop":0,"step":0}}
 ],
    "brewing":[
    {"pause1":{"time":60,"name":"Кислотная пауза","temperature":40,"stop":0,"member":0,"step":0}},
@@ -49,10 +49,10 @@
 	{"in4":{"value":0,"name":"","member":0,"allert":0}}
 ],
 	"pid":[
-	{"Kp":{"userSetValue":0}},
-	{"Ki":{"userSetValue":0}},
-	{"Kd":{"userSetValue":0}},
-	{"t1":{"userSetValue":0}}
+	{"Kp":{"userSetValue":30,"deviceOutValue":14}},
+	{"Ki":{"userSetValue":50,"deviceOutValue":41}},
+	{"Kd":{"userSetValue":40,"deviceOutValue":21}},
+	{"t1":{"userSetValue":70}}
 	],
 	"power":90,
 	"temperatureAlcoholBoil":78.15,
