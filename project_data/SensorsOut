@@ -50,7 +50,7 @@
 ],
 	"pid":[
 	{"Kp":{"userSetValue":30,"deviceOutValue":14}},
-	{"Ki":{"userSetValue":50,"deviceOutValue":41}},
+	{"Ki":{"userSetValue":0.05,"deviceOutValue":41.02}},
 	{"Kd":{"userSetValue":40,"deviceOutValue":21}},
 	{"t1":{"userSetValue":70}}
 	],

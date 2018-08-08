@@ -2050,7 +2050,7 @@ $(function () {
 					if (/*sensor_key !== "p1" && */!e["delta"] && !e["cutoff"]) {
 						tpl_all_body += '<div class="row row-striped">' +
 							'<div class="pt-10 pb-10 clearfix">' +
-							'<div class="col-xs-12 col-sm-4 text-center-xs text-strong">t&#176' + name_sensor + '></div>' +
+							'<div class="col-xs-12 col-sm-4 text-center-xs text-strong">t&#176' + name_sensor + '</div>' +
 							'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle text-strong"><span id="reflux_' + sensor_key + '"></span><span class="hidden">&#176С</span></div>' +
 							'<div class="col-xs-3 col-sm-3"></div>' +
 							'<div class="col-xs-4 col-sm-3"></div>' +
@@ -2062,7 +2062,7 @@ $(function () {
 					sensorsRefluxSend[sensor_key]["member"] = 1;
 					tpl_devices_body += '<div class="row row-striped">' +
 						'<div class="pt-10 clearfix">' +
-						'<div class="col-xs-12 col-sm-4 text-center-xs text-middle text-strong">' + name_sensor + '></div>' +
+						'<div class="col-xs-12 col-sm-4 text-center-xs text-middle text-strong">' + name_sensor + '</div>' +
 						'<div class="col-xs-5 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle text-strong"><span id="reflux_' + sensor_key + '"></span> <span class="hidden"></span></div>' +
 						'</div></div>';
 				}
@@ -2992,7 +2992,11 @@ $(function () {
 				if (!re_t.test(pid_key)) {
 					let pid_value = Number(globalSensorsJson["pid"][j][pid_key]["deviceOutValue"]);
 					if(pid_value > 0) {
-						$(".pid_device_" + pid_key).text(pid_value.toFixed(0));
+						if(pid_key === "Ki"){
+							$(".pid_device_" + pid_key).text(pid_value.toFixed(2));
+						}else {
+							$(".pid_device_" + pid_key).text(pid_value.toFixed(0));
+						}
 					}
 				}
 			});
@@ -3046,10 +3050,18 @@ $(function () {
 						let pid_value = Number(globalSensorsJson["pid"][j][pid_key]["deviceOutValue"]);
 						let user_value = Number(globalSensorsJson["pid"][j][pid_key]["userSetValue"]);
 						if(pid_value > 0) {
-							$(".pid_device_" + pid_key).text(pid_value.toFixed(0));
+							if(pid_key === "Ki"){
+								$(".pid_device_" + pid_key).text(pid_value.toFixed(2));
+							}else {
+								$(".pid_device_" + pid_key).text(pid_value.toFixed(0));
+							}
 						}
 						if(user_value > 0 && Number($("#pid_" + pid_key).val()) === 0) {
-							$("#pid_" + pid_key).val(user_value.toFixed(0));
+							if(pid_key === "Ki"){
+								$("#pid_" + pid_key).val(user_value.toFixed(2));
+							}else {
+								$("#pid_" + pid_key).val(user_value.toFixed(0));
+							}
 						}
 					//}
 				});
@@ -3241,9 +3253,9 @@ $(function () {
 				console.log('Settings', msg);
 				$("#settings_ssdp").val(msg["SSDP"]);
 				$("#settings_ssid").val(msg["ssid"]);
-				$("#settings_password").val(msg["password"]);
+				// $("#settings_password").val(msg["password"]);
 				$("#settings_ssidap").val(msg["ssidAP"]);
-				$("#settings_passwordap").val(msg["passwordAP"]);
+				// $("#settings_passwordap").val(msg["passwordAP"]);
 				$("#settings_timezone").val(msg["timezone"]);
 			}
 		});
