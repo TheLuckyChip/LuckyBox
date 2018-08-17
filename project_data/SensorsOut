@@ -55,6 +55,7 @@
 	{"t1":{"userSetValue":70}}
 	],
 	"power":90,
+	"powerLower":85,
 	"temperatureAlcoholBoil":78.15,
 	"temperatureStartPressure":78.00,
 	"time":0

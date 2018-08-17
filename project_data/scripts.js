@@ -1224,6 +1224,16 @@ $(function () {
 		'</div>' +
 		'</div>' +
 		'</div>';
+	const powerLowerTempl =
+		'<div class="row row-striped">' +
+		'<div class="pt-10 pb-10 clearfix">' +
+		'<div class="col-xs-12 col-sm-4 text-center-xs text-middle text-strong">Уменьшение мощности при достижении первого зачения</div>' +
+		'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center"></div>' +
+		'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 col-centered">' +
+		returnTplHtml([{id: "${id_lower_set}", value: '0', min: '0', max: '100', step: '1'}], deltaTempl) +
+		'</div>' +
+		'</div>' +
+		'</div>';
 	/*var ooo =
 			'<div class="row row-striped">' + tpl_cutoff_thead +
 			'<div id="mashing_alert_bg_'+sensor_key+'" class="pt-10 pb-10 clearfix">' +
@@ -1252,7 +1262,7 @@ $(function () {
 		'</div></div>'
 	;
 	//Привязка датчиков к процессу дистиляции, и запуск
-	let distillationProcess = {"sensors": {}, "power": 0, "start": false};
+	let distillationProcess = {"sensors": {}, "power": 0, "powerLower": 0, "start": false};
 	$(document).on('click', '#distillation_add_sensor', function (e) {
 		e.preventDefault();
 		let _this = $(this);
@@ -1553,7 +1563,9 @@ $(function () {
 				//console.log("distillationSensorsSetSave",sensorsDistillationSend);
 			}
 			//localStorage.setObj('sensors', sensors);
-			distillationTemplate = returnTplHtml([{id_value: "distillation_power_value", id_set: "distillation_power_set"}], powerTempl) + distillationTemplate + tpl_devices_body + tpl_safety_body;
+			distillationTemplate = returnTplHtml([{id_value: "distillation_power_value", id_set: "distillation_power_set"}], powerTempl) +
+				returnTplHtml([{id_lower_set: "distillation_power_lower_set"}], powerLowerTempl) +
+				distillationTemplate + tpl_devices_body + tpl_safety_body;
 			$("#distillation_start_group_button").removeClass("hidden");
 			//$("#svg_distillation").show();
 		} else {
@@ -1561,7 +1573,9 @@ $(function () {
 		}
 		$("#distillation_process").html(distillationTemplate);
 		distillationProcess["power"] = Number(globalSensorsJson["power"]);
+		distillationProcess["powerLower"] = Number(globalSensorsJson["powerLower"]);
 		$("#distillation_power_set").val(distillationProcess["power"]);
+		$("#distillation_power_lower_set").val(distillationProcess["powerLower"]);
 
 		if (distillationProcess["start"] === true) {
 			//console.log('distillationProcess');
@@ -1617,6 +1631,7 @@ $(function () {
 		flagSendProcess = true;
 		distillationProcess["start"] = false;
 		clearInterval(sensorsProcessId);
+		clearInterval(sensorsIntervalId);
 		setDistillation();
 	}
 
@@ -1653,15 +1668,21 @@ $(function () {
 			"t6": {"allertValue": 0},
 			"t7": {"allertValue": 0},
 			"t8": {"allertValue": 0},
-			"power": 0
+			"power": 0,
+			"powerLower": 0
 		};
 		//let flag_send = false;
 		let power_set = $("#distillation_power_set");
+		let power_lower_set = $("#distillation_power_lower_set");
 		distillationSendData["process"]["allow"] = (distillationProcess["start"] ? 1 : 0);
 		if (distillationProcess["power"] !== power_set.val()) {
 			flagSendProcess = true;
 		}
+		if (distillationProcess["powerLower"] !== power_lower_set.val()) {
+			flagSendProcess = true;
+		}
 		distillationSendData["power"] = distillationProcess["power"] = power_set.val();
+		distillationSendData["powerLower"] = distillationProcess["powerLower"] = power_lower_set.val();
 
 		$.each(distillationProcess["sensors"], function (i, e) {
 			let sensor_key = i;
@@ -2158,6 +2179,7 @@ $(function () {
 		flagSendProcess = true;
 		refluxProcess["start"] = false;
 		clearInterval(sensorsProcessId);
+		clearInterval(sensorsIntervalId);
 		setReflux();
 	}
 
@@ -2645,6 +2667,7 @@ $(function () {
 		flagSendProcess = true;
 		mashingProcess["start"] = false;
 		clearInterval(sensorsProcessId);
+		clearInterval(sensorsIntervalId);
 		setMashing();
 	}
 
