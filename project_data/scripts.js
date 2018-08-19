@@ -420,19 +420,19 @@ $(function () {
 		let msg = '';
 
 		if (err.status === 0) {
-			msg = 'Not connect. Verify Network.';
+			msg = 'Нет подключения. Проверьте сеть.';
 		} else if (err.status === 404) {
-			msg = 'Requested page not found. [404]';
+			msg = 'Такой страницы не существует. [404]';
 		} else if (err.status === 500) {
-			msg = 'Internal Server Error [500].';
+			msg = 'Внутренняя ошибка сервера [500].';
 		} else if (exception === 'parsererror') {
-			msg = 'Requested JSON parse failed.';
+			msg = 'Ошибка парсинга JSON параметров.';
 		} else if (exception === 'timeout') {
-			msg = 'Time out error.';
+			msg = 'Ошибка тайм-аута (превышено время ожидания ответа).';
 		} else if (exception === 'abort') {
-			msg = 'Ajax request aborted.';
+			msg = 'Запрос Ajax прерван.';
 		} else {
-			msg = 'Uncaught Error.' + err.responseText;
+			msg = 'Неизвестная ошибка.' + err.responseText;
 		}
 		let error_alert = '<div class="alert alert-danger alert-dismissible fade in mt-10" role="alert">' +
 			'<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
@@ -1227,8 +1227,8 @@ $(function () {
 	const powerLowerTempl =
 		'<div class="row row-striped">' +
 		'<div class="pt-10 pb-10 clearfix">' +
-		'<div class="col-xs-12 col-sm-4 text-center-xs text-middle text-strong">Уменьшение мощности при достижении первого зачения</div>' +
-		'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center"></div>' +
+		'<div class="col-xs-12 col-sm-7 text-center-xs text-middle text-strong">Рабочая мощность после прогрева куба</div>' +
+		'<div class="col-xs-3 col-xs-offset-1 hidden-sm"></div>' +
 		'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 col-centered">' +
 		returnTplHtml([{id: "${id_lower_set}", value: '0', min: '0', max: '100', step: '1'}], deltaTempl) +
 		'</div>' +
@@ -1335,7 +1335,7 @@ $(function () {
 				section += '<tr><td colspan="4" class="text-center text-strong">Датчики температуры</td></tr>' + tpl_temperature;
 			}
 			if (tpl_devices !== '') {
-				section += '<tr><td colspan="4" class="text-center text-strong">Клапана</td></tr>' + tpl_devices;
+				section += '<tr><td colspan="4" class="text-center text-strong">Исполнительные устройства</td></tr>' + tpl_devices;
 			}
 			if (tpl_safety !== '') {
 				section += '<tr><td colspan="4" class="text-center text-strong">Датчики безопасности</td></tr>' + tpl_safety;
@@ -1467,8 +1467,8 @@ $(function () {
 			let tpl_delta_body = '';*/
 			let tpl_cutoff_thead =
 				'<div class="row-xs clearfix">' +
-				'<div class="col-xs-4 col-xs-offset-0 col-sm-3 col-sm-offset-4 text-center text-middle text-primary">Значение</div>' +
-				'<div class="col-xs-4 col-xs-offset-4 col-sm-2 col-sm-offset-3 text-center text-middle text-primary">Отсечка</div>' +
+				'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-4 text-center text-middle text-primary">Значение</div>' +
+				'<div class="col-xs-4 col-xs-offset-3 col-sm-3 col-sm-offset-2 text-center text-middle text-primary">Отсечка</div>' +
 				'</div>';
 			let tpl_cutoff_body = '';
 			let tpl_all_body = '';
@@ -1510,7 +1510,7 @@ $(function () {
 							'<div id="distillation_alert_text_' + sensor_key + '" class="col-xs-12 col-sm-4 text-center-xs text-strong">t&#176' + name_sensor + '</div>' +
 							'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle text-strong"><span id="distillation_' + sensor_key + '"></span><span class="hidden">&#176С</span></div>' +
 							//'<div class="col-xs-3 col-sm-3"></div>' +
-							'<div class="col-xs-4 col-xs-offset-3 col-sm-2 col-sm-offset-3">' + tpl_cutoff +
+							'<div class="col-xs-4 col-xs-offset-3 col-sm-3 col-sm-offset-2">' + tpl_cutoff +
 							'</div>' +
 							'</div>' +
 							'</div>';
@@ -1805,7 +1805,7 @@ $(function () {
 	}
 
 	//Привязка датчиков к процессу ректификации, и запуск
-	let refluxProcess = {"sensors": {}, "power": 0, "start": false};//"devices":[],"safety":[],
+	let refluxProcess = {"sensors": {}, "power": 0, "powerLower": 0, "start": false};//"devices":[],"safety":[],
 	$(document).on('click', '#reflux_add_sensor', function (e) {
 		e.preventDefault();
 		let _this = $(this);
@@ -1878,7 +1878,7 @@ $(function () {
 				section += '<tr><td colspan="4" class="text-center text-strong">Датчики температуры</td></tr>' + tpl_temperature;
 			}
 			if (tpl_devices !== '') {
-				section += '<tr><td colspan="4" class="text-center text-strong">Клапана</td></tr>' + tpl_devices;
+				section += '<tr><td colspan="4" class="text-center text-strong">Исполнительные устройства</td></tr>' + tpl_devices;
 			}
 			if (tpl_safety !== '') {
 				section += '<tr><td colspan="4" class="text-center text-strong">Датчики безопасности</td></tr>' + tpl_safety;
@@ -2015,9 +2015,9 @@ $(function () {
 			let tpl_cutoff_thead =
 				//'<div class="col-xs-hidden col-sm-4"></div>' +
 				'<div class="row-xs clearfix">' +
-				'<div class="col-xs-4 col-xs-offset-0 col-sm-3 col-sm-offset-4 text-center text-middle text-primary">Значение</div>' +
+				'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-4 text-center text-middle text-primary">Значение</div>' +
 				//'<div class="col-xs-4 col-sm-3 text-center text-middle text-primary"></div>' +
-				'<div class="col-xs-4 col-xs-offset-4 col-sm-2 col-sm-offset-3 text-center text-middle text-primary">Отсечка</div>' +
+				'<div class="col-xs-4 col-xs-offset-3 col-sm-3 col-sm-offset-2 text-center text-middle text-primary">Отсечка</div>' +
 				'</div>';
 			let tpl_cutoff_body = '';
 			let tpl_all_body = '';
@@ -2037,7 +2037,7 @@ $(function () {
 					if (e["delta"]) {
 						sensorsRefluxSend[sensor_key]["delta"] = 1;
 						tpl_delta = returnTplHtml([{id: "reflux_delta_" + sensor_key, value: e["allertValue"], min: '0', max: '1', step: '0.05'}], deltaTempl);
-						tpl_delta_result = '<span id="reflux_delta_result_' + sensor_key + '"></span><span class="hidden">&#176С</span>';
+						tpl_delta_result = '<span id="reflux_delta_result_' + sensor_key + '"></span>57.4<span class="hidden_">&#176С</span>';
 						tpl_delta_body +=
 							'<div class="row row-striped">' + tpl_delta_thead +
 							'<div id="reflux_alert_bg_' + sensor_key + '" class="pt-10 pb-10 clearfix">' +
@@ -2061,7 +2061,7 @@ $(function () {
 							'<div id="reflux_alert_text_' + sensor_key + '" class="col-xs-12 col-sm-4 text-center-xs text-strong">t&#176' + name_sensor + '</div>' +
 							'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle text-strong"><span id="reflux_' + sensor_key + '"></span><span class="hidden">&#176С</span></div>' +
 							//'<div class="col-xs-3 col-sm-3"></div>' +
-							'<div class="col-xs-4 col-xs-offset-3 col-sm-2 col-sm-offset-3">' + tpl_cutoff +
+							'<div class="col-xs-4 col-xs-offset-3 col-sm-3 col-sm-offset-2">' + tpl_cutoff +
 							'</div>' +
 							'</div>' +
 							'</div>';
@@ -2114,7 +2114,9 @@ $(function () {
 				//console.log("refluxSensorsSetSave",sensorsRefluxSend);
 			}
 			//localStorage.setObj('sensors', sensors);
-			refluxTemplate = returnTplHtml([{id_value: "reflux_power_value", id_set: "reflux_power_set"}], powerTempl) + refluxTemplate + pressureTemplate + tpl_devices_body + tpl_safety_body;
+			refluxTemplate = returnTplHtml([{id_value: "reflux_power_value", id_set: "reflux_power_set"}], powerTempl) +
+				returnTplHtml([{id_lower_set: "reflux_power_lower_set"}], powerLowerTempl) +
+				refluxTemplate + pressureTemplate + tpl_devices_body + tpl_safety_body;
 
 			$("#reflux_start_group_button").removeClass("hidden");
 			//$("#svg_reflux").show();
@@ -2123,7 +2125,9 @@ $(function () {
 		}
 		$("#reflux_process").html(refluxTemplate);
 		refluxProcess["power"] = Number(globalSensorsJson["power"]);
+		refluxProcess["powerLower"] = Number(globalSensorsJson["powerLower"]);
 		$("#reflux_power_set").val(refluxProcess["power"]);
+		$("#reflux_power_lower_set").val(refluxProcess["powerLower"]);
 		//console.log(refluxProcess);
 		if (refluxProcess["start"] === true) {
 			getReflux();
@@ -2205,15 +2209,21 @@ $(function () {
 			"t6": {"allertValue": 0},
 			"t7": {"allertValue": 0},
 			"t8": {"allertValue": 0},
-			"power": 0
+			"power": 0,
+			"powerLower": 0
 		};
 		//let flag_send = false;
 		let power_set = $("#reflux_power_set");
+		let power_lower_set = $("#reflux_power_lower_set");
 		refluxSendData["process"]["allow"] = (refluxProcess["start"] ? 2 : 0);
 		if (refluxProcess["power"] !== power_set.val()) {
 			flagSendProcess = true;
 		}
+		if (refluxProcess["powerLower"] !== power_lower_set.val()) {
+			flagSendProcess = true;
+		}
 		refluxSendData["power"] = refluxProcess["power"] = power_set.val();
+		refluxSendData["powerLower"] = refluxProcess["powerLower"] = power_lower_set.val();
 
 		$.each(refluxProcess["sensors"], function (i, e) {
 			let sensor_key = i;
@@ -2429,7 +2439,7 @@ $(function () {
 				section += '<tr><td colspan="4" class="text-center text-strong">Датчики температуры</td></tr>' + tpl_temperature;
 			}
 			/*if(tpl_devices !== ''){
-				section += '<tr><td colspan="4" class="text-center text-strong">Клапана</td></tr>' + tpl_devices;
+				section += '<tr><td colspan="4" class="text-center text-strong">Переферийные устройства</td></tr>' + tpl_devices;
 			}
 			if(tpl_safety !== ''){
 				section += '<tr><td colspan="4" class="text-center text-strong">Датчики безопасности</td></tr>' + tpl_safety;

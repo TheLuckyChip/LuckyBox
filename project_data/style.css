@@ -373,6 +373,9 @@ span.show {
 		color: #333;
 		background-color: #ededed;
 	}
+	.text-center-xs {
+		text-align: center;
+	}
 }
 @media (max-width: 468px) {
 	.modal-body {
@@ -387,9 +390,9 @@ span.show {
 	.modal-body .table>tbody>tr>td{
 		padding: 6px;
 	}
-	.text-center-xs {
+	/*.text-center-xs {
 		text-align: center;
-	}
+	}*/
 	.row-xs-margin-15{
 		margin-left: -15px;
 		margin-right: -15px;
