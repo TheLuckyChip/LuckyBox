@@ -493,6 +493,13 @@ $(function () {
 	//Кнопки + и -
 	let flagSendProcess = false;
 	let timeout = false;
+	function f(n) {
+		n = (typeof n === 'string') ? n : n.toString();
+		if (n.indexOf('e') !== -1) return parseInt(n.split('e')[1]) * -1;
+		let separator = (1.1).toString().split('1')[1];
+		let parts = n.split(separator);
+		return parts.length > 1 ? parts[parts.length - 1].length : 0;
+	}
 	$(document).on('mousedown', '.minus', function (e) {
 		e.preventDefault();
 		flagSendProcess = true;
@@ -505,7 +512,8 @@ $(function () {
 		timeout = setInterval(function () {
 			count_interval++;
 			let fixed = 0;
-			const f = x => ((x.toString().includes('.')) ? (x.toString().split('.').pop().length) : (0));
+			// const f = x => ((x.toString().includes('.')) ? (x.toString().split('.').pop().length) : (0));
+			// const f = x => ~(x + '').indexOf('.') ? (x + '').split('.')[1].length : 0;
 			if (typeof min === typeof undefined && min === false) {
 				min = 0;
 			}
@@ -542,7 +550,7 @@ $(function () {
 		let step = Number($input.attr("step"));
 		let min = Number($input.attr("min"));
 		let fixed = 0;
-		const f = x => ((x.toString().includes('.')) ? (x.toString().split('.').pop().length) : (0));
+		// const f = x => ((x.toString().includes('.')) ? (x.toString().split('.').pop().length) : (0));
 		if (typeof min === typeof undefined && min === false) {
 			min = 0;
 		}
@@ -573,7 +581,7 @@ $(function () {
 		timeout = setInterval(function () {
 			count_interval++;
 			let fixed = 0;
-			const f = x => ((x.toString().includes('.')) ? (x.toString().split('.').pop().length) : (0));
+			// const f = x => ((x.toString().includes('.')) ? (x.toString().split('.').pop().length) : (0));
 			if (typeof max === typeof undefined && max === false) {
 				max = 100;
 			}
@@ -611,7 +619,7 @@ $(function () {
 		let step = Number($input.attr("step"));
 		let max = Number($input.attr("max"));
 		let fixed = 0;
-		const f = x => ((x.toString().includes('.')) ? (x.toString().split('.').pop().length) : (0));
+		// const f = x => ((x.toString().includes('.')) ? (x.toString().split('.').pop().length) : (0));
 		if (typeof max === typeof undefined && max === false) {
 			max = 100;
 		}
