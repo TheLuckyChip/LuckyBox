@@ -1,10 +1,5 @@
 #include "heater.h"
-#include "user_config.h"
-#include "setting.h"
-#include <ArduinoJson.h>
 
-byte heaterStatus	=	0;		// статус ТЭНа (включен/выключен)
-int	heaterPower		=	0;		// Мощность ТЭНа в % от 0 до 100
 int	reg				=	0;		// переменная для расчетов
 int	tenRealPower	=	100;	// мощности ТЭН от напряжения сети, может быть от 50% (при напряжении сети 160В) до 135%(при напряжении сети 260В)
 int	errorBr			=	0;      // ошибка округления по алгоритму Брезенхема

@@ -1,29 +1,12 @@
-#include "touch_interrupt.h"
 #include "setup.h"
-#include "user_config.h"
-#include "wifi_config.h"
-#include "time_config.h"
-#include "ssdp.h"
-#include "reflux_mode.h"
-#include "tft.h"
-#include "http_config.h"
-#include "fs_config.h"
-#include "file_config.h"
-#include "distillation_mode.h"
-#include "sensors.h"
-#include "setting.h"
-#include "buzzer.h"
-#include "heater.h"
-#include "brewing_mode.h"
 
 void setup()
 {
 	// Настройка вывода для ТЭНа
 	pinMode(heater, OUTPUT);
 	digitalWrite(heater, LOW);
-	// Настройка вывода для пищалки
-	pinMode(buzzer, OUTPUT);
-	digitalWrite(buzzer, LOW);
+
+	delay(200);
 
 	Serial.begin(115200);
 	Serial.println("");
@@ -32,52 +15,149 @@ void setup()
 
 	Wire.setClock(400000);
 	Wire.begin(pSDA, pSCL);
-	delay(10);
+	delay(100);
 
 	// Установим CS для всех SPI устройств
 	pwm = Adafruit_PWMServoDriver();
 	pwm.begin();
 	pwm.setPWMFreq(1000);
-	csOff(13);	// CS SD
-	csOff(14);	// CS TFT
-	csOff(15);	// CS Touch
+	csOff(TFT_RES_PRG);
+	csOff(SIREN_OUT);
+	csOff(SD_CS);
+	csOff(TOUCH_CS);
+	csOff(BUZ_VOL);
+	csOff(BUZ_OUT);
+	pwmOut[0].invert = PWM_CH1_Invert;
+	pwmOut[1].invert = PWM_CH2_Invert;
+	pwmOut[2].invert = PWM_CH3_Invert;
+	pwmOut[3].invert = PWM_CH4_Invert;
+	pwmOut[4].invert = PWM_CH5_Invert;
+	pwmOut[5].invert = PWM_CH6_Invert;
+	pwmOut[6].invert = PWM_CH7_Invert;
+	pwmOut[7].invert = PWM_CH8_Invert;
+	pwmOut[8].invert = PWM_CH9_Invert;
+	csOff(PWM_CH1);
+	csOff(PWM_CH2);
+	csOff(PWM_CH3);
+	csOff(PWM_CH4);
+	csOff(PWM_CH5);
+	csOff(PWM_CH6);
+	csOff(PWM_CH7);
+	csOff(PWM_CH8);
+	csOff(PWM_CH9);
+	delay(2);
+	csOn(TFT_RES_PRG);
+	delay(10);
+	csOff(TFT_RES_PRG);
+	delay(2);
 
 #if defined TFT_Display
-	csOn(14);
+	csOn(TFT_CS);
 	initTFT();	    // HSPI & TFT
+
+	uint16_t x = 0;
+	uint16_t y = 0;
+	uint16_t yLine = 319;
+	byte arrayShift = 0;
+	byte yShift = 0;
+	uint8_t data_mem, data_rect;
+	uint16_t color, tmp_color;
+	// рисуем две встречные полоски шириной по 20 пикселей
+	for(uint16_t i1 = 0; i1 < 320; i1++) {
+		tft.drawLine(i1, 15, i1, 34, 0xFFFF);
+		tft.drawLine(yLine, 185, yLine, 204, 0xFFFF);
+		yLine--;
+		delayMicroseconds(100);// delay(1);
+	}
+
+	// выводим наш логотип
+	tft.setAddrWindow(x, y + 35, 320, 1);
+	for (uint16_t i2 = 0; i2 < 24000; i2++) {
+		// Выводим с одного байта 2 точки
+		data_mem = pgm_read_byte_near(imageDataStartScreen + (y * 160 + arrayShift));
+		data_rect = data_mem >> 4;
+		if (data_rect == 0x0F) color = 0xFFFF;
+		else {
+		  color = (data_rect * 2) << 11;
+		  tmp_color = (data_rect * 4) << 5;
+		  color += (data_rect * 2 + tmp_color);
+		}
+		//tft.drawPixel(x, y + 35, color);
+		while (SPI1CMD & SPIBUSY) {}
+		SPI1W0 = color >> 8;
+		SPI1CMD |= SPIBUSY;
+		while (SPI1CMD & SPIBUSY) {}
+		SPI1W0 = color;
+		SPI1CMD |= SPIBUSY;
+
+		x++;
+		data_rect = data_mem & ~0xF0;
+		if (data_rect == 0x0F) color = 0xFFFF;
+		else {
+		  color = (data_rect * 2) << 11;
+		  tmp_color = (data_rect * 4) << 5;
+		  color += (data_rect * 2 + tmp_color);
+		}
+		//tft.drawPixel(x, y + 35, color);
+		while (SPI1CMD & SPIBUSY) {}
+		SPI1W0 = color >> 8;
+		SPI1CMD |= SPIBUSY;
+		while (SPI1CMD & SPIBUSY) {}
+		SPI1W0 = color;
+		SPI1CMD |= SPIBUSY;
+
+		x++;
+
+		if (x == 320) {
+			x = 0;
+			y += 10;
+			if (y >= 150) {
+				yShift++;
+				y = yShift;
+			}
+			tft.setAddrWindow(x, y + 35, 320, 1);
+		}
+		if (arrayShift < 159) arrayShift++;
+		else arrayShift = 0;
+	}
+	while (SPI1CMD & SPIBUSY) {}
+	SPI.endTransaction();
+
+	// рисуем квадратики для индикации загрузки
+	scaleCount = 2;
+	tft.writeFillRect(scaleCount, 215, 15, 15, 0xFFFF);
+	delay(150);
 #endif
+
+	csOff(TFT_CS);
+	// инициализация SD карты
+	sdInit();
+	csOn(TFT_CS);
 
 	// инициализация I2C
 	Serial.println("Step 1 - I2C Init");
-#if defined TFT_Display
-	tft.println("Step 1 - I2C Init");
-#endif
 
-	// Инициализация датчиков температуры
+	// Инициализация EEPROM и датчиков температуры
 	Serial.println("Step 2 - DS Init");
-#if defined TFT_Display
-	tft.println("Step 2 - DS Init");
-#endif
-	DS_Count = DS_Cnt;
-	if (DS_Count > 8) DS_Count = 8;
+	EEPROM.begin(2048);
+	senseWebInit();
 	dallSearch();
-	dallRead();
 
 	//Запускаем файловую систему
 	Serial.println("Step 3 - FS Init");
 #if defined TFT_Display
-	tft.println("Step 3 - FS Init");
+	// рисуем квадратики для индикации загрузки
+	scaleCount += 20;
+	tft.writeFillRect(scaleCount, 215, 15, 15, 0xFFFF);
 #endif
 	initFS();
 	Serial.println("Step 4 - File Config");
-#if defined TFT_Display
-	tft.println("Step 4 - File Config");
-#endif
 	loadConfig();
 	Serial.println("Step 5 - WIFI Init");
 #if defined TFT_Display
-	tft.println("Step 5 - WIFI Init");
-	tft.println("");
+	// рисуем квадратики для индикации загрузки
+	scaleCount += 20;
+	tft.writeFillRect(scaleCount, 215, 15, 15, 0xFFFF);
 #endif
 	//Запускаем WIFI
 	initWifi();
@@ -86,19 +166,6 @@ void setup()
 	if (WiFi.status() != WL_CONNECTED) {
 		Serial.println("Not'Connected STA! WiFi up AP.");
 		Serial.println("");
-		// если есть индикатор выводим локальный IP
-#if defined TFT_Display
-		tft.setTextSize(2);
-		tft.setTextColor(ILI9341_YELLOW);
-		tft.println("AP mode. IP adress:");
-		tft.setTextSize(1);
-		tft.println("");
-		tft.setTextSize(2);
-		tft.println("192.168.4.1");
-		tft.setTextSize(1);
-		tft.setTextColor(ILI9341_GREEN);
-		delay(2000);
-#endif
 	}
 	else {
 		// Иначе удалось подключиться отправляем сообщение
@@ -108,27 +175,9 @@ void setup()
 		Serial.println("WiFi connected");
 		Serial.println("IP address: ");
 		Serial.println(Local_IP);
-
-		// если есть индикатор выводим локальный IP
-#if defined TFT_Display
-		tft.setTextSize(2);
-		tft.setTextColor(ILI9341_YELLOW);
-		tft.println("STA mode. IP adress:");
-		tft.setTextSize(1);
-		tft.println("");
-		tft.setTextSize(2);
-		tft.println(Local_IP);
-		tft.setTextSize(1);
-		tft.setTextColor(ILI9341_GREEN);
-		delay(2000);
-#endif
 	}
 
 	Serial.println("Step 6 - Time, NTP Init");
-#if defined TFT_Display
-	tft.println("");
-	tft.println("Step 6 - Time, Init");
-#endif
 	// Получаем время из сети
 	initTime();
 	//Настраиваем и запускаем SSDP интерфейс
@@ -137,77 +186,96 @@ void setup()
 		//Удалось подключиться - запускаем SSDP
 		Serial.println("Step 7  - SSDP Init");
 #if defined TFT_Display
-		tft.println("Step 7 - SSDP Init");
+		// рисуем квадратики для индикации загрузки
+		scaleCount += 20;
+		if (scaleCount <= 282) tft.writeFillRect(scaleCount, 215, 15, 15, 0xFFFF);
 #endif
 		initSSDP();
 	}
 
 	//Настраиваем и запускаем HTTP интерфейс
 	Serial.println("Step 8  - WebServer Start");
-#if defined TFT_Display
-	tft.println("Step 8 - WebServer Sart");
-#endif
 	initHTTP();
 	Serial.println("Step 9  - Reflux Init");
 #if defined TFT_Display
-	tft.println("Step 9 - User functions Init");
+	// рисуем квадратики для индикации загрузки
+	scaleCount += 20;
+	if (scaleCount <= 282) tft.writeFillRect(scaleCount, 215, 15, 15, 0xFFFF);
 #endif
 	initReflux();
 	Serial.println("Step 10 - Distillation Init");
 	initDistillation();
-	Serial.println("Step 11 - Brewing Init");
+
+	initPID();
+
+	Serial.println("Step 11 - Mashing Init");
+	initMashing();
+	Serial.println("Step 12 - Brewing Init");
 	initBrewing();
-	Serial.println("Step 12 - Heater Init");
+	Serial.println("Step 13 - Heater Init");
 	initHeater();
-	Serial.println("Step 13 - Pressure sensor Init");
+	Serial.println("Step 14 - Pressure sensor Init");
+	pressureSensor.status = 0;
+	pressureSensor.data = 760.0;
 	initPressureSensor();
-	Serial.println("Step 14 - Buzzer Init");
+	Serial.println("Step 15 - Buzzer Init");
 
-	Serial.println("Step 15 - Variables Init");
+	Serial.println("Step 16 - Variables Init");
 
-	dallas_my_sensor[DS_Cube].temperature = 5.0;
-	dallas_my_sensor[DS_Tube].temperature = 5.0;
-	dallas_my_sensor[DS_Out].temperature = 5.0;
-	dallas_my_sensor[DS_Def].temperature = 5.0;
-	dallas_my_sensor[DS_Res1].temperature = 5.0;
-	dallas_my_sensor[DS_Res2].temperature = 5.0;
-	dallas_my_sensor[DS_Res3].temperature = 5.0;
-	dallas_my_sensor[DS_Res4].temperature = 5.0;
-
-	int count_w = 10;
-	while (1) {
-		dallRead();
-		if (dallas_my_sensor[DS_Cube].temperature != 5 || count_w == 0) break;
-		count_w--;
-		delay(200);
-	}
+	dallRead();
+	delay(750);
+	dallRead();
+#if defined TFT_Display
+	// рисуем квадратики для индикации загрузки
+	scaleCount += 20;
+	if (scaleCount <= 282) tft.writeFillRect(scaleCount, 215, 15, 15, 0xFFFF);
+#endif
+	delay(750);
+	dallRead();
+	delay(750);
+	dallRead();
+#if defined TFT_Display
+	// рисуем квадратики для индикации загрузки
+	scaleCount += 20;
+	if (scaleCount <= 282) tft.writeFillRect(scaleCount, 215, 15, 15, 0xFFFF);
+#endif
 	Serial.println("Temperature sensors:");
 	if (DS_Count == 0) Serial.println("Not present...");
-	if (DS_Count >= 1) Serial.println(dallas_my_sensor[DS_Cube].temperature);
-	if (DS_Count >= 2) Serial.println(dallas_my_sensor[DS_Tube].temperature);
-	if (DS_Count >= 3) Serial.println(dallas_my_sensor[DS_Out].temperature);
-	if (DS_Count >= 4) Serial.println(dallas_my_sensor[DS_Def].temperature);
-	if (DS_Count >= 5) Serial.println(dallas_my_sensor[DS_Res1].temperature);
-	if (DS_Count >= 6) Serial.println(dallas_my_sensor[DS_Res2].temperature);
-	if (DS_Count >= 7) Serial.println(dallas_my_sensor[DS_Res3].temperature);
-	if (DS_Count >= 8) Serial.println(dallas_my_sensor[DS_Res4].temperature);
-	Serial.println("Pressure sensor:");
-	if (pressureStatus) pressureRead();
-	Serial.println(pressure);
+	if (DS_Count >= 1) Serial.println(temperatureSensor[DS_Cube].data);
+	if (DS_Count >= 2) Serial.println(temperatureSensor[DS_Tube].data);
+	if (DS_Count >= 3) Serial.println(temperatureSensor[DS_Out].data);
+	if (DS_Count >= 4) Serial.println(temperatureSensor[DS_Def].data);
+	if (DS_Count >= 5) Serial.println(temperatureSensor[DS_Res1].data);
+	if (DS_Count >= 6) Serial.println(temperatureSensor[DS_Res2].data);
+	if (DS_Count >= 7) Serial.println(temperatureSensor[DS_Res3].data);
+	if (DS_Count >= 8) Serial.println(temperatureSensor[DS_Res4].data);
 
-#if defined TFT_Display
-	tftStartForGraph();
+	Serial.println("Pressure sensor:");
+	if (pressureSensor.status) pressureRead();
+	Serial.println(pressureSensor.data);
+
+  // инициализация АЦП
+  adcInit();
+  #if defined TFT_Display
+  // рисуем квадратики для индикации загрузки
+  scaleCount += 20;
+  if (scaleCount <= 282) tft.writeFillRect(scaleCount, 215, 15, 15, 0xFFFF);
+
+  // рисуем квадратики для индикации загрузки
+  while (1) {
+	  scaleCount += 20;
+	  if (scaleCount > 302) break;
+	  tft.writeFillRect(scaleCount, 215, 15, 15, 0xFFFF);
+	  delay(150);
+  }
+  csOff(TFT_CS);
+  pinMode(intTouch, INPUT); // прерывание от тачскрина
+  attachInterrupt(intTouch, touchscreenUpdateSet, FALLING);
 #endif
+
+  processMode.allow = 0; // Стоп
+  processMode.number = 0;
+  processMode.step = 0;
 
   Serial.println("Setup Done!");
-
-#if defined TFT_Display
-  tftStartForGraph();
-  tft.setTextColor(ILI9341_GREEN);
-  tft.println("");
-  tft.println("Done!!!");
-  delay(2000);
-  tft.fillScreen(ILI9341_BLACK);
-  csOff(14);
-#endif
 }

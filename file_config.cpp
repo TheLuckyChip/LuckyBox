@@ -1,8 +1,7 @@
 #include "file_config.h"
-#include "user_config.h"
-#include "setting.h"
-#include <ArduinoJson.h>
 #include <FS.h>
+
+#define FS_NO_GLOBALS
 
 // Загрузка данных сохраненных в файл  config.json
 bool loadConfig()
@@ -15,7 +14,7 @@ bool loadConfig()
     return false;
   }
   
-  File configFile = SPIFFS.open("/config.json", "r");
+  fs::File configFile = SPIFFS.open("/config.json", "r");
   Serial.println("File config.json present");
   // Проверяем размер файла, будем использовать файл размером меньше 2048 байта
   size_t size = configFile.size();
@@ -61,7 +60,7 @@ bool saveConfig()
 	// Помещаем созданный json в глобальную переменную json.printTo(jsonConfig);
 	json.printTo(jsonConfig);
 	// Открываем файл для записи
-	File configFile = SPIFFS.open("/config.json", "w");
+	fs::File configFile = SPIFFS.open("/config.json", "w");
 	if (!configFile)
 	{
 		//Serial.println("Failed to open config file for writing");
@@ -73,6 +72,3 @@ bool saveConfig()
 	configFile.close();
 	return true;
 }
-
-
-

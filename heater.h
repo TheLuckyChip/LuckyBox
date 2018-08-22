@@ -1,5 +1,4 @@
-// heater.h
-
+//   Проект центра открытого проектирования у Счастливчика https://LuckyCenter.ru
 #ifndef _HEATER_h
 #define _HEATER_h
 
@@ -9,13 +8,15 @@
 	#include "WProgram.h"
 #endif
 
-extern int heaterPower;
-extern byte heaterStatus;
+#include "user_config.h"
+#include "setting.h"
+#include <ArduinoJson.h>
 
+extern int heaterPower;
+extern bool heaterStatus;
 extern void heaterLoop();
 extern void initHeater();
 extern void handleSetHeaterPower();
 extern void handleHeaterJSON();
 
 #endif
-

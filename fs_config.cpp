@@ -1,7 +1,9 @@
 #include "fs_config.h"
-#include "setting.h"
-#include "user_config.h"
 #include <FS.h>
+
+#define FS_NO_GLOBALS
+
+fs::File fsUploadFile;
 
 // инициализация FFS
 void initFS(void)
@@ -10,13 +12,17 @@ void initFS(void)
 	Serial.println("SPIFFS Mount Failed");
   return;
   }
-  Dir dir = SPIFFS.openDir("/");
+  #ifdef ESP8266
+  fs::Dir dir = SPIFFS.openDir("/");
   while (dir.next()) {    
     String fileName = dir.fileName();
     size_t fileSize = dir.fileSize();
     Serial.printf("FS File: %s, size: %s\n", fileName.c_str(), formatBytes(fileSize).c_str());
   }
-  Serial.printf("\n");
+  #else
+    listDir("/", 0);
+  #endif
+    Serial.printf("\n");
  
 	//HTTP страницы дл¤ работы с FFS
 	//list directory
@@ -74,8 +80,8 @@ bool handleFileRead(String path)
 	{
 		if (SPIFFS.exists(pathWithGz))
 			path += ".gz";
-		File file = SPIFFS.open(path, "r");
-		size_t sent = HTTP.streamFile(file, contentType);
+		fs::File file = SPIFFS.open(path, "r");
+		HTTP.streamFile(file, contentType); //size_t sent = HTTP.streamFile(file, contentType);
 		file.close();
 		return true;
 	}
@@ -128,7 +134,7 @@ void handleFileCreate()
 		return HTTP.send(500, "text/plain", "BAD PATH");
 	if (SPIFFS.exists(path))
 		return HTTP.send(500, "text/plain", "FILE EXISTS");
-	File file = SPIFFS.open(path, "w");
+	fs::File file = SPIFFS.open(path, "w");
 	if (file)
 		file.close();
 	else
@@ -162,12 +168,12 @@ void handleFileList() {
   }
   String path = HTTP.arg("dir");
   Serial.println("handleFileList: " + path);
-  Dir dir = SPIFFS.openDir(path);
+  fs::Dir dir = SPIFFS.openDir(path);
   path = String();
   
   String output = "[";
   while(dir.next()){
-    File entry = dir.openFile("r");
+	fs::File entry = dir.openFile("r");
     if (output != "[") output += ',';
     bool isDir = false;
     output += "{\"type\":\"";
@@ -180,4 +186,3 @@ void handleFileList() {
   output += "]";
   HTTP.send(200, "text/json", output);
 }
-
