@@ -295,6 +295,7 @@ void sensorsUserSetInWeb() {
 
 	EEPROM.commit();
 	delay(100);
+	// перераспредилим датчики сразу
 	dallSearch();
 }
 // отправка параметров датчиков
