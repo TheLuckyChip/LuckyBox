@@ -74,6 +74,25 @@ void dallSearch()
 			for (k = 0; k < 60; k++) { adcIn[i].name[k] = EEPROM.read(index);  index++;	}
 		}
 	}
+	else {
+		// датчики температуры
+		for (i = 0; i < 8; i++) {
+			temperatureSensor[i].num = 0;
+			temperatureSensor[i].color = 0;
+			temperatureSensor[i].name[0] = 0;
+		}
+		// датчик давления
+		pressureSensor.color = 0;
+		pressureSensor.member = 0;
+		// out
+		for (i = 0; i < 8; i++) {
+			pwmOut[i].name[0] = 0;
+		}
+		// in
+		for (i = 0; i < 4; i++) {
+			adcIn[i].name[0] = 0;
+		}
+	}
 
 	// поиск датчиков, определение их количества и сохранение их адресов
 	for (i = 0; i < DS_Cnt; i++) {

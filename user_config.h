@@ -52,8 +52,8 @@
 #define		PWM_CH8_Invert	true
 #define		PWM_CH9_Invert	true
 // переменные временных интервалов на отбор голов
-#define		headValveOpen	1000
-#define		headValveClose	3000
+#define		headValveOpen	800
+#define		headValveClose	5000
 // Периодичность вывода температурного графика в секундах на экран
 #define		Display_out_temp	15
 // Периодичность записи лог.файла на SD
@@ -62,8 +62,8 @@
 #define		setRestartWiFi		60
 // Какой используем датчик давления
 //#define		Pressure_BMP085
-//#define		Pressure_BMP180
-#define		Pressure_BMP280
+#define		Pressure_BMP180
+//#define		Pressure_BMP280
 //#define		Pressure_BME280
 // Вывод отладочной информации в UART
 //#define		Debug_en
