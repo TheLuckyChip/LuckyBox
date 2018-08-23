@@ -657,13 +657,13 @@ $(function () {
 	const re_Kd = new RegExp(/Kd/);
 	//Список алгоритмов ректификации
 	let algorithmReflux = [
-		{"id":0,"name":"Ручной режим, только сигнализация"},
-		{"id":1,"name":"Прима отбор по пару (головная фракция по жидкости)"},
-		{"id":2,"name":"Отбор по пару"},
-		{"id":3,"name":"Отбор по жидкости, 1 клапан на отбор"},
-		{"id":4,"name":"Отбор по жидкости, 2 клапана на отбор"},
-		{"id":5,"name":"Бражная колонна, регулировка отбора охлаждением"},
-		{"id":6,"name":"Бражная колонна, регулировка отбора мощностью"}
+		{"value":0,"text":"Ручной режим, только сигнализация"},
+		{"value":1,"text":"Прима отбор по пару (головная фракция по жидкости)"},
+		{"value":2,"text":"Отбор по пару"},
+		{"value":3,"text":"Отбор по жидкости, 1 клапан на отбор"},
+		{"value":4,"text":"Отбор по жидкости, 2 клапана на отбор"},
+		{"value":5,"text":"Бражная колонна, регулировка отбора охлаждением"},
+		{"value":6,"text":"Бражная колонна, регулировка отбора мощностью"}
 	];
 	//Глобальный объект dtoReceiver служит для опроса МК.
 	let dtoReceiver = {
@@ -2142,6 +2142,8 @@ $(function () {
 			$("#reflux_start_group_button").addClass("hidden");
 		}
 		$("#reflux_process").html(refluxTemplate);
+		$.fn.fillSelect($("#reflux_algorithm_select"), algorithmReflux, false);
+		$("#reflux_algorithm").removeClass("hidden");
 		refluxProcess["power"] = Number(globalSensorsJson["power"]);
 		refluxProcess["powerLower"] = Number(globalSensorsJson["powerLower"]);
 		$("#reflux_power_set").val(refluxProcess["power"]);
@@ -2151,9 +2153,11 @@ $(function () {
 			getReflux();
 			$('#reflux_start').prop("disabled", true);
 			$('#reflux_add_sensor').prop("disabled", true);
+			$('#reflux_algorithm_select').prop("disabled", true);
 		} else {
 			$('#reflux_add_sensor').prop("disabled", false);
 			$('#reflux_stop').prop("disabled", true);
+			$('#reflux_algorithm_select').prop("disabled", false);
 		}
 	};
 
