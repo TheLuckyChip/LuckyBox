@@ -1823,7 +1823,7 @@ $(function () {
 	}
 
 	//Привязка датчиков к процессу ректификации, и запуск
-	let refluxProcess = {"sensors": {}, "power": 0, "powerLower": 0, "start": false};//"devices":[],"safety":[],
+	let refluxProcess = {"sensors": {}, "power": 0, "powerLower": 0, "number": 0, "start": false};//"devices":[],"safety":[],
 	$(document).on('click', '#reflux_add_sensor', function (e) {
 		e.preventDefault();
 		let _this = $(this);
@@ -2055,7 +2055,7 @@ $(function () {
 					if (e["delta"]) {
 						sensorsRefluxSend[sensor_key]["delta"] = 1;
 						tpl_delta = returnTplHtml([{id: "reflux_delta_" + sensor_key, value: e["allertValue"], min: '0', max: '1', step: '0.05'}], deltaTempl);
-						tpl_delta_result = '<span id="reflux_delta_result_' + sensor_key + '"></span>57.4<span class="hidden_">&#176С</span>';
+						tpl_delta_result = '<span id="reflux_delta_result_' + sensor_key + '"></span><span class="hidden">&#176С</span>';
 						tpl_delta_body +=
 							'<div class="row row-striped">' + tpl_delta_thead +
 							'<div id="reflux_alert_bg_' + sensor_key + '" class="pt-10 pb-10 clearfix">' +
@@ -2146,13 +2146,16 @@ $(function () {
 		$("#reflux_algorithm").removeClass("hidden");
 		refluxProcess["power"] = Number(globalSensorsJson["power"]);
 		refluxProcess["powerLower"] = Number(globalSensorsJson["powerLower"]);
+		refluxProcess["number"] = Number(globalSensorsJson["process"]["number"]);
 		$("#reflux_power_set").val(refluxProcess["power"]);
 		$("#reflux_power_lower_set").val(refluxProcess["powerLower"]);
 		//console.log(refluxProcess);
 		if (refluxProcess["start"] === true) {
+			console.log('reflux is Start');
 			getReflux();
 			$('#reflux_start').prop("disabled", true);
 			$('#reflux_add_sensor').prop("disabled", true);
+			$("#reflux_algorithm_select option[value=" + refluxProcess["number"] + "]").prop('selected',true);
 			$('#reflux_algorithm_select').prop("disabled", true);
 		} else {
 			$('#reflux_add_sensor').prop("disabled", false);
@@ -2160,12 +2163,17 @@ $(function () {
 			$('#reflux_algorithm_select').prop("disabled", false);
 		}
 	};
+	$(document).on('change', '#reflux_algorithm_select', function () {
+		refluxProcess["number"] = $(this).find(":selected").val();
+	});
 
 	$(document).on('click', '#reflux_start', function () {
 		let _this = $(this);
 		_this.prop("disabled", true);
 		$('#reflux_add_sensor').prop("disabled", true);
 		$('#reflux_stop').prop("disabled", false);
+		$("#reflux_algorithm_select option[value=" + refluxProcess["number"] + "]").prop('selected',true);
+		$('#reflux_algorithm_select').prop("disabled", true);
 		//curStartProcess = 2;
 		localStorage.setObj('oldStartProcess', 2);
 		refluxProcess["start"] = flagSendProcess = true;
@@ -2201,6 +2209,8 @@ $(function () {
 		$('#reflux_stop').prop("disabled", true);
 		$('#reflux_add_sensor').prop("disabled", false);
 		$('#reflux_start').prop("disabled", false);
+		$('#reflux_algorithm_select').prop("disabled", false);
+		$("#reflux_algorithm_select option[value=0]").prop('selected',true);
 		$("#svg_reflux_start").css('stroke', "#000000");
 		flagSendProcess = true;
 		refluxProcess["start"] = false;
@@ -2244,6 +2254,7 @@ $(function () {
 		if (refluxProcess["powerLower"] !== power_lower_set.val()) {
 			flagSendProcess = true;
 		}
+		refluxSendData["process"]["number"] = refluxProcess["number"];
 		refluxSendData["power"] = refluxProcess["power"] = power_set.val();
 		refluxSendData["powerLower"] = refluxProcess["powerLower"] = power_lower_set.val();
 
