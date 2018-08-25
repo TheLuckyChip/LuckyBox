@@ -2,6 +2,7 @@
 
 #include "reflux_mode.h"
 int	countHaedEnd;
+bool senseHeadcontrol;
 
 void EEPROM_float_write_refl(int addr, float val) {
 	byte *x = (byte *)&val;
@@ -219,13 +220,12 @@ void refluxLoop() {
 	#if defined TFT_Display
 			// подготовка данных для вывода на TFT
 			csOn(TFT_CS);
-			//tft.fillScreen(ILI9341_BLACK);
 			tftStartForGraph();
 			displayTimeInterval = millis() + 1000;
 			DefCubOut = Display_out_temp;
 			csOff(TFT_CS);
 	#endif
-			//csOn(PWM_CH1);			// открыть клапан отбора
+			senseHeadcontrol = adcIn[0].member;
 			heaterStatus = 1;		// включили нагрев
 			heaterPower = 100;		// установили мощность на ТЭН 100 %
 			processMode.step = 1;	// перешли на следующий шаг алгоритма
@@ -235,7 +235,7 @@ void refluxLoop() {
 		// ждем начала подъема температуры в царге и включаем воду на охлаждение и понижаем мощность на ТЭН
 		case 1: {
 			if (temperatureSensor[DS_Tube].data >= 45.0) {
-				csOn(PWM_CH2);				// включаем клапан подачи воды
+				csOn(PWM_CH3);				// включаем клапан подачи воды
 				heaterPower = 65;			// установили мощность на ТЭН 65 %
 				settingAlarm = true;		// подаем звуковой сигнал
 				timePauseOff = millis();	// обнулим счетчик времени для зв.сигнала
@@ -251,7 +251,7 @@ void refluxLoop() {
 			}
 			break;
 		}
-		// ждем окончание стабилизации 20 минут и увеличиваем мощность для отбора голов
+		// ждем окончание стабилизации 20 минут
 		case 3: {
 			if (timePauseOff < millis() && (millis() - timePauseOff) >= 1190000) {
 				settingAlarm = true;	// подаем звуковой сигнал
@@ -288,7 +288,7 @@ void refluxLoop() {
 //   НОВОЕ  ....................................................................................................................
 			// рулим клапаном на отборе голов
 			if (headValveOff <= millis()) {
-				csOn(PWM_CH1);		// открыть клапан отбора
+				csOn(PWM_CH1);		// открыть клапан отбора голов
 				headValveOn = millis() + headValveOpen;		// обнулим счетчик времени для открытого состояния клапана
 				headValve = true;
 			}
@@ -300,13 +300,16 @@ void refluxLoop() {
 			}
 
 			if (headValve == true) {
-				csOff(PWM_CH1);									// закрыли клапан отбора
+				csOff(PWM_CH1);									// закрыли клапан отбора голов
 				headValveOff = millis() + headValveClose;		// обнулим счетчик времени для закрытого состояния клапана
 				headValve = false;
 			}
 //			....................................................................................................................
 
-			if (processMode.step == 6) csOn(PWM_CH1);		// открыть клапан отбора
+			if (processMode.step == 6) {
+				csOff(PWM_CH1);		// закрыли клапан отбора голов
+				csOn(PWM_CH2);		// открыть клапан отбора
+			}
 			break;
 		}
 		// ждем окончание по достижению температуры в кубе и рулим клапаном отбора
@@ -317,20 +320,20 @@ void refluxLoop() {
 				timePauseOff = millis();					// обнулим счетчик времени для зв.сигнала
 				temperatureSensor[DS_Cube].allert = true;	// сигнализация для WEB
 				settingAlarm = true;						// подаем звуковой сигнал
-				csOff(PWM_CH1);								// закрыли клапан отбора
+				csOff(PWM_CH2);								// закрыли клапан отбора
 				processMode.step = 7;						// перешли на следующий шаг алгоритма
 			}
 			else if (temperatureSensor[DS_Tube].allertValue > 0 && temperatureSensor[DS_Tube].data >= temperatureSensor[DS_Tube].allertValue) {
 				//temperatureSensor[DS_Tube].allert = true;	// сигнализация для WEB
 				settingAlarm = true;						// подаем звуковой сигнал
-				csOff(PWM_CH1);								// закрыли клапан отбора
+				csOff(PWM_CH2);								// закрыли клапан отбора
 				//temperatureTubeRect = temperatureSensor[DS_Tube].data - temperatureSensor[DS_Tube].allertValue;	// запомнили температуру с учетом гистерезиса уставки
 			}
 			else if (adcIn[0].allert == true) settingAlarm = true;	// подаем звуковой сигнал
 			else settingAlarm = false;								// выключили звуковой сигнал
 
 			if (temperatureSensor[DS_Tube].data <= temperatureSensor[DS_Tube].allertValue - settingBoilTube) {
-				csOn(PWM_CH1);	// открыли клапан отбора
+				csOn(PWM_CH2);	// открыли клапан отбора
 				if (adcIn[0].allert == false) settingAlarm = false;
 			}
 
@@ -342,7 +345,7 @@ void refluxLoop() {
 				settingAlarm = false;						// выключили звуковой сигнал
 			}
 			if (millis() >= 120000 + timePauseOff) {
-				csOff(PWM_CH2);								// закрыли клапан подачи воды
+				csOff(PWM_CH3);								// закрыли клапан подачи воды
 				temperatureSensor[DS_Cube].allert = false;	// сигнализация для WEB
 				processMode.allow = 0;						// вышли из режима ректификации
 				processMode.step = 0;						// обнулили шаг алгоритма

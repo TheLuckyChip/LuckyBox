@@ -62,8 +62,8 @@
 #define		setRestartWiFi		60
 // Какой используем датчик давления
 //#define		Pressure_BMP085
-#define		Pressure_BMP180
-//#define		Pressure_BMP280
+//#define		Pressure_BMP180
+#define		Pressure_BMP280
 //#define		Pressure_BME280
 // Вывод отладочной информации в UART
 //#define		Debug_en
