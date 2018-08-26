@@ -1280,7 +1280,7 @@ $(function () {
 		'</div></div>'
 	;
 	//Привязка датчиков к процессу дистиляции, и запуск
-	let distillationProcess = {"sensors": {}, "power": 0, "powerLower": 0, "start": false};
+	let distillationProcess = {"sensors": {}, "powerHigh": 0, "powerLower": 0, "start": false};
 	$(document).on('click', '#distillation_add_sensor', function (e) {
 		e.preventDefault();
 		let _this = $(this);
@@ -1592,9 +1592,9 @@ $(function () {
 			$("#distillation_start_group_button").addClass("hidden");
 		}
 		$("#distillation_process").html(distillationTemplate);
-		distillationProcess["power"] = Number(globalSensorsJson["power"]);
+		distillationProcess["powerHigh"] = Number(globalSensorsJson["powerHigh"]);
 		distillationProcess["powerLower"] = Number(globalSensorsJson["powerLower"]);
-		$("#distillation_power_set").val(distillationProcess["power"]);
+		$("#distillation_power_set").val(distillationProcess["powerHigh"]);
 		$("#distillation_power_lower_set").val(distillationProcess["powerLower"]);
 
 		if (distillationProcess["start"] === true) {
@@ -1688,20 +1688,20 @@ $(function () {
 			"t6": {"allertValue": 0},
 			"t7": {"allertValue": 0},
 			"t8": {"allertValue": 0},
-			"power": 0,
+			"powerHigh": 0,
 			"powerLower": 0
 		};
 		//let flag_send = false;
 		let power_set = $("#distillation_power_set");
 		let power_lower_set = $("#distillation_power_lower_set");
 		distillationSendData["process"]["allow"] = (distillationProcess["start"] ? 1 : 0);
-		if (distillationProcess["power"] !== power_set.val()) {
+		if (distillationProcess["powerHigh"] !== power_set.val()) {
 			flagSendProcess = true;
 		}
 		if (distillationProcess["powerLower"] !== power_lower_set.val()) {
 			flagSendProcess = true;
 		}
-		distillationSendData["power"] = distillationProcess["power"] = power_set.val();
+		distillationSendData["powerHigh"] = distillationProcess["powerHigh"] = power_set.val();
 		distillationSendData["powerLower"] = distillationProcess["powerLower"] = power_lower_set.val();
 
 		$.each(distillationProcess["sensors"], function (i, e) {
@@ -1803,11 +1803,11 @@ $(function () {
 			//Исполнительные устройства
 			$.each(globalSensorsJson["devices"], function (i, e) {
 				let sensor_key = Object.keys(e).shift();
-				console.log(i,e);
+				//console.log(i,e);
 				$.each(distillationProcess["sensors"], function (j, q) {
 					if (j === sensor_key && re_out.test(sensor_key)) {
 						if(Number(distillationProcess["sensors"][sensor_key]["member"]) !== 0) {
-							if(Number(e[sensor_key]["value"]) !== 0){
+							if(Number(e[sensor_key]["allert"]) !== 0){
 								$("#distillation_" + sensor_key).removeClass("hidden").addClass("show");
 							}else{
 								$("#distillation_" + sensor_key).removeClass("show").addClass("hidden");
@@ -1834,11 +1834,12 @@ $(function () {
 				})
 			});
 			let power_value = Number(globalSensorsJson["power"]);
-			//let power_lower_value = Number(globalSensorsJson["powerLower"]);
+			let power_higt_value = Number(globalSensorsJson["powerHigh"]);
+			let power_lower_value = Number(globalSensorsJson["powerLower"]);
 			// TODO заполнение поля регулировки тена и рабочей мощности
 			if(!flagSendProcess) {
-				$("#distillation_power_set").val(power_value.toFixed(0));
-				//$("#distillation_power_lower_set").val(power_lower_value.toFixed(0));
+				$("#distillation_power_set").val(power_higt_value.toFixed(0));
+				$("#distillation_power_lower_set").val(power_lower_value.toFixed(0));
 			}
 			$("#distillation_power_value").text(power_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 			$("#svg_distillation_ten_t").text(power_value.toFixed(0) + "%");
@@ -1860,7 +1861,7 @@ $(function () {
 	}
 
 	//Привязка датчиков к процессу ректификации, и запуск
-	let refluxProcess = {"sensors": {}, "power": 0, "powerLower": 0, "number": 0, "start": false};//"devices":[],"safety":[],
+	let refluxProcess = {"sensors": {}, "powerHigh": 0, "powerLower": 0, "number": 0, "start": false};//"devices":[],"safety":[],
 	$(document).on('click', '#reflux_add_sensor', function (e) {
 		e.preventDefault();
 		let _this = $(this);
@@ -2180,16 +2181,17 @@ $(function () {
 			$("#reflux_start_group_button").addClass("hidden");
 		}
 		$("#reflux_process").html(refluxTemplate);
+		$.fn.clearSelect($("#reflux_algorithm_select"));
 		$.fn.fillSelect($("#reflux_algorithm_select"), algorithmReflux, false);
 		$("#reflux_algorithm").removeClass("hidden");
-		refluxProcess["power"] = Number(globalSensorsJson["power"]);
+		refluxProcess["powerHigh"] = Number(globalSensorsJson["powerHigh"]);
 		refluxProcess["powerLower"] = Number(globalSensorsJson["powerLower"]);
 		refluxProcess["number"] = Number(globalSensorsJson["process"]["number"]);
-		$("#reflux_power_set").val(refluxProcess["power"]);
+		$("#reflux_power_set").val(refluxProcess["powerHigh"]);
 		$("#reflux_power_lower_set").val(refluxProcess["powerLower"]);
 		//console.log(refluxProcess);
 		if (refluxProcess["start"] === true) {
-			console.log('reflux is Start');
+			//console.log('reflux is Start');
 			getReflux();
 			$('#reflux_start').prop("disabled", true);
 			$('#reflux_add_sensor').prop("disabled", true);
@@ -2279,21 +2281,21 @@ $(function () {
 			"t6": {"allertValue": 0},
 			"t7": {"allertValue": 0},
 			"t8": {"allertValue": 0},
-			"power": 0,
+			"powerHigh": 0,
 			"powerLower": 0
 		};
 		//let flag_send = false;
 		let power_set = $("#reflux_power_set");
 		let power_lower_set = $("#reflux_power_lower_set");
 		refluxSendData["process"]["allow"] = (refluxProcess["start"] ? 2 : 0);
-		if (refluxProcess["power"] !== power_set.val()) {
+		if (refluxProcess["powerHigh"] !== power_set.val()) {
 			flagSendProcess = true;
 		}
 		if (refluxProcess["powerLower"] !== power_lower_set.val()) {
 			flagSendProcess = true;
 		}
 		refluxSendData["process"]["number"] = refluxProcess["number"];
-		refluxSendData["power"] = refluxProcess["power"] = power_set.val();
+		refluxSendData["powerHigh"] = refluxProcess["powerHigh"] = power_set.val();
 		refluxSendData["powerLower"] = refluxProcess["powerLower"] = power_lower_set.val();
 
 		$.each(refluxProcess["sensors"], function (i, e) {
@@ -2413,7 +2415,7 @@ $(function () {
 					$.each(refluxProcess["sensors"], function (j, q) {
 						if (j === sensor_key && re_out.test(sensor_key)) {
 							if(Number(refluxProcess["sensors"][sensor_key]["member"]) !== 0) {
-								if(Number(e[sensor_key]["value"]) !== 0){
+								if(Number(e[sensor_key]["allert"]) !== 0){
 									$("#reflux_" + sensor_key).removeClass("hidden").addClass("show");
 								}else{
 									$("#reflux_" + sensor_key).removeClass("show").addClass("hidden");
@@ -2450,11 +2452,12 @@ $(function () {
 			});
 			$("#reflux_alco_boil").text(globalSensorsJson["temperatureAlcoholBoil"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 			let power_value = Number(globalSensorsJson["power"]);
-			//let power_lower_value = Number(globalSensorsJson["powerLower"]);
+			let power_higt_value = Number(globalSensorsJson["powerHigh"]);
+			let power_lower_value = Number(globalSensorsJson["powerLower"]);
 			// TODO заполнение поля регулировки тена и рабочей мощности
 			if(!flagSendProcess) {
-				$("#reflux_power_set").val(power_value.toFixed(0));
-				//$("#reflux_power_lower_set").val(power_lower_value.toFixed(0));
+				$("#reflux_power_set").val(power_higt_value.toFixed(0));
+				$("#reflux_power_lower_set").val(power_lower_value.toFixed(0));
 			}
 			$("#reflux_power_value").text(power_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 			$("#svg_reflux_ten_t").text(power_value.toFixed(0) + "%");
@@ -3120,7 +3123,7 @@ $(function () {
 	}
 	function getPid() {
 		let sek= parseInt(+new Date()/1000);
-		console.log(flagSendProcess,"getPid "+sek);
+		//console.log(flagSendProcess,"getPid "+sek);
 		//console.log(globalSensorsJson);
 		if (!$.fn.objIsEmpty(globalSensorsJson, false)) {
 			let dtoJson = {};
