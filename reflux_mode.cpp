@@ -204,6 +204,15 @@ void handleRefluxSensorSetSave() {
 }
 
 void refluxLoop() {
+
+	if (processMode.step < 2) {
+		if (power.heaterPower != power.inPowerHigh) power.heaterPower = power.inPowerHigh;
+	}
+	else if (processMode.step < 7) {
+		if (power.heaterPower != power.inPowerLow) power.heaterPower = power.inPowerLow;
+	}
+	else power.heaterPower = 0;
+
 	float temperatureTubeCurPressure;
 	// уставку применим только после достижения 90 гр. в кубе
 	if (settingBoilTube != 0) {
@@ -226,8 +235,8 @@ void refluxLoop() {
 			csOff(TFT_CS);
 	#endif
 			senseHeadcontrol = adcIn[0].member;
-			heaterStatus = 1;		// включили нагрев
-			heaterPower = 100;		// установили мощность на ТЭН 100 %
+			power.heaterStatus = 1;		// включили нагрев
+			power.heaterPower = power.inPowerHigh;		// установили мощность на ТЭН 100 %
 			processMode.step = 1;	// перешли на следующий шаг алгоритма
 			countHaedEnd = 0;
 			break;
@@ -236,7 +245,7 @@ void refluxLoop() {
 		case 1: {
 			if (temperatureSensor[DS_Tube].data >= 45.0) {
 				csOn(PWM_CH3);				// включаем клапан подачи воды
-				heaterPower = 65;			// установили мощность на ТЭН 65 %
+				power.heaterPower = power.inPowerLow;			// установили мощность на ТЭН 65 %
 				settingAlarm = true;		// подаем звуковой сигнал
 				timePauseOff = millis();	// обнулим счетчик времени для зв.сигнала
 				processMode.step = 2;		// перешли на следующий шаг алгоритма
@@ -254,8 +263,9 @@ void refluxLoop() {
 		// ждем окончание стабилизации 20 минут
 		case 3: {
 			if (timePauseOff < millis() && (millis() - timePauseOff) >= 1190000) {
+				timePauseOff = millis();	// обнулим счетчик времени для зв.сигнала
 				settingAlarm = true;	// подаем звуковой сигнал
-				heaterPower = 65;		// установили мощность на ТЭН 65 %
+				power.heaterPower = power.inPowerLow;		// установили мощность на ТЭН 65 %
 				processMode.step = 4;	// перешли на следующий шаг алгоритма
 			}
 			break;
@@ -301,6 +311,7 @@ void refluxLoop() {
 
 			if (headValve == true) {
 				csOff(PWM_CH1);									// закрыли клапан отбора голов
+				pwmOut[0].allert = 1;							// для вывода в web и на TFT
 				headValveOff = millis() + headValveClose;		// обнулим счетчик времени для закрытого состояния клапана
 				headValve = false;
 			}
@@ -315,8 +326,8 @@ void refluxLoop() {
 		// ждем окончание по достижению температуры в кубе и рулим клапаном отбора
 		case 6: {
 			if (temperatureSensor[DS_Cube].allertValue > 0 && temperatureSensor[DS_Cube].data >= temperatureSensor[DS_Cube].allertValue) {
-				heaterStatus = 0;							// выключили ТЭН
-				heaterPower = 0;							// установили мощность на ТЭН 0 %
+				power.heaterStatus = 0;							// выключили ТЭН
+				power.heaterPower = 0;							// установили мощность на ТЭН 0 %
 				timePauseOff = millis();					// обнулим счетчик времени для зв.сигнала
 				temperatureSensor[DS_Cube].allert = true;	// сигнализация для WEB
 				settingAlarm = true;						// подаем звуковой сигнал

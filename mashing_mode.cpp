@@ -368,16 +368,18 @@ void mashingLoop() {
 		// включить или выключить ТЭН в зависимости от расчетов временного PID регулирования
 		if (Output < millis() - windowStartTime) {
 			digitalWrite(heater, LOW);
-			heaterPower = 0;
+			power.heaterPower = 0;
 		}
 		else {
 			digitalWrite(heater, HIGH);
-			heaterPower = 100;
+			power.heaterPower = 100;
 		}
 	//}
 	delay(100);
 
 	if (processMode.allow == 0) {
+		power.heaterPower = 0;
+		power.heaterStatus = 0;
 		settingAlarm = false;			// выключили звуковой сигнал
 		digitalWrite(heater, LOW);		// Выключим ТЭН по окончанию процесса
 		processMode.timeStep = 0;		// для расчета и вывода времени прошедшего с начала текущего шага

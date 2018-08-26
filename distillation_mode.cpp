@@ -175,6 +175,9 @@ void handleDistillationSensorSetSave() {
 
 void distillationLoop() {
 
+	if (power.heaterPower != power.inPowerHigh && processMode.step < 4) power.heaterPower = power.inPowerHigh;
+	else if (processMode.step >= 4) power.heaterPower = 0;
+
 	switch (processMode.step) {
 		// пришли при старте дистилляции
 		case 0: {
@@ -188,16 +191,16 @@ void distillationLoop() {
 			DefCubOut = Display_out_temp;
 			csOff(TFT_CS);
 #endif
-			//csOn(PWM_CH1);			// открыть клапан отбора
-			heaterStatus = 1;		// включили нагрев
-			heaterPower = 100;		// установили мощность на ТЭН 100 %
-			processMode.step = 1;	// перешли на следующий шаг алгоритма
+			csOn(PWM_CH1);				// открыть клапан отбора
+			power.heaterStatus = 1;		// включили нагрев
+			power.heaterPower = 100;	// установили мощность на ТЭН 100 %
+			processMode.step = 1;		// перешли на следующий шаг алгоритма
 			break;
 		}
 		case 1: {
 			// ждем нагрев куба до 80 градусов
 			if (temperatureSensor[DS_Cube].data >= 80.0) {
-				csOn(PWM_CH2);			// включаем клапан подачи воды
+				csOn(PWM_CH3);			// включаем клапан подачи воды
 				settingAlarm = true;	// подаем звуковой сигнал
 				timePauseOff = millis();// обнулим счетчик времени для зв.сигнала
 				processMode.step = 2;	// перешли на следующий шаг алгоритма
@@ -215,8 +218,8 @@ void distillationLoop() {
 		case 3: {
 			// ждем достижения заданных температур
 			if (temperatureSensor[DS_Cube].data >= settingTank || (temperatureSensor[DS_Cube].data >= temperatureSensor[DS_Cube].allertValue && temperatureSensor[DS_Cube].allertValue > 0)) {
-				heaterStatus = 0;							// выключили ТЭН
-				heaterPower = 0;							// установили мощность 0%
+				power.heaterStatus = 0;						// выключили ТЭН
+				power.heaterPower = 0;						// установили мощность 0%
 				timePauseOff = millis();					// обнулим счетчик времени для зв.сигнала
 				temperatureSensor[DS_Cube].allert = true;	// сигнализация для WEB
 				settingAlarm = true;						// подали звуковой сигнал
@@ -230,8 +233,8 @@ void distillationLoop() {
 		case 4: {
 			// ждем 30 сек.
 			if ((millis() - timePauseOff) >= 30000) {
-				//csOff(PWM_CH1);		// закрыли клапан отбора
-				csOff(PWM_CH2);		// закрыли клапан подачи воды
+				csOff(PWM_CH1);		// закрыли клапан отбора
+				csOff(PWM_CH3);		// закрыли клапан подачи воды
 				temperatureSensor[DS_Cube].allert = false;	// сигнализация для WEB
 				settingAlarm = false;	// выключили звуковой сигнал
 				processMode.allow = 0;  // вышли из режима дистилляции

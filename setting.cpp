@@ -40,8 +40,10 @@ struct OUT_Pwm pwmOut[PWM_Cnt];
 struct IN_Adc adcIn[ADC_Cnt];
 struct PR_Type processMode;
 struct PR_Mashing processMashing[4];
-bool heaterStatus = 0;		// статус ТЭНа (включен/выключен)
-int	heaterPower = 0;		// Мощность ТЭНа в % от 0 до 100
+struct PR_Power power;
+
+//bool heaterStatus = 0;		// статус ТЭНа (включен/выключен)
+//int	heaterPower = 0;		// Мощность ТЭНа в % от 0 до 100
 uint16_t servoOld = 0;		// Старая позиция сервопривода
 unsigned long displayTimeInterval = 0;
 unsigned long sdTimeWriteInterval = 0;

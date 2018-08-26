@@ -75,11 +75,11 @@ void pidSetLoop() {
 		// включить или выключить ТЭН в зависимости от расчетов временного PID регулирования
 		if (Output < millis() - windowStartTime) {
 			digitalWrite(heater, LOW);
-			heaterPower = 0;
+			power.heaterPower = 0;
 		}
 		else {
 			digitalWrite(heater, HIGH);
-			heaterPower = 100;
+			power.heaterPower = 100;
 		}
 		delay(100);
 	}

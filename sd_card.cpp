@@ -87,7 +87,7 @@ void sdWriteLog() {
 		if (temperatureSensor[i].member != 0) fileData += String(temperatureSensor[i].name) + " = " + String(temperatureSensor[i].data) + "\t";
 	}
 	fileData += "Давление = " + String(pressureSensor.data) + "\t";
-	fileData += "Мощность = " + String(heaterPower);
+	fileData += "Мощность = " + String(power.heaterPower);
 	Serial.println(fileData);
 	csOn(SD_CS);
 	myFile = SD.open(fileName, FILE_WRITE);

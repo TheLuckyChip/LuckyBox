@@ -44,7 +44,7 @@ void senseWebInit() {
 	HTTP.on("/sensorsInSet", sensorsUserSetInWeb);    // прием и сохранение параметров датчиков
 	HTTP.on("/sensorsOutSet", sensorsUserSetOutWeb);  // отправка параметров датчиков
 	HTTP.on("/SensorsOut", handleProcessSensorOut);		// отправка всех датчиков и входов выходов для интикации в процессе рект.
-	HTTP.on("/SensorsIn", handleProcessModeIn);			// прием старт, стоп, уставок для рект.
+	HTTP.on("/SensorsIn", handleProcessModeIn);			// прием старт, стоп, уставок для всех процессов
 	HTTP.on("/resetData", handleResetDataEeprom);		// очистка сохраненной структуры датчиков
 }
 
@@ -401,7 +401,8 @@ void handleProcessSensorOut() {
 	dataForWeb += "{\"Kd\":{\"userSetValue\":" + String(Kd) + "}},";
 	dataForWeb += "{\"t1\":{\"userSetValue\":" + String(temperatureSensor[DS_Cube].data) + "}}],";
 
-	dataForWeb += "\"power\":" + String(heaterPower) + ",\"temperatureAlcoholBoil\":" + String(temperatureAlcoholBoil);
+	//dataForWeb += "\"power\":" + String(power.heaterPower) + ",\"temperatureAlcoholBoil\":" + String(temperatureAlcoholBoil);
+	dataForWeb += "\"power\":" + String(power.heaterPower) + ",\"powerHigh\":" + String(power.inPowerHigh) + ",\"powerLower\":" + String(power.inPowerLow) + ",\"temperatureAlcoholBoil\":" + String(temperatureAlcoholBoil);
 	dataForWeb += ",\"temperatureStartPressure\":" + String(settingColumnShow) + "}";
 
 	HTTP.send(200, "text/json", dataForWeb);
@@ -415,7 +416,7 @@ void handleProcessModeIn() {
 	// парсим ответ от браузера в переменные
 	uint8_t processModeOld = processMode.allow;
 	processMode.allow = HTTP.arg("process[allow]").toInt();
-	//processMode.num = HTTP.arg("process[number]").toInt();
+	processMode.number = HTTP.arg("process[number]").toInt();
 	if (processMode.allow < 3) {
 #if defined Debug_en
 		Serial.println(""); Serial.println("Прием уставок:");
@@ -427,8 +428,10 @@ void handleProcessModeIn() {
 			
 			if (tmpAllertValue > 10) temperatureSensor[i].allertValue = tmpAllertValue;
 			else if (tmpAllertValue > 0) {
-				settingBoilTube = tmpAllertValue;
-				settingColumn = temperatureSensor[i].data;
+				if (settingBoilTube != tmpAllertValue) {
+					settingBoilTube = tmpAllertValue;
+					settingColumn = temperatureSensor[i].data;
+				}
 			}
 			else temperatureSensor[i].allertValue = 0;
 			temperatureSensor[i].allertValueIn = tmpAllertValue;
@@ -450,7 +453,9 @@ void handleProcessModeIn() {
 		}
 	}
 
-	heaterPower = HTTP.arg("power").toInt();
+	//power.heaterPower = HTTP.arg("power").toInt();
+	power.inPowerHigh = HTTP.arg("powerHigh").toInt();
+	power.inPowerLow = HTTP.arg("powerLower").toInt();
 
 	HTTP.send(200, "text/json", "{\"result\":\"ok\"}");
 
