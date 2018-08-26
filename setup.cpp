@@ -5,6 +5,10 @@ void setup()
 	// Настройка вывода для ТЭНа
 	pinMode(heater, OUTPUT);
 	digitalWrite(heater, LOW);
+	power.heaterStatus = 0;
+	power.heaterPower = 0;
+	power.inPowerHigh = 100;
+	power.inPowerLow = 65;
 
 	delay(200);
 

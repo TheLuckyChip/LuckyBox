@@ -69,12 +69,20 @@ struct PR_Mashing
 	uint8_t		step;
 	bool		stop;
 };
+struct PR_Power
+{
+	bool heaterStatus;
+	uint8_t	heaterPower;
+	uint8_t inPowerHigh;
+	uint8_t inPowerLow;
+};
 extern struct DS_Str temperatureSensor[DS_Cnt];
 extern struct BMP_Str pressureSensor;
 extern struct OUT_Pwm pwmOut[PWM_Cnt];
 extern struct IN_Adc adcIn[ADC_Cnt];
 extern struct PR_Type processMode;
 extern struct PR_Mashing processMashing[4];
+extern struct PR_Power power;
 
 extern Ticker tickerSet;
 
@@ -131,8 +139,8 @@ extern bool headValve;
 extern unsigned long headValveOn;
 extern unsigned long headValveOff;
 extern byte touchArea;
-extern bool heaterStatus;
-extern int	heaterPower;
+//extern bool heaterStatus;
+//extern int	heaterPower;
 extern uint16_t servoOld;
 extern int modeWiFi;
 extern uint8_t DefCubOut;

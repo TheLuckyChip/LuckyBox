@@ -15,4 +15,7 @@
 extern void initBuzzer(uint16_t duration);
 extern void deinitBuzzer();
 
+void tone(uint8_t _pin, unsigned int frequency, unsigned long duration);
+void noTone(uint8_t _pin);
+
 #endif
