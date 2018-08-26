@@ -1,6 +1,5 @@
 #include "buzzer.h"
 
-void initBuzzer(uint16_t duration)
 {
 	tickerSet.attach_ms(duration, deinitBuzzer);
 	setPWM(BUZ_OUT, 0, 2048);
