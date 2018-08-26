@@ -1525,7 +1525,7 @@ $(function () {
 						tpl_cutoff_body +=
 							'<div class="row row-striped">' + tpl_cutoff_thead +
 							'<div id="distillation_alert_bg_' + sensor_key + '" class="pt-10 pb-10 clearfix">' +
-							'<div id="distillation_alert_text_' + sensor_key + '" class="col-xs-12 col-sm-4 text-center-xs text-strong">t&#176' + name_sensor + '</div>' +
+							'<div id="distillation_alert_text_' + sensor_key + '" class="col-xs-12 col-sm-4 text-middle text-center-xs text-strong">t&#176' + name_sensor + '</div>' +
 							'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle text-strong"><span id="distillation_' + sensor_key + '"></span><span class="hidden">&#176С</span></div>' +
 							//'<div class="col-xs-3 col-sm-3"></div>' +
 							'<div class="col-xs-4 col-xs-offset-3 col-sm-3 col-sm-offset-2">' + tpl_cutoff +
@@ -1549,17 +1549,19 @@ $(function () {
 				if (re_out.test(sensor_key) && Number(e["member"]) !== 0) {
 					sensorsDistillationSend[sensor_key]["member"] = 1;
 					tpl_devices_body += '<div class="row row-striped">' +
-						'<div class="pt-10 clearfix">' +
+						'<div class="pt-10 pb-10 clearfix">' +
 						'<div class="col-xs-12 col-sm-4 text-center-xs text-middle text-strong">' + name_sensor + '</div>' +
-						'<div class="col-xs-5 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle text-strong"><span id="distillation_' + sensor_key + '"></span> <span class="hidden"></span></div>' +
+						'<div class="col-xs-5 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-strong">' +
+						'<span id="distillation_' + sensor_key + '" class="box-green hidden"><span class="glyphicon">✔</span></span></div>' +
 						'</div></div>';
 				}
 				if (re_in.test(sensor_key) && Number(e["member"]) !== 0) {
 					sensorsDistillationSend[sensor_key]["member"] = 1;
 					tpl_safety_body += '<div class="row row-striped">' +
-						'<div class="pt-10 clearfix">' +
-						'<div class="col-xs-12 col-sm-4 text-center-xs text-middle text-strong">' + name_sensor + '</div>' +
-						'<div class="col-xs-5 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle text-strong"><span id="distillation_' + sensor_key + '"></span> <span class="hidden"></span></div>' +
+						'<div id="distillation_alert_bg_' + sensor_key + '" class="pt-10 pb-10 clearfix">' +
+						'<div id="distillation_alert_text_' + sensor_key + '" class="col-xs-12 col-sm-4 text-center-xs text-strong">' + name_sensor + '</div>' +
+						'<div class="col-xs-5 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle text-strong">' +
+						'<span id="distillation_' + sensor_key + '"></span> <span class="hidden"></span></div>' +
 						'</div></div>';
 				}
 			});
@@ -1784,7 +1786,7 @@ $(function () {
 						//убрал пока
 						/*if(!flagSendProcess) {
 							$("#distillation_cutoff_" + sensor_key).val(alert_value.toFixed(0));
-							//$("#mashing_temperature_" + sensor_key).val(temperature);
+							//$("#distillation_temperature_" + sensor_key).val(temperature);
 						}*/
 						let allertValue = alert_value;
 						allertValue = allertValue > 0 ? allertValue.toFixed(2) : "";
@@ -1798,11 +1800,46 @@ $(function () {
 					}
 				});
 			});
+			//Исполнительные устройства
+			$.each(globalSensorsJson["devices"], function (i, e) {
+				let sensor_key = Object.keys(e).shift();
+				console.log(i,e);
+				$.each(distillationProcess["sensors"], function (j, q) {
+					if (j === sensor_key && re_out.test(sensor_key)) {
+						if(Number(distillationProcess["sensors"][sensor_key]["member"]) !== 0) {
+							if(Number(e[sensor_key]["value"]) !== 0){
+								$("#distillation_" + sensor_key).removeClass("hidden").addClass("show");
+							}else{
+								$("#distillation_" + sensor_key).removeClass("show").addClass("hidden");
+							}
+						}
+					}
+				})
+			});
+			//Датчики безопасности
+			$.each(globalSensorsJson["safety"], function (i, e) {
+				let sensor_key = Object.keys(e).shift();
+				$.each(distillationProcess["sensors"], function (j, q) {
+					if (j === sensor_key && re_in.test(sensor_key)) {
+						if(Number(distillationProcess["sensors"][sensor_key]["member"]) !== 0) {
+							if(Number(e[sensor_key]["allert"]) !== 0){
+								$("#distillation_alert_bg_" + sensor_key).addClass("bg-danger");
+								$("#distillation_alert_text_" + sensor_key).addClass("text-danger");
+							} else {
+								$("#distillation_alert_bg_" + sensor_key).removeClass("bg-danger");
+								$("#distillation_alert_text_" + sensor_key).removeClass("text-danger");
+							}
+						}
+					}
+				})
+			});
 			let power_value = Number(globalSensorsJson["power"]);
-			//убрал пока
-			/*if(!flagSendProcess) {
+			//let power_lower_value = Number(globalSensorsJson["powerLower"]);
+			// TODO заполнение поля регулировки тена и рабочей мощности
+			if(!flagSendProcess) {
 				$("#distillation_power_set").val(power_value.toFixed(0));
-			}*/
+				//$("#distillation_power_lower_set").val(power_lower_value.toFixed(0));
+			}
 			$("#distillation_power_value").text(power_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 			$("#svg_distillation_ten_t").text(power_value.toFixed(0) + "%");
 			$("#svg_distillation_color_ten").css('fill', colorPersent("#FF0000", power_value.toFixed(0), 100));
@@ -2059,7 +2096,7 @@ $(function () {
 						tpl_delta_body +=
 							'<div class="row row-striped">' + tpl_delta_thead +
 							'<div id="reflux_alert_bg_' + sensor_key + '" class="pt-10 pb-10 clearfix">' +
-							'<div id="reflux_alert_text_' + sensor_key + '" class="col-xs-12 col-sm-4 text-center-xs text-strong">t&#176' + name_sensor + '</div>' +
+							'<div id="reflux_alert_text_' + sensor_key + '" class="col-xs-12 col-sm-4 text-middle text-center-xs text-strong">t&#176' + name_sensor + '</div>' +
 							'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle text-strong"><span id="reflux_' + sensor_key + '"></span><span class="hidden">&#176С</span></div>' +
 							'<div class="col-xs-3 col-sm-3">' + tpl_delta + '</div>' +
 							'<div class="col-xs-4 col-xs-offset-1 col-sm-2 col-sm-offset-0 text-center text-middle text-strong">' + tpl_delta_result +
@@ -2076,7 +2113,7 @@ $(function () {
 						tpl_cutoff_body +=
 							'<div class="row row-striped">' + tpl_cutoff_thead +
 							'<div id="reflux_alert_bg_' + sensor_key + '" class="pt-10 pb-10 clearfix">' +
-							'<div id="reflux_alert_text_' + sensor_key + '" class="col-xs-12 col-sm-4 text-center-xs text-strong">t&#176' + name_sensor + '</div>' +
+							'<div id="reflux_alert_text_' + sensor_key + '" class="col-xs-12 col-sm-4 text-middle text-center-xs text-strong">t&#176' + name_sensor + '</div>' +
 							'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle text-strong"><span id="reflux_' + sensor_key + '"></span><span class="hidden">&#176С</span></div>' +
 							//'<div class="col-xs-3 col-sm-3"></div>' +
 							'<div class="col-xs-4 col-xs-offset-3 col-sm-3 col-sm-offset-2">' + tpl_cutoff +
@@ -2100,16 +2137,17 @@ $(function () {
 				if (re_out.test(sensor_key) && Number(e["member"]) !== 0) {
 					sensorsRefluxSend[sensor_key]["member"] = 1;
 					tpl_devices_body += '<div class="row row-striped">' +
-						'<div class="pt-10 clearfix">' +
+						'<div class="pt-10 pb-10 clearfix">' +
 						'<div class="col-xs-12 col-sm-4 text-center-xs text-middle text-strong">' + name_sensor + '</div>' +
-						'<div class="col-xs-5 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle text-strong"><span id="reflux_' + sensor_key + '"></span> <span class="hidden"></span></div>' +
+						'<div class="col-xs-5 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-strong">' +
+						'<span id="reflux_' + sensor_key + '" class="box-green hidden"><span class="glyphicon">✔</span></span></div>' +
 						'</div></div>';
 				}
 				if (re_in.test(sensor_key) && Number(e["member"]) !== 0) {
 					sensorsRefluxSend[sensor_key]["member"] = 1;
 					tpl_safety_body += '<div class="row row-striped">' +
-						'<div class="pt-10 clearfix">' +
-						'<div class="col-xs-12 col-sm-4 text-center-xs text-middle text-strong">' + name_sensor + '</div>' +
+						'<div id="reflux_alert_bg_' + sensor_key + '" class="pt-10 pb-10 clearfix">' +
+						'<div id="reflux_alert_text_' + sensor_key + '" class="col-xs-12 col-sm-4 text-center-xs text-strong">' + name_sensor + '</div>' +
 						'<div class="col-xs-5 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle text-strong"><span id="reflux_' + sensor_key + '"></span> <span class="hidden"></span></div>' +
 						'</div></div>';
 				}
@@ -2369,6 +2407,38 @@ $(function () {
 						}
 					}
 				});
+				//Исполнительные устройства
+				$.each(globalSensorsJson["devices"], function (i, e) {
+					let sensor_key = Object.keys(e).shift();
+					$.each(refluxProcess["sensors"], function (j, q) {
+						if (j === sensor_key && re_out.test(sensor_key)) {
+							if(Number(refluxProcess["sensors"][sensor_key]["member"]) !== 0) {
+								if(Number(e[sensor_key]["value"]) !== 0){
+									$("#reflux_" + sensor_key).removeClass("hidden").addClass("show");
+								}else{
+									$("#reflux_" + sensor_key).removeClass("show").addClass("hidden");
+								}
+							}
+						}
+					})
+				});
+				//Датчики безопасности
+				$.each(globalSensorsJson["safety"], function (i, e) {
+					let sensor_key = Object.keys(e).shift();
+					$.each(refluxProcess["sensors"], function (j, q) {
+						if (j === sensor_key && re_in.test(sensor_key)) {
+							if(Number(refluxProcess["sensors"][sensor_key]["member"]) !== 0) {
+								if(Number(e[sensor_key]["allert"]) !== 0){
+									$("#reflux_alert_bg_" + sensor_key).addClass("bg-danger");
+									$("#reflux_alert_text_" + sensor_key).addClass("text-danger");
+								} else {
+									$("#reflux_alert_bg_" + sensor_key).removeClass("bg-danger");
+									$("#reflux_alert_text_" + sensor_key).removeClass("text-danger");
+								}
+							}
+						}
+					})
+				});
 
 				if (re_p.test(sensor_key)) {
 					$("#reflux_pressure").text(globalSensorsJson["sensors"][i]["p1"]["value"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
@@ -2380,10 +2450,12 @@ $(function () {
 			});
 			$("#reflux_alco_boil").text(globalSensorsJson["temperatureAlcoholBoil"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 			let power_value = Number(globalSensorsJson["power"]);
-			//убрал пока
-			/*if(!flagSendProcess) {
+			//let power_lower_value = Number(globalSensorsJson["powerLower"]);
+			// TODO заполнение поля регулировки тена и рабочей мощности
+			if(!flagSendProcess) {
 				$("#reflux_power_set").val(power_value.toFixed(0));
-			}*/
+				//$("#reflux_power_lower_set").val(power_lower_value.toFixed(0));
+			}
 			$("#reflux_power_value").text(power_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 			$("#svg_reflux_ten_t").text(power_value.toFixed(0) + "%");
 			$("#svg_reflux_color_ten").css('fill', colorPersent("#FF0000", power_value.toFixed(0), 100));

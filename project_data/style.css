@@ -353,7 +353,17 @@ span.show {
 .number-group input.input-number{
 	text-align: center;
 }
-
+.box-green {
+	height: 28px;
+	width: 29px;
+	padding: 5px 10px;
+	font-size: 12px;
+	line-height: 1.5;
+	border-radius: 3px;
+	color: #fff;
+	background-color: #5cb85c;
+	border-color: #4cae4c;
+}
 /*navbar-banner*/
 @media (max-width: 768px) {
 	.top-banner .h1{font-size: 26px;}
