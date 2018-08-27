@@ -280,6 +280,16 @@ $(function () {
 		//return "#FF0000";
 	}
 
+	//Преобразование секунд во время
+	function secToTime(sec){
+		let dt = new Date();
+		dt.setTime(sec*1000);
+		let hours = dt.getUTCHours();
+		let minutes = dt.getUTCMinutes();
+		// let seconds = dt.getUTCSeconds();
+		return (hours<10 ? "0" + hours : hours) +":"+ (minutes<10 ? "0" + minutes : minutes);
+	}
+
 	/**
 	 * Проверка на мобильную версию
 	 * @returns {boolean}
@@ -1583,7 +1593,12 @@ $(function () {
 				//console.log("distillationSensorsSetSave",sensorsDistillationSend);
 			}
 			//localStorage.setObj('sensors', sensors);
-			distillationTemplate = returnTplHtml([{id_value: "distillation_power_value", id_set: "distillation_power_set"}], powerTempl) +
+			let timeStepTemplate = '<div class="row row-striped">' +
+				'<div id="distillation_step" class="col-xs-12 col-md-6 text-center-xs text-middle text-strong hidden"></div>' +
+				'<div id="distillation_time" class="col-xs-12 col-md-6 text-center-xs text-middle text-strong hidden"></div>' +
+				'</div>';
+			distillationTemplate = timeStepTemplate +
+				returnTplHtml([{id_value: "distillation_power_value", id_set: "distillation_power_set"}], powerTempl) +
 				returnTplHtml([{id_lower_set: "distillation_power_lower_set"}], powerLowerTempl) +
 				distillationTemplate + tpl_devices_body + tpl_safety_body;
 			$("#distillation_start_group_button").removeClass("hidden");
@@ -1842,6 +1857,20 @@ $(function () {
 				$("#distillation_power_lower_set").val(power_lower_value.toFixed(0));
 			}
 			$("#distillation_power_value").text(power_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
+
+			if(globalSensorsJson["process"]["step"] !== "") {
+				let stepProcess = globalSensorsJson["process"]["step"];
+				$("#distillation_step").html('Текущая операция: <span class="text-primary">' + stepProcess + '</span>').removeClass("hidden");
+			}else{
+				$("#distillation_step").html('').addClass("hidden");
+			}
+			if (Number(globalSensorsJson["process"]["time"])>0) {
+				let timeProcess = secToTime(Number(globalSensorsJson["process"]["time"]));
+				$("#distillation_time").html('Прошло времени: <span class="text-primary">'+timeProcess+'</span>').removeClass("hidden");
+			}else{
+				$("#distillation_time").html('').addClass("hidden");
+			}
+
 			$("#svg_distillation_ten_t").text(power_value.toFixed(0) + "%");
 			$("#svg_distillation_color_ten").css('fill', colorPersent("#FF0000", power_value.toFixed(0), 100));
 			//dtoJson["temperatures"] = distillationProcess["sensors"];
@@ -2171,7 +2200,12 @@ $(function () {
 				//console.log("refluxSensorsSetSave",sensorsRefluxSend);
 			}
 			//localStorage.setObj('sensors', sensors);
-			refluxTemplate = returnTplHtml([{id_value: "reflux_power_value", id_set: "reflux_power_set"}], powerTempl) +
+			let timeStepTemplate = '<div class="row row-striped">' +
+				'<div id="reflux_step" class="col-xs-12 col-md-6 text-center-xs text-middle text-strong hidden"></div>' +
+				'<div id="reflux_time" class="col-xs-12 col-md-6 text-center-xs text-middle text-strong hidden"></div>' +
+				'</div>';
+			refluxTemplate = timeStepTemplate +
+				returnTplHtml([{id_value: "reflux_power_value", id_set: "reflux_power_set"}], powerTempl) +
 				returnTplHtml([{id_lower_set: "reflux_power_lower_set"}], powerLowerTempl) +
 				refluxTemplate + pressureTemplate + tpl_devices_body + tpl_safety_body;
 
@@ -2460,6 +2494,21 @@ $(function () {
 				$("#reflux_power_lower_set").val(power_lower_value.toFixed(0));
 			}
 			$("#reflux_power_value").text(power_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
+
+
+			if(globalSensorsJson["process"]["step"] !== "") {
+				let stepProcess = globalSensorsJson["process"]["step"];
+				$("#reflux_step").html('Текущая операция: <span class="text-primary">' + stepProcess + '</span>').removeClass("hidden");
+			}else{
+				$("#reflux_step").html('').addClass("hidden");
+			}
+			if (Number(globalSensorsJson["process"]["time"])>0) {
+				let timeProcess = secToTime(Number(globalSensorsJson["process"]["time"]));
+				$("#reflux_time").html('Прошло времени: <span class="text-primary">'+timeProcess+'</span>').removeClass("hidden");
+			}else {
+				$("#reflux_time").html('').addClass("hidden");
+			}
+
 			$("#svg_reflux_ten_t").text(power_value.toFixed(0) + "%");
 			$("#svg_reflux_color_ten").css('fill', colorPersent("#FF0000", power_value.toFixed(0), 100));
 			//dtoJson["temperatures"] = refluxProcess["sensors"];
@@ -2726,7 +2775,11 @@ $(function () {
 				sendRequest("mashingSensorsSetSave", sensorsMashingSend, "json", false, false, $("#error_mashing"), false);
 			}
 			//returnTplHtml([{id_value: "mashing_power_value", id_set: "mashing_power_set"}], powerTempl)
-			mashingTemplate = mashingTemplate + tpl_timer_body + tpl_pause_body;
+			let timeStepTemplate = '<div class="row row-striped">' +
+				'<div id="mashing_step" class="col-xs-12 col-md-6 text-center-xs text-middle text-strong hidden"></div>' +
+				'<div id="mashing_time" class="col-xs-12 col-md-6 text-center-xs text-middle text-strong hidden"></div>' +
+				'</div>';
+			mashingTemplate = timeStepTemplate + mashingTemplate + tpl_timer_body + tpl_pause_body;
 			$("#mashing_start_group_button").removeClass("hidden");
 		} else {
 			$("#mashing_start_group_button").addClass("hidden");
@@ -2958,6 +3011,20 @@ $(function () {
 				$("#mashing_timer_text").text("Пауза").parent().find(".show").removeClass("show").addClass("hidden");
 			}
 			//$("#mashing_power_value").text(power_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
+
+			if(globalSensorsJson["process"]["step"] !== "") {
+				let stepProcess = globalSensorsJson["process"]["step"];
+				$("#mashing_step").html('Текущая операция: <span class="text-primary">' + stepProcess + '</span>').removeClass("hidden");
+			}else{
+				$("#mashing_step").html('').addClass("hidden");
+			}
+			if (Number(globalSensorsJson["process"]["time"])>0) {
+				let timeProcess = secToTime(Number(globalSensorsJson["process"]["time"]));
+				$("#mashing_time").html('Прошло времени: <span class="text-primary">'+timeProcess+'</span>').removeClass("hidden");
+			}else {
+				$("#mashing_time").html('').addClass("hidden");
+			}
+
 			$("#svg_mashing_ten_t").text(power_value.toFixed(0) + "%");
 			$("#svg_mashing_color_ten").css('fill', colorPersent("#FF0000", power_value.toFixed(0), 100));
 			$("#view_reflux_chart").html("");
