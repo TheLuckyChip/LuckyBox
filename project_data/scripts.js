@@ -1811,7 +1811,11 @@ $(function () {
 							$("#distillation_cutoff_result_" + sensor_key).text(allertValue).parent().find(".show").removeClass("show").addClass("hidden");
 						}
 						//svg
-						$("#svg_distillation_" + sensor_key).html(sensor_value.toFixed(0) + '&#176С');
+						if(sensor_value.toFixed(0) !== 150) {
+							$("#svg_distillation_" + sensor_key).html(sensor_value.toFixed(0) + '&#176С');
+						}else{
+							$("#svg_distillation_" + sensor_key).html('');
+						}
 					}
 				});
 			});
@@ -2436,7 +2440,11 @@ $(function () {
 							$("#reflux_cutoff_result_" + sensor_key).text(allertValue).parent().find(".show").removeClass("show").addClass("hidden");
 						}
 						//svg
-						$("#svg_reflux_" + sensor_key).html(sensor_value.toFixed(0) + '&#176С');
+						if(sensor_value.toFixed(0) !== 150) {
+							$("#svg_reflux_" + sensor_key).html(sensor_value.toFixed(0) + '&#176С');
+						}else{
+							$("#svg_reflux_" + sensor_key).html('');
+						}
 
 						if (Number(q["member"]) !== 0) {
 							dtoJson["temperatures"][sensor_key] = {value: sensor_value, name: q["name"], color: fillcolor};
@@ -2959,7 +2967,11 @@ $(function () {
 				});
 				$("#mashing_" + sensor_key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 				//svg
-				$("#svg_mashing_" + sensor_key).html(sensor_value.toFixed(0) + '&#176С');
+				if(sensor_value.toFixed(0) !== 150) {
+					$("#svg_mashing_" + sensor_key).html(sensor_value.toFixed(0) + '&#176С');
+				}else{
+					$("#svg_mashing_" + sensor_key).html('');
+				}
 			});
 			let time_cur_pause = 0;
 			let step_pause = 0;
@@ -3298,7 +3310,9 @@ $(function () {
 
 					}*/
 					$("#distillation_power_value").text(globalSensorsJson["power"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
-					$("#svg_distillation_" + sensor_key).html(sensor_value.toFixed(0) + '&#176С');
+					if(sensor_value.toFixed(0) !== 150) {
+						$("#svg_distillation_" + sensor_key).html(sensor_value.toFixed(0) + '&#176С');
+					}
 					$("#svg_distillation_ten_t").text(globalSensorsJson["power"] + '%');
 
 					if (process === 1) {
@@ -3329,7 +3343,9 @@ $(function () {
 						$("#reflux_power_value").text(globalSensorsJson["power"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 					}
 
-					$("#svg_reflux_" + sensor_key).html(sensor_value.toFixed(0) + '&#176С');
+					if(sensor_value.toFixed(0) !== 150) {
+						$("#svg_reflux_" + sensor_key).html(sensor_value.toFixed(0) + '&#176С');
+					}
 					$("#svg_reflux_ten_t").text(globalSensorsJson["power"] + '%');
 
 					if (process === 2) {
@@ -3354,7 +3370,9 @@ $(function () {
 				if (mashingProcess["start"] !== true /*&& $.trim($("#mashing_process").html()) !== ""*/) {
 					$("#mashing_" + sensor_key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 					$("#mashing_power_value").text(globalSensorsJson["power"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
-					$("#svg_mashing_" + sensor_key).html(sensor_value.toFixed(0) + '&#176С');
+					if(sensor_value.toFixed(0) !== 150) {
+						$("#svg_mashing_" + sensor_key).html(sensor_value.toFixed(0) + '&#176С');
+					}
 					$("#svg_mashing_ten_t").text(globalSensorsJson["power"] + '%');
 
 					if (process === 3) {

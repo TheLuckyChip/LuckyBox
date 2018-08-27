@@ -11,17 +11,19 @@
     "build-htm": "html-minifier index.htm --output ../data/index.htm --collapse-whitespace --remove-comments & html-minifier distillation.htm --output ../data/distillation.htm --collapse-whitespace --remove-comments & html-minifier reflux.htm --output ../data/reflux.htm --collapse-whitespace --remove-comments & html-minifier mashing.htm --output ../data/mashing.htm --collapse-whitespace --remove-comments & html-minifier brewing.htm --output ../data/brewing.htm --collapse-whitespace --remove-comments & html-minifier pid.htm --output ../data/pid.htm --collapse-whitespace --remove-comments & html-minifier sensors.htm --output ../data/sensors.htm --collapse-whitespace --remove-comments",
     "build-del": "trash  ../data/scripts.js ../data/style.css",
     "build-lib": "npm run build-js-lib && npm run build-del-lib",
-    "build": "npm run build-js && npm run build-css && npm run build-htm && npm run build-del"
+    "build": "npm run build-js && npm run build-css && npm run build-htm && npm run build-del",
+    "build-babel": "babel scripts.js --out-file bscripts.js --presets=es2015"
   },
   "devDependencies": {
     "html-minifier": "^3.5.19",
     "ngzip": "^1.1.3",
-    "node-minify": "^3.1.0",
+    "node-minify": "^3.4.0",
     "trash-cli": "^1.4.0"
   },
   "dependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-es2015": "^6.24.1",
     "ngzip": "^1.1.3",
-    "node-minify": "^3.1.0",
     "trash-cli": "^1.4.0"
   }
 }

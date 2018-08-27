@@ -59,5 +59,6 @@
 	"powerLower":85,
 	"temperatureAlcoholBoil":78.15,
 	"temperatureStartPressure":78.00,
+    "cubeAlcohol":0,
 	"time":0
 }
