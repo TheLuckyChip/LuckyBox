@@ -2775,11 +2775,11 @@ $(function () {
 				sendRequest("mashingSensorsSetSave", sensorsMashingSend, "json", false, false, $("#error_mashing"), false);
 			}
 			//returnTplHtml([{id_value: "mashing_power_value", id_set: "mashing_power_set"}], powerTempl)
-			let timeStepTemplate = '<div class="row row-striped">' +
+			/*let timeStepTemplate = '<div class="row row-striped">' +
 				'<div id="mashing_step" class="col-xs-12 col-md-6 text-center-xs text-middle text-strong hidden"></div>' +
 				'<div id="mashing_time" class="col-xs-12 col-md-6 text-center-xs text-middle text-strong hidden"></div>' +
-				'</div>';
-			mashingTemplate = timeStepTemplate + mashingTemplate + tpl_timer_body + tpl_pause_body;
+				'</div>';*/
+			mashingTemplate = mashingTemplate + tpl_timer_body + tpl_pause_body;
 			$("#mashing_start_group_button").removeClass("hidden");
 		} else {
 			$("#mashing_start_group_button").addClass("hidden");
@@ -3012,7 +3012,7 @@ $(function () {
 			}
 			//$("#mashing_power_value").text(power_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 
-			if(globalSensorsJson["process"]["step"] !== "") {
+			/*if(globalSensorsJson["process"]["step"] !== "") {
 				let stepProcess = globalSensorsJson["process"]["step"];
 				$("#mashing_step").html('Текущая операция: <span class="text-primary">' + stepProcess + '</span>').removeClass("hidden");
 			}else{
@@ -3023,7 +3023,7 @@ $(function () {
 				$("#mashing_time").html('Прошло времени: <span class="text-primary">'+timeProcess+'</span>').removeClass("hidden");
 			}else {
 				$("#mashing_time").html('').addClass("hidden");
-			}
+			}*/
 
 			$("#svg_mashing_ten_t").text(power_value.toFixed(0) + "%");
 			$("#svg_mashing_color_ten").css('fill', colorPersent("#FF0000", power_value.toFixed(0), 100));
