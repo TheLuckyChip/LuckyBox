@@ -3312,6 +3312,8 @@ $(function () {
 					$("#distillation_power_value").text(globalSensorsJson["power"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 					if(sensor_value.toFixed(0) !== 150) {
 						$("#svg_distillation_" + sensor_key).html(sensor_value.toFixed(0) + '&#176С');
+					}else{
+						$("#svg_distillation_" + sensor_key).html('');
 					}
 					$("#svg_distillation_ten_t").text(globalSensorsJson["power"] + '%');
 
@@ -3345,6 +3347,8 @@ $(function () {
 
 					if(sensor_value.toFixed(0) !== 150) {
 						$("#svg_reflux_" + sensor_key).html(sensor_value.toFixed(0) + '&#176С');
+					}else{
+						$("#svg_reflux_" + sensor_key).html('');
 					}
 					$("#svg_reflux_ten_t").text(globalSensorsJson["power"] + '%');
 
@@ -3372,6 +3376,8 @@ $(function () {
 					$("#mashing_power_value").text(globalSensorsJson["power"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 					if(sensor_value.toFixed(0) !== 150) {
 						$("#svg_mashing_" + sensor_key).html(sensor_value.toFixed(0) + '&#176С');
+					}else{
+						$("#svg_mashing_" + sensor_key).html('');
 					}
 					$("#svg_mashing_ten_t").text(globalSensorsJson["power"] + '%');
 
