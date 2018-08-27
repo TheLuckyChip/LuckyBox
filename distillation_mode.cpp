@@ -194,6 +194,8 @@ void distillationLoop() {
 			csOn(PWM_CH1);				// открыть клапан отбора
 			power.heaterStatus = 1;		// включили нагрев
 			power.heaterPower = 100;	// установили мощность на ТЭН 100 %
+			processMode.timeStep = 0;
+			nameProcessStep = "Нагрев куба";
 			processMode.step = 1;		// перешли на следующий шаг алгоритма
 			break;
 		}
@@ -203,6 +205,8 @@ void distillationLoop() {
 				csOn(PWM_CH3);			// включаем клапан подачи воды
 				settingAlarm = true;	// подаем звуковой сигнал
 				timePauseOff = millis();// обнулим счетчик времени для зв.сигнала
+				processMode.timeStep = 0;
+				nameProcessStep = "Отбор СС";
 				processMode.step = 2;	// перешли на следующий шаг алгоритма
 			}
 			break;
@@ -223,6 +227,8 @@ void distillationLoop() {
 				timePauseOff = millis();					// обнулим счетчик времени для зв.сигнала
 				temperatureSensor[DS_Cube].allert = true;	// сигнализация для WEB
 				settingAlarm = true;						// подали звуковой сигнал
+				processMode.timeStep = 0;
+				nameProcessStep = "Процесс закончен";
 				processMode.step = 4;						// перешли на следующий шаг алгоритма
 			}
 			// если сработал датчик уровня жидкости подаем звуковой сигнал

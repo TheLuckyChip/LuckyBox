@@ -354,7 +354,7 @@ void handleProcessSensorOut() {
 	temperatureAlcoholBoil = 78.91 - (780 - pressureSensor.data)*0.038; // расчет температуры кипения спирта при данном давлении
 	settingColumnShow = settingColumn + (temperatureAlcoholBoil - temperatureStartPressure); // расчет уставки при изменившемся атмосферном давлении
 	String dataForWeb = "{\"process\":{\"allow\":" + String(processMode.allow) + ",\"number\":" + String(processMode.number);
-	dataForWeb += ",\"step\":" + String(processMode.step) + ",\"time\":" + String(processMode.timeStep) + "},\"sensors\":[";
+	dataForWeb += ",\"step\":\"" + String(nameProcessStep) + "\",\"time\":" + String(processMode.timeStep) + "},\"sensors\":[";
 	// датчики температуры
 	for (i = 1; i <= DS_Cnt; i++) {
 		k = 0;

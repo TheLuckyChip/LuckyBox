@@ -79,3 +79,4 @@ int WindowSize = 250;
 unsigned long windowStartTime, stepTime;
 unsigned long stepStartTime;
 unsigned long wifiTimeInterval;
+String nameProcessStep = " ";

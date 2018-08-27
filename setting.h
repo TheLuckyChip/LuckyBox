@@ -156,5 +156,6 @@ extern int WindowSize;
 extern unsigned long windowStartTime, stepTime;
 extern unsigned long stepStartTime;
 extern unsigned long wifiTimeInterval;
+extern String nameProcessStep;
 
 #endif

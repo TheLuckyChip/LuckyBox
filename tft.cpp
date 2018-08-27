@@ -503,10 +503,8 @@ void tftMenuLoop() {
 		settingAlarm = false;
 		power.heaterStatus = 0;
 		power.heaterPower = 0;
-		csOff(PWM_CH1);		// закрыли клапан отбора голов
-		csOff(PWM_CH2);		// закрыли клапан отбора тела
-		csOff(PWM_CH3);		// закрыли клапан подачи воды
-		csOff(PWM_CH4);		// закрыли клапан 4
+		csOff(PWM_CH1);		// закрыли клапан отбора
+		csOff(PWM_CH2);		// закрыли клапан подачи воды
 	}
 #if defined TFT_Display
 	// processMode.num = 0 вывод экрана, processMode.num = 1 ждем нажатия

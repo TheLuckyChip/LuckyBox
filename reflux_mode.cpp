@@ -237,17 +237,21 @@ void refluxLoop() {
 			senseHeadcontrol = adcIn[0].member;
 			power.heaterStatus = 1;		// включили нагрев
 			power.heaterPower = power.inPowerHigh;		// установили мощность на ТЭН 100 %
+			processMode.timeStep = 0;
+			nameProcessStep = "Нагрев куба";
 			processMode.step = 1;	// перешли на следующий шаг алгоритма
 			countHaedEnd = 0;
 			break;
 		}
 		// ждем начала подъема температуры в царге и включаем воду на охлаждение и понижаем мощность на ТЭН
 		case 1: {
-			if (temperatureSensor[DS_Tube].data >= 45.0) {
+			if (temperatureSensor[DS_Tube].data >= 30.0) {//45.0) {
 				csOn(PWM_CH3);				// включаем клапан подачи воды
 				power.heaterPower = power.inPowerLow;			// установили мощность на ТЭН 65 %
 				settingAlarm = true;		// подаем звуковой сигнал
 				timePauseOff = millis();	// обнулим счетчик времени для зв.сигнала
+				processMode.timeStep = 0;
+				nameProcessStep = "Стабилизация колонны";
 				processMode.step = 2;		// перешли на следующий шаг алгоритма
 			}
 			break;
@@ -265,7 +269,9 @@ void refluxLoop() {
 			if (timePauseOff < millis() && (millis() - timePauseOff) >= 1190000) {
 				timePauseOff = millis();	// обнулим счетчик времени для зв.сигнала
 				settingAlarm = true;	// подаем звуковой сигнал
-				power.heaterPower = power.inPowerLow;		// установили мощность на ТЭН 65 %
+				//power.heaterPower = power.inPowerLow;		// установили мощность на ТЭН 65 %
+				processMode.timeStep = 0;
+				nameProcessStep = "Отбор голов";
 				processMode.step = 4;	// перешли на следующий шаг алгоритма
 			}
 			break;
@@ -320,6 +326,8 @@ void refluxLoop() {
 			if (processMode.step == 6) {
 				csOff(PWM_CH1);		// закрыли клапан отбора голов
 				csOn(PWM_CH2);		// открыть клапан отбора
+				processMode.timeStep = 0;
+				nameProcessStep = "Отбор тела";
 			}
 			break;
 		}
@@ -332,6 +340,8 @@ void refluxLoop() {
 				temperatureSensor[DS_Cube].allert = true;	// сигнализация для WEB
 				settingAlarm = true;						// подаем звуковой сигнал
 				csOff(PWM_CH2);								// закрыли клапан отбора
+				processMode.timeStep = 0;
+				nameProcessStep = "Процесс закончен";
 				processMode.step = 7;						// перешли на следующий шаг алгоритма
 			}
 			else if (temperatureSensor[DS_Tube].allertValue > 0 && temperatureSensor[DS_Tube].data >= temperatureSensor[DS_Tube].allertValue) {
