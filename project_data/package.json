@@ -12,7 +12,7 @@
     "build-del": "trash  ../data/scripts.js ../data/style.css",
     "build-lib": "npm run build-js-lib && npm run build-del-lib",
     "build": "npm run build-js && npm run build-css && npm run build-htm && npm run build-del",
-    "build-babel": "babel scripts.js --out-file bscripts.js --presets=es2015"
+    "build-babel": "babel scripts.js --out-file bscripts.js --presets=es2015 & babel ajaxloader.js --out-file bajaxloader.js --presets=es2015 & babel dialog.js --out-file bdialog.js --presets=es2015"
   },
   "devDependencies": {
     "html-minifier": "^3.5.19",
