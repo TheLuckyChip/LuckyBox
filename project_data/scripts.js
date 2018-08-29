@@ -1811,10 +1811,10 @@ $(function () {
 							$("#distillation_cutoff_result_" + sensor_key).text(allertValue).parent().find(".show").removeClass("show").addClass("hidden");
 						}
 						//svg
-						if(sensor_value.toFixed(0) < 150) {
-							$("#svg_distillation_" + sensor_key).html(sensor_value.toFixed(0) + '&#176С');
+						if(sensor_value < 150) {
+							$("#svg_distillation_" + sensor_key).text(sensor_value.toFixed(0) + '°С');
 						}else{
-							$("#svg_distillation_" + sensor_key).html('');
+							$("#svg_distillation_" + sensor_key).text('');
 						}
 					}
 				});
@@ -2096,7 +2096,7 @@ $(function () {
 		if (!$.fn.objIsEmpty(refluxProcess["sensors"], false)) {
 			let tpl_delta_thead = //'<div class="col-xs-hidden col-sm-4"></div>' +
 				'<div class="row-xs clearfix">' +
-				'<div class="col-xs-4 col-xs-offset-0 col-sm-3 col-sm-offset-4 text-center text-middle text-primary">Значение</div>' +
+				'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-4 text-center text-middle text-primary">Значение</div>' +
 				'<div class="col-xs-4 col-sm-3 text-center text-middle text-primary">Дельта</div>' +
 				'<div class="col-xs-4 col-sm-2 text-center text-middle text-primary">Уставка</div>' +
 				'</div>';
@@ -2132,8 +2132,8 @@ $(function () {
 							'<div id="reflux_alert_bg_' + sensor_key + '" class="pt-10 pb-10 clearfix">' +
 							'<div id="reflux_alert_text_' + sensor_key + '" class="col-xs-12 col-sm-4 text-middle text-center-xs text-strong">t&#176' + name_sensor + '</div>' +
 							'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle text-strong"><span id="reflux_' + sensor_key + '"></span><span class="hidden">&#176С</span></div>' +
-							'<div class="col-xs-3 col-sm-3">' + tpl_delta + '</div>' +
-							'<div class="col-xs-4 col-xs-offset-1 col-sm-2 col-sm-offset-0 text-center text-middle text-strong">' + tpl_delta_result +
+							'<div class="col-xs-4 col-sm-3">' + tpl_delta + '</div>' +
+							'<div class="col-xs-4 col-xs-offset-0 col-sm-2 col-sm-offset-0 text-center text-middle text-strong">' + tpl_delta_result +
 							'</div>' +
 							'</div>' +
 							'</div>';
@@ -2440,10 +2440,10 @@ $(function () {
 							$("#reflux_cutoff_result_" + sensor_key).text(allertValue).parent().find(".show").removeClass("show").addClass("hidden");
 						}
 						//svg
-						if(sensor_value.toFixed(0) < 150) {
-							$("#svg_reflux_" + sensor_key).html(sensor_value.toFixed(0) + '&#176С');
+						if(sensor_value < 150) {
+							$("#svg_reflux_" + sensor_key).text(sensor_value.toFixed(0) + '°С');
 						}else{
-							$("#svg_reflux_" + sensor_key).html('');
+							$("#svg_reflux_" + sensor_key).text('');
 						}
 
 						if (Number(q["member"]) !== 0) {
@@ -2967,10 +2967,10 @@ $(function () {
 				});
 				$("#mashing_" + sensor_key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 				//svg
-				if(sensor_value.toFixed(0) < 150) {
-					$("#svg_mashing_" + sensor_key).html(sensor_value.toFixed(0) + '&#176С');
+				if(sensor_value < 150) {
+					$("#svg_mashing_" + sensor_key).text(sensor_value.toFixed(0) + '°С');
 				}else{
-					$("#svg_mashing_" + sensor_key).html('');
+					$("#svg_mashing_" + sensor_key).text('');
 				}
 			});
 			let time_cur_pause = 0;
@@ -3289,10 +3289,11 @@ $(function () {
 			$.each(globalSensorsJson["sensors"], function (i, e) {
 				let sensor_key = Object.keys(e).shift();
 				//заполнение вкладки датчики
-				let sensor_value = globalSensorsJson["sensors"][i][sensor_key]["value"];
+				let sensor_value = Number(globalSensorsJson["sensors"][i][sensor_key]["value"]);
+
 				if ($("#sensor_val_" + sensor_key).length && sensor_value < 150) {
 					$("#sensor_val_" + sensor_key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
-					$("#svg_sensor_" + sensor_key).html(sensor_value.toFixed(0) + '&#176С');
+					$("#svg_sensor_" + sensor_key).text(sensor_value.toFixed(0) + '°С');
 				}
 				let process = Number(globalSensorsJson["process"]["allow"]);
 				//очистка данных графиков
@@ -3310,10 +3311,10 @@ $(function () {
 
 					}*/
 					$("#distillation_power_value").text(globalSensorsJson["power"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
-					if(sensor_value.toFixed(0) < 150) {
-						$("#svg_distillation_" + sensor_key).html(sensor_value.toFixed(0) + '&#176С');
+					if(sensor_value < 150) {
+						$("#svg_distillation_" + sensor_key).text(sensor_value.toFixed(0) + '°С');
 					}else{
-						$("#svg_distillation_" + sensor_key).html('');
+						$("#svg_distillation_" + sensor_key).text('');
 					}
 					$("#svg_distillation_ten_t").text(globalSensorsJson["power"] + '%');
 
@@ -3345,10 +3346,10 @@ $(function () {
 						$("#reflux_power_value").text(globalSensorsJson["power"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 					}
 
-					if(sensor_value.toFixed(0) < 150) {
-						$("#svg_reflux_" + sensor_key).html(sensor_value.toFixed(0) + '&#176С');
+					if(sensor_value < 150) {
+						$("#svg_reflux_" + sensor_key).text(sensor_value.toFixed(0) + '°С');
 					}else{
-						$("#svg_reflux_" + sensor_key).html('');
+						$("#svg_reflux_" + sensor_key).text('');
 					}
 					$("#svg_reflux_ten_t").text(globalSensorsJson["power"] + '%');
 
@@ -3374,10 +3375,10 @@ $(function () {
 				if (mashingProcess["start"] !== true /*&& $.trim($("#mashing_process").html()) !== ""*/) {
 					$("#mashing_" + sensor_key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 					$("#mashing_power_value").text(globalSensorsJson["power"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
-					if(sensor_value.toFixed(0) < 150) {
-						$("#svg_mashing_" + sensor_key).html(sensor_value.toFixed(0) + '&#176С');
+					if(sensor_value < 150) {
+						$("#svg_mashing_" + sensor_key).text(sensor_value.toFixed(0) + '°С');
 					}else{
-						$("#svg_mashing_" + sensor_key).html('');
+						$("#svg_mashing_" + sensor_key).text('');
 					}
 					$("#svg_mashing_ten_t").text(globalSensorsJson["power"] + '%');
 
