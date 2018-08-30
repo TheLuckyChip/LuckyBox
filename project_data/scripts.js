@@ -290,6 +290,18 @@ $(function () {
 		return (hours<10 ? "0" + hours : hours) +":"+ (minutes<10 ? "0" + minutes : minutes);
 	}
 
+	//Запуск аудио
+	let audio =  $('#alert_audio')[0];
+	function stopSound() {
+		audio.pause();
+	}
+	function playSound() {
+		audio.loop = true;
+		audio.play();
+		setTimeout(function () {
+			stopSound();
+		}, 5000);
+	}
 	/**
 	 * Проверка на мобильную версию
 	 * @returns {boolean}
@@ -1789,6 +1801,7 @@ $(function () {
 						if (alert_value > 0 && sensor_value >= alert_value) {
 							$("#distillation_alert_bg_" + sensor_key).addClass("bg-danger");
 							$("#distillation_alert_text_" + sensor_key).addClass("text-danger");
+							playSound();
 							// Вибрация поддерживается
 							/*if (window.navigator && window.navigator.vibrate) {
 								navigator.vibrate(1000);
@@ -1850,6 +1863,7 @@ $(function () {
 							if(Number(e[sensor_key]["allert"]) !== 0){
 								$("#distillation_alert_bg_" + sensor_key).addClass("bg-danger");
 								$("#distillation_alert_text_" + sensor_key).addClass("text-danger");
+								playSound();
 							} else {
 								$("#distillation_alert_bg_" + sensor_key).removeClass("bg-danger");
 								$("#distillation_alert_text_" + sensor_key).removeClass("text-danger");
@@ -2426,6 +2440,7 @@ $(function () {
 						if (alert_value > 0 && sensor_value >= alert_value) {
 							$("#reflux_alert_bg_" + sensor_key).addClass("bg-danger");
 							$("#reflux_alert_text_" + sensor_key).addClass("text-danger");
+							playSound();
 							// Вибрация поддерживается
 							/*if (window.navigator && window.navigator.vibrate) {
 								navigator.vibrate(1000);
@@ -2494,6 +2509,7 @@ $(function () {
 								if(Number(e[sensor_key]["allert"]) !== 0){
 									$("#reflux_alert_bg_" + sensor_key).addClass("bg-danger");
 									$("#reflux_alert_text_" + sensor_key).addClass("text-danger");
+									playSound();
 								} else {
 									$("#reflux_alert_bg_" + sensor_key).removeClass("bg-danger");
 									$("#reflux_alert_text_" + sensor_key).removeClass("text-danger");
