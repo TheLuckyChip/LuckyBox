@@ -1663,6 +1663,12 @@ $(function () {
 		$('#distillation_add_sensor').prop("disabled", false);
 		$('#distillation_start').prop("disabled", false);
 		$("#svg_distillation_start").css('stroke', "#000000");
+		$("#svg_distillation_alco_txt").hide();
+		$("#svg_distillation_alco_val").hide().text("");
+		$("#distillation_time").html('').addClass("hidden");
+		$("#distillation_step").html('').addClass("hidden");
+		$("#distillation_process").find("div.bg-danger").removeClass("bg-danger");
+		$("#distillation_process").find("div.text-danger").removeClass("text-danger");
 		flagSendProcess = true;
 		distillationProcess["start"] = false;
 		clearInterval(sensorsProcessId);
@@ -1890,6 +1896,13 @@ $(function () {
 		if (distillationProcess["start"] === true) {
 			//console.log("setTimeout","getDistillation");
 			$("#svg_distillation_start").css('stroke', "#02b500");
+			if(Number(globalSensorsJson["cubeAlcohol"])>0){
+				$("#svg_distillation_alco_txt").show();
+				$("#svg_distillation_alco_val").show().text(globalSensorsJson["cubeAlcohol"] + "%");
+			}else{
+				$("#svg_distillation_alco_txt").hide();
+				$("#svg_distillation_alco_val").hide().text("");
+			}
 		}
 	}
 
@@ -2290,6 +2303,12 @@ $(function () {
 		$('#reflux_algorithm_select').prop("disabled", false);
 		$("#reflux_algorithm_select option[value=0]").prop('selected',true);
 		$("#svg_reflux_start").css('stroke', "#000000");
+		$("#svg_reflux_alco_txt").hide();
+		$("#svg_reflux_alco_val").hide().text("");
+		$("#reflux_time").html('').addClass("hidden");
+		$("#reflux_step").html('').addClass("hidden");
+		$("#reflux_process").find("div.bg-danger").removeClass("bg-danger");
+		$("#reflux_process").find("div.text-danger").removeClass("text-danger");
 		flagSendProcess = true;
 		refluxProcess["start"] = false;
 		clearInterval(sensorsProcessId);
@@ -2534,6 +2553,13 @@ $(function () {
 		if (refluxProcess["start"] === true) {
 			//setTimeout(getReflux, 2000);
 			$("#svg_reflux_start").css('stroke', "#02b500");
+			if(Number(globalSensorsJson["cubeAlcohol"])>0){
+				$("#svg_reflux_alco_txt").show();
+				$("#svg_reflux_alco_val").show().text(globalSensorsJson["cubeAlcohol"] + "%");
+			}else{
+				$("#svg_reflux_alco_txt").hide();
+				$("#svg_reflux_alco_val").hide().text("");
+			}
 		}
 	}
 
