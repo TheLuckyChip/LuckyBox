@@ -292,15 +292,21 @@ $(function () {
 
 	//Запуск аудио
 	let audio =  $('#alert_audio')[0];
+	let playAudio = false;
 	function stopSound() {
 		audio.pause();
+		audio.currentTime = 0;
+		playAudio = false;
 	}
 	function playSound() {
-		audio.loop = true;
-		audio.play();
-		setTimeout(function () {
-			stopSound();
-		}, 5000);
+		if(!playAudio) {
+			playAudio = true;
+			audio.loop = true;
+			audio.play();
+			setTimeout(function () {
+				stopSound();
+			}, 5000);
+		}
 	}
 	/**
 	 * Проверка на мобильную версию
@@ -1801,7 +1807,6 @@ $(function () {
 						if (alert_value > 0 && sensor_value >= alert_value) {
 							$("#distillation_alert_bg_" + sensor_key).addClass("bg-danger");
 							$("#distillation_alert_text_" + sensor_key).addClass("text-danger");
-							playSound();
 							// Вибрация поддерживается
 							/*if (window.navigator && window.navigator.vibrate) {
 								navigator.vibrate(1000);
@@ -1863,7 +1868,6 @@ $(function () {
 							if(Number(e[sensor_key]["allert"]) !== 0){
 								$("#distillation_alert_bg_" + sensor_key).addClass("bg-danger");
 								$("#distillation_alert_text_" + sensor_key).addClass("text-danger");
-								playSound();
 							} else {
 								$("#distillation_alert_bg_" + sensor_key).removeClass("bg-danger");
 								$("#distillation_alert_text_" + sensor_key).removeClass("text-danger");
@@ -2440,7 +2444,6 @@ $(function () {
 						if (alert_value > 0 && sensor_value >= alert_value) {
 							$("#reflux_alert_bg_" + sensor_key).addClass("bg-danger");
 							$("#reflux_alert_text_" + sensor_key).addClass("text-danger");
-							playSound();
 							// Вибрация поддерживается
 							/*if (window.navigator && window.navigator.vibrate) {
 								navigator.vibrate(1000);
@@ -2509,7 +2512,6 @@ $(function () {
 								if(Number(e[sensor_key]["allert"]) !== 0){
 									$("#reflux_alert_bg_" + sensor_key).addClass("bg-danger");
 									$("#reflux_alert_text_" + sensor_key).addClass("text-danger");
-									playSound();
 								} else {
 									$("#reflux_alert_bg_" + sensor_key).removeClass("bg-danger");
 									$("#reflux_alert_text_" + sensor_key).removeClass("text-danger");
@@ -3484,6 +3486,9 @@ $(function () {
 					$("#sensors_group_button").addClass("hidden");
 				}
 			});
+			if(Number(globalSensorsJson["sound"]) > 0 ){
+				playSound();
+			}
 		}
 	}
 	//запрос постоянно всех датчиков
