@@ -351,6 +351,9 @@ void sensorsUserSetOutWeb() {
 // Отправка всех датчиков и входов выходов для интикации в процессе рект./дист./затир./пив.
 void handleProcessSensorOut() {
 	int i, k;
+	float cubeAlcohol;
+	if (temperatureCubeAlcohol <= 50 && temperatureCubeAlcohol > 0) cubeAlcohol = temperatureCubeAlcohol;
+	else cubeAlcohol = 0;
 	temperatureAlcoholBoil = 78.91 - (780 - pressureSensor.data)*0.038; // расчет температуры кипения спирта при данном давлении
 	settingColumnShow = settingColumn + (temperatureAlcoholBoil - temperatureStartPressure); // расчет уставки при изменившемся атмосферном давлении
 	String dataForWeb = "{\"process\":{\"allow\":" + String(processMode.allow) + ",\"number\":" + String(processMode.number);
@@ -403,7 +406,7 @@ void handleProcessSensorOut() {
 
 	//dataForWeb += "\"power\":" + String(power.heaterPower) + ",\"temperatureAlcoholBoil\":" + String(temperatureAlcoholBoil);
 	dataForWeb += "\"power\":" + String(power.heaterPower) + ",\"powerHigh\":" + String(power.inPowerHigh) + ",\"powerLower\":" + String(power.inPowerLow) + ",\"temperatureAlcoholBoil\":" + String(temperatureAlcoholBoil);
-	dataForWeb += ",\"temperatureStartPressure\":" + String(settingColumnShow) + "}";
+	dataForWeb += ",\"temperatureStartPressure\":" + String(settingColumnShow) + ",\"cubeAlcohol\":" + String(cubeAlcohol) + ",\"sound\":" + String(settingAlarm) + "}";
 
 	HTTP.send(200, "text/json", dataForWeb);
 }

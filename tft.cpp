@@ -189,7 +189,7 @@ void tftOutText(int temp_min, int temp_max) {
 	tft.setCursor(0, 22);
 	//tft.print("Step ");
 	//tft.print(processMode.step);
-	if (temperatureCubeAlcohol < 100) tft.printf("%.1f ", temperatureCubeAlcohol);
+	if (temperatureCubeAlcohol <= 50 && temperatureCubeAlcohol >= 2) tft.printf("%.1f ", temperatureCubeAlcohol);
 	else tft.print("-.- ");
 
 	tft.setCursor(26, DW_Y_axis + 5);
@@ -503,8 +503,14 @@ void tftMenuLoop() {
 		settingAlarm = false;
 		power.heaterStatus = 0;
 		power.heaterPower = 0;
-		csOff(PWM_CH1);		// закрыли клапан отбора
-		csOff(PWM_CH2);		// закрыли клапан подачи воды
+		csOff(PWM_CH1);		// закрыли все клапана
+		csOff(PWM_CH2);
+		csOff(PWM_CH3);
+		csOff(PWM_CH4);
+		csOff(PWM_CH5);
+		csOff(PWM_CH6);
+		csOff(PWM_CH7);
+		csOff(PWM_CH8);
 	}
 #if defined TFT_Display
 	// processMode.num = 0 вывод экрана, processMode.num = 1 ждем нажатия
