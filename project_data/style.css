@@ -75,7 +75,7 @@ span.show {
 	min-height: 100px;
 }
 .fill-height{
-	min-height: calc(100vh - 355px);
+	min-height: calc(100vh - 365px);
 }
 .navbar{
 	border-radius: 0;

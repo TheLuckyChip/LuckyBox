@@ -291,7 +291,7 @@ $(function () {
 	}
 
 	//Запуск аудио
-	let audio =  $('#alert_audio')[0];
+	let audio =  document.getElementById("alert_audio"); //$('#alert_audio')[0];
 	let playAudio = false;
 	function stopSound() {
 		audio.pause();
@@ -299,11 +299,15 @@ $(function () {
 		playAudio = false;
 	}
 	function playSound() {
-		if(!playAudio) {
+		if(!playAudio && audio !== undefined) {
+			//audio.pause();
+			//audio.currentTime = 0;
+			audio.load();
 			playAudio = true;
 			audio.loop = true;
 			audio.play();
 			setTimeout(function () {
+				audio.currentTime = 0;
 				stopSound();
 			}, 5000);
 		}
