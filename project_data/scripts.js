@@ -290,28 +290,6 @@ $(function () {
 		return (hours<10 ? "0" + hours : hours) +":"+ (minutes<10 ? "0" + minutes : minutes);
 	}
 
-	//Запуск аудио
-	let audio =  document.getElementById("alert_audio"); //$('#alert_audio')[0];
-	let playAudio = false;
-	function stopSound() {
-		audio.pause();
-		audio.currentTime = 0;
-		playAudio = false;
-	}
-	function playSound() {
-		if(!playAudio && audio !== undefined) {
-			//audio.pause();
-			//audio.currentTime = 0;
-			audio.load();
-			playAudio = true;
-			audio.loop = true;
-			audio.play();
-			setTimeout(function () {
-				audio.currentTime = 0;
-				stopSound();
-			}, 5000);
-		}
-	}
 	/**
 	 * Проверка на мобильную версию
 	 * @returns {boolean}
@@ -319,6 +297,7 @@ $(function () {
 	function isMobile() {
 		try {
 			if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Opera Mobile|Kindle|Windows Phone|PSP|AvantGo|Atomic Web Browser|Blazer|Chrome Mobile|Dolphin|Dolfin|Doris|GO Browser|Jasmine|MicroB|Mobile Firefox|Mobile Safari|Mobile Silk|Motorola Internet Browser|NetFront|NineSky|Nokia Web Browser|Obigo|Openwave Mobile Browser|Palm Pre web browser|Polaris|PS Vita browser|Puffin|QQbrowser|SEMC Browser|Skyfire|Tear|TeaShark|UC Browser|uZard Web|wOSBrowser|Yandex.Browser mobile/i.test(navigator.userAgent)) {
+				console.log("Is isMobile");
 				return true;
 			}
 			return false
@@ -329,6 +308,42 @@ $(function () {
 		}
 	}
 
+	//Запуск аудио
+	let audio =  document.getElementById("alert_audio");
+	// console.log(audio.duration);
+	// audio.addEventListener('timeupdate',function(){
+	// 	let currentTimeMs = audio.currentTime*1000;
+	// 	console.log(currentTimeMs);
+	// },false);
+	let playAudio = false;
+	function stopSound() {
+		audio.loop = false;
+		audio.pause();
+		if (isMobile && window.navigator && window.navigator.vibrate) {
+			window.navigator.vibrate(0);
+		}
+		// audio.currentTime = 0;
+		playAudio = false;
+	}
+	function playSound() {
+		if(!playAudio && audio !== undefined) {
+			//audio.pause();
+			//audio.currentTime = 0;
+			audio.load();
+
+			playAudio = true;
+			audio.loop = true;
+			audio.play();
+			// Вибрация поддерживается
+			if (isMobile && window.navigator && window.navigator.vibrate) {
+				navigator.vibrate(1000);
+			}
+			setTimeout(function () {
+				audio.currentTime = 0;
+				stopSound();
+			}, 5000);
+		}
+	}
 	//Свайп вкладок
 	$(function () {
 		function widthOfList() {
@@ -692,10 +707,11 @@ $(function () {
 		{"value":0,"text":"Ручной режим, только сигнализация"},
 		{"value":1,"text":"Прима отбор по пару (головная фракция по жидкости)"},
 		{"value":2,"text":"Отбор по пару"},
-		{"value":3,"text":"Отбор по жидкости, 1 клапан на отбор"},
-		{"value":4,"text":"Отбор по жидкости, 2 клапана на отбор"},
-		{"value":5,"text":"Бражная колонна, регулировка отбора охлаждением"},
-		{"value":6,"text":"Бражная колонна, регулировка отбора мощностью"}
+		{"value":3,"text":"РК по жидкости 1 клапан (головы - импульсы, тело - дельта)"},
+		{"value":4,"text":"РК по жидкости 2 клапана (головы - импульсы, тело - дельта)"},
+		{"value":5,"text":"РК по жидкости 2 клапана (головы - открыт, тело - дельта)"},
+		{"value":6,"text":"Бражная колонна, регулировка отбора охлаждением"},
+		{"value":7,"text":"Бражная колонна, регулировка отбора мощностью"}
 	];
 	//Глобальный объект dtoReceiver служит для опроса МК.
 	let dtoReceiver = {
@@ -1148,7 +1164,7 @@ $(function () {
 						$("#sensor_name_" + key).val(sensors[key]["name"]);
 						$("#sensor_color_" + key).val(jscolor).next("button").css("background-color", "#" + jscolor);
 						$("#sensor_val_" + key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
-						$("#svg_sensor_" + key).html(sensor_value.toFixed(0) + '&#176С');
+						$("#svg_sensor_" + key).text(sensor_value.toFixed(1) + '°С');
 						$("#svg_sensor_color_" + key).css('fill', jscolor);
 					} else {
 						if (!$.fn.objIsEmpty(sensors[key]["name"], false)) {
@@ -1796,7 +1812,7 @@ $(function () {
 		//setDistillation();
 		if (!$.fn.objIsEmpty(globalSensorsJson, false)) {
 			let dtoJson = {};
-			dtoJson["heaterPower"] = globalSensorsJson["power"];
+			dtoJson["heaterPower"] = Number(globalSensorsJson["power"]);
 			dtoJson["temperatures"] = {};
 			$.each(globalSensorsJson["sensors"], function (i, e) {
 				let sensor_key = Object.keys(e).shift();
@@ -1840,7 +1856,7 @@ $(function () {
 						}
 						//svg
 						if(sensor_value < 150) {
-							$("#svg_distillation_" + sensor_key).text(sensor_value.toFixed(0) + '°С');
+							$("#svg_distillation_" + sensor_key).text(sensor_value.toFixed(1) + '°С');
 						}else{
 							$("#svg_distillation_" + sensor_key).text('');
 						}
@@ -1888,7 +1904,7 @@ $(function () {
 				$("#distillation_power_set").val(power_higt_value.toFixed(0));
 				$("#distillation_power_lower_set").val(power_lower_value.toFixed(0));
 			}
-			$("#distillation_power_value").text(power_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
+			$("#distillation_power_value").text(power_value.toFixed(0)).parent().find(".hidden").removeClass("hidden").addClass("show");
 
 			if(globalSensorsJson["process"]["step"] !== "") {
 				let stepProcess = globalSensorsJson["process"]["step"];
@@ -2256,6 +2272,7 @@ $(function () {
 		$("#reflux_process").html(refluxTemplate);
 		$.fn.clearSelect($("#reflux_algorithm_select"));
 		$.fn.fillSelect($("#reflux_algorithm_select"), algorithmReflux, false);
+		$("#reflux_algorithm_select").val(globalSensorsJson["process"]["number"]).change();
 		$("#reflux_algorithm").removeClass("hidden");
 		refluxProcess["powerHigh"] = Number(globalSensorsJson["powerHigh"]);
 		refluxProcess["powerLower"] = Number(globalSensorsJson["powerLower"]);
@@ -2323,7 +2340,7 @@ $(function () {
 		$('#reflux_add_sensor').prop("disabled", false);
 		$('#reflux_start').prop("disabled", false);
 		$('#reflux_algorithm_select').prop("disabled", false);
-		$("#reflux_algorithm_select option[value=0]").prop('selected',true);
+		// $("#reflux_algorithm_select option[value=0]").prop('selected',true);
 		$("#svg_reflux_start").css('stroke', "#000000");
 		$("#svg_reflux_alco_txt").hide();
 		$("#svg_reflux_alco_val").hide().text("");
@@ -2431,7 +2448,7 @@ $(function () {
 		//setReflux();
 		if (!$.fn.objIsEmpty(globalSensorsJson, false)) {
 			let dtoJson = {};
-			dtoJson["heaterPower"] = globalSensorsJson["power"];
+			dtoJson["heaterPower"] = Number(globalSensorsJson["power"]);
 			dtoJson["temperatures"] = {};
 			$.each(globalSensorsJson["sensors"], function (i, e) {
 				let sensor_key = Object.keys(e).shift();
@@ -2482,7 +2499,7 @@ $(function () {
 						}
 						//svg
 						if(sensor_value < 150) {
-							$("#svg_reflux_" + sensor_key).text(sensor_value.toFixed(0) + '°С');
+							$("#svg_reflux_" + sensor_key).text(sensor_value.toFixed(1) + '°С');
 						}else{
 							$("#svg_reflux_" + sensor_key).text('');
 						}
@@ -2542,7 +2559,7 @@ $(function () {
 				$("#reflux_power_set").val(power_higt_value.toFixed(0));
 				$("#reflux_power_lower_set").val(power_lower_value.toFixed(0));
 			}
-			$("#reflux_power_value").text(power_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
+			$("#reflux_power_value").text(power_value.toFixed(0)).parent().find(".hidden").removeClass("hidden").addClass("show");
 
 
 			if(globalSensorsJson["process"]["step"] !== "") {
@@ -2997,7 +3014,7 @@ $(function () {
 		//setMashing();
 		if (!$.fn.objIsEmpty(globalSensorsJson, false)) {
 			let dtoJson = {};
-			dtoJson["heaterPower"] = globalSensorsJson["power"];
+			dtoJson["heaterPower"] = Number(globalSensorsJson["power"]);
 			dtoJson["temperatures"] = {};
 			$.each(globalSensorsJson["sensors"], function (i, e) {
 				let sensor_key = Object.keys(e).shift();
@@ -3016,7 +3033,7 @@ $(function () {
 				$("#mashing_" + sensor_key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 				//svg
 				if(sensor_value < 150) {
-					$("#svg_mashing_" + sensor_key).text(sensor_value.toFixed(0) + '°С');
+					$("#svg_mashing_" + sensor_key).text(sensor_value.toFixed(1) + '°С');
 				}else{
 					$("#svg_mashing_" + sensor_key).text('');
 				}
@@ -3341,7 +3358,7 @@ $(function () {
 
 				if ($("#sensor_val_" + sensor_key).length && sensor_value < 150) {
 					$("#sensor_val_" + sensor_key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
-					$("#svg_sensor_" + sensor_key).text(sensor_value.toFixed(0) + '°С');
+					$("#svg_sensor_" + sensor_key).text(sensor_value.toFixed(1) + '°С');
 				}
 				let process = Number(globalSensorsJson["process"]["allow"]);
 				//очистка данных графиков
@@ -3358,13 +3375,13 @@ $(function () {
 						$("#distillation_alco_boil").text(globalSensorsJson["temperatureAlcoholBoil"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 
 					}*/
-					$("#distillation_power_value").text(globalSensorsJson["power"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
+					$("#distillation_power_value").text(Number(globalSensorsJson["power"]).toFixed(0)).parent().find(".hidden").removeClass("hidden").addClass("show");
 					if(sensor_value < 150) {
-						$("#svg_distillation_" + sensor_key).text(sensor_value.toFixed(0) + '°С');
+						$("#svg_distillation_" + sensor_key).text(sensor_value.toFixed(1) + '°С');
 					}else{
 						$("#svg_distillation_" + sensor_key).text('');
 					}
-					$("#svg_distillation_ten_t").text(globalSensorsJson["power"] + '%');
+					$("#svg_distillation_ten_t").text(Number(globalSensorsJson["power"]).toFixed(0) + '%');
 
 					if (process === 1) {
 						$('li.swipe-tab a[data-target="#distillation"]').tab('show');
@@ -3391,15 +3408,15 @@ $(function () {
 						$("#reflux_pressure").text(globalSensorsJson["sensors"][i]["p1"]["value"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 
 						$("#reflux_alco_boil").text(globalSensorsJson["temperatureAlcoholBoil"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
-						$("#reflux_power_value").text(globalSensorsJson["power"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
+						$("#reflux_power_value").text(Number(globalSensorsJson["power"]).toFixed(0)).parent().find(".hidden").removeClass("hidden").addClass("show");
 					}
 
 					if(sensor_value < 150) {
-						$("#svg_reflux_" + sensor_key).text(sensor_value.toFixed(0) + '°С');
+						$("#svg_reflux_" + sensor_key).text(sensor_value.toFixed(1) + '°С');
 					}else{
 						$("#svg_reflux_" + sensor_key).text('');
 					}
-					$("#svg_reflux_ten_t").text(globalSensorsJson["power"] + '%');
+					$("#svg_reflux_ten_t").text(Number(globalSensorsJson["power"]).toFixed(0) + '%');
 
 					if (process === 2) {
 						$('li.swipe-tab a[data-target="#reflux"]').tab('show');
@@ -3422,13 +3439,13 @@ $(function () {
 				//заполнение процесса затирания
 				if (mashingProcess["start"] !== true /*&& $.trim($("#mashing_process").html()) !== ""*/) {
 					$("#mashing_" + sensor_key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
-					$("#mashing_power_value").text(globalSensorsJson["power"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
+					// $("#mashing_power_value").text(Number(globalSensorsJson["power"]).toFixed(0)).parent().find(".hidden").removeClass("hidden").addClass("show");
 					if(sensor_value < 150) {
-						$("#svg_mashing_" + sensor_key).text(sensor_value.toFixed(0) + '°С');
+						$("#svg_mashing_" + sensor_key).text(sensor_value.toFixed(1) + '°С');
 					}else{
 						$("#svg_mashing_" + sensor_key).text('');
 					}
-					$("#svg_mashing_ten_t").text(globalSensorsJson["power"] + '%');
+					$("#svg_mashing_ten_t").text(Number(globalSensorsJson["power"]).toFixed(0) + '%');
 
 					if (process === 3) {
 						$('li.swipe-tab a[data-target="#mashing"]').tab('show');
