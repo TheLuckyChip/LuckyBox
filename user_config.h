@@ -16,10 +16,10 @@
 // Количество входных линий АЦП
 #define		ADC_Cnt			4
 // Соответствие каналов ADC
-#define		AN0				1
-#define		AN1				2
-#define		AN2				3
-#define		AN3				0
+#define		AN0				0
+#define		AN1				1
+#define		AN2				2
+#define		AN3				3
 // Используем TFT дисплей или нет
 #define		TFT_Display
 // ТачСкрин
