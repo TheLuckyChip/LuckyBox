@@ -15,6 +15,11 @@
 #define		PWM_Cnt			9
 // Количество входных линий АЦП
 #define		ADC_Cnt			4
+// Соответствие каналов ADC
+#define		AN0				1
+#define		AN1				2
+#define		AN2				3
+#define		AN3				0
 // Используем TFT дисплей или нет
 #define		TFT_Display
 // ТачСкрин
@@ -31,10 +36,10 @@
 #define		BUZ_VOL		13
 #define		BUZ_OUT		14
 #define		SIREN_OUT	1
-#define		PWM_CH1		9//11
-#define		PWM_CH2		8//10
-#define		PWM_CH3		11//9
-#define		PWM_CH4		10//8
+#define		PWM_CH1		11
+#define		PWM_CH2		10
+#define		PWM_CH3		9
+#define		PWM_CH4		8
 #define		PWM_CH5		2
 #define		PWM_CH6		3
 #define		PWM_CH7		4
@@ -51,7 +56,7 @@
 #define		PWM_CH7_Invert	false
 #define		PWM_CH8_Invert	true
 #define		PWM_CH9_Invert	true
-// переменные временных интервалов на отбор голов
+// переменные временных интервалов на отбор голов для РК
 #define		headValveOpen	800
 #define		headValveClose	5000
 // Периодичность вывода температурного графика в секундах на экран

@@ -208,6 +208,7 @@ void mashingLoop() {
 			processMashing[0].step = 1;					// для индикации обрабатываемой температурной паузы в WEB
 			processMode.timeStep = 0;					// для расчета и вывода времени прошедшего с начала текущего шага
 			windowStartTime = millis();					// для расчетов в алгоритме PID
+			processMode.timeStart = time(nullptr);
 			processMode.step = 1;			// перешли на следующий шаг алгоритма
 			break;
 		}

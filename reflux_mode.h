@@ -10,6 +10,7 @@
 
 #include "heater.h"
 #include "setting.h"
+#include <time.h>
 #include "tft.h"
 #include "pwm_out.h"
 #include <EEPROM.h>

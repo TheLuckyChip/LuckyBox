@@ -196,6 +196,7 @@ void distillationLoop() {
 			power.heaterPower = 100;	// установили мощность на ТЭН 100 %
 			processMode.timeStep = 0;
 			nameProcessStep = "Нагрев куба";
+			processMode.timeStart = time(nullptr);
 			processMode.step = 1;		// перешли на следующий шаг алгоритма
 			break;
 		}

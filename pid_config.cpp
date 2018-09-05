@@ -45,9 +45,10 @@ void handlePidSet() {
 }
 
 void pidSetLoop() {
-	while (processMode.allow == 4) {
-		if (processMode.step == 0) {
+	switch (processMode.step) {
+		case 0: {
 			loadEepromMashing();
+			processMode.timeStart = time(nullptr);
 			if (temperatureSensor[0].member == 1) numSenseMashBrew = 0;
 			else if (temperatureSensor[1].member == 1) numSenseMashBrew = 1;
 			else if (temperatureSensor[2].member == 1) numSenseMashBrew = 2;
@@ -56,31 +57,45 @@ void pidSetLoop() {
 			else if (temperatureSensor[5].member == 1) numSenseMashBrew = 5;
 			else if (temperatureSensor[6].member == 1) numSenseMashBrew = 6;
 			else if (temperatureSensor[7].member == 1) numSenseMashBrew = 7;
-
+			// подготовка данных для вывода на TFT
+#if defined TFT_Display
+			csOn(TFT_CS);
+			//tft.fillScreen(ILI9341_BLACK);
+			tftStartForGraph();
+			displayTimeInterval = millis() + 1000;
+			DefCubOut = Display_out_temp;
+			csOff(TFT_CS);
+#endif
 			myPID.SetTunings(setKp, setKi, setKd);
 			myPID.SetOutputLimits(0, WindowSize);		// временной интервал реагирования для PID
 			myPID.SetMode(AUTOMATIC);
 			Setpoint = processMashing[0].temperature;
+			timePauseOff = millis();
 			processMode.step = 1;
+			break;
 		}
+		case 1: {
+			if (timePauseOff <= millis()) {
+				timePauseOff = millis() + 100;	// счетчик времени
+				Input = setTempForPID;
 
-		Input = setTempForPID;
+				myPID.Compute();											// расчет времени для PID регулировки
 
-		myPID.Compute();											// расчет времени для PID регулировки
-
-		if (millis() > WindowSize + windowStartTime) {
-			windowStartTime += WindowSize;
-			if (windowStartTime > millis()) windowStartTime = 0;    // защита от переполнения
+				if (millis() > WindowSize + windowStartTime) {
+					windowStartTime += WindowSize;
+					if (windowStartTime > millis()) windowStartTime = 0;    // защита от переполнения
+				}
+				// включить или выключить ТЭН в зависимости от расчетов временного PID регулирования
+				if (Output < millis() - windowStartTime) {
+					digitalWrite(heater, LOW);
+					power.heaterPower = 0;
+				}
+				else {
+					digitalWrite(heater, HIGH);
+					power.heaterPower = 100;
+				}
+			}
+			break;
 		}
-		// включить или выключить ТЭН в зависимости от расчетов временного PID регулирования
-		if (Output < millis() - windowStartTime) {
-			digitalWrite(heater, LOW);
-			power.heaterPower = 0;
-		}
-		else {
-			digitalWrite(heater, HIGH);
-			power.heaterPower = 100;
-		}
-		delay(100);
 	}
 }

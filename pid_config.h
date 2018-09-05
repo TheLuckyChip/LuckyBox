@@ -12,6 +12,7 @@
 #include "setting.h"
 #include "user_config.h"
 #include "mashing_mode.h"
+#include <time.h>
 
 extern void initPID();
 extern void handlePidSet();

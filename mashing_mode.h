@@ -12,6 +12,7 @@
 #include "setting.h"
 #include "pwm_out.h"
 #include "tft.h"
+#include <time.h>
 #include <PID_v1.h>
 
 //extern void loadEepromMashing();

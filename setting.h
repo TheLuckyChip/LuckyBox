@@ -60,6 +60,7 @@ struct PR_Type
 	uint8_t			allow;			// какой процесс (дистилляция, ректификация или затирание) включен
 	uint8_t			step;			// номер шага алгоритма
 	unsigned long	timeStep;		// время шага алгоритма в секундах
+	unsigned long	timeStart;		// время старта процесса
 	uint8_t			number;			// тип (номер) алгоритма для ректификации или затирания
 };
 struct PR_Mashing

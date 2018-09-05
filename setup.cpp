@@ -278,7 +278,8 @@ void setup()
 #endif
 
   processMode.allow = 0; // Стоп
-  processMode.number = 0;
+  processMode.number = EEPROM.read(1499);// modeReflux;
+  if (processMode.number > 7) processMode.number = 0;
   processMode.step = 0;
 
   Serial.println("Setup Done!");

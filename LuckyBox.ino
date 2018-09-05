@@ -26,7 +26,7 @@ void loop() {
 	case 2: refluxLoop(); break;
 	case 3: mashingLoop(); break;
 	case 4: pidSetLoop(); break;
-	case 5: brewingLoop(); break;
+	//case 5: brewingLoop(); break;
   }
   adcLoop();
   heaterLoop();

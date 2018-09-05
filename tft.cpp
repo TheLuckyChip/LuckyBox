@@ -499,10 +499,12 @@ void getTouchArea() {
 }
 
 void tftMenuLoop() {
-	if (processMode.step == 0) {
+	if (processMode.allow == 0) {
 		settingAlarm = false;
 		power.heaterStatus = 0;
 		power.heaterPower = 0;
+		processMode.timeStart = 0;
+		processMode.timeStep = 0;
 		csOff(PWM_CH1);		// закрыли все клапана
 		csOff(PWM_CH2);
 		csOff(PWM_CH3);
