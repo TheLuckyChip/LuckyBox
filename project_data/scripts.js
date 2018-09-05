@@ -1669,7 +1669,7 @@ $(function () {
 		distillationProcess["start"] = flagSendProcess = true;
 		localStorage.setObj('oldStartProcess', 1);
 		//очищаем графики
-		clearChart();
+		// clearChart();
 		startChart();
 		clearInterval(sensorsProcessId);
 		setDistillation();
@@ -3513,7 +3513,9 @@ $(function () {
 		}
 	}
 	//запрос постоянно всех датчиков
-	//let tmpTime = 1;
+	let tmpTime = 0;
+	let stopTime = 30;
+	let openModalError = false;
 	function getIntervalSensors() {
 		$.ajax({
 			//url: 'sensors.php',
@@ -3526,11 +3528,38 @@ $(function () {
 				//console.log('Sensors',msg);
 				globalSensorsJson = msg;
 				fillSensorsData();
+				tmpTime = 0;
+				if(openModalError){
+					$('.modal').modal('hide');
+				}
+				openModalError = false;
 			},
 			error: function (err, exception) {
-				$.fn.openModal('', '<p class="text-center text-danger text-strong">Ошибка загрузки данных датчиков, проверьте питание контроллера и обновите страницу</p>', "modal-sm", false, true);
-				clearInterval(sensorsIntervalId);
-				clearInterval(sensorsProcessId);
+				if(!openModalError) {
+					openModalError = true;
+					$.fn.openModal('',
+						'<p class="text-center text-danger text-strong">Ошибка загрузки данных датчиков, проверьте питание контроллера и обновите страницу</p>' +
+						'<p class="text-center text-strong" id="modal_time_out"></p>',
+						"modal-sm", false, {
+							text: "Запустить",
+							id: "return_interval",
+							class: "btn btn-success hidden",
+							click: function () {
+								$(this).closest(".modal").modal("hide");
+								sensorsIntervalId = setInterval(getIntervalSensors, 1000);
+							}
+						});
+				}
+				$("#modal_time_out").text('Запрос датчиков прекратится через ' + (stopTime - tmpTime) + ' сек.');
+				tmpTime++;
+				if(tmpTime > stopTime) {
+					$("#modal_time_out").text('Запрос датчиков остановлен');
+					$("#return_interval").removeClass("hidden");
+					clearInterval(sensorsIntervalId);
+					clearInterval(sensorsProcessId);
+					tmpTime = 0;
+					openModalError = false;
+				}
 			},
 		});
 		//if(tmpTime<100 && refluxProcess["start"] === true)
