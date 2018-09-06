@@ -808,8 +808,9 @@ $(function () {
 		if(process !== 0)
 			plot = getPlot();
 	});*/
-
+	let drowChart = false;
 	function startChart() {
+		drowChart = true;
 		$(document).one("newDTOreceived", function (e) {
 			//console.log(e,dtoReceiver.dtoContainer);
 			let process = Number(globalSensorsJson["process"]["allow"]);
@@ -824,6 +825,7 @@ $(function () {
 	}
 
 	function clearChart() {
+		drowChart = false;
 		$(document).off("newDTOreceived");
 		plot = {};
 		//console.log("clearChart");
@@ -1668,9 +1670,14 @@ $(function () {
 		$('#distillation_stop').prop("disabled", false);
 		distillationProcess["start"] = flagSendProcess = true;
 		localStorage.setObj('oldStartProcess', 1);
-		//очищаем графики
+		// let oldTimeStart = Number(localStorage.getObj('timeStartProcess'));
+		// if(oldTimeStart !== Number(globalSensorsJson["process"]["timeStart"])) {
+		// 	localStorage.setObj('timeStartProcess', globalSensorsJson["process"]["timeStart"]);
+		// 	//очищаем графики
+		// 	clearChart();
+		// }
 		// clearChart();
-		startChart();
+		// startChart();
 		clearInterval(sensorsProcessId);
 		setDistillation();
 	});
@@ -1927,7 +1934,7 @@ $(function () {
 			$("#view_pid_chart").html("");
 			//let oldStartProcess = Number(localStorage.getItem('oldStartProcess'));
 			//if(oldStartProcess === 1) {
-			if (!$.fn.objIsEmpty(dtoJson["temperatures"], false)){
+			if (!$.fn.objIsEmpty(dtoJson["temperatures"], false) && drowChart){
 				dtoReceiver.start(dtoJson, 'view_distillation_chart');
 			}
 		}
@@ -2308,8 +2315,8 @@ $(function () {
 		localStorage.setObj('oldStartProcess', 2);
 		refluxProcess["start"] = flagSendProcess = true;
 		//очищаем графики
-		clearChart();
-		startChart();
+		//clearChart();
+		//startChart();
 		clearInterval(sensorsProcessId);
 		//sensorsProcessId = setInterval(getReflux, 2000);
 		setReflux();
@@ -2583,7 +2590,7 @@ $(function () {
 			$("#view_pid_chart").html("");
 			//let oldStartProcess = Number(localStorage.getItem('oldStartProcess'));
 			//if(oldStartProcess === 2) {
-			if (!$.fn.objIsEmpty(dtoJson["temperatures"], false)){
+			if (!$.fn.objIsEmpty(dtoJson["temperatures"], false) && drowChart){
 				dtoReceiver.start(dtoJson, 'view_reflux_chart');
 			}
 		}
@@ -2877,8 +2884,8 @@ $(function () {
 		mashingProcess["start"] = flagSendProcess = true;
 		localStorage.setObj('oldStartProcess', 3);
 		//очищаем графики
-		clearChart();
-		startChart();
+		//clearChart();
+		//startChart();
 		clearInterval(sensorsProcessId);
 		setMashing();
 		//startMashing();
@@ -3107,7 +3114,7 @@ $(function () {
 			$("#view_reflux_chart").html("");
 			$("#view_distillation_chart").html("");
 			$("#view_pid_chart").html("");
-			if (!$.fn.objIsEmpty(dtoJson["temperatures"], false)) {
+			if (!$.fn.objIsEmpty(dtoJson["temperatures"], false) && drowChart) {
 				dtoReceiver.start(dtoJson, 'view_mashing_chart');
 			}
 		}
@@ -3124,8 +3131,8 @@ $(function () {
 		pidProcess["start"] = flagSendProcess = true;
 		localStorage.setObj('oldStartProcess', 4);
 		//очищаем графики
-		clearChart();
-		startChart();
+		//clearChart();
+		//startChart();
 		clearInterval(sensorsProcessId);
 		setPid();
 	});
@@ -3316,7 +3323,7 @@ $(function () {
 			$("#view_reflux_chart").html("");
 			$("#view_distillation_chart").html("");
 			$("#view_mashing_chart").html("");
-			if (!$.fn.objIsEmpty(dtoJson["temperatures"], false)) {
+			if (!$.fn.objIsEmpty(dtoJson["temperatures"], false) && drowChart) {
 				//console.log(dtoJson);
 				dtoReceiver.start(dtoJson, 'view_pid_chart');
 			}
@@ -3351,6 +3358,8 @@ $(function () {
 					//}
 				});
 			}
+			let process = Number(globalSensorsJson["process"]["allow"]);
+
 			$.each(globalSensorsJson["sensors"], function (i, e) {
 				let sensor_key = Object.keys(e).shift();
 				//заполнение вкладки датчики
@@ -3359,12 +3368,6 @@ $(function () {
 				if ($("#sensor_val_" + sensor_key).length && sensor_value < 150) {
 					$("#sensor_val_" + sensor_key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 					$("#svg_sensor_" + sensor_key).text(sensor_value.toFixed(1) + '°С');
-				}
-				let process = Number(globalSensorsJson["process"]["allow"]);
-				//очистка данных графиков
-				let oldStartProcess = Number(localStorage.getItem('oldStartProcess'));
-				if (process > 0 && oldStartProcess !== process) {
-					clearChart();
 				}
 				//заполнение процесса дистиляции
 				if (distillationProcess["start"] !== true /*&& $.trim($("#distillation_process").html()) !== ""*/) {
@@ -3507,6 +3510,22 @@ $(function () {
 					$("#sensors_group_button").addClass("hidden");
 				}
 			});
+			//очистка данных графиков и запуск
+			let oldTimeStart = Number(localStorage.getObj('timeStartProcess'));
+			//console.log(oldTimeStart);
+			if(oldTimeStart !== Number(globalSensorsJson["process"]["timeStart"])) {
+				localStorage.setObj('timeStartProcess', globalSensorsJson["process"]["timeStart"]);
+				//очищаем графики
+				clearChart();
+			}
+			let oldStartProcess = Number(localStorage.getItem('oldStartProcess'));
+			if (process > 0 && oldStartProcess !== process) {
+				//очищаем графики
+				clearChart();
+			}
+			if (process > 0 && !drowChart && Number(globalSensorsJson["process"]["timeStart"])>0){
+				startChart();
+			}
 			if(Number(globalSensorsJson["sound"]) > 0 ){
 				playSound();
 			}
@@ -3535,6 +3554,7 @@ $(function () {
 				openModalError = false;
 			},
 			error: function (err, exception) {
+				// globalSensorsJson = {};
 				if(!openModalError) {
 					openModalError = true;
 					$.fn.openModal('',
