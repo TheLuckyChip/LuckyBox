@@ -3554,7 +3554,7 @@ $(function () {
 				openModalError = false;
 			},
 			error: function (err, exception) {
-				// globalSensorsJson = {};
+				globalSensorsJson = {};
 				if(!openModalError) {
 					openModalError = true;
 					$.fn.openModal('',
