@@ -1,10 +1,5 @@
 #include "heater.h"
-#include "user_config.h"
-#include "setting.h"
-#include <ArduinoJson.h>
 
-byte heaterStatus	=	0;		// статус ТЭНа (включен/выключен)
-int	heaterPower		=	0;		// Мощность ТЭНа в % от 0 до 100
 int	reg				=	0;		// переменная для расчетов
 int	tenRealPower	=	100;	// мощности ТЭН от напряжения сети, может быть от 50% (при напряжении сети 160В) до 135%(при напряжении сети 260В)
 int	errorBr			=	0;      // ошибка округления по алгоритму Брезенхема
@@ -16,7 +11,7 @@ void ResOut();
 
 void heaterLoop()
 {
-	if (heaterStatus)
+	if (power.heaterStatus)
 	{
 		if (lastTime + 250 <= millis())
 		{
@@ -39,7 +34,7 @@ void heaterLoop()
 void ResOut()
 {      // вызываем функцию ResOut()при каждом переходе напряжения через ноль (каждые 10мс)
 	   //delay(1);         // задержка которая устанавливает начало открывания семистора ровно при переходе напряжения через ноль 
-	reg = heaterPower + errorBr;
+	reg = power.heaterPower + errorBr;
 	if (reg < 50)
 	{
 		outHeater=0;
@@ -67,8 +62,8 @@ void initHeater()
 
 void handleSetHeaterPower()
 {              //
-	heaterPower = HTTP.arg("heaterPower").toInt();         // Получаем значение мощности ТЭНа из запроса и сохраняем в глобальной переменной
-	heaterStatus = HTTP.arg("heaterStatus").toInt();
+	power.heaterPower = HTTP.arg("heaterPower").toInt();         // Получаем значение мощности ТЭНа из запроса и сохраняем в глобальной переменной
+	power.heaterStatus = HTTP.arg("heaterStatus").toInt();
 
 	HTTP.send(200, "text/plain", "OK");   // отправляем ответ о выполнении
 
@@ -80,7 +75,7 @@ void handleHeaterJSON()
 	DynamicJsonBuffer jsonBuffer;
 	JsonObject& json = jsonBuffer.parseObject(root);
 
-	json["heaterPower"] = heaterPower;
+	json["heaterPower"] = power.heaterPower;
 
 	root = "";
 	json.printTo(root);

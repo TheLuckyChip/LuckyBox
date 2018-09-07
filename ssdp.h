@@ -1,5 +1,4 @@
-// ssdp.h
-
+//   Проект центра открытого проектирования у Счастливчика https://LuckyCenter.ru
 #ifndef _SSDP_h
 #define _SSDP_h
 
@@ -9,7 +8,9 @@
 	#include "WProgram.h"
 #endif
 
+#include "setting.h"
+#include <ESP8266SSDP.h> 
+
 extern void initSSDP(void);
 
 #endif
-

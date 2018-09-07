@@ -1,5 +1,4 @@
-// file_config.h
-
+//   Проект центра открытого проектирования у Счастливчика https://LuckyCenter.ru
 #ifndef _FILE_CONFIG_h
 #define _FILE_CONFIG_h
 
@@ -9,8 +8,11 @@
 	#include "WProgram.h"
 #endif
 
+#include "user_config.h"
+#include "setting.h"
+#include <ArduinoJson.h>
+
 extern bool loadConfig();
 extern bool saveConfig();
 
 #endif
-

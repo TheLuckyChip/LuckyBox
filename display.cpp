@@ -1,37 +1,47 @@
-// 
-// 
-// 
-#include "touch_interrupt.h"
 #include "display.h"
-#include "sensors.h"
-#include "tft.h"
-#include "wifi_config.h"
-#include "setting.h"
-#include "user_config.h"
 
+unsigned long timePauseTouchRead;
 
 void displayLoop() {
 	// опрос тачскрина
 #if defined TFT_Display
-	if ((millis() - touchTimeRead) >= 125) {
-		touchTimeRead = millis();
-		touchscreenUpdate();
+	if (touch_in == true) {
+		if (timePauseTouchRead < millis()) {
+			initBuzzer(50);
+			touchscreenUpdate();
+			delay(150);
+			// определим область нажатия для меню
+			if (processMode.allow == 0) {
+				if (touch_x > 0 && touch_x < 160 && touch_y > 20 && touch_y < 130) touchArea = 1;
+				else if (touch_x > 160 && touch_x < 320 && touch_y > 20 && touch_y < 130) touchArea = 2;
+				else if (touch_x > 0 && touch_x < 160 && touch_y > 130 && touch_y < 240) touchArea = 3;
+				else if (touch_x > 160 && touch_x < 320 && touch_y > 130 && touch_y < 240) touchArea = 4;
+				else touchArea = 0;
+			}
+			if (processMode.allow > 0) {
+				if (touch_x > 110 && touch_x < 260 && touch_y < 100) touchArea = 10;
+				else touchArea = 0;
+			}
+			timePauseTouchRead = millis() + 1000;
+		}
+		else touchscreenUpdate();
+		touch_in = false;
 	}
 #endif
+
 	// Вывод на экран
 	if ((millis() - displayTimeInterval) >= 1000) {
 		displayTimeInterval = millis();
 #if defined TFT_Display
-		tftOutGraphDisplay(); // вывод на дисплей, если он есть
+		if (processMode.allow != 0 && processMode.step != 0) tftOutGraphDisplay(); // вывод на дисплей графиков, если он есть
 		DefCubOut++;
 #endif
-		// проверка WiFi
-		if ((millis() - displayTimeInterval) >= (Display_out_temp * 1000)) {
-			displayTimeInterval = millis();
+	}
+	// проверка WiFi
+	if ((millis() - wifiTimeInterval) >= (setRestartWiFi * 1000)) {
+		wifiTimeInterval = millis();
 
-			reconnectWiFi(timeWiFiReconnect);
-			if (timeWiFiReconnect < setRestartWiFi) timeWiFiReconnect++;
-			else timeWiFiReconnect = 0;
-		}
+		reconnectWiFi();
+
 	}
 }

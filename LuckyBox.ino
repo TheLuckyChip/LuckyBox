@@ -1,34 +1,42 @@
-/*
-   Система автоматики винокура. 
-   Проект центра открытого проектирования у Счастливчика https://LuckyCenter.ru
-*/
+//   Система автоматики винокура. 
+//   Проект центра открытого проектирования у Счастливчика https://LuckyCenter.ru
+//   Версия 2.0 beta
+
+#include "pid_config.h"
+#include "adc.h"
+#include "sd_card.h"
 #include "display.h"
-#include "touch_interrupt.h"
-#include "setup.h"
-#include "wifi_config.h"
-#include "time_config.h"
-#include "ssdp.h"
-#include "reflux_mode.h"
-#include "tft.h"
-#include "http_config.h"
-#include "fs_config.h"
-#include "file_config.h"
-#include "distillation_mode.h"
 #include "sensors.h"
-#include "setting.h"
-#include "buzzer.h"
 #include "heater.h"
-#include "brewing_mode.h"
-#include "Wire.h" 
-#include "user_config.h"
+#include "tft.h"
+#include "setting.h"
+#include "reflux_mode.h"
+#include "distillation_mode.h"
+#include "mashing_mode.h"
+#include "pid_config.h"
+#include "brewing_mode.h" 
+
+unsigned long pause, st;
 
 void loop() {
   HTTP.handleClient();
-  distillationLoop();
-  refluxLoop();
-  brewingLoop();
+  switch (processMode.allow) {
+    case 0: tftMenuLoop(); break;
+	case 1: distillationLoop(); break;
+	case 2: refluxLoop(); break;
+	case 3: mashingLoop(); break;
+	case 4: pidSetLoop(); break;
+	//case 5: brewingLoop(); break;
+  }
+  adcLoop();
   heaterLoop();
   sensorLoop();
   displayLoop();
+  logfileLoop();
   yield();
+  if (touchArea == 10) {
+	  processMode.step = 0;
+	  processMode.allow = 0;
+	  touchArea = 0;
+  }
 }
