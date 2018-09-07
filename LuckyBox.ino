@@ -1,6 +1,6 @@
 //   Система автоматики винокура. 
 //   Проект центра открытого проектирования у Счастливчика https://LuckyCenter.ru
-//   Версия 2.0 beta
+//   Версия 2.0 Release Candidate
 
 #include "pid_config.h"
 #include "adc.h"
