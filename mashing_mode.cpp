@@ -196,6 +196,7 @@ void mashingLoop() {
 			// подготовка данных для вывода на TFT
 #if defined TFT_Display
 			csOn(TFT_CS);
+			graphOutInterval = Display_out_temp;
 			//tft.fillScreen(ILI9341_BLACK);
 			tftStartForGraph();
 			displayTimeInterval = millis() + 1000;

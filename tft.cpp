@@ -87,7 +87,7 @@ void tftStartForGraph() {
 	if (processMode.allow == 1) tft.printf("Distil.");
 	else if (processMode.allow == 2) tft.printf("Reflux");
 	else if (processMode.allow == 3) tft.printf("Mashing");
-	else if (processMode.allow == 4) tft.printf("Brewing");
+	else if (processMode.allow == 4) tft.printf("PID set");
 
 	if (temperatureSensor[DS_Cube].color == 0) dallas_graph[0].color = 0xFC4C; // розовый
 	else dallas_graph[0].color = temperatureSensor[DS_Cube].color;
@@ -328,6 +328,15 @@ void tftOutText(int temp_min, int temp_max) {
 		// температура
 		tft.printf("%.1f C    ", tempOutTFT);
 	}
+	else if (processMode.allow == 4) {
+		// в процессе настройки PID выводим время и температуру
+
+		// время
+		tft.setTextSize(2);
+		tft.setCursor(30, 47);
+		tft.setTextColor(ILI9341_LIGHTGREY, ILI9341_BLACK);
+		tft.printf("Calibration T1 = 65.0");
+	}
 
 	// крупно температура основного графика
 	if (processMode.allow == 2) temp_convert = (int)(temperatureSensor[DS_Tube].data * 10);
@@ -492,8 +501,8 @@ void getTouchArea() {
 		//handleMashingSensorTpl();
 	}
 	else if (touchArea == 4) {
-		//processMode.allow = 4;
-		//processMode.step = 0;
+		processMode.allow = 4;
+		processMode.step = 0;
 	}
 	touchArea = 0;
 }

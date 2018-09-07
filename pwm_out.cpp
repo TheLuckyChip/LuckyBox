@@ -96,7 +96,7 @@ void csOn(byte ch) {
 		else pwm.setPWM(ch, 4096, 0);
 	}
 	else pwm.setPWM(ch, 0, 4096);
-	delay(1);
+	delay(2);
 }
 // задать скважность ШИМ
 void setPWM(byte ch, uint16_t Pon, uint16_t Poff) {

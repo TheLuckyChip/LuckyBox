@@ -956,6 +956,7 @@ void refluxLoop() {
 		EEPROM.commit();
 		delay(10);
 		processMode.timeStart = time(nullptr);
+		graphOutInterval = Display_out_temp;
 	}
 	switch (processMode.number) {
 		// пришли при старте ректификации

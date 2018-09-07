@@ -15,6 +15,7 @@
 #include <time.h>
 
 extern void initPID();
+extern void loadEepromPid();
 extern void handlePidSet();
 extern void pidSetLoop();
 

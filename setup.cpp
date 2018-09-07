@@ -281,6 +281,9 @@ void setup()
   processMode.number = EEPROM.read(1499);// modeReflux;
   if (processMode.number > 7) processMode.number = 0;
   processMode.step = 0;
+  loadEepromPid();
 
+  Serial.print("Kd = ");
+  Serial.println(Kd);
   Serial.println("Setup Done!");
 }

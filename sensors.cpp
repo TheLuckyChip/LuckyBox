@@ -447,7 +447,7 @@ void handleProcessModeIn() {
 #endif
 		}
 	}
-	if (processMode.allow == 0 || processMode.allow == 3) {
+	if (processMode.allow == 0 || processMode.allow == 3 || processMode.allow == 4) {
 		for (i = 0; i < 4; i++) {
 			arg = "pause" + String(i + 1);
 			processMashing[i].time = HTTP.arg(arg + "[time]").toInt();
