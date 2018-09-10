@@ -1,5 +1,4 @@
-// fs.h
-
+//   Проект центра открытого проектирования у Счастливчика https://LuckyCenter.ru
 #ifndef _FS_h
 #define _FS_h
 
@@ -8,6 +7,9 @@
 #else
 	#include "WProgram.h"
 #endif
+
+#include "setting.h"
+#include "user_config.h"
 
 extern void initFS(void);
 extern String getContentType(String filename);
@@ -23,4 +25,3 @@ void listDir(const char * dirname, uint8_t levels);
 #endif
 
 #endif
-

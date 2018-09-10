@@ -1,22 +1,13 @@
 #include "ssdp.h"
-#include "setting.h"
-
-#ifdef ESP8266
-#include <ESP8266SSDP.h> 
-
-#else
-#include <ESP32SSDP.h>
-
-#endif
 
 void initSSDP(void)
 {
-	// SSDP ����������
+	// SSDP дескриптор
 	HTTP.on("/description.xml", HTTP_GET, []()
 	{
 		SSDP.schema(HTTP.client());
 	});
-	//���� ������  2.0.0 ��������������� ��������� �������
+	//Если версия  2.0.0 закомментируйте следующую строчку
 	SSDP.setDeviceType("upnp:rootdevice");
 	SSDP.setSchemaURL("description.xml");
 	SSDP.setHTTPPort(80);
@@ -26,8 +17,7 @@ void initSSDP(void)
 	SSDP.setModelName("LuckyBox");
 	SSDP.setModelNumber("000000000001");
 	SSDP.setModelURL("https://luckycenter.ru");
-	SSDP.setManufacturer("�����������");
+	SSDP.setManufacturer("Счастливчик");
 	SSDP.setManufacturerURL("https://luckycenter.ru");
 	SSDP.begin();
 }
-

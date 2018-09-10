@@ -1,14 +1,9 @@
 #include "fs_config.h"
-#include "setting.h"
-#include "user_config.h"
-
-#ifdef ESP8266
 #include <FS.h>
 
-#else
-#include <SPIFFS.h>
+#define FS_NO_GLOBALS
 
-#endif
+fs::File fsUploadFile;
 
 // инициализация FFS
 void initFS(void)
@@ -18,7 +13,7 @@ void initFS(void)
   return;
   }
   #ifdef ESP8266
-  Dir dir = SPIFFS.openDir("/");
+  fs::Dir dir = SPIFFS.openDir("/");
   while (dir.next()) {    
     String fileName = dir.fileName();
     size_t fileSize = dir.fileSize();
@@ -85,8 +80,8 @@ bool handleFileRead(String path)
 	{
 		if (SPIFFS.exists(pathWithGz))
 			path += ".gz";
-		File file = SPIFFS.open(path, "r");
-		size_t sent = HTTP.streamFile(file, contentType);
+		fs::File file = SPIFFS.open(path, "r");
+		HTTP.streamFile(file, contentType); //size_t sent = HTTP.streamFile(file, contentType);
 		file.close();
 		return true;
 	}
@@ -139,7 +134,7 @@ void handleFileCreate()
 		return HTTP.send(500, "text/plain", "BAD PATH");
 	if (SPIFFS.exists(path))
 		return HTTP.send(500, "text/plain", "FILE EXISTS");
-	File file = SPIFFS.open(path, "w");
+	fs::File file = SPIFFS.open(path, "w");
 	if (file)
 		file.close();
 	else
@@ -154,8 +149,6 @@ void returnFail(String msg) {
 }
 
 
-
-#ifdef ESP8266
 String formatBytes(size_t bytes){
   if (bytes < 1024){
     return String(bytes)+"B";
@@ -175,12 +168,12 @@ void handleFileList() {
   }
   String path = HTTP.arg("dir");
   Serial.println("handleFileList: " + path);
-  Dir dir = SPIFFS.openDir(path);
+  fs::Dir dir = SPIFFS.openDir(path);
   path = String();
   
   String output = "[";
   while(dir.next()){
-    File entry = dir.openFile("r");
+	fs::File entry = dir.openFile("r");
     if (output != "[") output += ',';
     bool isDir = false;
     output += "{\"type\":\"";
@@ -193,80 +186,3 @@ void handleFileList() {
   output += "]";
   HTTP.send(200, "text/json", output);
 }
-
-#else
-void handleFileList() {
-  if(!HTTP.hasArg("dir")) {
-    returnFail("BAD ARGS");
-    return;
-  }
-  String path = HTTP.arg("dir");
-  if(path != "/" && !SPIFFS.exists((char *)path.c_str())) {
-    returnFail("BAD PATH");
-    return;
-  }
-  File dir = SPIFFS.open((char *)path.c_str());
-  path = String();
-  if(!dir.isDirectory()){
-    dir.close();
-    returnFail("NOT DIR");
-    return;
-  }
-  dir.rewindDirectory();
-
-  String output = "[";
-  for (int cnt = 0; true; ++cnt) {
-    File entry = dir.openNextFile();
-    if (!entry)
-    break;
-
-    if (cnt > 0)
-      output += ',';
-
-    output += "{\"type\":\"";
-    output += (entry.isDirectory()) ? "dir" : "file";
-    output += "\",\"name\":\"";
-    // Ignore '/' prefix
-    output += entry.name()+1;
-    output += "\"";
-    output += "}";
-    entry.close();
-  }
-  output += "]";
-  HTTP.send(200, "text/json", output);
-  dir.close();
-}
-
-void listDir(const char * dirname, uint8_t levels) {
-  Serial.printf("Listing directory: %s\n", dirname);
-  
-  File root = SPIFFS.open(dirname);
-  if (!root) {
-    Serial.println("Failed to open directory");
-    return;
-  }
-  if (!root.isDirectory()) {
-    Serial.println("Not a directory");
-    return;
-  }
-
-  File file = root.openNextFile();
-  while (file) {
-    if (file.isDirectory()) {
-      Serial.print("  DIR : ");
-      Serial.println(file.name());
-      if (levels) {
-        listDir(file.name(), levels - 1);
-      }
-    } else {
-      Serial.print("  FILE: ");
-      Serial.print(file.name());
-      Serial.print("  SIZE: ");
-      Serial.println(file.size());
-    }
-    file = root.openNextFile();
-  }
-}
-#endif
-
-
