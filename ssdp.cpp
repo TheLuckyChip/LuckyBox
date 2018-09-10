@@ -1,4 +1,6 @@
 #include "ssdp.h"
+#include "setting.h"
+#include <ESP8266SSDP.h> 
 
 void initSSDP(void)
 {
@@ -21,3 +23,4 @@ void initSSDP(void)
 	SSDP.setManufacturerURL("https://luckycenter.ru");
 	SSDP.begin();
 }
+

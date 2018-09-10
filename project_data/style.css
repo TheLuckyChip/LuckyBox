@@ -2,14 +2,63 @@ html,
 body {
 	height: 100%;
 }
+/** {
+	outline:0 !important;
+	-webkit-appearance:none;
+}*/
+.input-number::-webkit-outer-spin-button,
+.input-number::-webkit-inner-spin-button {
+	-webkit-appearance: none;
+	margin: 0;
+}
+.input-number,
+.input-number:hover,
+.input-number:focus{
+	-moz-appearance: textfield;
+}
+.input-sm{
+	padding: 5px 5px;
+}
+span.show {
+	display: inline-block !important;
+}
 .mt-10{
 	margin-top: 10px;
+}
+.mr-20{
+	margin-right: 20px;
+}
+.ml-20{
+	margin-left: 20px;
+}
+.pt-10{
+	padding-top: 10px;
+}
+.pb-10{
+	padding-bottom: 10px;
+}
+.text-middle{
+	padding-top: 0.3em;
+}
+.text-middle input[type=checkbox]{
+	margin-top: -8px;
+}
+.col-centered{
+	margin: 0 auto;
+	/*float: none;*/
+}
+.text-strong{
+	font-weight: bold;
+}
+.table-noborder td,
+.table-noborder th {
+	border: 0!important;
 }
 .wrap {
 	min-height: 100%;
 	height: auto;
-	margin: 0 auto -60px;
-	padding: 0 0 60px;
+	margin: 0 auto -70px;
+	padding: 0 0 70px;
 }
 
 .wrap > .container {
@@ -17,7 +66,7 @@ body {
 }
 
 .footer {
-	height: 60px;
+	height: 70px;
 	background-color: #f5f5f5;
 	border-top: 1px solid #ddd;
 	padding-top: 20px;
@@ -26,7 +75,7 @@ body {
 	min-height: 100px;
 }
 .fill-height{
-	min-height: calc(100vh - 355px);
+	min-height: calc(100vh - 365px);
 }
 .navbar{
 	border-radius: 0;
@@ -243,7 +292,7 @@ body {
 	left:0;
 	top:0;
 	/*min-width:3000px;*/
-	margin-left:12px;
+	/*margin-left:12px;*/
 	margin-top:0;
 }
 
@@ -297,8 +346,36 @@ body {
 	padding-left: 15px;
 	padding-right: 15px;
 }
+.number-group{
+	width: 120px;
+	margin: 0 auto;
+}
+.number-group input.input-number{
+	text-align: center;
+}
+.box-green {
+	height: 28px;
+	width: 29px;
+	padding: 5px 10px;
+	font-size: 12px;
+	line-height: 1.5;
+	border-radius: 3px;
+	color: #fff;
+	background-color: #5cb85c;
+	border-color: #4cae4c;
+}
+.svg-container-mashing,
+.svg-container{
+	height: 450px;
+}
 /*navbar-banner*/
 @media (max-width: 768px) {
+	.svg-container{
+		height: 380px;
+	}
+	.svg-container-mashing{
+		height: 250px;
+	}
 	.top-banner .h1{font-size: 26px;}
 	.navbar-default.navbar-banner .in {
 		z-index: 1000;
@@ -316,8 +393,70 @@ body {
 		color: #333;
 		background-color: #ededed;
 	}
+	.text-center-xs {
+		text-align: center;
+	}
 }
 @media (max-width: 468px) {
+	.svg-container{
+		height: 300px;
+	}
+	.svg-container-mashing{
+		height: 200px;
+	}
+	.modal-body {
+		padding: 10px;
+	}
+	.modal-body .checkbox-inline{
+		padding-left: 0;
+	}
+	.modal-body input[type=text]{
+		padding-left: 4px;
+	}
+	.modal-body .table>tbody>tr>td{
+		padding: 6px;
+	}
+	/*.text-center-xs {
+		text-align: center;
+	}*/
+	.row-xs-margin-15{
+		margin-left: -15px;
+		margin-right: -15px;
+	}
+	.row-xs:before{
+		content: " ";
+		display: table;
+		clear:both;
+		/*margin-left: 0;*/
+		/*margin-right:0;*/
+	}
+	.row-xs:after{
+		content: " ";
+		display: table;
+		clear:both;
+	}
+	.row-striped{
+		/*margin-left: -10px;*/
+		/*margin-right: -10px;*/
+	}
+	.row-striped:nth-of-type(odd),
+	.row-striped:nth-of-type(odd) .row-xs{
+		background-color: #dcdcdc;
+	}
+	.row-striped:nth-of-type(even),
+	.row-striped:nth-of-type(even) .row-xs{
+		background-color: #ececec;
+	}
+
 	.top-banner .h1{font-size: 18px;}
+
+	.row-xs .col-xs-1, .row-xs .col-xs-2/*, .row-xs .col-xs-3, .row-xs .col-xs-4, .row-xs .col-xs-5, .row-xs .col-xs-6, .row-xs .col-xs-7, .row-xs .col-xs-8, .row-xs .col-xs-9, .row-xs .col-xs-10, .row-xs .col-xs-11, .row-xs .col-xs-12*/{
+		padding-left: 5px;
+		padding-right: 5px;
+	}
+	.col-xs-1, .col-sm-1, .col-md-1, .col-lg-1, .col-xs-2, .col-sm-2, .col-md-2, .col-lg-2, .col-xs-3, .col-sm-3, .col-md-3, .col-lg-3, .col-xs-4, .col-sm-4, .col-md-4, .col-lg-4, .col-xs-5, .col-sm-5, .col-md-5, .col-lg-5, .col-xs-6, .col-sm-6, .col-md-6, .col-lg-6, .col-xs-7, .col-sm-7, .col-md-7, .col-lg-7, .col-xs-8, .col-sm-8, .col-md-8, .col-lg-8, .col-xs-9, .col-sm-9, .col-md-9, .col-lg-9, .col-xs-10, .col-sm-10, .col-md-10, .col-lg-10, .col-xs-11, .col-sm-11, .col-md-11, .col-lg-11, .col-xs-12, .col-sm-12, .col-md-12, .col-lg-12 {
+		/*padding-left: 10px;*/
+		/*padding-right: 10px;*/
+	}
 }
 

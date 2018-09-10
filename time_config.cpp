@@ -1,5 +1,9 @@
 #include "time_config.h"
+#include "file_config.h"
+#include "setting.h"
+#include <ESP8266WiFi.h>
 
+#include <time.h>               //Содержится в пакете
 void initTime()
 {
 	HTTP.on("/Time", handleTime);     // Синхронизировать время устройства по запросу вида /Time
@@ -62,3 +66,6 @@ String GetDate()
 	Data.replace(Time, ""); // Удаляем из строки 8 символов времени и пробел
 	return Data; // Возврашаем полученную дату
 }
+
+
+

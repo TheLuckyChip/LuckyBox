@@ -1,0 +1,19 @@
+﻿{
+  "ssid": "SSID",
+  "password": "password",
+  "ssidAP": "LuckyBox",
+  "passwordAP": "12345678",
+  "ssdP_Name": "LuckyBox",
+  "timezone": 3,
+  "time": "00:55:35",
+  "settingTank": 100.0,
+  "heaterPower": 0,
+  "heaterStatus": false,
+  "sensorsСonformity": [1, 2, 3, 4, 5, 6],
+  "pauseTemp": [48, 64, 72, 78],
+  "pauseTime": [48, 64, 72, 78],
+  "heaterPowerReal": 100.0,
+  "temperatures": [80.0, 30.0, 50.0, 40.0, 20.0, 55.0],
+  "pressure": 760.0,
+  "alarmIs": false
+}

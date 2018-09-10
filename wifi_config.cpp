@@ -1,4 +1,7 @@
 #include "wifi_config.h"
+#include <ESP8266WiFi.h>
+#include "setting.h"
+#include "user_config.h"
 
 void initWifi() {
 	WiFi.disconnect();
@@ -25,8 +28,7 @@ void initWifi() {
 	if (modeWiFi == 1) {
 	    // пробуем подключиться
 		Serial.printf("Connecting to %s\n", _ssid.c_str());
-		//WiFi.disconnect(true);
-		//WiFi.mode(WIFI_STA);
+		WiFi.disconnect(true);
 		WiFi.begin(_ssid.c_str(), _password.c_str());
 		// ждем N кол-во попыток, если нет, то AP Mode
 		byte tmp_while = 0;
@@ -38,55 +40,21 @@ void initWifi() {
 				modeWiFi = 0;
 				break;
 			}
-#if defined TFT_Display
-			if (tmp_while % 2 == 0) {
-				// рисуем квадратики для индикации загрузки
-				scaleCount += 20;
-				if (scaleCount <= 282) tft.writeFillRect(scaleCount, 215, 15, 15, 0xFFFF);
-			}
-#endif
 		}
 	}
 }
 
-void reconnectWiFi() {
-
-
-
-	//Serial.println();
-	//if (WiFi.status() != WL_CONNECTED) Serial.println("Нет подключения");
-	//else Serial.println("Ok");
-	//Serial.print("mode: ");
-	//Serial.println(modeWiFi);
-
-
-
-	if (WiFi.status() == WL_CONNECTED) return;
-	//else WiFi.mode(WIFI_AP_STA);
-
-	if (!WiFi.softAPgetStationNum() && WiFi.status() != WL_CONNECTED) {
-		if (modeWiFi == 0) {
-			int n_network = WiFi.scanNetworks(); // запрос количества доступных сетей
-			for (int i = 0; i < n_network; ++i) {
-				if (WiFi.SSID(i) == _ssid.c_str()) {
-					modeWiFi = 1; // наша сеть присутствует
-					//Serial.println("connect");
-					WiFi.begin(_ssid.c_str(), _password.c_str());
-					// ждем N кол-во попыток, если нет, то AP Mode
-					byte tmp_while = 0;
-					while (WiFi.status() != WL_CONNECTED) {
-						delay(1000);
-						//Serial.print(".");
-						if (tmp_while < 10) tmp_while++;
-						else {
-							break;
-						}
-					}
-				}
-			}
-		}
-		else {
-			WiFi.reconnect();
-		}
+void reconnectWiFi(int tCnt) {
+	if (WiFi.status() == WL_CONNECTED) {
+		modeWiFi = 1;
+		return;
+	}
+	else if (modeWiFi == 1) {
+		modeWiFi = 0;
+	}
+	// При потери связи с базовой станцией переходим в режим точки доступа и пробуем переподключиться
+	if (_ssid.length() && tCnt >= setRestartWiFi && !WiFi.softAPgetStationNum()) {
+		WiFi.reconnect();
+		Serial.println("reconnect");
 	}
 }

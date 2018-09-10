@@ -1,0 +1,23 @@
+{
+  "t1":{"value":54.00,"name":"В кубе","color":64588},
+  "t2":{"value":55.00,"name":"В царге","color":7905},
+  "t3":{"value":78.00,"name":"В узле отбора","color":65504},
+  "t4":{"value":25.00,"name":"Вода на выходе","color":16799},
+  "t5":{"value":35.00,"name":"Датчик в струе","color":64870},
+  "t6":{"value":150.00,"name":"","color":0},
+  "t7":{"value":150.00,"name":"","color":0},
+  "t8":{"value":150.00,"name":"","color":0},
+  "p1":{"value":760.00,"color":1887},
+  "out1":{"value":0,"name":"Клапан давления","member":0},
+  "out2":{"value":0,"name":"","member":0},
+  "out3":{"value":0,"name":"","member":0},
+  "out4":{"value":0,"name":"","member":0},
+  "out5":{"value":0,"name":"","member":0},
+  "out6":{"value":0,"name":"","member":0},
+  "out7":{"value":0,"name":"","member":0},
+  "out8":{"value":0,"name":"","member":0},
+  "in1":{"value":0,"name":"Датчик протечки","member":0},
+  "in2":{"value":0,"name":"","member":0},
+  "in3":{"value":0,"name":"","member":0},
+  "in4":{"value":0,"name":"","member":0}
+}
