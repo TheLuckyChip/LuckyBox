@@ -1807,10 +1807,14 @@ $(function () {
 	);
 	function startDistillation() {
 		console.log("startDistillation");
-		sensorsIntervalId = setInterval(getIntervalSensors, 1000);
-		if(distillationProcess["start"] === true) {
-			sensorsProcessId = setInterval(getDistillation, 2000);
-		}
+		setTimeout(function () {
+			clearInterval(sensorsProcessId);
+			clearInterval(sensorsIntervalId);
+			sensorsIntervalId = setInterval(getIntervalSensors, 1000);
+			if(distillationProcess["start"] === true) {
+				sensorsProcessId = setInterval(getDistillation, 2000);
+			}
+		}, 2000);
 	}
 
 	function getDistillation() {
@@ -2443,10 +2447,14 @@ $(function () {
 	);
 	function startReflux() {
 		console.log("startReflux");
-		sensorsIntervalId = setInterval(getIntervalSensors, 1000);
-		if(refluxProcess["start"] === true) {
-			sensorsProcessId = setInterval(getReflux, 2000);
-		}
+		setTimeout(function () {
+			clearInterval(sensorsProcessId);
+			clearInterval(sensorsIntervalId);
+			sensorsIntervalId = setInterval(getIntervalSensors, 1000);
+			if(refluxProcess["start"] === true) {
+				sensorsProcessId = setInterval(getReflux, 2000);
+			}
+		}, 2000);
 	}
 
 	function getReflux() {
@@ -3010,10 +3018,14 @@ $(function () {
 		flagSendProcess = false;
 		//clearInterval(sensorsProcessId);
 		console.log("startMashing");
-		sensorsIntervalId = setInterval(getIntervalSensors, 1000);
-		if(mashingProcess["start"] === true) {
-			sensorsProcessId = setInterval(getMashing, 2000);
-		}
+		setTimeout(function () {
+			clearInterval(sensorsProcessId);
+			clearInterval(sensorsIntervalId);
+			sensorsIntervalId = setInterval(getIntervalSensors, 1000);
+			if(mashingProcess["start"] === true) {
+				sensorsProcessId = setInterval(getMashing, 2000);
+			}
+		}, 2000);
 	}
 	function getMashing() {
 		//let sek= parseInt(+new Date()/1000);
@@ -3263,23 +3275,30 @@ $(function () {
 			}
 		}, 300)
 	);
-	function startPid() {
+	function startPid(request) {
 		flagSendProcess = false;
 		//clearInterval(sensorsProcessId);
 		console.log("startPid");
-		sensorsIntervalId = setInterval(getIntervalSensors, 1000);
-		if(pidProcess["start"] === true) {
-			sensorsProcessId = setInterval(getPid, 2000);
-		}
+		setTimeout(function () {
+			clearInterval(sensorsProcessId);
+			clearInterval(sensorsIntervalId);
+			sensorsIntervalId = setInterval(getIntervalSensors, 1000);
+			if(pidProcess["start"] === true) {
+				if (!$.fn.objIsEmpty(request, false)) {
+					pidProcess["pid"] = request["settings"];
+				}
+				sensorsProcessId = setInterval(getPid, 2000);
+			}
+		}, 2000);
 	}
 	function getPid() {
-		let sek= parseInt(+new Date()/1000);
+		// let sek= parseInt(+new Date()/1000);
 		//console.log(flagSendProcess,"getPid "+sek);
-		//console.log(globalSensorsJson);
+		// console.log(pidProcess);
 		if (!$.fn.objIsEmpty(globalSensorsJson, false)) {
 			let dtoJson = {};
 			dtoJson["temperatures"] = {};
-			$.each(globalSensorsJson["pid"], function (j, q) {
+			/*$.each(globalSensorsJson["pid"], function (j, q) {
 				let pid_key = Object.keys(q).shift();
 				if (!re_t.test(pid_key)) {
 					let pid_value = Number(globalSensorsJson["pid"][j][pid_key]["deviceOutValue"]);
@@ -3291,8 +3310,41 @@ $(function () {
 						}
 					}
 				}
-			});
-			$.each(globalSensorsJson["sensors"], function (i, e) {
+			});*/
+			if (!$.fn.objIsEmpty(pidProcess, false)) {
+				$.each(pidProcess["pid"], function (j, q) {
+					let pid_key = Object.keys(q).shift();
+					if (!re_t.test(pid_key)) {
+						if(pidProcess["pid"][j][pid_key].hasOwnProperty("deviceOutValue")) {
+							let pid_value = Number(pidProcess["pid"][j][pid_key]["deviceOutValue"]);
+							if (pid_value > 0) {
+								if (pid_key === "Ki") {
+									$(".pid_device_" + pid_key).text(pid_value.toFixed(2));
+								} else {
+									$(".pid_device_" + pid_key).text(pid_value.toFixed(0));
+								}
+							}
+						}
+						if(pidProcess["pid"][j][pid_key].hasOwnProperty("userSetValue")) {
+							let pid_value = Number(pidProcess["pid"][j][pid_key]["userSetValue"]);
+							if (!flagSendProcess) {
+								//убрал пока
+								$("#pid_" + pid_key).val(pid_value);
+							}
+						}
+					}
+				});
+			}
+			let sensor_value = Number(globalSensorsJson["sensors"][0]['t1']["value"]);
+			let sensor_name = globalSensorsJson["sensors"][0]['t1']["name"];
+			let color_value = globalSensorsJson["sensors"][0]['t1']["color"];
+			let fillcolor = "#" + dec2hex(color_value);
+			$("#pid_value_t1").text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
+			//if (Number(globalSensorsJson["sensors"][i][sensor_key]["member"]) !== 0) {
+			if (pidProcess["start"] === true){
+				dtoJson["temperatures"]['t1'] = {value: sensor_value, name: sensor_name, color: fillcolor};
+			}
+			/*$.each(globalSensorsJson["sensors"], function (i, e) {
 				let sensor_key = Object.keys(e).shift();
 				let sensor_value = Number(globalSensorsJson["sensors"][i][sensor_key]["value"]);
 				let sensor_name = globalSensorsJson["sensors"][i][sensor_key]["name"];
@@ -3310,16 +3362,15 @@ $(function () {
 						}
 					}
 				});
-			});
-			$.each(globalSensorsJson["pid"], function (i, e) {
+			});*/
+			/*$.each(globalSensorsJson["pid"], function (i, e) {
 				let pid_key = Object.keys(e).shift();
 				let pid_value = Number(e[pid_key]["userSetValue"]);
 				if(!flagSendProcess) {
 					//убрал пока
 					$("#pid_" + pid_key).val(pid_value);
 				}
-
-			});
+			});*/
 			$("#view_reflux_chart").html("");
 			$("#view_distillation_chart").html("");
 			$("#view_mashing_chart").html("");
@@ -3339,15 +3390,15 @@ $(function () {
 				$.each(globalSensorsJson["pid"], function (j, q) {
 					let pid_key = Object.keys(q).shift();
 					//if (!re_t.test(pid_key)) {
-						let pid_value = Number(globalSensorsJson["pid"][j][pid_key]["deviceOutValue"]);
-						let user_value = Number(globalSensorsJson["pid"][j][pid_key]["userSetValue"]);
-						if(pid_value > 0) {
-							if(pid_key === "Ki"){
-								$(".pid_device_" + pid_key).text(pid_value.toFixed(2));
-							}else {
-								$(".pid_device_" + pid_key).text(pid_value.toFixed(0));
-							}
+					/*let pid_value = Number(globalSensorsJson["pid"][j][pid_key]["deviceOutValue"]);
+					if(pid_value > 0) {
+						if(pid_key === "Ki"){
+							$(".pid_device_" + pid_key).text(pid_value.toFixed(2));
+						}else {
+							$(".pid_device_" + pid_key).text(pid_value.toFixed(0));
 						}
+					}*/
+						let user_value = Number(globalSensorsJson["pid"][j][pid_key]["userSetValue"]);
 						if(user_value > 0 && Number($("#pid_" + pid_key).val()) === 0) {
 							if(pid_key === "Ki"){
 								$("#pid_" + pid_key).val(user_value.toFixed(2));

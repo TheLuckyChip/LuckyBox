@@ -49,9 +49,9 @@
 	{"in4":{"value":0,"name":"","member":0,"allert":0}}
 ],
 	"pid":[
-	{"Kp":{"userSetValue":30,"deviceOutValue":14}},
-	{"Ki":{"userSetValue":0.05,"deviceOutValue":41.02}},
-	{"Kd":{"userSetValue":40,"deviceOutValue":21}},
+	{"Kp":{"userSetValue":30}},
+	{"Ki":{"userSetValue":0.05}},
+	{"Kd":{"userSetValue":40}},
 	{"t1":{"userSetValue":70}}
 	],
 	"power":90,
