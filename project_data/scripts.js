@@ -547,6 +547,10 @@ $(function () {
 		let parts = n.split(separator);
 		return parts.length > 1 ? parts[parts.length - 1].length : 0;
 	}
+	// TODO не работает в ИЕ
+	/*function f(x) {
+		return x.toString().includes('.') ? x.toString().split('.').pop().length : 0;
+	}*/
 	$(document).on('mousedown', '.minus', function (e) {
 		e.preventDefault();
 		flagSendProcess = true;
@@ -3285,7 +3289,10 @@ $(function () {
 			sensorsIntervalId = setInterval(getIntervalSensors, 1000);
 			if(pidProcess["start"] === true) {
 				if (!$.fn.objIsEmpty(request, false)) {
-					pidProcess["pid"] = request["settings"];
+					$.each(request["settings"], function (j, q) {
+						let pid_key = Object.keys(q).shift();
+						pidProcess["pid"][pid_key] = request["settings"][j][pid_key];
+					});
 				}
 				sensorsProcessId = setInterval(getPid, 2000);
 			}
@@ -3312,11 +3319,10 @@ $(function () {
 				}
 			});*/
 			if (!$.fn.objIsEmpty(pidProcess, false)) {
-				$.each(pidProcess["pid"], function (j, q) {
-					let pid_key = Object.keys(q).shift();
+				$.each(pidProcess["pid"], function (pid_key, q) {
 					if (!re_t.test(pid_key)) {
-						if(pidProcess["pid"][j][pid_key].hasOwnProperty("deviceOutValue")) {
-							let pid_value = Number(pidProcess["pid"][j][pid_key]["deviceOutValue"]);
+						if(pidProcess["pid"][pid_key].hasOwnProperty("deviceOutValue")) {
+							let pid_value = Number(pidProcess["pid"][pid_key]["deviceOutValue"]);
 							if (pid_value > 0) {
 								if (pid_key === "Ki") {
 									$(".pid_device_" + pid_key).text(pid_value.toFixed(2));
@@ -3325,8 +3331,8 @@ $(function () {
 								}
 							}
 						}
-						if(pidProcess["pid"][j][pid_key].hasOwnProperty("userSetValue")) {
-							let pid_value = Number(pidProcess["pid"][j][pid_key]["userSetValue"]);
+						if(pidProcess["pid"][pid_key].hasOwnProperty("userSetValue")) {
+							let pid_value = Number(pidProcess["pid"][pid_key]["userSetValue"]);
 							if (!flagSendProcess) {
 								//убрал пока
 								$("#pid_" + pid_key).val(pid_value);
