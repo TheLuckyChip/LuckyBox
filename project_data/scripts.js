@@ -1854,10 +1854,10 @@ $(function () {
 
 						$("#distillation_" + sensor_key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 						//убрал пока
-						/*if(!flagSendProcess) {
+						if(!flagSendProcess) {
 							$("#distillation_cutoff_" + sensor_key).val(alert_value.toFixed(0));
 							//$("#distillation_temperature_" + sensor_key).val(temperature);
-						}*/
+						}
 						let allertValue = alert_value;
 						allertValue = allertValue > 0 ? allertValue.toFixed(2) : "";
 						if (allertValue !== "") {
@@ -2498,10 +2498,10 @@ $(function () {
 							$("#svg_reflux_color_" + sensor_key).css('fill', colorPersent(fillcolor, delta_value, delta_alert));
 						}
 						//убрал пока
-						/*if(!flagSendProcess) {
+						if(!flagSendProcess) {
 							$("#reflux_delta_" + sensor_key).val(alert_value);
 							$("#reflux_cutoff_" + sensor_key).val(alert_value.toFixed(0));
-						}*/
+						}
 						$("#reflux_" + sensor_key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 						let allertValue = alert_value;
 						allertValue = allertValue > 0 ? allertValue.toFixed(2) : "";
