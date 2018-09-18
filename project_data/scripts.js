@@ -2503,7 +2503,7 @@ $(function () {
 						}
 						//убрал пока
 						if(!flagSendProcess) {
-							$("#reflux_delta_" + sensor_key).val(alert_value);
+							//$("#reflux_delta_" + sensor_key).val(alert_value);
 							$("#reflux_cutoff_" + sensor_key).val(alert_value.toFixed(0));
 						}
 						$("#reflux_" + sensor_key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
