@@ -402,7 +402,7 @@ void handleProcessSensorOut() {
 	dataForWeb += "}}],\"pid\":[{\"Kp\":{\"userSetValue\":" + String(Kp) + "}},";
 	dataForWeb += "{\"Ki\":{\"userSetValue\":" + String(Ki) + "}},";
 	dataForWeb += "{\"Kd\":{\"userSetValue\":" + String(Kd) + "}},";
-	dataForWeb += "{\"t1\":{\"userSetValue\":" + String(temperatureSensor[DS_Cube].data) + "}}],";
+	dataForWeb += "{\"t1\":{\"userSetValue\":" + String(setTempForPID) + "}}],";
 
 	//dataForWeb += "\"power\":" + String(power.heaterPower) + ",\"temperatureAlcoholBoil\":" + String(temperatureAlcoholBoil);
 	dataForWeb += "\"power\":" + String(power.heaterPower) + ",\"powerHigh\":" + String(power.inPowerHigh) + ",\"powerLower\":" + String(power.inPowerLow) + ",\"temperatureAlcoholBoil\":" + String(temperatureAlcoholBoil);
@@ -468,6 +468,7 @@ void handleProcessModeIn() {
 	else if (processModeOld == 0 && processMode.allow != 0) {
 		processMode.step = 0;
 	}
+	delay(500);
 }
 
 void handleResetDataEeprom() {

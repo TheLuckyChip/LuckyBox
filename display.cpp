@@ -1,31 +1,48 @@
 #include "display.h"
 
-unsigned long timePauseTouchRead;
+byte touchRead = 0;
 
 void displayLoop() {
 	// опрос тачскрина
 #if defined TFT_Display
 	if (touch_in == true) {
-		if (timePauseTouchRead < millis()) {
+		if (touchRead == 0) {
 			initBuzzer(50);
+			delay(25);
 			touchscreenUpdate();
-			delay(150);
+			touchRead = 1;
 			// определим область нажатия для меню
-			if (processMode.allow == 0) {
+			if (processMode.allow == 0 && touchScreen == 0) {
 				if (touch_x > 0 && touch_x < 160 && touch_y > 20 && touch_y < 130) touchArea = 1;
 				else if (touch_x > 160 && touch_x < 320 && touch_y > 20 && touch_y < 130) touchArea = 2;
 				else if (touch_x > 0 && touch_x < 160 && touch_y > 130 && touch_y < 240) touchArea = 3;
 				else if (touch_x > 160 && touch_x < 320 && touch_y > 130 && touch_y < 240) touchArea = 4;
 				else touchArea = 0;
 			}
-			if (processMode.allow > 0) {
-				if (touch_x > 110 && touch_x < 260 && touch_y < 100) touchArea = 10;
+			else if (processMode.allow > 0 && touchScreen == 0) {
+				if (touch_x > 110 && touch_x < 260 && touch_y < 100) {
+					touchArea = 10;
+					touchScreen = 1;
+				}
 				else touchArea = 0;
 			}
-			timePauseTouchRead = millis() + 1000;
+			else if (processMode.allow > 0 && touchScreen == 2) {
+				if (touch_x > 10 && touch_x < 160 && touch_y > 100) touchArea = 21;
+				else if (touch_x > 160 && touch_x < 320 && touch_y > 100) touchArea = 22;
+				else touchArea = 0;
+			}
+			delay(25);
+			Serial.print("X="); Serial.println(touch_x);
+			Serial.print("Y="); Serial.println(touch_y);
 		}
-		else touchscreenUpdate();
-		touch_in = false;
+
+		if (digitalRead(intTouch) == 1) {
+			delay(25);
+			touchRead = 0;
+			touch_in = false;
+			attachInterrupt(intTouch, touchscreenUpdateSet, FALLING);
+		}
+		
 	}
 #endif
 
@@ -33,15 +50,15 @@ void displayLoop() {
 	if ((millis() - displayTimeInterval) >= 1000) {
 		displayTimeInterval = millis();
 #if defined TFT_Display
-		if (processMode.allow != 0 && processMode.step != 0) tftOutGraphDisplay(); // вывод на дисплей графиков, если он есть
+		if (processMode.allow != 0 && processMode.step != 0 && touchScreen == 0) tftOutGraphDisplay(); // вывод на дисплей графиков, если он есть
 		DefCubOut++;
 #endif
 	}
 	// проверка WiFi
-	if ((millis() - wifiTimeInterval) >= (setRestartWiFi * 1000)) {
+	/*if ((millis() - wifiTimeInterval) >= (setRestartWiFi * 1000)) {
 		wifiTimeInterval = millis();
 
 		reconnectWiFi();
 
-	}
+	}*/
 }

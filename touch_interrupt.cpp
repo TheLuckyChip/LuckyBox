@@ -17,8 +17,14 @@ void touchscreenUpdate()
 	csOff(TOUCH_CS);
 	SPI.endTransaction();
 
-	touch_x = 4095 - x1;
-	touch_y = 4095 - y1;
+	if (touchInvert == true) {
+		touch_x = x1;
+		touch_y = y1;
+	}
+	else {
+		touch_x = 4095 - x1;
+		touch_y = 4095 - y1;
+	}
 	// приведем к нашему разрешению экрана
 	if (touch_x <= 400) touch_x = 0;
 	else if (touch_x >= 3900) touch_x = 319;
@@ -38,4 +44,5 @@ void touchscreenUpdate()
 
 void touchscreenUpdateSet() {
 	touch_in = true;
+	detachInterrupt(intTouch);
 }

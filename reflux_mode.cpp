@@ -941,7 +941,154 @@ void rfluxLoopMode_6() {
 }
 // БК регулировка охлаждением
 void rfluxLoopMode_7() {
-	rfluxLoopMode_1();
+	if (processMode.step < 2) {
+		if (power.heaterPower != power.inPowerHigh) power.heaterPower = power.inPowerHigh;
+	}
+	else if (processMode.step < 7) {
+		if (power.heaterPower != power.inPowerLow) power.heaterPower = power.inPowerLow;
+	}
+	else power.heaterPower = 0;
+
+	float temperatureTubeCurPressure;
+	// уставку применим только после достижения 90 гр. в кубе
+	if (settingBoilTube != 0) {
+		temperatureStartPressure = settingColumn - (760 - pressureSensor.data)*0.037;
+		temperatureTubeCurPressure = temperatureSensor[DS_Tube].data - (760 - pressureSensor.data)*0.037;
+		temperatureSensor[DS_Tube].allertValue = temperatureStartPressure + settingBoilTube + (temperatureSensor[DS_Tube].data - temperatureTubeCurPressure);
+	}
+	else temperatureSensor[DS_Tube].allertValue = 0;
+
+	switch (processMode.step) {
+		// пришли при старте ректификации
+		case 0: {
+			loadEepromReflux();
+	#if defined TFT_Display
+			// подготовка данных для вывода на TFT
+			csOn(TFT_CS);
+			tftStartForGraph();
+			displayTimeInterval = millis() + 1000;
+			DefCubOut = Display_out_temp;
+			csOff(TFT_CS);
+	#endif
+			senseHeadcontrol = adcIn[0].member;
+			power.heaterStatus = 1;		// включили нагрев
+			power.heaterPower = power.inPowerHigh;		// установили мощность на ТЭН 100 %
+			processMode.timeStep = 0;
+			nameProcessStep = "Нагрев куба";
+			processMode.step = 1;	// перешли на следующий шаг алгоритма
+			countHaedEnd = 0;
+			break;
+		}
+			// ждем начала подъема температуры в царге и включаем воду на охлаждение и понижаем мощность на ТЭН
+		case 1: {
+			if (temperatureSensor[DS_Tube].data >= 45.0) {
+				csOn(PWM_CH3);
+				csOn(PWM_CH2);				// включаем клапан доп. подачи воды
+				power.heaterPower = power.inPowerLow;			// установили мощность на ТЭН 65 %
+				settingAlarm = true;		// подаем звуковой сигнал
+				timePauseOff = millis();	// обнулим счетчик времени для зв.сигнала
+				processMode.timeStep = 0;
+				nameProcessStep = "Стабилизация колонны";
+				processMode.step = 2;		// перешли на следующий шаг алгоритма
+			}
+			break;
+		}
+			// пищалка на 10 сек.
+		case 2: {
+			if (timePauseOff < millis() && millis() >= 10000 + timePauseOff) {
+				settingAlarm = false;	// выключили звуковой сигнал
+				processMode.step = 3;	// перешли на следующий шаг алгоритма
+			}
+			break;
+		}
+			// ждем окончание стабилизации 20 минут
+		case 3: {
+			if (timePauseOff < millis() && (millis() - timePauseOff) >= (timeStabilizationReflux * 60000)) {
+				timePauseOff = millis();	// обнулим счетчик времени для зв.сигнала
+				settingAlarm = true;	// подаем звуковой сигнал
+										//power.heaterPower = power.inPowerLow;		// установили мощность на ТЭН 65 %
+				processMode.timeStep = 0;
+				nameProcessStep = "Отбор голов";
+				processMode.step = 4;	// перешли на следующий шаг алгоритма
+			}
+			break;
+		}
+			// пищалка на 10 сек.
+		case 4: {
+			if (timePauseOff < millis() && (millis() - timePauseOff) >= 10000) {
+				settingAlarm = false;	// выключили звуковой сигнал
+				if (adcIn[0].member == 1) {		// датчик уровня присутствует
+					processMode.step = 5;		// перешли на следующий шаг алгоритма отбора голов
+				}
+				else {
+					processMode.step = 6;		// пропустили следующий шаг алгоритма т.к. нет датчика уровня
+				}
+			}
+			break;
+		}
+			// ждем срабатывание датчика уровня в приемной емкоси голов если он есть, включаем пищалку, поднимаем мощность ТЭН для отбора
+		case 5: {
+			if (adcIn[0].allert == true) {
+				countHaedEnd++;
+				if (countHaedEnd > 10) {		// антирдебезг :)
+					settingAlarm = true;		// подаем звуковой сигнал
+					timePauseOff = millis();	// обнулим счетчик времени для зв.сигнала
+					processMode.step = 6;		// перешли на следующий шаг алгоритма
+				}
+			}
+			else countHaedEnd = 0;
+
+			if (processMode.step == 6) {
+				csOff(PWM_CH2);		// закрыли клапан доп. подачи воды
+				processMode.timeStep = 0;
+				nameProcessStep = "Отбор тела";
+			}
+			break;
+		}
+			// ждем окончание по достижению температуры в кубе и рулим клапаном отбора
+		case 6: {
+			if (temperatureSensor[DS_Cube].allertValue > 0 && temperatureSensor[DS_Cube].data >= temperatureSensor[DS_Cube].allertValue) {
+				power.heaterStatus = 0;							// выключили ТЭН
+				power.heaterPower = 0;							// установили мощность на ТЭН 0 %
+				timePauseOff = millis();					// обнулим счетчик времени для зв.сигнала
+				temperatureSensor[DS_Cube].allert = true;	// сигнализация для WEB
+				settingAlarm = true;						// подаем звуковой сигнал
+				//csOff(PWM_CH1);								// закрыли клапан отбора
+				processMode.timeStep = 0;
+				nameProcessStep = "Процесс закончен";
+				processMode.step = 7;						// перешли на следующий шаг алгоритма
+			}
+			else if (temperatureSensor[DS_Tube].allertValue > 0 && temperatureSensor[DS_Tube].data >= temperatureSensor[DS_Tube].allertValue) {
+				//temperatureSensor[DS_Tube].allert = true;	// сигнализация для WEB
+				settingAlarm = true;						// подаем звуковой сигнал
+				csOn(PWM_CH2);								// открыли клапан доп. подачи воды
+															//temperatureTubeRect = temperatureSensor[DS_Tube].data - temperatureSensor[DS_Tube].allertValue;	// запомнили температуру с учетом гистерезиса уставки
+			}
+			else if (adcIn[0].allert == true) settingAlarm = true;	// подаем звуковой сигнал
+			else settingAlarm = false;								// выключили звуковой сигнал
+
+			if (temperatureSensor[DS_Tube].data <= temperatureSensor[DS_Tube].allertValue - settingBoilTube) {
+				csOff(PWM_CH2);	// закрыли клапан доп. подачи воды
+				if (adcIn[0].allert == false) settingAlarm = false;
+			}
+
+			break;
+		}
+			// после завершения процесса ждем 120 сек. и выключаем клапана и пищалку
+		case 7: {
+			if (millis() >= 10000 + timePauseOff) {
+				settingAlarm = false;						// выключили звуковой сигнал
+			}
+			if (millis() >= 120000 + timePauseOff) {
+				csOff(PWM_CH3);								// закрыли клапан подачи воды
+				csOff(PWM_CH2);
+				temperatureSensor[DS_Cube].allert = false;	// сигнализация для WEB
+				processMode.allow = 0;						// вышли из режима ректификации
+				processMode.step = 0;						// обнулили шаг алгоритма
+			}
+			break;
+		}
+	}
 }
 // БК регулировка мощностью
 void rfluxLoopMode_8() {

@@ -446,6 +446,7 @@ extern Adafruit_ILI9341 tft;
 extern void initTFT();
 extern void tftStartForGraph();
 extern void tftOutGraphDisplay();
+extern void tftStopLoop();
 extern void tftMenuLoop();
 
 #endif

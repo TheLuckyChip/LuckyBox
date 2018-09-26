@@ -175,8 +175,16 @@ void handleDistillationSensorSetSave() {
 
 void distillationLoop() {
 
-	if (power.heaterPower != power.inPowerHigh && processMode.step < 4) power.heaterPower = power.inPowerHigh;
-	else if (processMode.step >= 4) power.heaterPower = 0;
+	if (processMode.step < 2) {
+		if (power.heaterPower != power.inPowerHigh) power.heaterPower = power.inPowerHigh;
+	}
+	else if (processMode.step < 4) {
+		if (power.heaterPower != power.inPowerLow) power.heaterPower = power.inPowerLow;
+	}
+	else power.heaterPower = 0;
+
+	//if (power.heaterPower != power.inPowerHigh && processMode.step < 4) power.heaterPower = power.inPowerHigh;
+	//else if (processMode.step >= 4) power.heaterPower = 0;
 
 	switch (processMode.step) {
 		// пришли при старте дистилляции

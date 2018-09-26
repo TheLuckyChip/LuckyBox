@@ -34,9 +34,17 @@ void loop() {
   displayLoop();
   logfileLoop();
   yield();
-  if (touchArea == 10) {
-	  processMode.step = 0;
-	  processMode.allow = 0;
-	  touchArea = 0;
+  if (touchArea == 10 || touchScreen != 0) {
+	  //touchArea = 0;
+	  tftStopLoop();
+
+
+
+
+
+
+	  //processMode.step = 0;
+	  //processMode.allow = 0;
+	  //touchArea = 0;
   }
 }

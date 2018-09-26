@@ -65,6 +65,7 @@ bool headValve;									// Состояние клапана отбора
 unsigned long headValveOn;						// контроль времени клапана отбора в открытом состоянии
 unsigned long headValveOff;						// контроль времени клапана отбора в закрытом состоянии
 byte touchArea = 0;								// Область нажатия
+byte touchScreen = 0;							// На каком экране контролируем нажатие
 int modeWiFi;
 uint8_t DefCubOut = 9;
 int16_t touch_x = 0;
@@ -75,6 +76,7 @@ uint8_t numSenseMashBrew;
 double Setpoint, Input, Output;
 double Kp = 120, Ki = 0.02, Kd = 75;
 double setKp, setKi, setKd;
+float setTempForPID = 65;
 int WindowSize = 250;
 unsigned long windowStartTime, stepTime;
 unsigned long stepStartTime;

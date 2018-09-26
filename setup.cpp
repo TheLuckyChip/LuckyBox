@@ -282,8 +282,9 @@ void setup()
   if (processMode.number > 7) processMode.number = 0;
   processMode.step = 0;
   loadEepromPid();
+  setKp = Kp;
+  setKi = Ki;
+  setKd = Kd;
 
-  Serial.print("Kd = ");
-  Serial.println(Kd);
   Serial.println("Setup Done!");
 }

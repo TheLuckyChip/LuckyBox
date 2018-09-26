@@ -24,6 +24,7 @@
 #define		TFT_Display
 // ТачСкрин
 #define		intTouch		2
+#define		touchInvert		true
 // GPIO для TFT
 #define		TFT_DC_Lib		15
 #define		TFT_CS_Lib		-1
@@ -59,6 +60,8 @@
 // переменные временных интервалов на отбор голов для РК
 #define		headValveOpen	800
 #define		headValveClose	5000
+// Время стабилизации в минутах
+#define		timeStabilizationReflux		15
 // Периодичность вывода температурного графика в секундах на экран
 #define		Display_out_temp	15
 // Периодичность записи лог.файла на SD

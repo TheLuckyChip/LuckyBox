@@ -4,7 +4,6 @@
 
 #include "pid_config.h"
 
-float setTempForPID = 65;
 byte PIDsetSave;
 
 void initPID()
@@ -41,7 +40,9 @@ void handlePidSet() {
 	PIDsetSave = HTTP.arg(arg).toInt();
 	if (PIDsetSave == 0) {
 		arg = "process";
+		uint8_t processModeOld = processMode.allow;
 		processMode.allow = HTTP.arg(arg + "[allow]").toInt();
+		if (processMode.allow != processModeOld) processMode.step = 0;
 	}
 	arg = "Kp";
 	setKp = HTTP.arg(arg + "[userSetValue]").toFloat();
@@ -52,14 +53,14 @@ void handlePidSet() {
 	arg = "t1";
 	setTempForPID = HTTP.arg(arg + "[userSetValue]").toFloat();
 
-	Kp = setKp;
-	Ki = setKi;
-	Kd = setKd;
+	//Kp = setKp;
+	//Ki = setKi;
+	//Kd = setKd;
 
 	if (PIDsetSave != 0) {
-		//Kp = setKp;
-		//Ki = setKi;
-		//Kd = setKd;
+		Kp = setKp;
+		Ki = setKi;
+		Kd = setKd;
 		// сохраним в EEPROM
 		uint16_t index = 1600;
 		EEPROM.write(index, 0x04); index++;
@@ -70,29 +71,31 @@ void handlePidSet() {
 		EEPROM.commit();
 		delay(100);
 	}
-	else processMode.step = 0;
+	//else processMode.step = 0;
 
 	String dataForWeb = "{";
 	dataForWeb += "\"process\":{\"allow\":" + String(processMode.allow) + ",\"save\":" + String(PIDsetSave) + "},";
-	//dataForWeb += "\"settings\":[{\"Kp\":{\"userSetValue\":" + String(setKp) + ",\"deviceOutValue\":" + String(Kp) + "}},";
-	//dataForWeb += "{\"Ki\":{\"userSetValue\":" + String(setKi) + ",\"deviceOutValue\":" + String(Ki) + "}},";
-	//dataForWeb += "{\"Kd\":{\"userSetValue\":" + String(setKd) + ",\"deviceOutValue\":" + String(Kd) + "}},";
-	dataForWeb += "\"settings\":[{\"Kp\":{\"userSetValue\":" + String(setKp) + ",\"deviceOutValue\":" + String(setKp) + "}},";
-	dataForWeb += "{\"Ki\":{\"userSetValue\":" + String(setKi) + ",\"deviceOutValue\":" + String(setKi) + "}},";
-	dataForWeb += "{\"Kd\":{\"userSetValue\":" + String(setKd) + ",\"deviceOutValue\":" + String(setKd) + "}},";
+	dataForWeb += "\"settings\":[{\"Kp\":{\"userSetValue\":" + String(setKp) + ",\"deviceOutValue\":" + String(Kp) + "}},";
+	dataForWeb += "{\"Ki\":{\"userSetValue\":" + String(setKi) + ",\"deviceOutValue\":" + String(Ki) + "}},";
+	dataForWeb += "{\"Kd\":{\"userSetValue\":" + String(setKd) + ",\"deviceOutValue\":" + String(Kd) + "}},";
+//	dataForWeb += "\"settings\":[{\"Kp\":{\"userSetValue\":" + String(setKp) + ",\"deviceOutValue\":" + String(setKp) + "}},";
+//	dataForWeb += "{\"Ki\":{\"userSetValue\":" + String(setKi) + ",\"deviceOutValue\":" + String(setKi) + "}},";
+//	dataForWeb += "{\"Kd\":{\"userSetValue\":" + String(setKd) + ",\"deviceOutValue\":" + String(setKd) + "}},";
 
 	dataForWeb += "{\"t1\":{\"userSetValue\":" + String(setTempForPID) + ",\"deviceOutValue\":" + String(temperatureSensor[numSenseMashBrew].data) + "}}]}";
 
 	HTTP.send(200, "text/json", dataForWeb);
 
-	Serial.println(PIDsetSave);
+	//Serial.println(PIDsetSave);
 }
 
 void pidSetLoop() {
+	
 	switch (processMode.step) {
 		case 0: {
+			//Serial.println("Start");
 			loadEepromMashing();
-			loadEepromPid();
+			//loadEepromPid();
 			processMode.timeStart = time(nullptr);
 			if (temperatureSensor[0].member == 1) numSenseMashBrew = 0;
 			else if (temperatureSensor[1].member == 1) numSenseMashBrew = 1;
@@ -123,7 +126,7 @@ void pidSetLoop() {
 		case 1: {
 			if (timePauseOff <= millis()) {
 				timePauseOff = millis() + 100;	// счетчик времени
-				Input = 65;// setTempForPID;
+				Input = setTempForPID;
 
 				myPID.Compute();											// расчет времени для PID регулировки
 
