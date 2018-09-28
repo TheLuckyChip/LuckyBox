@@ -345,7 +345,7 @@ void tftOutText(int temp_min, int temp_max) {
 	else temp_convert = (int)(temperatureSensor[DS_Cube].data * 10);
 	if (temp_in_old != temp_convert) {
 		// сначала сотрем старый текст
-		tft.setTextSize(1);
+		/*tft.setTextSize(1);
 		tft.setFont(&FreeSerifBold24pt7b);
 		tft.setCursor(98, 36);
 		tft.setTextColor(ILI9341_BLACK);
@@ -355,7 +355,8 @@ void tftOutText(int temp_min, int temp_max) {
 		tft.setFont();
 		tft.setTextSize(2);
 		tft.setCursor(k + 8, 0);
-		tft.printf("o");
+		tft.printf("o");*/
+		fillScreenRect(98, 3, 102, 35, ILI9341_BLACK);
 		// выведем новое значение
 		tft.setTextSize(1);
 		tft.setFont(&FreeSerifBold24pt7b);
@@ -364,7 +365,7 @@ void tftOutText(int temp_min, int temp_max) {
 		else tft.setTextColor(dallas_graph[0].color);
 		if (temp_convert < 1000) tft.printf("%d.%d", temp_convert / 10, temp_convert % 10);
 		else tft.printf("--.-");
-		k = tft.getCursorX();
+		int k = tft.getCursorX();
 		tft.setFont();
 		tft.setTextSize(2);
 		tft.setCursor(k + 8, 0);

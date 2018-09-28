@@ -12,7 +12,6 @@
 
 #include <Ticker.h>
 #include <Adafruit_PWMServoDriver.h>
-#include <ESP8266HTTPUpdateServer.h> 
 #include <ESP8266WebServer.h>
 #include <PID_v1.h>
 

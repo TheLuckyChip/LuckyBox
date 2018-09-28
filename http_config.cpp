@@ -1,6 +1,7 @@
 #include "http_config.h"
 
-ESP8266HTTPUpdateServer httpUpdater;
+byte startLoad = 0;
+unsigned long timeStartLoad;
 
 void initHTTP(void)
 {
@@ -12,8 +13,96 @@ void initHTTP(void)
 	HTTP.on("/ssidap", handleSetSSIDAP); // Установить имя и пароль для точки доступа по запросу вида /ssidap?ssidAP=home1&passwordAP=8765439
 	HTTP.on("/restart", handleRestart);   // Перезагрузка модуля по запросу вида /restart?device=ok
 
-										   // Добавляем функцию Update для перезаписи прошивки по WiFi при 1М(256K SPIFFS) и выше
-	httpUpdater.setup(&HTTP);
+	// Добавляем функцию Update для перезаписи прошивки по WiFi при 1М(256K SPIFFS) и выше
+	HTTP.on("/update", HTTP_POST, []() {
+		HTTP.sendHeader("Connection", "close");
+		HTTP.send(200, "text/plain", (Update.hasError()) ? "FAIL" : "OK");
+		ESP.restart();
+	}, []() {
+		HTTPUpload& upload = HTTP.upload();
+		if (upload.status == UPLOAD_FILE_START) {
+			startLoad = 1;
+			Serial.setDebugOutput(true);
+			//WiFiUDP::stopAll();
+			
+			String nameBinFile = upload.filename.c_str();
+
+			Serial.print("Update: "); Serial.println(nameBinFile);
+			//Serial.printf("Update: %s\n", nameBinFile);
+
+			//uint32_t maxSketchSpace = (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000;
+
+
+			if (nameBinFile == "LuckyBox.spiffs.bin" || nameBinFile == "LuckyBox.ino.spiffs.bin") {	
+				uint32_t maxSketchSpace = (ESP.getFreeSketchSpace() - ESP.getSketchSize());
+				Serial.println(maxSketchSpace);
+				if (!Update.begin(maxSketchSpace, U_SPIFFS)) { //start with max available size
+					Update.printError(Serial);
+				}
+				else {
+					Serial.println("...web files update...");
+#if defined TFT_Display
+					csOn(TFT_CS);
+					fillScreenRect(0, 0, 320, 240, ILI9341_BLACK);
+					tft.setCursor(10, 10);
+					tft.setTextColor(ILI9341_WHITE);
+					tft.setTextSize(2);
+					tft.print("Web files update");
+					timeStartLoad = millis() + 1000;
+					csOff(TFT_CS);
+#endif
+				}
+			}
+			else {
+				
+				uint32_t maxSketchSpace = (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000;
+				Serial.println(maxSketchSpace);
+				if (!Update.begin(maxSketchSpace, U_FLASH)) { //start with max available size
+					Update.printError(Serial);
+				}
+				else {
+					Serial.println("...scetch files update...");
+#if defined TFT_Display
+					csOn(TFT_CS);
+					fillScreenRect(0, 0, 320, 240, ILI9341_BLACK);
+					tft.setCursor(10, 10);
+					tft.setTextColor(ILI9341_WHITE);
+					tft.setTextSize(2);
+					tft.print("Scetch files update");
+					timeStartLoad = millis() + 1000;
+					csOff(TFT_CS);
+#endif
+				}
+			}
+		}
+		else if (upload.status == UPLOAD_FILE_WRITE) {
+			if (Update.write(upload.buf, upload.currentSize) != upload.currentSize) {
+				Update.printError(Serial);
+			}
+		}
+		else if (upload.status == UPLOAD_FILE_END) {
+			startLoad = 0;
+			if (Update.end(true)) { //true to set the size to the current progress
+				Serial.printf("Update Success: %u\nRebooting...\n", upload.totalSize);
+			}
+			else {
+				Update.printError(Serial);
+			}
+			Serial.setDebugOutput(false);
+		}
+
+		if (startLoad == 1 && timeStartLoad <= millis()) {
+			timeStartLoad = millis() + 1000;
+#if defined TFT_Display
+			csOn(TFT_CS);
+			tft.print(".");
+			csOff(TFT_CS);
+#endif
+		}
+
+		yield();
+	});
+	
 	// Запускаем HTTP сервер
 	HTTP.begin();
 }

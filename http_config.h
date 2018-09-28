@@ -11,6 +11,7 @@
 #include "setting.h"
 #include "file_config.h"
 #include "time_config.h"
+#include "tft.h"
 #include <ArduinoJson.h>
 
 extern void initHTTP(void);

@@ -8,7 +8,7 @@ void displayLoop() {
 	if (touch_in == true) {
 		if (touchRead == 0) {
 			initBuzzer(50);
-			delay(25);
+			delay(15);
 			touchscreenUpdate();
 			touchRead = 1;
 			// определим область нажатия для меню
@@ -31,9 +31,9 @@ void displayLoop() {
 				else if (touch_x > 160 && touch_x < 320 && touch_y > 100) touchArea = 22;
 				else touchArea = 0;
 			}
-			delay(25);
-			Serial.print("X="); Serial.println(touch_x);
-			Serial.print("Y="); Serial.println(touch_y);
+			delay(35);
+			//Serial.print("X="); Serial.println(touch_x);
+			//Serial.print("Y="); Serial.println(touch_y);
 		}
 
 		if (digitalRead(intTouch) == 1) {
