@@ -44,11 +44,11 @@ void initHTTP(void)
 #if defined TFT_Display
 					csOn(TFT_CS);
 					fillScreenRect(0, 0, 320, 240, ILI9341_BLACK);
-					tft.setCursor(10, 10);
+					tft.setCursor(0, 10);
 					tft.setTextColor(ILI9341_WHITE);
 					tft.setTextSize(2);
-					tft.print("Web files update");
-					timeStartLoad = millis() + 1000;
+					tft.print(" Web files update");
+					timeStartLoad = millis() + 500;
 					csOff(TFT_CS);
 #endif
 				}
@@ -65,11 +65,11 @@ void initHTTP(void)
 #if defined TFT_Display
 					csOn(TFT_CS);
 					fillScreenRect(0, 0, 320, 240, ILI9341_BLACK);
-					tft.setCursor(10, 10);
+					tft.setCursor(0, 10);
 					tft.setTextColor(ILI9341_WHITE);
 					tft.setTextSize(2);
-					tft.print("Scetch files update");
-					timeStartLoad = millis() + 1000;
+					tft.print(" Sketch files update");
+					timeStartLoad = millis() + 500;
 					csOff(TFT_CS);
 #endif
 				}
@@ -81,6 +81,16 @@ void initHTTP(void)
 			}
 		}
 		else if (upload.status == UPLOAD_FILE_END) {
+#if defined TFT_Display
+			csOn(TFT_CS);
+			tft.println();
+			tft.println();
+			tft.println(" Succes!");
+			tft.println();
+			tft.print(" Restart...");
+			timeStartLoad = millis() + 500;
+			csOff(TFT_CS);
+#endif
 			startLoad = 0;
 			if (Update.end(true)) { //true to set the size to the current progress
 				Serial.printf("Update Success: %u\nRebooting...\n", upload.totalSize);
@@ -92,7 +102,7 @@ void initHTTP(void)
 		}
 
 		if (startLoad == 1 && timeStartLoad <= millis()) {
-			timeStartLoad = millis() + 1000;
+			timeStartLoad = millis() + 500;
 #if defined TFT_Display
 			csOn(TFT_CS);
 			tft.print(".");

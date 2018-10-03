@@ -200,6 +200,7 @@ void distillationLoop() {
 			DefCubOut = Display_out_temp;
 			csOff(TFT_CS);
 #endif
+			tempBigOut = 1;
 			csOn(PWM_CH1);				// открыть клапан отбора
 			power.heaterStatus = 1;		// включили нагрев
 			power.heaterPower = 100;	// установили мощность на ТЭН 100 %

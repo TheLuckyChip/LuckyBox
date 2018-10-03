@@ -20,9 +20,18 @@ void displayLoop() {
 				else touchArea = 0;
 			}
 			else if (processMode.allow > 0 && touchScreen == 0) {
-				if (touch_x > 110 && touch_x < 260 && touch_y < 100) {
+				if (touch_x > 0 && touch_y < 80) {
 					touchArea = 10;
 					touchScreen = 1;
+				}
+				else if (touch_x > 0 && touch_x < 106 && touch_y > 120) {
+					touchArea = 11;
+				}
+				else if (touch_x > 106 && touch_x < 212 && touch_y > 120) {
+					touchArea = 12;
+				}
+				else if (touch_x > 212 && touch_y > 120) {
+					touchArea = 13;
 				}
 				else touchArea = 0;
 			}

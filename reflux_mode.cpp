@@ -231,6 +231,7 @@ void rfluxLoopMode_1() {
 			DefCubOut = Display_out_temp;
 			csOff(TFT_CS);
 	#endif
+			tempBigOut = 2;
 			senseHeadcontrol = adcIn[0].member;
 			power.heaterStatus = 1;		// включили нагрев
 			csOn(PWM_CH1);				// открыть клапан отбора голов
@@ -326,6 +327,7 @@ void rfluxLoopMode_2() {
 			DefCubOut = Display_out_temp;
 			csOff(TFT_CS);
 	#endif
+			tempBigOut = 2;
 			senseHeadcontrol = adcIn[0].member;
 			power.heaterStatus = 1;		// включили нагрев
 			power.heaterPower = power.inPowerHigh;		// установили мощность на ТЭН 100 %
@@ -470,6 +472,7 @@ void rfluxLoopMode_4() {
 			DefCubOut = Display_out_temp;
 			csOff(TFT_CS);
 	#endif
+			tempBigOut = 2;
 			senseHeadcontrol = adcIn[0].member;
 			power.heaterStatus = 1;		// включили нагрев
 			power.heaterPower = power.inPowerHigh;		// установили мощность на ТЭН 100 %
@@ -644,6 +647,7 @@ void rfluxLoopMode_5() {
 			DefCubOut = Display_out_temp;
 			csOff(TFT_CS);
 	#endif
+			tempBigOut = 2;
 			senseHeadcontrol = adcIn[0].member;
 			power.heaterStatus = 1;		// включили нагрев
 			power.heaterPower = power.inPowerHigh;		// установили мощность на ТЭН 100 %
@@ -819,6 +823,7 @@ void rfluxLoopMode_6() {
 		DefCubOut = Display_out_temp;
 		csOff(TFT_CS);
 #endif
+		tempBigOut = 2;
 		senseHeadcontrol = adcIn[0].member;
 		power.heaterStatus = 1;		// включили нагрев
 		power.heaterPower = power.inPowerHigh;		// установили мощность на ТЭН 100 %
@@ -970,6 +975,7 @@ void rfluxLoopMode_7() {
 			DefCubOut = Display_out_temp;
 			csOff(TFT_CS);
 	#endif
+			tempBigOut = 2;
 			senseHeadcontrol = adcIn[0].member;
 			power.heaterStatus = 1;		// включили нагрев
 			power.heaterPower = power.inPowerHigh;		// установили мощность на ТЭН 100 %

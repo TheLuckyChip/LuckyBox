@@ -164,7 +164,8 @@ void setup()
 	tft.writeFillRect(scaleCount, 215, 15, 15, 0xFFFF);
 #endif
 	//Запускаем WIFI
-	_ssidAP += " - ";
+	_ssidAPconnect = _ssidAP;
+	_ssidAPconnect += " - ";
 	String addrMac = WiFi.softAPmacAddress();
 	String addrMacMod = "            ";
 	addrMacMod[0] = addrMac[0];	addrMacMod[1] = addrMac[1];
@@ -173,7 +174,7 @@ void setup()
 	addrMacMod[6] = addrMac[9];	addrMacMod[7] = addrMac[10];
 	addrMacMod[8] = addrMac[12]; addrMacMod[9] = addrMac[13];
 	addrMacMod[10] = addrMac[15]; addrMacMod[11] = addrMac[16];
-	_ssidAP += addrMacMod;
+	_ssidAPconnect += addrMacMod;
 	initWifi();
 
 	// просто отчет о подключении

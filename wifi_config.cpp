@@ -5,7 +5,7 @@ void initWifi() {
 	IPAddress apIP(192, 168, 4, 1);
 	WiFi.mode(WIFI_AP_STA);
 	WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
-	WiFi.softAP(_ssidAP.c_str(), _passwordAP.c_str());
+	WiFi.softAP(_ssidAPconnect.c_str(), _passwordAP.c_str());
 	modeWiFi = 0;
 	int n_network = WiFi.scanNetworks(); // запрос количества доступных сетей
 	for (int i = 0; i < n_network; ++i) {
@@ -25,8 +25,8 @@ void initWifi() {
 	if (modeWiFi == 1) {
 	    // пробуем подключиться
 		Serial.printf("Connecting to %s\n", _ssid.c_str());
-		//WiFi.disconnect(true);
-		//WiFi.mode(WIFI_STA);
+		WiFi.disconnect(true);
+		WiFi.mode(WIFI_STA);
 		WiFi.begin(_ssid.c_str(), _password.c_str());
 		// ждем N кол-во попыток, если нет, то AP Mode
 		byte tmp_while = 0;
@@ -46,6 +46,19 @@ void initWifi() {
 			}
 #endif
 		}
+		if (WiFi.status() == WL_CONNECTED) WiFi.setAutoReconnect(true);
+		else {
+			WiFi.disconnect(true);
+			WiFi.mode(WIFI_AP);
+			WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
+			WiFi.softAP(_ssidAPconnect.c_str(), _passwordAP.c_str());
+		}
+	}
+	else {
+		WiFi.disconnect(true);
+		WiFi.mode(WIFI_AP);
+		WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
+		WiFi.softAP(_ssidAPconnect.c_str(), _passwordAP.c_str());
 	}
 }
 

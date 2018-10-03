@@ -64,6 +64,7 @@ void brewingLoop()
 		DefCubOut = Display_out_temp;
 		csOff(TFT_CS);
 #endif
+		tempBigOut = 1;
 		temperatureSensor[DS_Cube].member = 1;
 		myPID.SetOutputLimits(0, WindowSize);
 		myPID.SetMode(AUTOMATIC);
