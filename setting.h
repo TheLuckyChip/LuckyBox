@@ -12,7 +12,6 @@
 
 #include <Ticker.h>
 #include <Adafruit_PWMServoDriver.h>
-#include <ESP8266HTTPUpdateServer.h> 
 #include <ESP8266WebServer.h>
 #include <PID_v1.h>
 
@@ -104,6 +103,7 @@ extern PID myPID;
 extern String _ssid;
 extern String _password;
 extern String _ssidAP;
+extern String _ssidAPconnect;
 extern String _passwordAP;
 extern String SSDP_Name;
 extern String jsonConfig;
@@ -126,7 +126,8 @@ extern unsigned long adcTimeRead;
 extern unsigned long sdTimeWriteInterval;
 extern uint16_t graphOutInterval;
 extern uint16_t scaleCount;
-//extern float temperatureTubeRect;
+extern byte tempBigOut;
+extern byte tempBigOutOld;
 extern float settingBoilTube;
 extern float settingColumn;
 extern float temperatureStartPressure;
@@ -140,6 +141,7 @@ extern bool headValve;
 extern unsigned long headValveOn;
 extern unsigned long headValveOff;
 extern byte touchArea;
+extern byte touchScreen;
 //extern bool heaterStatus;
 //extern int	heaterPower;
 extern uint16_t servoOld;
@@ -153,6 +155,7 @@ extern uint8_t numSenseMashBrew;
 extern double Setpoint, Input, Output;
 extern double Kp, Ki, Kd;
 extern double setKp, setKi, setKd;
+extern float setTempForPID;
 extern int WindowSize;
 extern unsigned long windowStartTime, stepTime;
 extern unsigned long stepStartTime;

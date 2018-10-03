@@ -164,6 +164,17 @@ void setup()
 	tft.writeFillRect(scaleCount, 215, 15, 15, 0xFFFF);
 #endif
 	//Запускаем WIFI
+	_ssidAPconnect = _ssidAP;
+	_ssidAPconnect += " - ";
+	String addrMac = WiFi.softAPmacAddress();
+	String addrMacMod = "            ";
+	addrMacMod[0] = addrMac[0];	addrMacMod[1] = addrMac[1];
+	addrMacMod[2] = addrMac[3];	addrMacMod[3] = addrMac[4];
+	addrMacMod[4] = addrMac[6];	addrMacMod[5] = addrMac[7];
+	addrMacMod[6] = addrMac[9];	addrMacMod[7] = addrMac[10];
+	addrMacMod[8] = addrMac[12]; addrMacMod[9] = addrMac[13];
+	addrMacMod[10] = addrMac[15]; addrMacMod[11] = addrMac[16];
+	_ssidAPconnect += addrMacMod;
 	initWifi();
 
 	// просто отчет о подключении
@@ -282,8 +293,11 @@ void setup()
   if (processMode.number > 7) processMode.number = 0;
   processMode.step = 0;
   loadEepromPid();
+  setKp = Kp;
+  setKi = Ki;
+  setKd = Kd;
 
-  Serial.print("Kd = ");
-  Serial.println(Kd);
   Serial.println("Setup Done!");
+
+  //Serial.println(ESP.getFreeSketchSpace());
 }

@@ -17,6 +17,7 @@ PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
 String _ssid		= "SSID";      // Для хранения SSID
 String _password	= "PASSWORD";  // Для хранения пароля сети
 String _ssidAP		= "LuckyBox";  // SSID AP точки доступа
+String _ssidAPconnect;
 String _passwordAP	= "12345678";  // пароль точки доступа
 String SSDP_Name	= "LuckyBox";  // Имя SSDP
 String jsonConfig	= "{}";
@@ -49,7 +50,8 @@ unsigned long displayTimeInterval = 0;
 unsigned long sdTimeWriteInterval = 0;
 uint16_t graphOutInterval = Display_out_temp;	// Инетрал времени для вывода графика температуры если показания неизменны
 uint16_t scaleCount;
-//float temperatureTubeRect;
+byte tempBigOut;
+byte tempBigOutOld;
 float settingBoilTube;
 float settingColumn = 101;         // Температура срабатывания оповещения от датчика в царге
 float temperatureStartPressure = 78;   //Температура кипения спирта при запуске отслеживания ректификации
@@ -65,6 +67,7 @@ bool headValve;									// Состояние клапана отбора
 unsigned long headValveOn;						// контроль времени клапана отбора в открытом состоянии
 unsigned long headValveOff;						// контроль времени клапана отбора в закрытом состоянии
 byte touchArea = 0;								// Область нажатия
+byte touchScreen = 0;							// На каком экране контролируем нажатие
 int modeWiFi;
 uint8_t DefCubOut = 9;
 int16_t touch_x = 0;
@@ -75,6 +78,7 @@ uint8_t numSenseMashBrew;
 double Setpoint, Input, Output;
 double Kp = 120, Ki = 0.02, Kd = 75;
 double setKp, setKi, setKd;
+float setTempForPID = 65;
 int WindowSize = 250;
 unsigned long windowStartTime, stepTime;
 unsigned long stepStartTime;

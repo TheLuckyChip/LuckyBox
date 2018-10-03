@@ -203,6 +203,7 @@ void mashingLoop() {
 			DefCubOut = Display_out_temp;
 			csOff(TFT_CS);
 #endif
+			tempBigOut = 1;
 			myPID.SetOutputLimits(0, WindowSize);		// временной интервал реагирования для PID
 			myPID.SetMode(AUTOMATIC);					// режим PID
 			Setpoint = processMashing[0].temperature;	// температура которую надо поддерживать PID алгоритму (1-й шаг)
