@@ -169,17 +169,17 @@ void handleConfigJSON()
 	// Заполняем поля json
 	json["SSDP"] = SSDP_Name;
 	json["ssidAP"] = _ssidAP;
-	json["passwordAP"] = _passwordAP;
+	//json["passwordAP"] = _passwordAP;
 	json["ssid"] = _ssid;
-	json["password"] = _password;
+	//json["password"] = _password;
 	json["timezone"] = timezone;
-	json["ip"] = WiFi.localIP().toString();
-	json["time"] = GetTime();
-	json["date"] = GetDate();
-	json["temperature"] = temperatureSensor[DS_Cube].data;
-	json["temperature2"] = temperatureSensor[DS_Tube].data;
-	json["temperature3"] = temperatureSensor[DS_Out].data;
-	json["temperature4"] = temperatureSensor[DS_Def].data;
+	//json["ip"] = WiFi.localIP().toString();
+	//json["time"] = GetTime();
+	//json["date"] = GetDate();
+	//json["temperature"] = temperatureSensor[DS_Cube].data;
+	//json["temperature2"] = temperatureSensor[DS_Tube].data;
+	//json["temperature3"] = temperatureSensor[DS_Out].data;
+	//json["temperature4"] = temperatureSensor[DS_Def].data;
 	//json["setting"] = settingColumn;
 	//json["settingAlarm"] = settingAlarm;
 
