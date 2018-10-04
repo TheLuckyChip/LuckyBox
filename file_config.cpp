@@ -6,7 +6,6 @@
 // Загрузка данных сохраненных в файл  config.json
 bool loadConfig()
 {
-	String passwordIn;
   // Проверяем наличие файла и открываем для чтения
   if (!SPIFFS.exists("/config.json")) { // Файл не найден
     Serial.println("Failed to open config.json file");
@@ -35,13 +34,11 @@ bool loadConfig()
 	JsonObject& root = jsonBuffer.parseObject(jsonConfig);
 	// Теперь можно получить значения из root
 	_ssidAP = root["ssidAPName"].as<String>(); // Так получаем строку
-	passwordIn = root["ssidAPPassword"].as<String>();
-	if (passwordIn.length() >= 8) _passwordAP = passwordIn;
+	_passwordAP = root["ssidAPPassword"].as<String>();
 	timezone = root["timezone"];               // Так получаем число
 	SSDP_Name = root["SSDPName"].as<String>();
 	_ssid = root["ssidName"].as<String>();
-	passwordIn = root["ssidPassword"].as<String>();
-	if (passwordIn.length() >= 8) _password = passwordIn;
+	_password = root["ssidPassword"].as<String>();
 	return true;
 }
 
@@ -55,10 +52,15 @@ bool saveConfig()
 	// Заполняем поля json
 	json["SSDPName"] = SSDP_Name;
 	json["ssidAPName"] = _ssidAP;
-	json["ssidAPPassword"] = _passwordAP;
+	if (_passwordAP.length() >= 8) json["ssidAPPassword"] = _passwordAP;
+	else json["ssidAPPassword"] = "12345678";
 	json["ssidName"] = _ssid;
-	json["ssidPassword"] = _password;
+	if (_password.length() >= 8) json["ssidPassword"] = _password;
+	else json["ssidPassword"] = "PASSWORD";
 	json["timezone"] = timezone;
+
+	//Serial.print("Lenght: "); Serial.println(_password.length());
+	//Serial.println(_password);
 
 	// Помещаем созданный json в глобальную переменную json.printTo(jsonConfig);
 	json.printTo(jsonConfig);
