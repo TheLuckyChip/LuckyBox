@@ -63,7 +63,7 @@
             <div id="navbar-menu" class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
                     <li class="active"><a href="#home" data-toggle="tab">Дом</a></li>
-                    <li><a href="#settings" data-toggle="tab">Настройки</a></li>
+                    <li><a id="toggle_settings" href="#settings" data-toggle="tab">Настройки</a></li>
                     <!--<li><a href="#graph" data-toggle="tab">Графики</a></li>-->
                 </ul>
             </div>
@@ -159,7 +159,7 @@
                                     <input id="settings_passwordap" class="form-control input-sm noSwipe" value="" pattern=".{8,15}" onfocus="this.type='text'" type="password" placeholder="Пароль">
                                     </div>
                                     <div class="form-group mt-10">
-                                    <button id="settings_set_ssidap" type="button" class="btn btn-success btn-sm noSwipe" onclick="set_ssid_ap(this);">Сохранить</button>
+                                    <button id="settings_set_ssidap" type="button" class="btn btn-success btn-sm noSwipe">Сохранить</button>
                                     </div>
                                 </div>
                             </div>

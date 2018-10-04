@@ -1245,7 +1245,7 @@ $(function () {
 			}
 		}
 		if (nameError) {
-			$.fn.openModal('', '<p class="text-center text-danger <p class="text-center text-danger text-strong">Заполните названия подключенных датчиков</p>', "modal-sm", true, false);
+			$.fn.openModal('', '<p class="text-center text-danger text-strong">Заполните названия подключенных датчиков</p>', "modal-sm", true, false);
 		} else {
 			//console.log(sensorsJson,sensorsSend);
 			sendRequest("sensorsInSet", sensorsSend, "json", setSensors, _this, $("#error_sensors"), false);
@@ -3416,6 +3416,11 @@ $(function () {
 				});
 			}
 			let process = Number(globalSensorsJson["process"]["allow"]);
+			if (process !== 0){
+				$("a#toggle_settings").prop("disabled",true).css('cursor', 'not-allowed');
+			}else{
+				$("a#toggle_settings").prop("disabled",false).css('cursor', 'pointer');
+			}
 
 			$.each(globalSensorsJson["sensors"], function (i, e) {
 				let sensor_key = Object.keys(e).shift();
@@ -3714,27 +3719,39 @@ $(function () {
 		e.preventDefault();
 		let _this = $(this);
 		let ssdp = $("#settings_ssdp").val();
-		sendRequest("ssdp", {"ssdp": ssdp}, "text", false, _this, $("#error_settings"), false);
+		if(ssdp !== "") {
+			sendRequest("ssdp", {"ssdp": ssdp}, "text", false, _this, $("#error_settings"), false);
+		}else{
+			$.fn.openModal('', '<p class="text-center text-danger text-strong">Заполните поле</p>', "modal-sm", true, false);
+		}
 	});
 	$("#settings_set_ssid").on("click", function (e) {
 		e.preventDefault();
 		let _this = $(this);
 		let ssid = $("#settings_ssid").val();
 		let pass = $("#settings_password").val();
-		sendRequest("ssid", {
-			"ssid": ssid,
-			"password": pass
-		}, "text", false, _this, $("#error_settings"), '<p class="text-center text-success text-strong">Изменения вступят в силу после перезагрузки. Пожалуйста перезагрузите устройство.</p>');
+		if(ssid !== "" && pass.length >= 8) {
+			sendRequest("ssid", {
+				"ssid": ssid,
+				"password": pass
+			}, "text", false, _this, $("#error_settings"), '<p class="text-center text-success text-strong">Изменения вступят в силу после перезагрузки. Пожалуйста перезагрузите устройство.</p>');
+		}else{
+			$.fn.openModal('', '<p class="text-center text-danger text-strong">Заполните поля, пароль не может быть меньше 8 знаков</p>', "modal-sm", true, false);
+		}
 	});
 	$("#settings_set_ssidap").on("click", function (e) {
 		e.preventDefault();
 		let _this = $(this);
 		let ssidap = $("#settings_ssidap").val();
 		let pass = $("#settings_passwordap").val();
+		if(ssidap !== "" && pass.length >= 8) {
 		sendRequest("ssidap", {
-			"ssidAP": ssidap,
-			"passwordAP": pass
-		}, "text", false, _this, $("#error_settings"), '<p class="text-center text-success text-strong">Изменения вступят в силу после перезагрузки. Пожалуйста перезагрузите устройство.</p>');
+				"ssidAP": ssidap,
+				"passwordAP": pass
+			}, "text", false, _this, $("#error_settings"), '<p class="text-center text-success text-strong">Изменения вступят в силу после перезагрузки. Пожалуйста перезагрузите устройство.</p>');
+		}else{
+			$.fn.openModal('', '<p class="text-center text-danger text-strong">Заполните поля, пароль не может быть меньше 8 знаков</p>', "modal-sm", true, false);
+		}
 	});
 	$("#settings_auto_timezone").on("click", function (e) {
 		e.preventDefault();
@@ -3743,12 +3760,18 @@ $(function () {
 		let timezone = Math.abs(date.getTimezoneOffset() / 60);
 		$("#settings_timezone").val(timezone);
 		sendRequest("TimeZone", {"timezone": timezone}, "text", false, _this, $("#error_settings"), '<p class="text-center text-success text-strong">Изменения временной зоны сохранены</p>');
+
+
 	});
 	$("#settings_set_timezone").on("click", function (e) {
 		e.preventDefault();
 		let _this = $(this);
 		let timezone = $("#settings_timezone").val();
-		sendRequest("TimeZone", {"timezone": timezone}, "text", false, _this, $("#error_settings"), '<p class="text-center text-success text-strong">Изменения временной зоны сохранены</p>');
+		if(timezone !== "") {
+			sendRequest("TimeZone", {"timezone": timezone}, "text", false, _this, $("#error_settings"), '<p class="text-center text-success text-strong">Изменения временной зоны сохранены</p>');
+		}else{
+			$.fn.openModal('', '<p class="text-center text-danger text-strong">Заполните поле</p>', "modal-sm", true, false);
+		}
 	});
 	$("#settings_restart").on("click", function (e) {
 		e.preventDefault();
@@ -3780,140 +3803,6 @@ $(function () {
 		sendRequest("rotate", {
 			"tft_rotate": tft_rotate,
 			"touchpad_rotate": touchpad_rotate
-		}, "text", false, false, false, false);
+		}, "text", false, _this, $("#error_settings"), false);
 	});
-
-
-	//TODO не используется все что ниже
-	//Затирание
-	// нужно думать с этими переменными (согласовать с ардуино), что бы можно было запускать затирание с любого шага
-	let start_brewing = 0;
-	let step_brewing = 0;
-
-	function getBrewing() {
-		$.ajax({
-			url: 'brewing.json',
-			data: {},
-			type: 'GET',
-			dataType: 'json',
-			success: function (msg) {
-				console.log('Brewing', msg);
-				$("#brewing_temp_1").val(msg["pauseTemp1"].toFixed(0));
-				$("#brewing_temp_2").val(msg["pauseTemp2"].toFixed(0));
-				$("#brewing_temp_3").val(msg["pauseTemp3"].toFixed(0));
-				$("#brewing_temp_4").val(msg["pauseTemp4"].toFixed(0));
-				$("#brewing_time_1").val(msg["pauseTime1"].toFixed(0));
-				$("#brewing_time_2").val(msg["pauseTime2"].toFixed(0));
-				$("#brewing_time_3").val(msg["pauseTime3"].toFixed(0));
-				$("#brewing_time_4").val(msg["pauseTime4"].toFixed(0));
-				$("#brewing_time").text(msg["time"]);
-
-				let step_brew = msg["stepBrewing"].toFixed(0);
-				let step = 0;
-				$(".brewing-status").removeClass('success');
-				switch (step_brew) {
-					case '1':
-					case '2':
-						step = 1;
-						break;
-					case '3':
-					case '4':
-						step = 2;
-						break;
-					case '5':
-					case '6':
-						step = 3;
-						break;
-					case '7':
-					case '8':
-						step = 4;
-						break;
-
-				}
-				if (step > 0) {
-					$("#brewing_status_" + step).addClass('success');
-				}
-
-				setTimeout(getPower, 2000);
-			}
-		});
-	}
-
-	function settingsBrewing() {
-		let pauseTemp1 = Number($("#brewing_temp_1").val());
-		let pauseTemp2 = Number($("#brewing_temp_2").val());
-		let pauseTemp3 = Number($("#brewing_temp_3").val());
-		let pauseTemp4 = Number($("#brewing_temp_4").val());
-
-		let pauseTime1 = Number($("#brewing_time_1").val());
-		let pauseTime2 = Number($("#brewing_time_2").val());
-		let pauseTime3 = Number($("#brewing_time_3").val());
-		let pauseTime4 = Number($("#brewing_time_4").val());
-
-		let data_send = {
-			startBrewing: start_brewing,
-			stepBrewing: step_brewing,
-			pauseTemp1: pauseTemp1,
-			pauseTemp2: pauseTemp2,
-			pauseTemp3: pauseTemp3,
-			pauseTemp4: pauseTemp4,
-			pauseTime1: pauseTime1,
-			pauseTime2: pauseTime2,
-			pauseTime3: pauseTime3,
-			pauseTime4: pauseTime4
-		};
-
-		sendRequest("SettingBrewing", data_send, "text", false, $(this), $("#error_brewing"), false);
-	}
-
-	function startBrewing(start, step) {
-		start_brewing = start;
-		step_brewing = step;
-		settingsBrewing();
-	}
-
-	function stopBrewing() {
-		settingsBrewing();
-	}
-
-	$("#brewing_set_pause_temp").on("click", function () {
-		settingsBrewing()
-	});
-
-	$("#start_brewing").on("click", function () {
-		startBrewing(1, 1);
-	});
-
-	$("#stop_brewing").on("click", function () {
-		start_brewing = 0;
-		step_brewing = 0;
-		stopBrewing(1, 1);
-		sendRequest("SetHeaterPower", {"heaterPower": 0}, "text", false, $(this), $("#error_brewing"), false);
-	});
-
-	//мощность тэна
-	function getPower() {
-		$.ajax({
-			url: 'heater.json',
-			data: {},
-			type: 'GET',
-			dataType: 'json',
-			success: function (msg) {
-				console.log('Heater', msg);
-				$("#heater_power").val(msg["heaterPower"].toFixed(2));
-
-				//setTimeout(getDistillation, 2000);
-			}
-		});
-	}
-
-	$("#heater_set_power").on("click", function () {
-		let pover = Number($("#heater_power").val());
-		pover = (pover > 0 ? pover : 0);
-
-		sendRequest("SetHeaterPower", {"heaterPower": pover}, "text", false, $(this), $("#error_heater"), false);
-	});
-
-	setTimeout(getSettings, 2000);
-	//setInterval(getDistillation,2000);
 });
