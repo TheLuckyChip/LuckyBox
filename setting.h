@@ -106,6 +106,8 @@ extern String _ssidAP;
 extern String _ssidAPconnect;
 extern String _passwordAP;
 extern String SSDP_Name;
+extern bool touchInvert;
+extern bool tftInvert;
 extern String jsonConfig;
 extern int port;
 extern int timezone;

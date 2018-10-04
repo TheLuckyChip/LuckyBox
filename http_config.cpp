@@ -11,6 +11,7 @@ void initHTTP(void)
 	HTTP.on("/ssdp", handleSetSSDP);     // Установить имя SSDP устройства по запросу вида /ssdp?ssdp=proba
 	HTTP.on("/ssid", handleSetSSID);     // Установить имя и пароль роутера по запросу вида /ssid?ssid=home2&password=12345678
 	HTTP.on("/ssidap", handleSetSSIDAP); // Установить имя и пароль для точки доступа по запросу вида /ssidap?ssidAP=home1&passwordAP=8765439
+	HTTP.on("/rotate", handleSetRotate); // Переворот экрана и тачскрина
 	HTTP.on("/restart", handleRestart);   // Перезагрузка модуля по запросу вида /restart?device=ok
 
 	// Добавляем функцию Update для перезаписи прошивки по WiFi при 1М(256K SPIFFS) и выше
@@ -28,10 +29,6 @@ void initHTTP(void)
 			String nameBinFile = upload.filename.c_str();
 
 			Serial.print("Update: "); Serial.println(nameBinFile);
-			//Serial.printf("Update: %s\n", nameBinFile);
-
-			//uint32_t maxSketchSpace = (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000;
-
 
 			if (nameBinFile == "LuckyBox.spiffs.bin" || nameBinFile == "LuckyBox.ino.spiffs.bin") {	
 				uint32_t maxSketchSpace = (ESP.getFreeSketchSpace() - ESP.getSketchSize());
@@ -142,6 +139,50 @@ void handleSetSSIDAP()
 	HTTP.send(200, "text/plain", "OK");   // отправляем ответ о выполнении
 }
 
+void handleSetRotate() {
+	uint8_t tft180, touch180;
+	if (processMode.allow == 0) {
+		tft180 = HTTP.arg("tft_rotate").toInt();
+		touch180 = HTTP.arg("touchpad_rotate").toInt();
+		HTTP.send(200, "text/plain", "OK");   // отправляем ответ о выполнении
+		if (tft180 == 1) {
+			if (tftInvert == true) {
+				tftInvert = false;
+				EEPROM.write(1298, 0);
+#if defined TFT_Display
+				csOn(TFT_CS);
+				tft.setRotation(3);
+				csOff(TFT_CS);
+#endif
+			}
+			else {
+				tftInvert = true;
+				EEPROM.write(1298, 1);
+#if defined TFT_Display
+				csOn(TFT_CS);
+				tft.setRotation(1);
+				csOff(TFT_CS);
+#endif
+			}
+		}
+		if (touch180 == 1) {
+			if (touchInvert = true) {
+				touchInvert = false;
+				EEPROM.write(1299, 0);
+			}
+			else {
+				touchInvert = true;
+				EEPROM.write(1299, 1);
+			}
+		}
+		if (tft180 == 1 || touch180 == 1) {
+			EEPROM.commit();
+			delay(100);
+			processMode.step = 0;
+		}
+	}
+	else HTTP.send(200, "text/plain", "ERR");   // отправляем ответ о выполнении
+}
 
 // Перезагрузка модуля по запросу вида http://192.168.0.101/restart?device=ok
 void handleRestart()

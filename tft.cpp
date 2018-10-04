@@ -68,7 +68,8 @@ void drawScreen4bitMonoBitmap(uint16_t x, uint16_t y, uint16_t w, uint16_t h, co
 
 void initTFT() {
 	tft.begin();
-	tft.setRotation(3);
+	if (tftInvert == false) tft.setRotation(3);
+	else tft.setRotation(1);
 	fillScreenRect(0, 0, 320, 240, ILI9341_BLACK);
 	tft.setCursor(0, 0);
 	tft.setTextColor(ILI9341_WHITE);
