@@ -20,17 +20,17 @@ void displayLoop() {
 				else touchArea = 0;
 			}
 			else if (processMode.allow > 0 && touchScreen == 0) {
-				if (touch_x > 0 && touch_y < 80) {
+				if (touch_x >= 0 && touch_y <= 100) {
 					touchArea = 10;
 					touchScreen = 1;
 				}
-				else if (touch_x > 0 && touch_x < 106 && touch_y > 120) {
+				else if (touch_x >= 20 && touch_x <= 106 && touch_y >= 170) {
 					touchArea = 11;
 				}
-				else if (touch_x > 106 && touch_x < 212 && touch_y > 120) {
+				else if (touch_x >= 126 && touch_x <= 212 && touch_y >= 170) {
 					touchArea = 12;
 				}
-				else if (touch_x > 212 && touch_y > 120) {
+				else if (touch_x >= 232 && touch_y >= 170) {
 					touchArea = 13;
 				}
 				else touchArea = 0;
@@ -41,8 +41,6 @@ void displayLoop() {
 				else touchArea = 0;
 			}
 			delay(35);
-			//Serial.print("X="); Serial.println(touch_x);
-			//Serial.print("Y="); Serial.println(touch_y);
 		}
 
 		if (digitalRead(intTouch) == 1) {

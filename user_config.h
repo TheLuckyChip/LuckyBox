@@ -24,7 +24,8 @@
 #define		TFT_Display
 // ТачСкрин
 #define		intTouch		2
-#define		touchInvert		true
+//#define		touchInvert		true
+#define		touchInvert		false
 // GPIO для TFT
 #define		TFT_DC_Lib		15
 #define		TFT_CS_Lib		-1

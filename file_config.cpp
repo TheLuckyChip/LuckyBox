@@ -6,6 +6,7 @@
 // Загрузка данных сохраненных в файл  config.json
 bool loadConfig()
 {
+	String passwordIn;
   // Проверяем наличие файла и открываем для чтения
   if (!SPIFFS.exists("/config.json")) { // Файл не найден
     Serial.println("Failed to open config.json file");
@@ -34,11 +35,13 @@ bool loadConfig()
 	JsonObject& root = jsonBuffer.parseObject(jsonConfig);
 	// Теперь можно получить значения из root
 	_ssidAP = root["ssidAPName"].as<String>(); // Так получаем строку
-	_passwordAP = root["ssidAPPassword"].as<String>();
+	passwordIn = root["ssidAPPassword"].as<String>();
+	if (passwordIn.length() >= 8) _passwordAP = passwordIn;
 	timezone = root["timezone"];               // Так получаем число
 	SSDP_Name = root["SSDPName"].as<String>();
 	_ssid = root["ssidName"].as<String>();
-	_password = root["ssidPassword"].as<String>();
+	passwordIn = root["ssidPassword"].as<String>();
+	if (passwordIn.length() >= 8) _password = passwordIn;
 	return true;
 }
 

@@ -29,7 +29,7 @@ void setup()
 	csOff(SIREN_OUT);
 	csOff(SD_CS);
 	csOff(TOUCH_CS);
-	csOff(BUZ_VOL);
+	setPWM(BUZ_VOL, 0, 650); //csOff(BUZ_VOL);
 	csOff(BUZ_OUT);
 	pwmOut[0].invert = PWM_CH1_Invert;
 	pwmOut[1].invert = PWM_CH2_Invert;

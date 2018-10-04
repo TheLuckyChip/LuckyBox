@@ -987,7 +987,7 @@ void rfluxLoopMode_7() {
 		}
 			// ждем начала подъема температуры в царге и включаем воду на охлаждение и понижаем мощность на ТЭН
 		case 1: {
-			if (temperatureSensor[DS_Tube].data >= 45.0) {
+			if (temperatureSensor[DS_Tube].data >= 30.0) {
 				csOn(PWM_CH3);
 				csOn(PWM_CH2);				// включаем клапан доп. подачи воды
 				power.heaterPower = power.inPowerLow;			// установили мощность на ТЭН 65 %

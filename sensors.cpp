@@ -495,9 +495,11 @@ void sensorLoop() {
 
 		// Пищалка для WEB
 		if (settingAlarm == true) {
+			setPWM(BUZ_VOL, 4096, 0);
 			initBuzzer(500);
 		}
 		else {
+			setPWM(BUZ_VOL, 0, 650);
 			deinitBuzzer();
 		}
 
