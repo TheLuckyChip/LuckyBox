@@ -368,6 +368,13 @@ span.show {
 .svg-container{
 	height: 450px;
 }
+/*label form настройки*/
+.label-top{
+	display: block;
+	margin-top: -16px;
+	color: #d9534f;
+	font-weight: normal;
+}
 /*navbar-banner*/
 @media (max-width: 768px) {
 	.svg-container{

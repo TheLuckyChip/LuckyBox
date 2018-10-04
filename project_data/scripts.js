@@ -3771,6 +3771,17 @@ $(function () {
 				}
 			}], {buttons: "replace"});
 	});
+	//Поворот экрана
+	$("#settings_set_rotate").on("click", function (e) {
+		e.preventDefault();
+		let _this = $(this);
+		let tft_rotate = ($("#tft_rotate").prop("checked") ? 1 : 0);
+		let touchpad_rotate = ($("#touchpad_rotate").prop("checked") ? 1 : 0);
+		sendRequest("rotate", {
+			"tft_rotate": tft_rotate,
+			"touchpad_rotate": touchpad_rotate
+		}, "text", false, false, false, false);
+	});
 
 
 	//TODO не используется все что ниже
