@@ -163,5 +163,9 @@ extern unsigned long windowStartTime, stepTime;
 extern unsigned long stepStartTime;
 extern unsigned long wifiTimeInterval;
 extern String nameProcessStep;
+extern bool CH1;
+extern bool CH2;
+extern bool CH3;
+extern bool CH4;
 
 #endif

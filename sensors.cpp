@@ -436,6 +436,10 @@ void handleProcessModeIn() {
 					settingColumn = temperatureSensor[i].data;
 				}
 			}
+			else if (tmpAllertValue == 0 && temperatureSensor[i].delta != 0) {
+				temperatureSensor[i].allertValue = 0;
+				settingBoilTube = 0;
+			}
 			else temperatureSensor[i].allertValue = 0;
 			temperatureSensor[i].allertValueIn = tmpAllertValue;
 

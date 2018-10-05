@@ -8,7 +8,7 @@ void displayLoop() {
 	if (touch_in == true) {
 		if (touchRead == 0) {
 			initBuzzer(50);
-			delay(15);
+			//delay(5);
 			touchscreenUpdate();
 			touchRead = 1;
 			// определим область нажатия для меню
@@ -20,18 +20,38 @@ void displayLoop() {
 				else touchArea = 0;
 			}
 			else if (processMode.allow > 0 && touchScreen == 0) {
+				// меню подтверждения выхода
 				if (touch_x >= 0 && touch_y <= 100) {
 					touchArea = 10;
 					touchScreen = 1;
 				}
-				else if (touch_x >= 20 && touch_x <= 106 && touch_y >= 170) {
+				// выбор температуры крупного плана
+				else if (touch_x >= 20 && touch_x <= 106 && touch_y >= 140 && processMode.allow < 6) {
 					touchArea = 11;
 				}
-				else if (touch_x >= 126 && touch_x <= 212 && touch_y >= 170) {
+				// выбор температуры крупного плана
+				else if (touch_x >= 126 && touch_x <= 212 && touch_y >= 140 && processMode.allow < 6) {
 					touchArea = 12;
 				}
-				else if (touch_x >= 232 && touch_y >= 170) {
+				// выбор температуры крупного плана
+				else if (touch_x >= 232 && touch_y >= 140 && processMode.allow < 6) {
 					touchArea = 13;
+				}
+				// выбор клапана 1
+				else if (touch_x < 80 && touch_y >= 140 && processMode.allow == 6) {
+					touchArea = 61;
+				}
+				// выбор клапана 2
+				else if (touch_x > 80 && touch_x < 160 && touch_y >= 140 && processMode.allow == 6) {
+					touchArea = 62;
+				}
+				// выбор клапана 3
+				else if (touch_x > 160 && touch_x < 240 && touch_y >= 140 && processMode.allow == 6) {
+					touchArea = 63;
+				}
+				// выбор клапана 4
+				else if (touch_x > 240 && touch_y >= 140 && processMode.allow == 6) {
+					touchArea = 64;
 				}
 				else touchArea = 0;
 			}
@@ -40,7 +60,7 @@ void displayLoop() {
 				else if (touch_x > 160 && touch_x < 320 && touch_y > 100) touchArea = 22;
 				else touchArea = 0;
 			}
-			delay(35);
+			delay(50);
 		}
 
 		if (digitalRead(intTouch) == 1) {
@@ -57,7 +77,7 @@ void displayLoop() {
 	if ((millis() - displayTimeInterval) >= 1000) {
 		displayTimeInterval = millis();
 #if defined TFT_Display
-		if (processMode.allow != 0 && processMode.step != 0 && touchScreen == 0) tftOutGraphDisplay(); // вывод на дисплей графиков, если он есть
+		if (processMode.allow != 0 && processMode.allow != 6 && processMode.step != 0 && touchScreen == 0) tftOutGraphDisplay(); // вывод на дисплей графиков, если он есть
 		DefCubOut++;
 #endif
 	}

@@ -87,3 +87,7 @@ unsigned long windowStartTime, stepTime;
 unsigned long stepStartTime;
 unsigned long wifiTimeInterval;
 String nameProcessStep = " ";
+bool CH1 = false;
+bool CH2 = false;
+bool CH3 = false;
+bool CH4 = false;
