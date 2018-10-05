@@ -106,6 +106,8 @@ extern String _ssidAP;
 extern String _ssidAPconnect;
 extern String _passwordAP;
 extern String SSDP_Name;
+extern bool touchInvert;
+extern bool tftInvert;
 extern String jsonConfig;
 extern int port;
 extern int timezone;
@@ -161,5 +163,9 @@ extern unsigned long windowStartTime, stepTime;
 extern unsigned long stepStartTime;
 extern unsigned long wifiTimeInterval;
 extern String nameProcessStep;
+extern bool CH1;
+extern bool CH2;
+extern bool CH3;
+extern bool CH4;
 
 #endif

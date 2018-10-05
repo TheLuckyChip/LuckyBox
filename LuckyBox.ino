@@ -2,6 +2,7 @@
 //   Проект центра открытого проектирования у Счастливчика https://LuckyCenter.ru
 //   Версия 2.0 Release Candidate
 
+#include "device_view.h"
 #include "pid_config.h"
 #include "adc.h"
 #include "sd_card.h"
@@ -27,6 +28,7 @@ void loop() {
 	case 3: mashingLoop(); break;
 	case 4: pidSetLoop(); break;
 	//case 5: brewingLoop(); break;
+	case 6: deviceViewLoop(); break;
   }
   adcLoop();
   heaterLoop();

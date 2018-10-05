@@ -52,10 +52,15 @@ bool saveConfig()
 	// Заполняем поля json
 	json["SSDPName"] = SSDP_Name;
 	json["ssidAPName"] = _ssidAP;
-	json["ssidAPPassword"] = _passwordAP;
+	if (_passwordAP.length() >= 8) json["ssidAPPassword"] = _passwordAP;
+	else json["ssidAPPassword"] = "12345678";
 	json["ssidName"] = _ssid;
-	json["ssidPassword"] = _password;
+	if (_password.length() >= 8) json["ssidPassword"] = _password;
+	else json["ssidPassword"] = "PASSWORD";
 	json["timezone"] = timezone;
+
+	//Serial.print("Lenght: "); Serial.println(_password.length());
+	//Serial.println(_password);
 
 	// Помещаем созданный json в глобальную переменную json.printTo(jsonConfig);
 	json.printTo(jsonConfig);

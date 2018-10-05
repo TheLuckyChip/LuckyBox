@@ -68,7 +68,8 @@ void drawScreen4bitMonoBitmap(uint16_t x, uint16_t y, uint16_t w, uint16_t h, co
 
 void initTFT() {
 	tft.begin();
-	tft.setRotation(3);
+	if (tftInvert == false) tft.setRotation(3);
+	else tft.setRotation(1);
 	fillScreenRect(0, 0, 320, 240, ILI9341_BLACK);
 	tft.setCursor(0, 0);
 	tft.setTextColor(ILI9341_WHITE);
@@ -403,7 +404,7 @@ void tftOutText(int temp_min, int temp_max) {
 		// температура
 		tft.printf("%.1f C    ", tempOutTFT);
 	}
-	else if (processMode.allow == 4) {
+	/*else if (processMode.allow == 4) {
 		// в процессе настройки PID выводим время и температуру
 
 		// время
@@ -412,7 +413,7 @@ void tftOutText(int temp_min, int temp_max) {
 		tft.setTextColor(ILI9341_LIGHTGREY, ILI9341_BLACK);
 		tft.printf("Calibration T1 = ");
 		tft.printf("%.1f", setTempForPID);
-	}
+	}*/
 
 	// крупно температура основного графика
 	switch (tempBigOut) {
@@ -604,10 +605,17 @@ void tftStopLoop() {
 			touchArea = 0;
 			touchScreen = 0;
 			csOn(TFT_CS);
-			fillScreenRect(25, 65, 270, 140, ILI9341_BLACK);
+			if (processMode.allow < 6) fillScreenRect(25, 65, 270, 140, ILI9341_BLACK);
 			csOff(TFT_CS);
+			if (processMode.allow == 6) processMode.step = 0;
 		}
 		else if (touchArea == 22) { // Да - останавливаем процесс и выходим в меню
+			if (processMode.allow == 6) {
+				CH1 = false; csOff(PWM_CH1);
+				CH2 = false; csOff(PWM_CH2);
+				CH3 = false; csOff(PWM_CH3);
+				CH4 = false; csOff(PWM_CH4);
+			}
 			processMode.step = 0;
 			processMode.allow = 0;
 			touchArea = 0;
@@ -634,7 +642,7 @@ void getTouchArea() {
 		//handleMashingSensorTpl();
 	}
 	else if (touchArea == 4) {
-		processMode.allow = 4;
+		processMode.allow = 6;
 		processMode.step = 0;
 	}
 	touchArea = 0;

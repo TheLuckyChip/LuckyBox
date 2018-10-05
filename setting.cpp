@@ -20,6 +20,9 @@ String _ssidAP		= "LuckyBox";  // SSID AP точки доступа
 String _ssidAPconnect;
 String _passwordAP	= "12345678";  // пароль точки доступа
 String SSDP_Name	= "LuckyBox";  // Имя SSDP
+// Настройки TFT
+bool touchInvert = false;
+bool tftInvert = false;
 String jsonConfig	= "{}";
 int port = 80;
 
@@ -84,3 +87,7 @@ unsigned long windowStartTime, stepTime;
 unsigned long stepStartTime;
 unsigned long wifiTimeInterval;
 String nameProcessStep = " ";
+bool CH1 = false;
+bool CH2 = false;
+bool CH3 = false;
+bool CH4 = false;

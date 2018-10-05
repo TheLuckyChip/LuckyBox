@@ -29,7 +29,7 @@ void setup()
 	csOff(SIREN_OUT);
 	csOff(SD_CS);
 	csOff(TOUCH_CS);
-	csOff(BUZ_VOL);
+	setPWM(BUZ_VOL, 0, 650); //csOff(BUZ_VOL);
 	csOff(BUZ_OUT);
 	pwmOut[0].invert = PWM_CH1_Invert;
 	pwmOut[1].invert = PWM_CH2_Invert;
@@ -54,6 +54,14 @@ void setup()
 	delay(10);
 	csOff(TFT_RES_PRG);
 	delay(2);
+
+	EEPROM.begin(2048);
+	uint8_t tft180 = EEPROM.read(1298);
+	uint8_t touch180 = EEPROM.read(1299);
+	if (tft180 > 1 || tft180 == 0) tftInvert = false;
+	else tftInvert = true;
+	if (touch180 > 1 || touch180 == 0) touchInvert = false;
+	else touchInvert = true;
 
 #if defined TFT_Display
 	csOn(TFT_CS);
@@ -143,7 +151,7 @@ void setup()
 
 	// Инициализация EEPROM и датчиков температуры
 	Serial.println("Step 2 - DS Init");
-	EEPROM.begin(2048);
+	//EEPROM.begin(2048);
 	senseWebInit();
 	dallSearch();
 
