@@ -11,7 +11,7 @@
 
 #.gitignore
 # JetBrains CLion
-./idea/*
+.idea/*
 CMakeLists.txt
 CMakeListsPrivate.txt
 /cmake/*

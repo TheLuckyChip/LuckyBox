@@ -1982,7 +1982,8 @@ $(function () {
 					if (sensor_name !== "") {
 						//if (key !== "p1") {
 						if (re_t.test(key)) {
-							let sensor_delta = '<label class="checkbox-inline"><input disabled id="delta_' + key + '" name="reflux_radio_' + key + '" type="radio" value="Y">Уставка</label>';
+							let sensor_delta = '<label class="checkbox-inline"><input class="reflux_delta_radio" disabled id="delta_' + key + '" name="reflux_radio_' + key + '" type="radio"' +
+								' value="Y">Уставка</label>';
 							let sensor_cutoff = '<label class="checkbox-inline"><input disabled id="cutoff_' + key + '" name="reflux_radio_' + key + '" type="radio" value="Y">Отсечка</label>';
 							//console.log(sensor_name);
 							//sensor_delta = sensor_cutoff = '';
@@ -2101,6 +2102,13 @@ $(function () {
 		if (checked) {
 			radio_delta.prop("checked", false);
 			radio_cutoff.prop("checked", false);
+		}
+	});
+	$(document).on('click', '#reflux_sensors input.reflux_delta_radio', function () {
+		let checked = $(this).prop("checked");
+		if(checked){
+			$('#reflux_sensors input.reflux_delta_radio').prop("checked",false);
+			$(this).prop("checked",true);
 		}
 	});
 
