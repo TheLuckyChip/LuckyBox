@@ -153,7 +153,25 @@ $(function () {
 				return this.setItem(key, JSON.stringify(obj));
 			} catch (e) {
 				if (isQuotaExceeded(e)) {
-					$.fn.openModal('', '<p class="text-center text-danger text-strong">Превышен лимит localStorage</p>', "modal-sm", false, true);
+					// $.fn.openModal('', '<p class="text-center text-danger text-strong">Превышен лимит localStorage</p>', "modal-sm", false, true);
+					$.fn.openModal('', '<p class="text-center text-danger text-strong">Превышен лимит localStorage, данные графиков переполнили память браузера</p>', "modal-sm", false, [
+						{
+							text: "Закрыть",
+							id: "return_tab",
+							class: "btn btn-primary btn-sm",
+							click: function () {
+								$(this).closest(".modal").modal("hide");
+							}
+						},
+						{
+							text: "Удалить графики",
+							id: "del_graf",
+							class: "btn btn-danger btn-sm",
+							click: function () {
+								$(this).closest(".modal").modal("hide");
+								clearChart();
+							}
+						}], {buttons: "replace"});
 				}
 				return null;
 			}
@@ -688,6 +706,14 @@ $(function () {
 		//$input.change();
 	});
 
+	//поиск нужного значения в датчиках
+	function getSensorValue(key) {
+		let keyData = $.map(globalSensorsJson["sensors"], function (e) {
+			return e[key]
+		});
+		return keyData[0];
+	}
+
 //////////////////////////////////////////////////////////////////////////
 	//Определение датчиков
 	let sensorsJson = {};
@@ -729,12 +755,20 @@ $(function () {
 
 			self.dtoCurrent = json;
 			self.dtoContainer = target;
-			self.dtoCurrent.dateTime = (new Date()).getTime();  // Пользуемся временем клиента, для несчастных без доступа к NTP
+			self.dtoCurrent.d = (new Date()).getTime();  // Пользуемся временем клиента, для несчастных без доступа к NTP
 
 			/*let process = Number(globalSensorsJson["process"]["allow"]);
 			let oldStartProcess = Number(localStorage.getItem('oldStartProcess'));
 			if(process > 0 && oldStartProcess !== process) {
 				clearChart();
+			}*/
+			// console.log(json);
+			/*let dtosData = localStorage.getObj('dtos');
+			// Проверка на существование сохранённых значений
+			if (dtosData == null) {
+				this.dtos = [];
+			}else{
+
 			}*/
 			// Считывание предыдущих сохранённых значений
 			this.dtos = localStorage.getObj('dtos');
@@ -985,7 +1019,7 @@ $(function () {
 			jsonPlot.series[0] = {
 				name: "Мощность", yAxis: 1, type: "area", step: 'left', fillOpacity: 0.05, color: "#f00000", lineWidth: 1, showInLegend: true,
 				data: dtoReceiver.dtos.map(function (dc) {
-					return [dc.dateTime, dc.heaterPower]
+					return [dc.d, dc.h]
 				})
 			};
 		}
@@ -1015,7 +1049,7 @@ $(function () {
 			jsonPlot.series[1] = {
 				name: "Атмосферное давление", yAxis: 2, type: "area", step: 'left', fillOpacity: 0.05, color: "#00e4f0", lineWidth: 1, showInLegend: true,
 				data: dtoReceiver.dtos.map(function (dc) {
-					return [dc.dateTime, dc.pressure]
+					return [dc.d, dc.p]
 				})
 			};
 		}
@@ -1024,16 +1058,21 @@ $(function () {
 		let plotNew = Highcharts.stockChart(view_chart, jsonPlot);
 
 		//console.log("plot",dtoReceiver.dtos[0].temperatures);
-		$.each(dtoReceiver.dtos[0].temperatures, function (key, t) {
-			//console.log("plot", key, t);
+		$.each(dtoReceiver.dtos[0].t, function (key, t) {
+			// console.log("plot", key, t);
 			if (re_t.test(key)) {
+				let sensorData = getSensorValue(key);
 				plotNew.addSeries({
-					name: t["name"],
-					color: t["color"],
+					name: sensorData["name"],
+					color: "#"+dec2hex(sensorData["color"]),
+					// name: t["name"],
+					// color: t["color"],
 					//color: "#"+dec2hex(t["color"]),
 					data: dtoReceiver.dtos.map(function (dc) {
 						//console.log(dc.temperatures[i]["value"]);
-						return [dc.dateTime, dc.temperatures[key]["value"]]
+						// return [dc.d, dc.t[key]["value"]]
+						// console.log("plot", dc.t[key]);
+						return [dc.d, dc.t[key]]
 					})
 				});
 			}
@@ -1059,13 +1098,13 @@ $(function () {
 				let count = 0;
 				let process = Number(globalSensorsJson["process"]["allow"]);
 				if (process !== 4) {
-					plot.series[0].addPoint([dto.dateTime, dto.heaterPower], false);
+					plot.series[0].addPoint([dto.d, dto.h], false);
 				}
 				if (process === 4) {
 					count = -1;
 				}
 				if (process === 2) {
-					plot.series[1].addPoint([dto.dateTime, dto.pressure], false);
+					plot.series[1].addPoint([dto.d, dto.p], false);
 					count = 1;
 				}
 				/*let oldStartProcess = Number(localStorage.getItem('oldStartProcess'));
@@ -1073,10 +1112,10 @@ $(function () {
 					clearChart();
 				}*/
 				//console.log("newDTOreceived", dto.temperatures);
-				$.each(dto.temperatures, function (key, t) {
+				$.each(dto.t, function (key, t) {
 					//console.log("plot", key, t);
 					if (re_t.test(key)) {
-						plotNew.series[count + 1].addPoint([dto.dateTime, t["value"]], false);
+						plotNew.series[count + 1].addPoint([dto.d, t], false);
 						count++;
 						/*plotNew.addSeries({
 							name: t["name"],
@@ -1827,8 +1866,8 @@ $(function () {
 		//setDistillation();
 		if (!$.fn.objIsEmpty(globalSensorsJson, false)) {
 			let dtoJson = {};
-			dtoJson["heaterPower"] = Number(globalSensorsJson["power"]);
-			dtoJson["temperatures"] = {};
+			dtoJson["h"] = Number(globalSensorsJson["power"]);
+			dtoJson["t"] = {};
 			$.each(globalSensorsJson["sensors"], function (i, e) {
 				let sensor_key = Object.keys(e).shift();
 				let sensor_value = Number(globalSensorsJson["sensors"][i][sensor_key]["value"]);
@@ -1853,7 +1892,8 @@ $(function () {
 						//console.log(sensor_key, fillcolor,sensor_value,alert_value);
 						$("#svg_distillation_color_" + sensor_key).css('fill', colorPersent(fillcolor, sensor_value, alert_value));
 						if (Number(q["member"]) !== 0) {
-							dtoJson["temperatures"][sensor_key] = {value: sensor_value, name: q["name"], color: fillcolor};
+							dtoJson["t"][sensor_key] = sensor_value;
+							// dtoJson["t"][sensor_key] = {value: sensor_value, name: q["name"], color: fillcolor};
 						}
 
 						$("#distillation_" + sensor_key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
@@ -1942,7 +1982,7 @@ $(function () {
 			$("#view_pid_chart").html("");
 			//let oldStartProcess = Number(localStorage.getItem('oldStartProcess'));
 			//if(oldStartProcess === 1) {
-			if (!$.fn.objIsEmpty(dtoJson["temperatures"], false) && drowChart){
+			if (!$.fn.objIsEmpty(dtoJson["t"], false) && drowChart){
 				dtoReceiver.start(dtoJson, 'view_distillation_chart');
 			}
 		}
@@ -2475,8 +2515,8 @@ $(function () {
 		//setReflux();
 		if (!$.fn.objIsEmpty(globalSensorsJson, false)) {
 			let dtoJson = {};
-			dtoJson["heaterPower"] = Number(globalSensorsJson["power"]);
-			dtoJson["temperatures"] = {};
+			dtoJson["h"] = Number(globalSensorsJson["power"]);
+			dtoJson["t"] = {};
 			$.each(globalSensorsJson["sensors"], function (i, e) {
 				let sensor_key = Object.keys(e).shift();
 				let sensor_value = Number(globalSensorsJson["sensors"][i][sensor_key]["value"]);
@@ -2532,7 +2572,7 @@ $(function () {
 						}
 
 						if (Number(q["member"]) !== 0) {
-							dtoJson["temperatures"][sensor_key] = {value: sensor_value, name: q["name"], color: fillcolor};
+							dtoJson["t"][sensor_key] = {value: sensor_value, name: q["name"], color: fillcolor};
 						}
 					}
 				});
@@ -2571,7 +2611,7 @@ $(function () {
 
 				if (re_p.test(sensor_key)) {
 					$("#reflux_pressure").text(globalSensorsJson["sensors"][i]["p1"]["value"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
-					dtoJson["pressure"] = globalSensorsJson["sensors"][i]["p1"]["value"];
+					dtoJson["p"] = globalSensorsJson["sensors"][i]["p1"]["value"];
 				}
 
 				//let fillcolor = temperaturePalette(sensor_value.toFixed(0));
@@ -2610,7 +2650,7 @@ $(function () {
 			$("#view_pid_chart").html("");
 			//let oldStartProcess = Number(localStorage.getItem('oldStartProcess'));
 			//if(oldStartProcess === 2) {
-			if (!$.fn.objIsEmpty(dtoJson["temperatures"], false) && drowChart){
+			if (!$.fn.objIsEmpty(dtoJson["t"], false) && drowChart){
 				dtoReceiver.start(dtoJson, 'view_reflux_chart');
 			}
 		}
@@ -3045,8 +3085,8 @@ $(function () {
 		//setMashing();
 		if (!$.fn.objIsEmpty(globalSensorsJson, false)) {
 			let dtoJson = {};
-			dtoJson["heaterPower"] = Number(globalSensorsJson["power"]);
-			dtoJson["temperatures"] = {};
+			dtoJson["h"] = Number(globalSensorsJson["power"]);
+			dtoJson["t"] = {};
 			$.each(globalSensorsJson["sensors"], function (i, e) {
 				let sensor_key = Object.keys(e).shift();
 				let sensor_value = Number(globalSensorsJson["sensors"][i][sensor_key]["value"]);
@@ -3057,7 +3097,7 @@ $(function () {
 						let fillcolor = "#" + dec2hex(color_value);
 						$("#svg_mashing_color_" + sensor_key).css('fill', colorPersent(fillcolor, sensor_value, 0));
 						if (Number(q["member"]) !== 0) {
-							dtoJson["temperatures"][sensor_key] = {value: sensor_value, name: q["name"], color: fillcolor};
+							dtoJson["t"][sensor_key] = {value: sensor_value, name: q["name"], color: fillcolor};
 						}
 					}
 				});
@@ -3138,7 +3178,7 @@ $(function () {
 			$("#view_reflux_chart").html("");
 			$("#view_distillation_chart").html("");
 			$("#view_pid_chart").html("");
-			if (!$.fn.objIsEmpty(dtoJson["temperatures"], false) && drowChart) {
+			if (!$.fn.objIsEmpty(dtoJson["t"], false) && drowChart) {
 				dtoReceiver.start(dtoJson, 'view_mashing_chart');
 			}
 		}
@@ -3312,7 +3352,7 @@ $(function () {
 		// console.log(pidProcess);
 		if (!$.fn.objIsEmpty(globalSensorsJson, false)) {
 			let dtoJson = {};
-			dtoJson["temperatures"] = {};
+			dtoJson["t"] = {};
 			/*$.each(globalSensorsJson["pid"], function (j, q) {
 				let pid_key = Object.keys(q).shift();
 				if (!re_t.test(pid_key)) {
@@ -3356,7 +3396,7 @@ $(function () {
 			$("#pid_value_t1").text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 			//if (Number(globalSensorsJson["sensors"][i][sensor_key]["member"]) !== 0) {
 			if (pidProcess["start"] === true){
-				dtoJson["temperatures"]['t1'] = {value: sensor_value, name: sensor_name, color: fillcolor};
+				dtoJson["t"]['t1'] = {value: sensor_value, name: sensor_name, color: fillcolor};
 			}
 			/*$.each(globalSensorsJson["sensors"], function (i, e) {
 				let sensor_key = Object.keys(e).shift();
@@ -3388,7 +3428,7 @@ $(function () {
 			$("#view_reflux_chart").html("");
 			$("#view_distillation_chart").html("");
 			$("#view_mashing_chart").html("");
-			if (!$.fn.objIsEmpty(dtoJson["temperatures"], false) && drowChart) {
+			if (!$.fn.objIsEmpty(dtoJson["t"], false) && drowChart) {
 				//console.log(dtoJson);
 				dtoReceiver.start(dtoJson, 'view_pid_chart');
 			}
