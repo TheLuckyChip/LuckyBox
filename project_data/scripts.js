@@ -3728,6 +3728,15 @@ $(function () {
 			$("#settings_update").prop("disabled", false);
 		}
 	});
+
+	/*function timeUpdate(){
+		$("#modal_time_out").text((stopTime - tmpTime) + ' сек.');
+		tmpTime++;
+		if(tmpTime > stopTime) {
+			location.reload(true)
+		}
+	}*/
+
 	$("form#firmware_update").submit(function (e) {
 		e.preventDefault();
 		let formData = new FormData();
@@ -3742,14 +3751,26 @@ $(function () {
 			enctype: 'multipart/form-data',
 			processData: false,
 			beforeSend: function () {
+				clearInterval(sensorsIntervalId);
 				$("#settings_update").ajaxLoading({disabled: true});
+				$.fn.openModal('',
+					'<p class="text-center text-success text-strong">Происходит обновление контроллера, страница будет обновлена через:</p>' +
+					'<p class="text-center text-strong" id="modal_time_out"></p>',
+					"modal-sm", false, false);
+				setInterval(function () {
+					$("#modal_time_out").text((stopTime - tmpTime) + ' сек.');
+					tmpTime++;
+					if(tmpTime > stopTime) {
+						location.reload(true)
+					}
+				}, 1000)
 			},
-			success: function (msg) {
+			/*success: function (msg) {
 				console.log(msg);
 			},
 			error: function (err, exception) {
 				alertAjaxError(err, exception, $("#error_settings"));
-			},
+			},*/
 			complete: function () {
 				$("#settings_update").ajaxLoading('stop').prop("disabled", false);
 			}
