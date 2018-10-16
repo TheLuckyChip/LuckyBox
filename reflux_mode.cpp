@@ -3,6 +3,7 @@
 #include "reflux_mode.h"
 int	countHaedEnd;
 bool senseHeadcontrol;
+bool beepEnd;
 
 void EEPROM_float_write_refl(int addr, float val) {
 	byte *x = (byte *)&val;
@@ -241,6 +242,7 @@ void rfluxLoopMode_1() {
 			nameProcessStep = "Ручной режим";
 			processMode.step = 1;		// перешли на следующий шаг алгоритма
 			countHaedEnd = 0;
+			beepEnd = false;
 			break;
 		}
 // просто контролируем температуры и датчики для индикации
@@ -335,11 +337,12 @@ void rfluxLoopMode_2() {
 			nameProcessStep = "Нагрев куба";
 			processMode.step = 1;	// перешли на следующий шаг алгоритма
 			countHaedEnd = 0;
+			beepEnd = false;
 			break;
 		}
 // ждем начала подъема температуры в царге и включаем воду на охлаждение и понижаем мощность на ТЭН
 		case 1: {
-			if (temperatureSensor[DS_Tube].data >= 30.0) {//45.0) {
+			if (temperatureSensor[DS_Tube].data >= 45.0) {
 				csOn(PWM_CH3);				// включаем клапан подачи воды
 				power.heaterPower = power.inPowerLow;			// установили мощность на ТЭН 65 %
 				settingAlarm = true;		// подаем звуковой сигнал
@@ -413,7 +416,7 @@ void rfluxLoopMode_2() {
 			}
 			else if (temperatureSensor[DS_Tube].allertValue > 0 && temperatureSensor[DS_Tube].data >= temperatureSensor[DS_Tube].allertValue) {
 				temperatureSensor[DS_Tube].allert = true;	// сигнализация для WEB
-				settingAlarm = true;						// подаем звуковой сигнал
+				if (beepEnd == false) settingAlarm = true;						// подаем звуковой сигнал
 			}
 			else if (adcIn[0].allert == true) settingAlarm = true;	// подаем звуковой сигнал
 			else settingAlarm = false;								// выключили звуковой сигнал
@@ -480,11 +483,12 @@ void rfluxLoopMode_4() {
 			nameProcessStep = "Нагрев куба";
 			processMode.step = 1;	// перешли на следующий шаг алгоритма
 			countHaedEnd = 0;
+			beepEnd = false;
 			break;
 		}
 // ждем начала подъема температуры в царге и включаем воду на охлаждение и понижаем мощность на ТЭН
 		case 1: {
-			if (temperatureSensor[DS_Tube].data >= 30.0) {//45.0) {
+			if (temperatureSensor[DS_Tube].data >= 45.0) {
 				csOn(PWM_CH3);				// включаем клапан подачи воды
 				power.heaterPower = power.inPowerLow;			// установили мощность на ТЭН 65 %
 				settingAlarm = true;		// подаем звуковой сигнал

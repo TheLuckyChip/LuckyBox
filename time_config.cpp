@@ -30,8 +30,16 @@ void timeSynch(int zone)
 void handleTimeZone()
 {
 	timezone = HTTP.arg("timezone").toInt(); // Получаем значение timezone из запроса конвертируем в int сохраняем в глобальной переменной
-	saveConfig();
+	//saveConfig();
 	HTTP.send(200, "text/plain", "OK");
+	// сохраним в EEPROM
+	uint16_t index = 1980;
+	if (timezone <= 23) {
+		EEPROM.write(index, timezone);
+		EEPROM.commit();
+		delay(100);
+	}
+	else timezone = 3;
 }
 
 void handleTime()

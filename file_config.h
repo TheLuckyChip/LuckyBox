@@ -10,9 +10,8 @@
 
 #include "user_config.h"
 #include "setting.h"
-#include <ArduinoJson.h>
+#include <EEPROM.h>
 
 extern bool loadConfig();
-extern bool saveConfig();
 
 #endif
