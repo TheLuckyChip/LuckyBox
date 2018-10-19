@@ -97,7 +97,7 @@
 (function ($) {
 	/**
 	 *
-	 * @param  title - заголовок окна
+	 * @param title - заголовок окна
 	 * @param message - сообщение окна
 	 * @param classModal - класс (маленький, средний, большой) "modal-sm", "modal-md", "modal-lg"
 	 * @param fade - скрывать через время автоматически (да/нет)

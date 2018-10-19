@@ -3736,9 +3736,11 @@ $(function () {
 			location.reload(true)
 		}
 	}*/
+	let modal_interval = 0;
 
 	$("form#firmware_update").submit(function (e) {
 		e.preventDefault();
+		clearInterval(sensorsIntervalId);
 		let formData = new FormData();
 		formData.append('update', $('#file_update')[0].files[0]);
 		//console.log(formData,$('#file_update')[0].files[0]);
@@ -3748,30 +3750,60 @@ $(function () {
 			data: formData,
 			cache: false,
 			contentType: false,
+			dataType: 'json',
 			enctype: 'multipart/form-data',
 			processData: false,
 			beforeSend: function () {
-				clearInterval(sensorsIntervalId);
+				console.log("beforeSend");
 				$("#settings_update").ajaxLoading({disabled: true});
 				$.fn.openModal('',
-					'<p class="text-center text-success text-strong">Происходит обновление контроллера, страница будет обновлена через:</p>' +
+					'<p id="modal_text_info" class="text-center text-danger text-strong">Происходит загрузка файла в контроллер, пожалуйста дождитесь окончания загрузки</p>' +
 					'<p class="text-center text-strong" id="modal_time_out"></p>',
-					"modal-sm", false, false);
-				setInterval(function () {
-					$("#modal_time_out").text((stopTime - tmpTime) + ' сек.');
-					tmpTime++;
-					if(tmpTime > stopTime) {
-						location.reload(true)
-					}
-				}, 1000)
+					"modal-sm", false, [{
+						text: "Закрыть",
+						id: "modal_update_close",
+						class: "btn btn-primary btn-sm hidden",
+						click: function () {
+							$(this).closest(".modal").modal("hide");
+						}
+					}], {buttons: "replace", id: "modal_update", data:{backdrop: 'static'}});
 			},
-			/*success: function (msg) {
-				console.log(msg);
+			success: function (msg) {
+				if(msg.hasOwnProperty('update') && msg['update'] === 'ok'){
+					setTimeout(function () {
+						clearInterval(modal_interval);
+						$("#modal_text_info").html('Файл обновления успешно загружен, контроллер будет перезагружен.<br><br>Страница будет автоматически обновлена, через 2 минуты').removeClass('text-danger').addClass('text-success');
+						// console.log("success", msg);
+						tmpTime = 0;
+						modal_interval = setInterval(function () {
+							tmpTime++;
+							$("#modal_time_out").text((tmpTime) + ' сек.');
+							if(tmpTime >= 120) {
+							 	location.reload(true)
+							}
+						}, 1000)
+					},1000);
+				}
+				if(msg.hasOwnProperty('update') && msg['update'] === 'err'){
+					setTimeout(function () {
+						$("#modal_text_info").html('Ошибка обновления прошивки, попробуйте загрузить файл еще раз');
+						$("#modal_update_close").removeClass('hidden');
+						// console.log("success", msg);
+					},1000);
+				}
+
 			},
 			error: function (err, exception) {
-				alertAjaxError(err, exception, $("#error_settings"));
-			},*/
+				setTimeout(function () {
+					$("#modal_text_info").html('Ошибка обновления прошивки, попробуйте загрузить файл еще раз');
+					$("#modal_update_close").removeClass('hidden');
+					// console.log("success", msg);
+				},1000);
+				// console.log("error", err, exception);
+				// alertAjaxError(err, exception, $("#error_settings"));
+			},
 			complete: function () {
+				// console.log("complete", msg);
 				$("#settings_update").ajaxLoading('stop').prop("disabled", false);
 			}
 		});
