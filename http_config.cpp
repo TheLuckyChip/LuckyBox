@@ -17,7 +17,9 @@ void initHTTP(void)
 	// Добавляем функцию Update для перезаписи прошивки по WiFi при 1М(256K SPIFFS) и выше
 	HTTP.on("/update", HTTP_POST, []() {
 		HTTP.sendHeader("Connection", "close");
-		HTTP.send(200, "text/plain", (Update.hasError()) ? "FAIL" : "OK");
+		HTTP.send(200, "text/json", (Update.hasError()) ? "{\"update\":\"err\"}" : "{\"update\":\"ok\"}");
+		//HTTP.send_P(200, "text/plain", (Update.hasError()) ? "FAIL" : "OK");
+		delay(500);
 		ESP.restart();
 	}, []() {
 		HTTPUpload& upload = HTTP.upload();
@@ -51,7 +53,6 @@ void initHTTP(void)
 				}
 			}
 			else {
-				
 				uint32_t maxSketchSpace = (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000;
 				Serial.println(maxSketchSpace);
 				if (!Update.begin(maxSketchSpace, U_FLASH)) { //start with max available size
@@ -90,7 +91,9 @@ void initHTTP(void)
 #endif
 			startLoad = 0;
 			if (Update.end(true)) { //true to set the size to the current progress
+				//HTTP.send_P(200, "text/plain", "Restart");
 				Serial.printf("Update Success: %u\nRebooting...\n", upload.totalSize);
+				//delay(1000);
 			}
 			else {
 				Update.printError(Serial);
