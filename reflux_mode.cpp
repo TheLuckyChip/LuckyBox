@@ -3,6 +3,7 @@
 #include "reflux_mode.h"
 int	countHaedEnd;
 bool senseHeadcontrol;
+bool beepEnd;
 
 void EEPROM_float_write_refl(int addr, float val) {
 	byte *x = (byte *)&val;
@@ -22,32 +23,50 @@ void loadEepromReflux() {
 	if (EEPROM.read(index) == 2) {
 		index++;
 		for (i = 0; i < 8; i++) {
-			temperatureSensor[i].member = EEPROM.read(index);  index++;
-			temperatureSensor[i].priority = EEPROM.read(index);  index++;
-			temperatureSensor[i].allertValue = EEPROM_float_read_refl(index); index += 4;
-			temperatureSensor[i].delta = EEPROM.read(index);  index++;
-			temperatureSensor[i].cutoff = EEPROM.read(index);  index++;
+			tpl2web.dsMember[i] = EEPROM.read(index);  index++;
+			tpl2web.dsPriority[i] = EEPROM.read(index);  index++;
+			tpl2web.dsAllertValue[i] = EEPROM_float_read_refl(index); index += 4;
+			tpl2web.dsDelta[i] = EEPROM.read(index);  index++;
+			tpl2web.dsCutoff[i] = EEPROM.read(index);  index++;
+			if (processMode.allow == 2) {
+				temperatureSensor[i].member = tpl2web.dsMember[i];
+				temperatureSensor[i].priority = tpl2web.dsPriority[i];
+				temperatureSensor[i].allertValue = tpl2web.dsAllertValue[i];
+				temperatureSensor[i].delta = tpl2web.dsDelta[i];
+				temperatureSensor[i].cutoff = tpl2web.dsCutoff[i];
+			}
 		}
 		for (i = 0; i < 8; i++) {
-			pwmOut[i].member = EEPROM.read(index);  index++;
+			tpl2web.pwmMember[i] = EEPROM.read(index);  index++;
+			if (processMode.allow == 2) pwmOut[i].member = tpl2web.pwmMember[i];
 		}
 		for (i = 0; i < 4; i++) {
-			adcIn[i].member = EEPROM.read(index);  index++;
+			tpl2web.adcMember[i] = EEPROM.read(index);  index++;
+			if (processMode.allow == 2) adcIn[i].member = tpl2web.adcMember[i];
 		}
 	}
 	else {
 		for (i = 0; i < 8; i++) {
-			temperatureSensor[i].member = 0;
-			temperatureSensor[i].priority = 0;
-			temperatureSensor[i].allertValue = 0;
-			temperatureSensor[i].delta = 0;
-			temperatureSensor[i].cutoff = 0;
+			tpl2web.dsMember[i] = 0;
+			tpl2web.dsPriority[i] = 0;
+			tpl2web.dsAllertValue[i] = 0;
+			tpl2web.dsDelta[i] = 0;
+			tpl2web.dsCutoff[i] = 0;
+			if (processMode.allow == 2) {
+				temperatureSensor[i].member = 0;
+				temperatureSensor[i].priority = 0;
+				temperatureSensor[i].allertValue = 0;
+				temperatureSensor[i].delta = 0;
+				temperatureSensor[i].cutoff = 0;
+			}
 		}
 		for (i = 0; i < 8; i++) {
-			pwmOut[i].member = 0;
+			tpl2web.pwmMember[i] = 0;
+			if (processMode.allow == 2) pwmOut[i].member = 0;
 		}
 		for (i = 0; i < 4; i++) {
-			adcIn[i].member = 0;
+			tpl2web.adcMember[i] = 0;
+			if (processMode.allow == 2) adcIn[i].member = 0;
 		}
 	}
 }
@@ -77,8 +96,8 @@ void handleRefluxSensorTpl() {
 			if (temperatureSensor[k].num == i) {
 				dataForWeb += "\"t" + String(i) + "\":{\"value\":" + String(temperatureSensor[k].data);
 				dataForWeb += ",\"name\":\"" + String(temperatureSensor[k].name) + "\",\"color\":" + String(temperatureSensor[k].color);
-				dataForWeb += ",\"member\":" + String(temperatureSensor[k].member) + ",\"delta\":" + String(temperatureSensor[k].delta);
-				dataForWeb += ",\"cutoff\":" + String(temperatureSensor[k].cutoff) + ",\"priority\":" + String(temperatureSensor[k].priority);
+				dataForWeb += ",\"member\":" + String(tpl2web.dsMember[k]) + ",\"delta\":" + String(tpl2web.dsDelta[k]);
+				dataForWeb += ",\"cutoff\":" + String(tpl2web.dsCutoff[k]) + ",\"priority\":" + String(tpl2web.dsPriority[k]);
 				dataForWeb += ",\"allertValue\":" + String(temperatureSensor[k].allertValueIn) + "},";
 				break;
 			}
@@ -94,13 +113,13 @@ void handleRefluxSensorTpl() {
 	}
 	// выходы ШИМ
 	for (i = 0; i < 8; i++) {
-		dataForWeb += "\"out" + String(i + 1) + "\":{\"value\":" + String(pwmOut[i].data) + ",\"name\":\"" + String(pwmOut[i].name) + "\",\"member\":" + String(pwmOut[i].member) + "},";
+		dataForWeb += "\"out" + String(i + 1) + "\":{\"value\":" + String(pwmOut[i].data) + ",\"name\":\"" + String(pwmOut[i].name) + "\",\"member\":" + String(tpl2web.pwmMember[i]) + "},";
 	}
 	// входы АЦП
-	dataForWeb += "\"in1\":{\"value\":" + String(adcIn[0].data) + ",\"name\":\"" + String(adcIn[0].name) + "\",\"member\":" + String(adcIn[0].member) + "},";
-	dataForWeb += "\"in2\":{\"value\":" + String(adcIn[1].data) + ",\"name\":\"" + String(adcIn[1].name) + "\",\"member\":" + String(adcIn[0].member) + "},";
-	dataForWeb += "\"in3\":{\"value\":" + String(adcIn[2].data) + ",\"name\":\"" + String(adcIn[2].name) + "\",\"member\":" + String(adcIn[0].member) + "},";
-	dataForWeb += "\"in4\":{\"value\":" + String(adcIn[3].data) + ",\"name\":\"" + String(adcIn[3].name) + "\",\"member\":" + String(adcIn[0].member) + "}}";
+	dataForWeb += "\"in1\":{\"value\":" + String(adcIn[0].data) + ",\"name\":\"" + String(adcIn[0].name) + "\",\"member\":" + String(tpl2web.adcMember[0]) + "},";
+	dataForWeb += "\"in2\":{\"value\":" + String(adcIn[1].data) + ",\"name\":\"" + String(adcIn[1].name) + "\",\"member\":" + String(tpl2web.adcMember[1]) + "},";
+	dataForWeb += "\"in3\":{\"value\":" + String(adcIn[2].data) + ",\"name\":\"" + String(adcIn[2].name) + "\",\"member\":" + String(tpl2web.adcMember[2]) + "},";
+	dataForWeb += "\"in4\":{\"value\":" + String(adcIn[3].data) + ",\"name\":\"" + String(adcIn[3].name) + "\",\"member\":" + String(tpl2web.adcMember[3]) + "}}";
 	HTTP.send(200, "text/json", dataForWeb);
 }
 // Отправка - Добавить датчики для процесса
@@ -241,6 +260,7 @@ void rfluxLoopMode_1() {
 			nameProcessStep = "Ручной режим";
 			processMode.step = 1;		// перешли на следующий шаг алгоритма
 			countHaedEnd = 0;
+			beepEnd = false;
 			break;
 		}
 // просто контролируем температуры и датчики для индикации
@@ -335,11 +355,12 @@ void rfluxLoopMode_2() {
 			nameProcessStep = "Нагрев куба";
 			processMode.step = 1;	// перешли на следующий шаг алгоритма
 			countHaedEnd = 0;
+			beepEnd = false;
 			break;
 		}
 // ждем начала подъема температуры в царге и включаем воду на охлаждение и понижаем мощность на ТЭН
 		case 1: {
-			if (temperatureSensor[DS_Tube].data >= 30.0) {//45.0) {
+			if (temperatureSensor[DS_Tube].data >= 45.0) {
 				csOn(PWM_CH3);				// включаем клапан подачи воды
 				power.heaterPower = power.inPowerLow;			// установили мощность на ТЭН 65 %
 				settingAlarm = true;		// подаем звуковой сигнал
@@ -413,7 +434,7 @@ void rfluxLoopMode_2() {
 			}
 			else if (temperatureSensor[DS_Tube].allertValue > 0 && temperatureSensor[DS_Tube].data >= temperatureSensor[DS_Tube].allertValue) {
 				temperatureSensor[DS_Tube].allert = true;	// сигнализация для WEB
-				settingAlarm = true;						// подаем звуковой сигнал
+				if (beepEnd == false) settingAlarm = true;						// подаем звуковой сигнал
 			}
 			else if (adcIn[0].allert == true) settingAlarm = true;	// подаем звуковой сигнал
 			else settingAlarm = false;								// выключили звуковой сигнал
@@ -480,11 +501,12 @@ void rfluxLoopMode_4() {
 			nameProcessStep = "Нагрев куба";
 			processMode.step = 1;	// перешли на следующий шаг алгоритма
 			countHaedEnd = 0;
+			beepEnd = false;
 			break;
 		}
 // ждем начала подъема температуры в царге и включаем воду на охлаждение и понижаем мощность на ТЭН
 		case 1: {
-			if (temperatureSensor[DS_Tube].data >= 30.0) {//45.0) {
+			if (temperatureSensor[DS_Tube].data >= 45.0) {
 				csOn(PWM_CH3);				// включаем клапан подачи воды
 				power.heaterPower = power.inPowerLow;			// установили мощность на ТЭН 65 %
 				settingAlarm = true;		// подаем звуковой сигнал

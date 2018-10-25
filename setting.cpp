@@ -14,19 +14,19 @@ ESP8266WebServer HTTP;
 PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
 
 // Определяем переменные wifi
-String _ssid		= "SSID";      // Для хранения SSID
-String _password	= "PASSWORD";  // Для хранения пароля сети
-String _ssidAP		= "LuckyBox";  // SSID AP точки доступа
+String _ssid;      // Для хранения SSID
+String _password;  // Для хранения пароля сети
+String _ssidAP;  // SSID AP точки доступа
 String _ssidAPconnect;
-String _passwordAP	= "12345678";  // пароль точки доступа
-String SSDP_Name	= "LuckyBox";  // Имя SSDP
+String _passwordAP;  // пароль точки доступа
+String SSDP_Name;  // Имя SSDP
 // Настройки TFT
 bool touchInvert = false;
 bool tftInvert = false;
 String jsonConfig	= "{}";
 int port = 80;
 
-int timezone = 3;                 // часовой пояс GTM
+int timezone;                 // часовой пояс GTM
 byte DS_Count;
 int temp_min;
 int temp_max;
@@ -38,6 +38,7 @@ byte DS_Res1 = 4;
 byte DS_Res2 = 5;
 byte DS_Res3 = 6;
 byte DS_Res4 = 7;
+struct TPL_Str tpl2web;
 struct DS_Str temperatureSensor[DS_Cnt];
 struct BMP_Str pressureSensor;
 struct OUT_Pwm pwmOut[PWM_Cnt];

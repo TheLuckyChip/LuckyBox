@@ -15,6 +15,16 @@
 #include <ESP8266WebServer.h>
 #include <PID_v1.h>
 
+struct TPL_Str
+{
+	bool		dsMember[8];
+	byte		dsPriority[8];
+	float		dsAllertValue[8];
+	bool		dsDelta[8];
+	bool		dsCutoff[8];
+	bool		pwmMember[8];
+	bool		adcMember[4];
+};
 struct DS_Str
 {
 	byte		addrSearch[8];	// серийный номер датчика для поиска
@@ -76,6 +86,7 @@ struct PR_Power
 	uint8_t inPowerHigh;
 	uint8_t inPowerLow;
 };
+extern struct TPL_Str tpl2web;
 extern struct DS_Str temperatureSensor[DS_Cnt];
 extern struct BMP_Str pressureSensor;
 extern struct OUT_Pwm pwmOut[PWM_Cnt];

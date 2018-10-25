@@ -17,7 +17,9 @@ void initHTTP(void)
 	// Добавляем функцию Update для перезаписи прошивки по WiFi при 1М(256K SPIFFS) и выше
 	HTTP.on("/update", HTTP_POST, []() {
 		HTTP.sendHeader("Connection", "close");
-		HTTP.send(200, "text/plain", (Update.hasError()) ? "FAIL" : "OK");
+		HTTP.send(200, "text/json", (Update.hasError()) ? "{\"update\":\"err\"}" : "{\"update\":\"ok\"}");
+		//HTTP.send_P(200, "text/plain", (Update.hasError()) ? "FAIL" : "OK");
+		delay(500);
 		ESP.restart();
 	}, []() {
 		HTTPUpload& upload = HTTP.upload();
@@ -51,7 +53,6 @@ void initHTTP(void)
 				}
 			}
 			else {
-				
 				uint32_t maxSketchSpace = (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000;
 				Serial.println(maxSketchSpace);
 				if (!Update.begin(maxSketchSpace, U_FLASH)) { //start with max available size
@@ -90,23 +91,23 @@ void initHTTP(void)
 #endif
 			startLoad = 0;
 			if (Update.end(true)) { //true to set the size to the current progress
+				//HTTP.send_P(200, "text/plain", "Restart");
 				Serial.printf("Update Success: %u\nRebooting...\n", upload.totalSize);
+				//delay(1000);
 			}
 			else {
 				Update.printError(Serial);
 			}
 			Serial.setDebugOutput(false);
 		}
-
+#if defined TFT_Display
 		if (startLoad == 1 && timeStartLoad <= millis()) {
 			timeStartLoad = millis() + 500;
-#if defined TFT_Display
 			csOn(TFT_CS);
 			tft.print(".");
 			csOff(TFT_CS);
-#endif
 		}
-
+#endif
 		yield();
 	});
 	
@@ -119,24 +120,49 @@ void initHTTP(void)
 void handleSetSSDP()
 {
 	SSDP_Name = HTTP.arg("ssdp"); // Получаем значение ssdp из запроса сохраняем в глобальной переменной
-	saveConfig();                 // Функция сохранения данных во Flash
+	//saveConfig();                 // Функция сохранения данных во Flash
 	HTTP.send(200, "text/plain", "OK"); // отправляем ответ о выполнении
+	// сохраним в EEPROM
+	uint16_t index = 1700;
+	if (SSDP_Name.length() >= 2 && SSDP_Name.length() <= 60) {
+		for (uint8_t k = 0; k < 60; k++) { EEPROM.write(index, SSDP_Name[k]); index++; }
+		EEPROM.commit();
+		delay(100);
+	}
 }
 // Установка параметров для подключения к внешней AP по запросу вида http://192.168.0.101/ssid?ssid=home2&password=12345678
 void handleSetSSID()
 {
 	_ssid = HTTP.arg("ssid");            // Получаем значение ssid из запроса сохраняем в глобальной переменной
 	_password = HTTP.arg("password");    // Получаем значение password из запроса сохраняем в глобальной переменной
-	saveConfig();                        // Функция сохранения данных во Flash
+	//saveConfig();                        // Функция сохранения данных во Flash
 	HTTP.send(200, "text/plain", "OK");   // отправляем ответ о выполнении
+	// сохраним в EEPROM
+	uint16_t index = 1760;
+	if (_ssid.length() >= 2 && _ssid.length() <= 60 && _password.length() >= 8 && _password.length() <= 32) {
+		for (uint8_t k = 0; k < 60; k++) { EEPROM.write(index, _ssid[k]);  index++; }
+		index = 1900;
+		for (uint8_t k = 0; k < 32; k++) { EEPROM.write(index, _password[k]);  index++; }
+		EEPROM.commit();
+		delay(100);
+	}
 }
 //Установка параметров внутренней точки доступа по запросу вида http://192.168.0.101/ssidap?ssidAP=home1&passwordAP=8765439
 void handleSetSSIDAP()
 {              //
 	_ssidAP = HTTP.arg("ssidAP");         // Получаем значение ssidAP из запроса сохраняем в глобальной переменной
 	_passwordAP = HTTP.arg("passwordAP"); // Получаем значение passwordAP из запроса сохраняем в глобальной переменной
-	saveConfig();                         // Функция сохранения данных во Flash
+	//saveConfig();                         // Функция сохранения данных во Flash
 	HTTP.send(200, "text/plain", "OK");   // отправляем ответ о выполнении
+	// сохраним в EEPROM
+	uint16_t index = 1820;
+	if (_ssidAP.length() >= 2 && _ssid.length() <= 60 && _passwordAP.length() >= 8 && _password.length() <= 32) {
+		for (uint8_t k = 0; k < 60; k++) { EEPROM.write(index, _ssidAP[k]);  index++; }
+		index = 1940;
+		for (uint8_t k = 0; k < 32; k++) { EEPROM.write(index, _passwordAP[k]);  index++; }
+		EEPROM.commit();
+		delay(100);
+	}
 }
 
 void handleSetRotate() {
@@ -166,7 +192,7 @@ void handleSetRotate() {
 			}
 		}
 		if (touch180 == 1) {
-			if (touchInvert = true) {
+			if (touchInvert == true) {
 				touchInvert = false;
 				EEPROM.write(1299, 0);
 			}

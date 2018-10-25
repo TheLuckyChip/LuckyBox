@@ -56,6 +56,16 @@ void setup()
 	delay(2);
 
 	EEPROM.begin(2048);
+	// 0 - датчики и устройства (1298 & 1299 переворот экрана и тачскрина)
+	// 1300 - сохраненные данные для процесса дистилляции
+	// 1400 - сохраненные данные для процесса ректификации (1499 № процесса по умолчанию)
+	// 1500 - сохраненные данные для процесса затирания
+	// 1600 - сохраненные данные PID установок
+	// 1700 - 1759 имя ssdp, 1760 - 1819 имя ssid, 1820 - 1879 имя ssidAP
+	// 1900 - 1931 пароль ssid, 1940 - 1971 пароль ssidAP, 1980 - часовой пояс
+	timezone = EEPROM.read(1980);
+	if (timezone > 23) timezone = 3;
+	// Считаем инверсию экрана и тачскрина
 	uint8_t tft180 = EEPROM.read(1298);
 	uint8_t touch180 = EEPROM.read(1299);
 	if (tft180 > 1 || tft180 == 0) tftInvert = false;
@@ -163,7 +173,8 @@ void setup()
 	tft.writeFillRect(scaleCount, 215, 15, 15, 0xFFFF);
 #endif
 	initFS();
-	Serial.println("Step 4 - File Config");
+	Serial.println();
+	Serial.println("Step 4 - Load WiFi settings");
 	loadConfig();
 	Serial.println("Step 5 - WIFI Init");
 #if defined TFT_Display

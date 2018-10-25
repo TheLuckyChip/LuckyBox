@@ -26,7 +26,7 @@ void initWifi() {
 	    // пробуем подключиться
 		Serial.printf("Connecting to %s\n", _ssid.c_str());
 		WiFi.disconnect(true);
-		WiFi.mode(WIFI_STA);
+		WiFi.mode(WIFI_AP_STA);
 		WiFi.begin(_ssid.c_str(), _password.c_str());
 		// ждем N кол-во попыток, если нет, то AP Mode
 		byte tmp_while = 0;
