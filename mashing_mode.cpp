@@ -22,35 +22,50 @@ void loadEepromMashing() {
 	if (EEPROM.read(index) == 3) {
 		index++;
 		for (i = 0; i < 8; i++) {
-			temperatureSensor[i].member = EEPROM.read(index);  index++;
-			temperatureSensor[i].priority = EEPROM.read(index);  index++;
-			temperatureSensor[i].cutoff = EEPROM.read(index);  index++;
+			tpl2web.dsMember[i] = EEPROM.read(index);  index++;
+			tpl2web.dsPriority[i] = EEPROM.read(index);  index++;
+			tpl2web.dsCutoff[i] = EEPROM.read(index);  index++;
+			if (processMode.allow == 3) {
+				temperatureSensor[i].member = tpl2web.dsMember[i];
+				temperatureSensor[i].priority = tpl2web.dsPriority[i];
+				temperatureSensor[i].cutoff = tpl2web.dsCutoff[i];
+			}
 		}
 		for (i = 0; i < 8; i++) {
-			pwmOut[i].member = EEPROM.read(index);  index++;
+			tpl2web.pwmMember[i] = EEPROM.read(index);  index++;
+			if (processMode.allow == 3) pwmOut[i].member = tpl2web.pwmMember[i];
 		}
 		for (i = 0; i < 4; i++) {
-			adcIn[i].member = EEPROM.read(index);  index++;
+			tpl2web.adcMember[i] = EEPROM.read(index);  index++;
+			if (processMode.allow == 3) adcIn[i].member = tpl2web.adcMember[i];
 		}
 	}
 	else {
 		for (i = 0; i < 8; i++) {
-			temperatureSensor[i].member = 0;
-			temperatureSensor[i].priority = 0;
-			temperatureSensor[i].allertValue = 0;
+			tpl2web.dsMember[i] = 0;
+			tpl2web.dsPriority[i] = 0;
+			tpl2web.dsCutoff[i] = 0;
+			if (processMode.allow == 3) {
+				temperatureSensor[i].member = 0;
+				temperatureSensor[i].priority = 0;
+				temperatureSensor[i].cutoff = 0;
+			}
 		}
 		for (i = 0; i < 8; i++) {
-			pwmOut[i].member = 0;
+			tpl2web.pwmMember[i] = 0;
+			if (processMode.allow == 3) pwmOut[i].member = 0;
 		}
 		for (i = 0; i < 4; i++) {
-			adcIn[i].member = 0;
+			tpl2web.adcMember[i] = 0;
+			if (processMode.allow == 3) adcIn[i].member = 0;
 		}
 	}
-
-	processMashing[0].time = 20; processMashing[0].temperature = 45;
-	processMashing[1].time = 30; processMashing[1].temperature = 55;
-	processMashing[2].time = 120; processMashing[2].temperature = 65;
-	processMashing[3].time = 10; processMashing[3].temperature = 72;
+	if (processMode.allow != 3) {
+		processMashing[0].time = 20; processMashing[0].temperature = 45;
+		processMashing[1].time = 30; processMashing[1].temperature = 55;
+		processMashing[2].time = 120; processMashing[2].temperature = 65;
+		processMashing[3].time = 10; processMashing[3].temperature = 72;
+	}
 }
 
 void initMashing() {
@@ -73,8 +88,8 @@ void handleMashingSensorTpl() {
 			if (temperatureSensor[k].num == i) {
 				dataForWeb += "\"t" + String(i) + "\":{\"value\":" + String(temperatureSensor[k].data);
 				dataForWeb += ",\"name\":\"" + String(temperatureSensor[k].name) + "\",\"color\":" + String(temperatureSensor[k].color);
-				dataForWeb += ",\"member\":" + String(temperatureSensor[k].member);
-				dataForWeb += ",\"priority\":" + String(temperatureSensor[k].priority);
+				dataForWeb += ",\"member\":" + String(tpl2web.dsMember[k]);
+				dataForWeb += ",\"priority\":" + String(tpl2web.dsPriority[k]);
 				dataForWeb += ",\"allertValue\":" + String(temperatureSensor[k].allertValueIn) + "},";
 				break;
 			}

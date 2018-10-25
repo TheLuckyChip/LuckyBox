@@ -71,6 +71,40 @@ void displayLoop() {
 		}
 		
 	}
+
+	if (touchArea == 10 || touchScreen != 0) {
+		tftStopLoop();
+	}
+	else if (touchArea == 11 && touchScreen == 0) {
+		touchArea = 0;
+		tempBigOutOld = tempBigOut;
+		switch (tempBigOut) {
+		case 1: tempBigOut = 2; break;
+		case 2: tempBigOut = 1; break;
+		case 3: tempBigOut = 1; break;
+		case 4: tempBigOut = 1; break;
+		}
+	}
+	else if (touchArea == 12 && touchScreen == 0) {
+		touchArea = 0;
+		tempBigOutOld = tempBigOut;
+		switch (tempBigOut) {
+		case 1: tempBigOut = 3; break;
+		case 2: tempBigOut = 3; break;
+		case 3: tempBigOut = 2; break;
+		case 4: tempBigOut = 2; break;
+		}
+	}
+	else if (touchArea == 13 && touchScreen == 0) {
+		touchArea = 0;
+		tempBigOutOld = tempBigOut;
+		switch (tempBigOut) {
+		case 1: tempBigOut = 4; break;
+		case 2: tempBigOut = 4; break;
+		case 3: tempBigOut = 4; break;
+		case 4: tempBigOut = 3; break;
+		}
+	}
 #endif
 
 	// Вывод на экран

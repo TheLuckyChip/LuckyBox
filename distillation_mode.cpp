@@ -22,30 +22,46 @@ void loadEepromDistillation() {
 	if (EEPROM.read(index) == 1) {
 		index++;
 		for (i = 0; i < 8; i++) {
-			temperatureSensor[i].member = EEPROM.read(index);  index++;
-			temperatureSensor[i].priority = EEPROM.read(index);  index++;
-			temperatureSensor[i].allertValue = EEPROM_float_read_dist(index); index += 4;
-			temperatureSensor[i].cutoff = EEPROM.read(index);  index++;
+			tpl2web.dsMember[i] = EEPROM.read(index);  index++;
+			tpl2web.dsPriority[i] = EEPROM.read(index);  index++;
+			tpl2web.dsAllertValue[i] = EEPROM_float_read_dist(index); index += 4;
+			tpl2web.dsCutoff[i] = EEPROM.read(index);  index++;
+			if (processMode.allow == 1) {
+				temperatureSensor[i].member = tpl2web.dsMember[i];
+				temperatureSensor[i].priority = tpl2web.dsPriority[i];
+				temperatureSensor[i].allertValue = tpl2web.dsAllertValue[i];
+				temperatureSensor[i].cutoff = tpl2web.dsCutoff[i];
+			}
 		}
 		for (i = 0; i < 8; i++) {
-			pwmOut[i].member = EEPROM.read(index);  index++;
+			tpl2web.pwmMember[i] = EEPROM.read(index);  index++;
+			if (processMode.allow == 1) pwmOut[i].member = tpl2web.pwmMember[i];
 		}
 		for (i = 0; i < 4; i++) {
-			adcIn[i].member = EEPROM.read(index);  index++;
+			tpl2web.adcMember[i] = EEPROM.read(index);  index++;
+			if (processMode.allow == 1) adcIn[i].member = tpl2web.adcMember[i];
 		}
 	}
 	else {
 		for (i = 0; i < 8; i++) {
-			temperatureSensor[i].member = 0;
-			temperatureSensor[i].priority = 0;
-			temperatureSensor[i].allertValue = 0;
-			temperatureSensor[i].cutoff = 0;
+			tpl2web.dsMember[i] = 0;
+			tpl2web.dsPriority[i] = 0;
+			tpl2web.dsAllertValue[i] = 0;
+			tpl2web.dsCutoff[i] = 0;
+			if (processMode.allow == 1) {
+				temperatureSensor[i].member = 0;
+				temperatureSensor[i].priority = 0;
+				temperatureSensor[i].allertValue = 0;
+				temperatureSensor[i].cutoff = 0;
+			}
 		}
 		for (i = 0; i < 8; i++) {
-			pwmOut[i].member = 0;
+			tpl2web.pwmMember[i] = 0;
+			if (processMode.allow == 1) pwmOut[i].member = 0;
 		}
 		for (i = 0; i < 4; i++) {
-			adcIn[i].member = 0;
+			tpl2web.adcMember[i] = 0;
+			if (processMode.allow == 1) adcIn[i].member = 0;
 		}
 	}
 }
@@ -70,8 +86,8 @@ void handleDistillationTpl() {
 			if (temperatureSensor[k].num == i) {
 				dataForWeb += "\"t" + String(i) + "\":{\"value\":" + String(temperatureSensor[k].data);
 				dataForWeb += ",\"name\":\"" + String(temperatureSensor[k].name) + "\",\"color\":" + String(temperatureSensor[k].color);
-				dataForWeb += ",\"member\":" + String(temperatureSensor[k].member);
-				dataForWeb += ",\"cutoff\":" + String(temperatureSensor[k].cutoff) + ",\"priority\":" + String(temperatureSensor[k].priority);
+				dataForWeb += ",\"member\":" + String(tpl2web.dsMember[k]);
+				dataForWeb += ",\"cutoff\":" + String(tpl2web.dsCutoff[k]) + ",\"priority\":" + String(tpl2web.dsPriority[k]);
 				dataForWeb += ",\"allertValue\":" + String(temperatureSensor[k].allertValueIn) + "},";
 				break;
 			}
@@ -81,13 +97,13 @@ void handleDistillationTpl() {
 	}
 	// выходы ШИМ
 	for (i = 0; i < 8; i++) {
-		dataForWeb += "\"out" + String(i + 1) + "\":{\"value\":" + String(pwmOut[i].data) + ",\"name\":\"" + String(pwmOut[i].name) + "\",\"member\":" + String(pwmOut[i].member) + "},";
+		dataForWeb += "\"out" + String(i + 1) + "\":{\"value\":" + String(pwmOut[i].data) + ",\"name\":\"" + String(pwmOut[i].name) + "\",\"member\":" + String(tpl2web.pwmMember[i]) + "},";
 	}
 	// входы АЦП
-	dataForWeb += "\"in1\":{\"value\":" + String(adcIn[0].data) + ",\"name\":\"" + String(adcIn[0].name) + "\",\"member\":" + String(adcIn[0].member) + "},";
-	dataForWeb += "\"in2\":{\"value\":" + String(adcIn[1].data) + ",\"name\":\"" + String(adcIn[1].name) + "\",\"member\":" + String(adcIn[0].member) + "},";
-	dataForWeb += "\"in3\":{\"value\":" + String(adcIn[2].data) + ",\"name\":\"" + String(adcIn[2].name) + "\",\"member\":" + String(adcIn[0].member) + "},";
-	dataForWeb += "\"in4\":{\"value\":" + String(adcIn[3].data) + ",\"name\":\"" + String(adcIn[3].name) + "\",\"member\":" + String(adcIn[0].member) + "}}";
+	dataForWeb += "\"in1\":{\"value\":" + String(adcIn[0].data) + ",\"name\":\"" + String(adcIn[0].name) + "\",\"member\":" + String(tpl2web.adcMember[0]) + "},";
+	dataForWeb += "\"in2\":{\"value\":" + String(adcIn[1].data) + ",\"name\":\"" + String(adcIn[1].name) + "\",\"member\":" + String(tpl2web.adcMember[1]) + "},";
+	dataForWeb += "\"in3\":{\"value\":" + String(adcIn[2].data) + ",\"name\":\"" + String(adcIn[2].name) + "\",\"member\":" + String(tpl2web.adcMember[2]) + "},";
+	dataForWeb += "\"in4\":{\"value\":" + String(adcIn[3].data) + ",\"name\":\"" + String(adcIn[3].name) + "\",\"member\":" + String(tpl2web.adcMember[3]) + "}}";
 	HTTP.send(200, "text/json", dataForWeb);
 }
 // Отправка - Добавить датчики для процесса

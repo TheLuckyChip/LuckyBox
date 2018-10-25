@@ -100,16 +100,14 @@ void initHTTP(void)
 			}
 			Serial.setDebugOutput(false);
 		}
-
+#if defined TFT_Display
 		if (startLoad == 1 && timeStartLoad <= millis()) {
 			timeStartLoad = millis() + 500;
-#if defined TFT_Display
 			csOn(TFT_CS);
 			tft.print(".");
 			csOff(TFT_CS);
-#endif
 		}
-
+#endif
 		yield();
 	});
 	

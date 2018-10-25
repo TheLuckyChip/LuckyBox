@@ -38,6 +38,7 @@ byte DS_Res1 = 4;
 byte DS_Res2 = 5;
 byte DS_Res3 = 6;
 byte DS_Res4 = 7;
+struct TPL_Str tpl2web;
 struct DS_Str temperatureSensor[DS_Cnt];
 struct BMP_Str pressureSensor;
 struct OUT_Pwm pwmOut[PWM_Cnt];
