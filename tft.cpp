@@ -527,7 +527,7 @@ void tftOutGraphDisplay() {
 	else {
 		graphOutInterval++;
 	}
-	// вывод цивровых значений
+	// вывод цифровых значений
 	tftOutText(temp_min, temp_max);
 	tft.fillCircle(7, 236, 3, ILI9341_BLACK);
 	csOff(TFT_CS);
