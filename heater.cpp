@@ -34,7 +34,7 @@ void heaterLoop()
 void ResOut()
 {      // вызываем функцию ResOut()при каждом переходе напряжения через ноль (каждые 10мс)
 	   //delay(1);         // задержка которая устанавливает начало открывания семистора ровно при переходе напряжения через ноль 
-	reg = power.heaterPower + errorBr;
+	reg = power.heaterPowerCorr + errorBr;
 	if (reg < 50)
 	{
 		outHeater=0;
@@ -55,11 +55,11 @@ void initHeater()
 	pinMode(heater, OUTPUT);
 	digitalWrite(heater, LOW);
 	//HeaterOff.attach_ms(10000, setPWM, 0);
-	HTTP.on("/SetHeaterPower", handleSetHeaterPower);    // Установка уставки для ректификации (вкладка Reflux)
-	HTTP.on("/heater.json", handleHeaterJSON); // формирование heater.json страницы для передачи данных в web интерфейс
+	//HTTP.on("/SetHeaterPower", handleSetHeaterPower);    // Установка уставки для ректификации (вкладка Reflux)
+	//HTTP.on("/heater.json", handleHeaterJSON); // формирование heater.json страницы для передачи данных в web интерфейс
 }
 
-
+/*
 void handleSetHeaterPower()
 {              //
 	power.heaterPower = HTTP.arg("heaterPower").toInt();         // Получаем значение мощности ТЭНа из запроса и сохраняем в глобальной переменной
@@ -81,4 +81,4 @@ void handleHeaterJSON()
 	json.printTo(root);
 	HTTP.send(200, "text/json", root);
 }
-
+*/
