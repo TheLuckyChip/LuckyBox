@@ -2572,7 +2572,8 @@ $(function () {
 						}
 
 						if (Number(q["member"]) !== 0) {
-							dtoJson["t"][sensor_key] = {value: sensor_value, name: q["name"], color: fillcolor};
+							dtoJson["t"][sensor_key] = sensor_value;
+							// dtoJson["t"][sensor_key] = {value: sensor_value, name: q["name"], color: fillcolor};
 						}
 					}
 				});
@@ -3097,7 +3098,8 @@ $(function () {
 						let fillcolor = "#" + dec2hex(color_value);
 						$("#svg_mashing_color_" + sensor_key).css('fill', colorPersent(fillcolor, sensor_value, 0));
 						if (Number(q["member"]) !== 0) {
-							dtoJson["t"][sensor_key] = {value: sensor_value, name: q["name"], color: fillcolor};
+							dtoJson["t"][sensor_key] = sensor_value;
+							// dtoJson["t"][sensor_key] = {value: sensor_value, name: q["name"], color: fillcolor};
 						}
 					}
 				});
@@ -3390,13 +3392,14 @@ $(function () {
 				});
 			}
 			let sensor_value = Number(globalSensorsJson["sensors"][0]['t1']["value"]);
-			let sensor_name = globalSensorsJson["sensors"][0]['t1']["name"];
-			let color_value = globalSensorsJson["sensors"][0]['t1']["color"];
-			let fillcolor = "#" + dec2hex(color_value);
+			// let sensor_name = globalSensorsJson["sensors"][0]['t1']["name"];
+			// let color_value = globalSensorsJson["sensors"][0]['t1']["color"];
+			// let fillcolor = "#" + dec2hex(color_value);
 			$("#pid_value_t1").text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 			//if (Number(globalSensorsJson["sensors"][i][sensor_key]["member"]) !== 0) {
 			if (pidProcess["start"] === true){
-				dtoJson["t"]['t1'] = {value: sensor_value, name: sensor_name, color: fillcolor};
+				dtoJson["t"]['t1'] = sensor_value;
+				// dtoJson["t"]['t1'] = {value: sensor_value, name: sensor_name, color: fillcolor};
 			}
 			/*$.each(globalSensorsJson["sensors"], function (i, e) {
 				let sensor_key = Object.keys(e).shift();
