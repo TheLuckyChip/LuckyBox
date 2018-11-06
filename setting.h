@@ -83,6 +83,7 @@ struct PR_Power
 {
 	bool heaterStatus;
 	uint8_t	heaterPower;
+	uint8_t heaterPowerCorr;
 	uint8_t inPowerHigh;
 	uint8_t inPowerLow;
 };
@@ -155,8 +156,7 @@ extern unsigned long headValveOn;
 extern unsigned long headValveOff;
 extern byte touchArea;
 extern byte touchScreen;
-//extern bool heaterStatus;
-//extern int	heaterPower;
+extern uint16_t Voltage;
 extern uint16_t servoOld;
 extern int modeWiFi;
 extern uint8_t DefCubOut;

@@ -33,6 +33,35 @@ void adcLoop() {
 		//Serial.print("AIN2: "); Serial.println(adcIn[2].data);
 		//Serial.print("AIN3: "); Serial.println(adcIn[3].data);
 		//Serial.println(" ");
+
+		// Замер напряжения сети
+		uint16_t minVoltage = 1024;
+		uint16_t maxVoltage = 0;
+		uint16_t adcRez;
+		unsigned long timeAdc = millis() + 40;
+		while (timeAdc > millis()) {
+			adcRez = analogRead(0);
+			if (minVoltage > adcRez) minVoltage = adcRez;
+			if (maxVoltage < adcRez) maxVoltage = adcRez;
+		}
+		//Voltage = (maxVoltage - minVoltage) >> 2; // для MCP602
+		Voltage = maxVoltage - minVoltage; // для LM358
+		if (Voltage < 50) Voltage = 230; // модуль zmpt101 отсутствует
+		float deltaPercent = 100 - (Voltage / 2.3);
+
+		// вычислим коррекцию для ТЭНа
+		if (power.heaterPower > 0) {
+			deltaPercent /= (100 / power.heaterPower);
+			if ((power.heaterPower + deltaPercent) <= 100 && (power.heaterPower + deltaPercent) >= 0) power.heaterPowerCorr = uint8_t(power.heaterPower + deltaPercent);
+			else if ((power.heaterPower + deltaPercent) > 100) power.heaterPowerCorr = 100;
+			else if ((power.heaterPower + deltaPercent) < 0) power.heaterPowerCorr = 0;
+		}
+		else power.heaterPowerCorr = 0;
+
+		//Serial.print("Power = "); Serial.println(power.heaterPowerCorr);
+		//Serial.print("min = "); Serial.println(minVoltage);
+		//Serial.print("max = "); Serial.println(maxVoltage);
+		//Serial.print("ADC Delta = "); Serial.println(Voltage);
 	}
 }
 
