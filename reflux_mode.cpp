@@ -671,6 +671,7 @@ void rfluxLoopMode_5() {
 	#endif
 			tempBigOut = 2;
 			senseHeadcontrol = adcIn[0].member;
+			csOn(PWM_CH4);				// включаем клапан слива ПБ
 			power.heaterStatus = 1;		// включили нагрев
 			power.heaterPower = power.inPowerHigh;		// установили мощность на ТЭН 100 %
 			processMode.timeStep = 0;
@@ -762,6 +763,7 @@ void rfluxLoopMode_5() {
 			if (processMode.step == 6) {
 				csOff(PWM_CH1);		// закрыли клапан отбора голов
 				csOn(PWM_CH2);		// открыть клапан отбора
+				csOff(PWM_CH4);		// закрыли клапан слива ПБ
 				processMode.timeStep = 0;
 				nameProcessStep = "Отбор тела";
 			}
@@ -772,10 +774,11 @@ void rfluxLoopMode_5() {
 			if (temperatureSensor[DS_Cube].allertValue > 0 && temperatureSensor[DS_Cube].data >= temperatureSensor[DS_Cube].allertValue) {
 				power.heaterStatus = 0;							// выключили ТЭН
 				power.heaterPower = 0;							// установили мощность на ТЭН 0 %
-				timePauseOff = millis();					// обнулим счетчик времени для зв.сигнала
+				timePauseOff = millis() + 10000;				// установим счетчик времени для зв.сигнала
 				temperatureSensor[DS_Cube].allert = true;	// сигнализация для WEB
 				settingAlarm = true;						// подаем звуковой сигнал
 				csOff(PWM_CH2);								// закрыли клапан отбора
+				csOn(PWM_CH4);								// включаем клапан слива ПБ
 				processMode.timeStep = 0;
 				nameProcessStep = "Процесс закончен";
 				processMode.step = 7;						// перешли на следующий шаг алгоритма
@@ -798,11 +801,13 @@ void rfluxLoopMode_5() {
 		}
 // после завершения процесса ждем 120 сек. и выключаем клапана и пищалку
 		case 7: {
-			if (millis() >= 10000 + timePauseOff) {
+			if (millis() >= timePauseOff) {
 				settingAlarm = false;						// выключили звуковой сигнал
+				timePauseOff = 60000 * 15 + millis();
 			}
-			if (millis() >= 120000 + timePauseOff) {
+			else if (millis() >= timePauseOff && settingAlarm == false) {
 				csOff(PWM_CH3);								// закрыли клапан подачи воды
+				csOff(PWM_CH4);								// закрыли клапан слива ПБ
 				temperatureSensor[DS_Cube].allert = false;	// сигнализация для WEB
 				processMode.allow = 0;						// вышли из режима ректификации
 				processMode.step = 0;						// обнулили шаг алгоритма

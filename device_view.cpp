@@ -78,9 +78,13 @@ void deviceViewLoop() {
 			tft.setCursor(223, 2);
 			tft.setTextColor(ILI9341_LIGHTGREY, ILI9341_BLACK);
 			tft.print(time_ntp);
-			tft.setCursor(236, 42);
+			tft.setCursor(236, 26);
 			tft.setTextColor(ILI9341_CYAN, ILI9341_BLACK); // голубой
 			tft.printf("%d mm", (int)pressureSensor.data);
+			tft.setCursor(242, 52);
+			tft.setTextColor(ILI9341_ORANGE, ILI9341_BLACK); // оранжевый
+			if (Voltage > 999) Voltage = 999; // чтобы не выйти за пределы индикации в настройках
+			tft.printf("%d V", Voltage);
 
 			if (touchScreen == 0) {
 				// вывод температур
