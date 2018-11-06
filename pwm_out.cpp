@@ -105,23 +105,49 @@ void setPWM(byte ch, uint16_t Pon, uint16_t Poff) {
 // управление сервоприводом
 void servoAngleSet(byte ch, byte angle) {
 	uint16_t servoSet;
-	if (angle > 180) return;
-	servoSet = (25 * angle) / 10 + 150;
-	pwm.setPWMFreq(60);
-	delay(100);
-	if (servoOld > servoSet) {
-		for (uint16_t pulselen = servoOld; pulselen > servoSet; pulselen--) {
+	uint16_t pulselen;
+	if (angle > 90) return;
+	servoSet = 100 + angle * 2;//servoSet = (25 * angle) / 10 + 150;
+	pwm.setPWMFreq(50);
+	pulselen = servoOld;
+	delay(50);
+	if (abs(servoOld - servoSet) < 50) {
+		if (servoOld > 190) {
+			while (pulselen > servoOld - 50) {
+				setPWM(ch, 0, pulselen);
+				delay(2);
+				pulselen--;
+			}
 			setPWM(ch, 0, pulselen);
-			delay(1);
 		}
+		else {
+			while (pulselen < servoOld + 50) {
+				setPWM(ch, 0, pulselen);
+				delay(2);
+				pulselen++;
+			}
+			setPWM(ch, 0, pulselen);
+		}
+		servoOld = pulselen;
+		delay(20);
+	}
+	if (servoOld > servoSet) {
+		while (pulselen > servoSet) {
+			setPWM(ch, 0, pulselen);
+			delay(2);
+			pulselen--;
+		}
+		setPWM(ch, 0, pulselen);
 	}
 	else {
-		for (uint16_t pulselen = servoOld; pulselen < servoSet; pulselen++) {
+		while (pulselen < servoSet) {
 			setPWM(ch, 0, pulselen);
-			delay(1);
+			delay(2);
+			pulselen++;
 		}
+		setPWM(ch, 0, pulselen);
 	}
-	delay(100);
+	delay(50);
 	setPWM(ch, 0, 4096);
 	pwm.setPWMFreq(1000);
 	servoOld = servoSet;

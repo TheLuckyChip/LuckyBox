@@ -48,7 +48,7 @@ struct PR_Mashing processMashing[4];
 struct PR_Power power;
 
 uint16_t Voltage;
-uint16_t servoOld = 0;		// Старая позиция сервопривода
+uint16_t servoOld = 100;		// Старая позиция сервопривода
 unsigned long displayTimeInterval = 0;
 unsigned long sdTimeWriteInterval = 0;
 uint16_t graphOutInterval = Display_out_temp;	// Инетрал времени для вывода графика температуры если показания неизменны
