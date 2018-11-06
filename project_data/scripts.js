@@ -3724,6 +3724,8 @@ $(function () {
 		});
 	}
 
+	setTimeout(getSettings, 2000);
+
 	//Обновление прошивки
 	$("#file_update").on("change", function () {
 		let vidFileLength = $(this)[0].files.length;
