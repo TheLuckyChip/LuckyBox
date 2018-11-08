@@ -2691,7 +2691,7 @@ $(function () {
 				if (sensors.hasOwnProperty(key)/* && key !== "p1"*/) {
 					let sensor_name = (sensors[key].hasOwnProperty("name") ? sensors[key]["name"] : "");
 					if (sensor_name !== "") {
-						//if (key !== "p1") {
+						//if (key === "t1" || key === "t2") {
 						if (re_t.test(key)) {
 							let sensor_priority = '<label class="checkbox-inline"><input disabled id="priority_' + key + '" name="mashing_radio[]" type="radio" value="Y">Приоритет</label>';
 							let jscolor = sensors[key]["color"] > 0 ? dec2hex(sensors[key]["color"]) : "FFFFFF";
@@ -2708,6 +2708,7 @@ $(function () {
 								'<td>' + sensor_priority + '</td>' +
 								'</tr>';
 						}
+						//}
 						/*if (re_out.test(key)) {
 						tpl_devices += '<tr><td>' +
 							'<div class="input-group input-group-sm">' +
@@ -2768,6 +2769,9 @@ $(function () {
 
 								mashingProcess["sensors"][key] = {};
 								if (tmp) {
+									if(key === "t2"){
+										name = "Датчик в струе";
+									}
 									mashingProcess["sensors"][key] = {"name": name, "priority": priority, "color": color,"member":1};
 								//} else {
 									//mashingProcess["sensors"][key] = {"name": name, "value": 0};
@@ -2858,6 +2862,9 @@ $(function () {
 				//console.log(i,e);
 				let sensor_key = i;
 				let name_sensor = e["name"];
+				if(sensor_key === "t2"){
+					name_sensor = "Датчик в струе";
+				}
 				let stop = Number(e["stop"]);
 				let time = e["time"];
 				let temperature = e["temperature"];
