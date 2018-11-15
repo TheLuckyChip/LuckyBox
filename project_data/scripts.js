@@ -404,7 +404,7 @@ $(function () {
 				let $tab = $('.list-tab .active').next();
 
 
-				if ($tab.length > 0) {
+				if ($tab.length > 0 && $("a.disabled", $tab).length === 0) {
 					let posTab = $tab.offset();
 					let posList = $('.list-tab').offset();
 					//console.log($tab,posTab);
@@ -425,7 +425,7 @@ $(function () {
 				//let hiddenWidth = widthOfHidden();
 				//let containerWidth = $('.wrapper-nav').outerWidth();
 				let $tab = $('.list-tab .active').prev();
-				if ($tab.length > 0) {
+				if ($tab.length > 0 && $("a.disabled", $tab).length === 0) {
 					let posTab = $tab.offset();
 					//let posList = $('.list-tab').offset();
 					let leftTab = posTab.left - 10;
@@ -461,6 +461,14 @@ $(function () {
 		}));
 	}
 
+	$('#nav-tabs li a').on("click",function(e){
+		if($(this).hasClass("disabled")){
+			e.preventDefault();
+			e.stopPropagation();
+			e.stopImmediatePropagation();
+			return false;
+		}
+	});
 
 	//загружаем контент во вкладки
 	$('li.swipe-tab a').on('show.bs.tab', function (e) {
@@ -470,12 +478,34 @@ $(function () {
 		if ($.trim($(target).html()) === '') {
 			$(target).ajaxLoading();
 			$(target).load(url, function (response, status, xhr) {
+				console.log("tabs");
 				if (status === "error") {
 					$.fn.openModal('', '<p class="text-center text-danger text-strong">Ошибка загрузки вкладки</p><p>' + xhr.status + ' ' + xhr.statusText + '</p>', "modal-sm", false, true);
 				}
 				$(target).ajaxLoading('stop');
 				tab.tab('show');
 			});
+		}else{
+			switch (target) {
+				case "#distillation":
+					distillationProcess["sensors"] = {};
+					$.fn.pasteDistillationSensors(false);
+					break;
+				case "#reflux":
+					refluxProcess["sensors"] = {};
+					$.fn.pasteRefluxSensors(false);
+					break;
+				case "#mashing":
+					mashingProcess["sensors"] = {};
+					$.fn.pasteMashingSensors(false);
+					break;
+			}
+			// distillationProcess["sensors"] = {};
+			// refluxProcess["sensors"] = {};
+			// mashingProcess["sensors"] = {};
+			// $.fn.pasteMashingSensors(false);
+			// $.fn.pasteDistillationSensors(false);
+			// $.fn.pasteRefluxSensors(false);
 		}
 	});
 	$('li.swipe-tab a:first').tab('show');
@@ -3476,8 +3506,31 @@ $(function () {
 			let process = Number(globalSensorsJson["process"]["allow"]);
 			if (process !== 0){
 				$("a#toggle_settings").prop("disabled",true).css('cursor', 'not-allowed');
+				$("#nav-tabs li a").addClass("disabled").css('cursor', 'not-allowed');
+				//$("#nav-tabs").removeClass("swipe-tab");
+				//$("#nav-tabs li").removeClass("swipe-tab");
+
+				switch (process) {
+					case 1:
+						$('#nav-tabs li a[data-target="#distillation"]').css('cursor', 'pointer');
+						break;
+					case 2:
+						$('#nav-tabs li a[data-target="#reflux"]').css('cursor', 'pointer');
+						break;
+					case 3:
+						$('#nav-tabs li a[data-target="#mashing"]').css('cursor', 'pointer');
+						break;
+					case 4:
+						$('#nav-tabs li a[data-target="#pid"]').css('cursor', 'pointer');
+						break;
+
+				}
 			}else{
 				$("a#toggle_settings").prop("disabled",false).css('cursor', 'pointer');
+				$("#nav-tabs li a").removeClass("disabled").css('cursor', 'pointer');
+				//$("#nav-tabs").addClass("swipe-tab");
+				//$("#nav-tabs li").addClass("swipe-tab");
+				//console.log('Index of ' + $("#nav-tabs li a").index());
 			}
 
 			$.each(globalSensorsJson["sensors"], function (i, e) {
@@ -3507,7 +3560,7 @@ $(function () {
 					$("#svg_distillation_ten_t").text(Number(globalSensorsJson["power"]).toFixed(0) + '%');
 
 					if (process === 1) {
-						$('li.swipe-tab a[data-target="#distillation"]').tab('show');
+						$('#nav-tabs li a[data-target="#distillation"]').tab('show');
 						setTimeout(function () {
 							$("#distillation_start").trigger("click");
 						}, 2000);
@@ -3542,7 +3595,7 @@ $(function () {
 					$("#svg_reflux_ten_t").text(Number(globalSensorsJson["power"]).toFixed(0) + '%');
 
 					if (process === 2) {
-						$('li.swipe-tab a[data-target="#reflux"]').tab('show');
+						$('#nav-tabs li a[data-target="#reflux"]').tab('show');
 						setTimeout(function () {
 							$("#reflux_start").trigger("click");
 						}, 2000);
@@ -3571,7 +3624,7 @@ $(function () {
 					$("#svg_mashing_ten_t").text(Number(globalSensorsJson["power"]).toFixed(0) + '%');
 
 					if (process === 3) {
-						$('li.swipe-tab a[data-target="#mashing"]').tab('show');
+						$('#nav-tabs li a[data-target="#mashing"]').tab('show');
 						setTimeout(function () {
 							$("#mashing_start").trigger("click");
 						}, 2000);
@@ -3588,7 +3641,7 @@ $(function () {
 					$("#pid_value_" + sensor_key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 
 					if (process === 4) {
-						$('li.swipe-tab a[data-target="#pid"]').tab('show');
+						$('#nav-tabs li a[data-target="#pid"]').tab('show');
 						setTimeout(function () {
 							$("#pid_start").trigger("click");
 						}, 2000);
