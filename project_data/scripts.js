@@ -3519,6 +3519,9 @@ $(function () {
 					$("#sensor_val_" + sensor_key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 					$("#svg_sensor_" + sensor_key).text(sensor_value.toFixed(1) + '°С');
 				}
+				if (sensor_key === "p1") {
+					$("#sensor_val_" + sensor_key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
+				}
 				//заполнение процесса дистиляции
 				if (distillationProcess["start"] !== true /*&& $.trim($("#distillation_process").html()) !== ""*/) {
 					$("#distillation_" + sensor_key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
