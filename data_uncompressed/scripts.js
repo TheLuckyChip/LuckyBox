@@ -458,6 +458,15 @@ $(function () {
 		}));
 	}
 
+	$('#navbar-menu li a').on("click",function(e){
+		if($(this).hasClass("disabled")){
+			e.preventDefault();
+			e.stopPropagation();
+			e.stopImmediatePropagation();
+			return false;
+		}
+	});
+
 	$('#nav-tabs li a').on("click",function(e){
 		if($(this).hasClass("disabled")){
 			e.preventDefault();
@@ -1221,6 +1230,7 @@ $(function () {
 	//Заполнение вкладки датчики данными после запроса
 	function getSensors(data) {
 		//console.log(data);
+		$("#sensors_settings select").prop('selectedIndex',0);
 		sensorsJson = data;
 		let sensors = data;
 		for (let key in sensors) {
@@ -3486,7 +3496,7 @@ $(function () {
 			}
 			let process = Number(globalSensorsJson["process"]["allow"]);
 			if (process !== 0){
-				$("a#toggle_settings").prop("disabled",true).css('cursor', 'not-allowed');
+				$("a#toggle_settings").addClass("disabled").css('cursor', 'not-allowed');
 				$("#nav-tabs li a").addClass("disabled").css('cursor', 'not-allowed');
 				//$("#nav-tabs").removeClass("swipe-tab");
 				//$("#nav-tabs li").removeClass("swipe-tab");
@@ -3507,7 +3517,7 @@ $(function () {
 
 				}
 			}else{
-				$("a#toggle_settings").prop("disabled",false).css('cursor', 'pointer');
+				$("a#toggle_settings").removeClass("disabled").css('cursor', 'pointer');
 				$("#nav-tabs li a").removeClass("disabled").css('cursor', 'pointer');
 				//$("#nav-tabs").addClass("swipe-tab");
 				//$("#nav-tabs li").addClass("swipe-tab");
