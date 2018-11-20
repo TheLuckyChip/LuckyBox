@@ -1585,6 +1585,8 @@ $(function () {
 				dataType: 'json',
 				success: function (msg) {
 					distillationProcess["sensors"] = msg;
+					distillationProcess["powerHigh"] = Number(msg["powerHigh"]);
+					distillationProcess["powerLower"] = Number(msg["powerLower"]);
 					//console.log('distillationSensorsGetTpl',distillationProcess["sensors"]);
 					if (!$.fn.objIsEmpty(distillationProcess["sensors"], false)) {
 						$.fn.pasteDistillationSensors(false);
@@ -1596,13 +1598,6 @@ $(function () {
 			});
 		}
 		if (!$.fn.objIsEmpty(distillationProcess["sensors"], false)) {
-			/*let tpl_delta_thead =
-				'<div class="row-xs">'+
-				'<div class="col-xs-4 col-xs-offset-0 col-sm-3 col-sm-offset-4 text-center text-middle text-primary">Значение</div>' +
-				'<div class="col-xs-4 col-sm-3 text-center text-middle text-primary">Дельта</div>' +
-				'<div class="col-xs-4 col-sm-2 text-center text-middle text-primary">Уставка</div>'+
-				'</div>';
-			let tpl_delta_body = '';*/
 			let tpl_cutoff_thead =
 				'<div class="row-xs clearfix">' +
 				'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-4 text-center text-middle text-primary">Значение</div>' +
@@ -1613,31 +1608,14 @@ $(function () {
 			$.each(distillationProcess["sensors"], function (i, e) {
 				//console.log(i,e);
 				let sensor_key = i;
-				let name_sensor = e["name"];
-				if (sensorsDistillationSend[sensor_key].hasOwnProperty("name")) {
-					sensorsDistillationSend[sensor_key]["name"] = name_sensor;
+				//let name_sensor = e["name"];
+				if (e.hasOwnProperty("name") && sensorsDistillationSend[sensor_key].hasOwnProperty("name")) {
+					sensorsDistillationSend[sensor_key]["name"] = e["name"];
 				}
 				if (re_t.test(sensor_key) && Number(e["member"]) !== 0) {
 					sensorsDistillationSend[sensor_key]["color"] = e["color"];
 					sensorsDistillationSend[sensor_key]["member"] = 1;
-					/*let tpl_delta = '';
-					let tpl_delta_result = '';
-					if (e["delta"]) {
-						tpl_delta = returnTplHtml([{id:"distillation_delta_"+sensor_key, value: e["allertValue"], min: '0', max: '1', step: '0.05'}], deltaTempl);
-						tpl_delta_result = '<span id="distillation_delta_result_'+sensor_key+'"></span><span class="hidden">&#176С</span>';
-						tpl_delta_body +=
-							'<div class="row row-striped">' + tpl_delta_thead +
-							'<div id="alert_bg_'+sensor_key+'" class="pt-10 pb-10 clearfix">' +
-							'<div id="alert_text_'+sensor_key+'" class="col-xs-12 col-sm-4 text-center-xs text-strong">t&#176' + name_sensor + '</div>' +
-							'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle text-strong"><span id="distillation_' + sensor_key + '"></span><span class="hidden">&#176С</span></div>' +
-							'<div class="col-xs-3 col-sm-3">' + tpl_delta + '</div>' +
-							'<div class="col-xs-4 col-xs-offset-1 col-sm-2 col-sm-offset-0 text-center text-middle text-strong">' + tpl_delta_result +
-							'</div>' +
-							'</div>' +
-							'</div>';
 
-						tpl_delta_thead = '';
-					}*/
 					let tpl_cutoff = '';
 					if (e["cutoff"]) {
 						sensorsDistillationSend[sensor_key]["cutoff"] = 1;
@@ -1645,7 +1623,7 @@ $(function () {
 						tpl_cutoff_body +=
 							'<div class="row row-striped">' + tpl_cutoff_thead +
 							'<div id="distillation_alert_bg_' + sensor_key + '" class="pt-10 pb-10 clearfix">' +
-							'<div id="distillation_alert_text_' + sensor_key + '" class="col-xs-12 col-sm-4 text-middle text-center-xs text-strong">t&#176' + name_sensor + '</div>' +
+							'<div id="distillation_alert_text_' + sensor_key + '" class="col-xs-12 col-sm-4 text-middle text-center-xs text-strong">t&#176' + e["name"] + '</div>' +
 							'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle text-strong"><span id="distillation_' + sensor_key + '"></span><span class="hidden">&#176С</span></div>' +
 							//'<div class="col-xs-3 col-sm-3"></div>' +
 							'<div class="col-xs-4 col-xs-offset-3 col-sm-3 col-sm-offset-2">' + tpl_cutoff +
@@ -1658,7 +1636,7 @@ $(function () {
 					if (/*sensor_key !== "p1" && */!e["delta"] && !e["cutoff"]) {
 						tpl_all_body += '<div class="row row-striped">' +
 							'<div class="pt-10 pb-10 clearfix">' +
-							'<div class="col-xs-12 col-sm-4 text-center-xs text-strong">t&#176' + name_sensor + '</div>' +
+							'<div class="col-xs-12 col-sm-4 text-center-xs text-strong">t&#176' + e["name"] + '</div>' +
 							'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle text-strong"><span id="distillation_' + sensor_key + '"></span><span class="hidden">&#176С</span></div>' +
 							'<div class="col-xs-3 col-sm-3"></div>' +
 							'<div class="col-xs-4 col-sm-3"></div>' +
@@ -1670,7 +1648,7 @@ $(function () {
 					sensorsDistillationSend[sensor_key]["member"] = 1;
 					tpl_devices_body += '<div class="row row-striped">' +
 						'<div class="pt-10 pb-10 clearfix">' +
-						'<div class="col-xs-12 col-sm-4 text-center-xs text-middle text-strong">' + name_sensor + '</div>' +
+						'<div class="col-xs-12 col-sm-4 text-center-xs text-middle text-strong">' + e["name"] + '</div>' +
 						'<div class="col-xs-5 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-strong">' +
 						'<span id="distillation_' + sensor_key + '" class="box-green hidden"><span class="glyphicon">✔</span></span></div>' +
 						'</div></div>';
@@ -1679,7 +1657,7 @@ $(function () {
 					sensorsDistillationSend[sensor_key]["member"] = 1;
 					tpl_safety_body += '<div class="row row-striped">' +
 						'<div id="distillation_alert_bg_' + sensor_key + '" class="pt-10 pb-10 clearfix">' +
-						'<div id="distillation_alert_text_' + sensor_key + '" class="col-xs-12 col-sm-4 text-center-xs text-strong">' + name_sensor + '</div>' +
+						'<div id="distillation_alert_text_' + sensor_key + '" class="col-xs-12 col-sm-4 text-center-xs text-strong">' + e["name"] + '</div>' +
 						'<div class="col-xs-5 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle text-strong">' +
 						'<span id="distillation_' + sensor_key + '"></span> <span class="hidden"></span></div>' +
 						'</div></div>';
@@ -1717,8 +1695,8 @@ $(function () {
 			$("#distillation_start_group_button").addClass("hidden");
 		}
 		$("#distillation_process").html(distillationTemplate);
-		distillationProcess["powerHigh"] = Number(globalSensorsJson["powerHigh"]);
-		distillationProcess["powerLower"] = Number(globalSensorsJson["powerLower"]);
+		//distillationProcess["powerHigh"] = Number(globalSensorsJson["powerHigh"]);
+		//distillationProcess["powerLower"] = Number(globalSensorsJson["powerLower"]);
 		$("#distillation_power_set").val(distillationProcess["powerHigh"]);
 		$("#distillation_power_lower_set").val(distillationProcess["powerLower"]);
 
@@ -1784,10 +1762,10 @@ $(function () {
 		$("#distillation_step").html('').addClass("hidden");
 		$("#distillation_process").find("div.bg-danger").removeClass("bg-danger");
 		$("#distillation_process").find("div.text-danger").removeClass("text-danger");
-		flagSendProcess = true;
-		distillationProcess["start"] = false;
 		clearInterval(sensorsProcessId);
 		clearInterval(sensorsIntervalId);
+		flagSendProcess = true;
+		distillationProcess["start"] = false;
 		setDistillation();
 	}
 
@@ -1831,14 +1809,14 @@ $(function () {
 		let power_set = $("#distillation_power_set");
 		let power_lower_set = $("#distillation_power_lower_set");
 		distillationSendData["process"]["allow"] = (distillationProcess["start"] ? 1 : 0);
-		if (distillationProcess["powerHigh"] !== power_set.val()) {
+		if (distillationProcess["powerHigh"] !== Number(power_set.val())) {
 			flagSendProcess = true;
 		}
-		if (distillationProcess["powerLower"] !== power_lower_set.val()) {
+		if (distillationProcess["powerLower"] !== Number(power_lower_set.val())) {
 			flagSendProcess = true;
 		}
-		distillationSendData["powerHigh"] = distillationProcess["powerHigh"] = power_set.val();
-		distillationSendData["powerLower"] = distillationProcess["powerLower"] = power_lower_set.val();
+		distillationSendData["powerHigh"] = distillationProcess["powerHigh"] = Number(power_set.val());
+		distillationSendData["powerLower"] = distillationProcess["powerLower"] = Number(power_lower_set.val());
 
 		$.each(distillationProcess["sensors"], function (i, e) {
 			let sensor_key = i;
@@ -1925,10 +1903,10 @@ $(function () {
 
 						$("#distillation_" + sensor_key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 						//убрал пока
-						if(!flagSendProcess) {
+						/*if(!flagSendProcess) {
 							$("#distillation_cutoff_" + sensor_key).val(alert_value.toFixed(0));
 							//$("#distillation_temperature_" + sensor_key).val(temperature);
-						}
+						}*/
 						let allertValue = alert_value;
 						allertValue = allertValue > 0 ? allertValue.toFixed(2) : "";
 						if (allertValue !== "") {
@@ -1979,9 +1957,9 @@ $(function () {
 				})
 			});
 			let power_value = Number(globalSensorsJson["power"]);
-			let power_higt_value = Number(globalSensorsJson["powerHigh"]);
-			let power_lower_value = Number(globalSensorsJson["powerLower"]);
-			// TODO заполнение поля регулировки тена и рабочей мощности
+			let power_higt_value = distillationProcess["powerHigh"];
+			let power_lower_value = distillationProcess["powerLower"];
+			//заполнение поля регулировки тена и рабочей мощности
 			if(!flagSendProcess) {
 				$("#distillation_power_set").val(power_higt_value.toFixed(0));
 				$("#distillation_power_lower_set").val(power_lower_value.toFixed(0));
@@ -2224,6 +2202,8 @@ $(function () {
 				dataType: 'json',
 				success: function (msg) {
 					refluxProcess["sensors"] = msg;
+					refluxProcess["powerHigh"] = Number(msg["powerHigh"]);
+					refluxProcess["powerLower"] = Number(msg["powerLower"]);
 					//console.log(refluxProcess["sensors"]);
 					if (!$.fn.objIsEmpty(refluxProcess["sensors"], false)) {
 						$.fn.pasteRefluxSensors(false);
@@ -2255,9 +2235,9 @@ $(function () {
 			$.each(refluxProcess["sensors"], function (i, e) {
 				//console.log(i,e);
 				let sensor_key = i;
-				let name_sensor = e["name"];
-				if (sensorsRefluxSend[sensor_key].hasOwnProperty("name")) {
-					sensorsRefluxSend[sensor_key]["name"] = name_sensor;
+				//let name_sensor = e["name"];
+				if (e.hasOwnProperty("name") && sensorsRefluxSend[sensor_key].hasOwnProperty("name")) {
+					sensorsRefluxSend[sensor_key]["name"] = e["name"];
 				}
 				if (re_t.test(sensor_key) && Number(e["member"]) !== 0) {
 					sensorsRefluxSend[sensor_key]["color"] = e["color"];//hex2dec(e["color"]);
@@ -2271,7 +2251,7 @@ $(function () {
 						tpl_delta_body +=
 							'<div class="row row-striped">' + tpl_delta_thead +
 							'<div id="reflux_alert_bg_' + sensor_key + '" class="pt-10 pb-10 clearfix">' +
-							'<div id="reflux_alert_text_' + sensor_key + '" class="col-xs-12 col-sm-4 text-middle text-center-xs text-strong">t&#176' + name_sensor + '</div>' +
+							'<div id="reflux_alert_text_' + sensor_key + '" class="col-xs-12 col-sm-4 text-middle text-center-xs text-strong">t&#176' + e["name"] + '</div>' +
 							'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle text-strong"><span id="reflux_' + sensor_key + '"></span><span class="hidden">&#176С</span></div>' +
 							'<div class="col-xs-4 col-sm-3">' + tpl_delta + '</div>' +
 							'<div class="col-xs-4 col-xs-offset-0 col-sm-2 col-sm-offset-0 text-center text-middle text-strong">' + tpl_delta_result +
@@ -2288,7 +2268,7 @@ $(function () {
 						tpl_cutoff_body +=
 							'<div class="row row-striped">' + tpl_cutoff_thead +
 							'<div id="reflux_alert_bg_' + sensor_key + '" class="pt-10 pb-10 clearfix">' +
-							'<div id="reflux_alert_text_' + sensor_key + '" class="col-xs-12 col-sm-4 text-middle text-center-xs text-strong">t&#176' + name_sensor + '</div>' +
+							'<div id="reflux_alert_text_' + sensor_key + '" class="col-xs-12 col-sm-4 text-middle text-center-xs text-strong">t&#176' + e["name"] + '</div>' +
 							'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle text-strong"><span id="reflux_' + sensor_key + '"></span><span class="hidden">&#176С</span></div>' +
 							//'<div class="col-xs-3 col-sm-3"></div>' +
 							'<div class="col-xs-4 col-xs-offset-3 col-sm-3 col-sm-offset-2">' + tpl_cutoff +
@@ -2301,7 +2281,7 @@ $(function () {
 					if (/*sensor_key !== "p1" && */!e["delta"] && !e["cutoff"]) {
 						tpl_all_body += '<div class="row row-striped">' +
 							'<div class="pt-10 pb-10 clearfix">' +
-							'<div class="col-xs-12 col-sm-4 text-center-xs text-strong">t&#176' + name_sensor + '</div>' +
+							'<div class="col-xs-12 col-sm-4 text-center-xs text-strong">t&#176' + e["name"] + '</div>' +
 							'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle text-strong"><span id="reflux_' + sensor_key + '"></span><span class="hidden">&#176С</span></div>' +
 							'<div class="col-xs-3 col-sm-3"></div>' +
 							'<div class="col-xs-4 col-sm-3"></div>' +
@@ -2313,7 +2293,7 @@ $(function () {
 					sensorsRefluxSend[sensor_key]["member"] = 1;
 					tpl_devices_body += '<div class="row row-striped">' +
 						'<div class="pt-10 pb-10 clearfix">' +
-						'<div class="col-xs-12 col-sm-4 text-center-xs text-middle text-strong">' + name_sensor + '</div>' +
+						'<div class="col-xs-12 col-sm-4 text-center-xs text-middle text-strong">' + e["name"] + '</div>' +
 						'<div class="col-xs-5 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-strong">' +
 						'<span id="reflux_' + sensor_key + '" class="box-green hidden"><span class="glyphicon">✔</span></span></div>' +
 						'</div></div>';
@@ -2322,7 +2302,7 @@ $(function () {
 					sensorsRefluxSend[sensor_key]["member"] = 1;
 					tpl_safety_body += '<div class="row row-striped">' +
 						'<div id="reflux_alert_bg_' + sensor_key + '" class="pt-10 pb-10 clearfix">' +
-						'<div id="reflux_alert_text_' + sensor_key + '" class="col-xs-12 col-sm-4 text-center-xs text-strong">' + name_sensor + '</div>' +
+						'<div id="reflux_alert_text_' + sensor_key + '" class="col-xs-12 col-sm-4 text-center-xs text-strong">' + e["name"] + '</div>' +
 						'<div class="col-xs-5 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle text-strong"><span id="reflux_' + sensor_key + '"></span> <span class="hidden"></span></div>' +
 						'</div></div>';
 				}
@@ -2364,8 +2344,8 @@ $(function () {
 		$.fn.fillSelect($("#reflux_algorithm_select"), algorithmReflux, false);
 		$("#reflux_algorithm_select").val(globalSensorsJson["process"]["number"]).change();
 		$("#reflux_algorithm").removeClass("hidden");
-		refluxProcess["powerHigh"] = Number(globalSensorsJson["powerHigh"]);
-		refluxProcess["powerLower"] = Number(globalSensorsJson["powerLower"]);
+		//refluxProcess["powerHigh"] = Number(refluxProcess["powerHigh"]);
+		//refluxProcess["powerLower"] = Number(refluxProcess["powerLower"]);
 		refluxProcess["number"] = Number(globalSensorsJson["process"]["number"]);
 		$("#reflux_power_set").val(refluxProcess["powerHigh"]);
 		$("#reflux_power_lower_set").val(refluxProcess["powerLower"]);
@@ -2438,10 +2418,10 @@ $(function () {
 		$("#reflux_step").html('').addClass("hidden");
 		$("#reflux_process").find("div.bg-danger").removeClass("bg-danger");
 		$("#reflux_process").find("div.text-danger").removeClass("text-danger");
-		flagSendProcess = true;
-		refluxProcess["start"] = false;
 		clearInterval(sensorsProcessId);
 		clearInterval(sensorsIntervalId);
+		flagSendProcess = true;
+		refluxProcess["start"] = false;
 		setReflux();
 	}
 
@@ -2481,8 +2461,8 @@ $(function () {
 			flagSendProcess = true;
 		}
 		refluxSendData["process"]["number"] = refluxProcess["number"];
-		refluxSendData["powerHigh"] = refluxProcess["powerHigh"] = power_set.val();
-		refluxSendData["powerLower"] = refluxProcess["powerLower"] = power_lower_set.val();
+		refluxSendData["powerHigh"] = refluxProcess["powerHigh"] = Number(power_set.val());
+		refluxSendData["powerLower"] = refluxProcess["powerLower"] = Number(power_lower_set.val());
 
 		$.each(refluxProcess["sensors"], function (i, e) {
 			let sensor_key = i;
@@ -2577,10 +2557,10 @@ $(function () {
 							$("#svg_reflux_color_" + sensor_key).css('fill', colorPersent(fillcolor, delta_value, delta_alert));
 						}
 						//убрал пока
-						if(!flagSendProcess) {
+						/*if(!flagSendProcess) {
 							//$("#reflux_delta_" + sensor_key).val(alert_value);
 							$("#reflux_cutoff_" + sensor_key).val(alert_value.toFixed(0));
-						}
+						}*/
 						$("#reflux_" + sensor_key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 						let allertValue = alert_value;
 						allertValue = allertValue > 0 ? allertValue.toFixed(2) : "";
@@ -2647,9 +2627,9 @@ $(function () {
 			});
 			$("#reflux_alco_boil").text(globalSensorsJson["temperatureAlcoholBoil"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 			let power_value = Number(globalSensorsJson["power"]);
-			let power_higt_value = Number(globalSensorsJson["powerHigh"]);
-			let power_lower_value = Number(globalSensorsJson["powerLower"]);
-			// TODO заполнение поля регулировки тена и рабочей мощности
+			let power_higt_value = refluxProcess["powerHigh"];
+			let power_lower_value = refluxProcess["powerLower"];
+			//заполнение поля регулировки тена и рабочей мощности
 			if(!flagSendProcess) {
 				$("#reflux_power_set").val(power_higt_value.toFixed(0));
 				$("#reflux_power_lower_set").val(power_lower_value.toFixed(0));
@@ -3010,10 +2990,10 @@ $(function () {
 		$('#mashing_add_sensor').prop("disabled", false);
 		$('#mashing_start').prop("disabled", false);
 		$("#svg_mashing_start").css('stroke', "#000000");
-		flagSendProcess = true;
-		mashingProcess["start"] = false;
 		clearInterval(sensorsProcessId);
 		clearInterval(sensorsIntervalId);
+		flagSendProcess = true;
+		mashingProcess["start"] = false;
 		setMashing();
 	}
 
@@ -3259,9 +3239,9 @@ $(function () {
 	function stopPid(){
 		$('#pid_stop').prop("disabled", true);
 		$('#pid_start').prop("disabled", false);
+		clearInterval(sensorsProcessId);
 		flagSendProcess = true;
 		pidProcess["start"] = false;
-		clearInterval(sensorsProcessId);
 		setPid();
 	}
 	$(document).on('stop-event','#pid_stop', function(e) {
@@ -3415,13 +3395,13 @@ $(function () {
 								}
 							}
 						}
-						if(pidProcess["pid"][pid_key].hasOwnProperty("userSetValue")) {
+						//убрал пока
+						/*if(pidProcess["pid"][pid_key].hasOwnProperty("userSetValue")) {
 							let pid_value = Number(pidProcess["pid"][pid_key]["userSetValue"]);
 							if (!flagSendProcess) {
-								//убрал пока
 								$("#pid_" + pid_key).val(pid_value);
 							}
-						}
+						}*/
 					}
 				});
 			}
@@ -3773,6 +3753,7 @@ $(function () {
 				console.log('Settings', msg);
 				$("#settings_ssdp").val(msg["SSDP"]);
 				$("#settings_ssid").val(msg["ssid"]);
+				$("#version").text("v."+msg["version"]);
 				// $("#settings_password").val(msg["password"]);
 				$("#settings_ssidap").val(msg["ssidAP"]);
 				// $("#settings_passwordap").val(msg["passwordAP"]);

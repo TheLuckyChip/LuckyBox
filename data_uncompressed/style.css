@@ -6,6 +6,15 @@ body {
 	outline:0 !important;
 	-webkit-appearance:none;
 }*/
+#version{
+	position: absolute;
+	top: 0;
+	right: 0;
+	color: #ffffff;
+	font-weight: bold;
+	padding: 10px;
+
+}
 .input-number::-webkit-outer-spin-button,
 .input-number::-webkit-inner-spin-button {
 	-webkit-appearance: none;
