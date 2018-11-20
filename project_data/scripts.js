@@ -1765,6 +1765,7 @@ $(function () {
 		clearInterval(sensorsProcessId);
 		clearInterval(sensorsIntervalId);
 		flagSendProcess = true;
+		globalSensorsJson["process"]["allow"] = 0;
 		distillationProcess["start"] = false;
 		setDistillation();
 	}
@@ -2421,6 +2422,7 @@ $(function () {
 		clearInterval(sensorsProcessId);
 		clearInterval(sensorsIntervalId);
 		flagSendProcess = true;
+		globalSensorsJson["process"]["allow"] = 0;
 		refluxProcess["start"] = false;
 		setReflux();
 	}
@@ -2993,6 +2995,7 @@ $(function () {
 		clearInterval(sensorsProcessId);
 		clearInterval(sensorsIntervalId);
 		flagSendProcess = true;
+		globalSensorsJson["process"]["allow"] = 0;
 		mashingProcess["start"] = false;
 		setMashing();
 	}
@@ -3241,6 +3244,7 @@ $(function () {
 		$('#pid_start').prop("disabled", false);
 		clearInterval(sensorsProcessId);
 		flagSendProcess = true;
+		globalSensorsJson["process"]["allow"] = 0;
 		pidProcess["start"] = false;
 		setPid();
 	}
