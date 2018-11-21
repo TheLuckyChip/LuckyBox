@@ -555,14 +555,11 @@ $(function () {
 	 * @param {object|boolean} error_target - контейнер для вывода ошибок
 	 * @param {string|boolean} success_text - текстовое сообщение в диалоговое окно при успешной отправке данных
 	 */
-	//let ajax_get = false;
+	let ajax_url_debug = '';//'http://192.168.0.190/';
 	function sendRequest(url, data, dataType, success_action, load_target, error_target, success_text) {
 		//console.log(url,data,target);
-		/*if (ajax_get) {
-			ajax_get.abort();
-		}
-		ajax_get = */$.ajax({
-			url: url,
+		$.ajax({
+			url: ajax_url_debug + url,
 			data: data,
 			type: 'GET',
 			dataType: dataType,
@@ -1589,7 +1586,7 @@ $(function () {
 		if (!sensors_select && $.fn.objIsEmpty(distillationProcess["sensors"], false)) {
 			//console.log('empty');
 			$.ajax({
-				url: 'distillationSensorsGetTpl',
+				url: ajax_url_debug + 'distillationSensorsGetTpl',
 				data: {},
 				type: 'GET',
 				dataType: 'json',
@@ -1762,6 +1759,7 @@ $(function () {
 
 	});
 	function stopDistillation(){
+		// console.log("stopDistillation",distillationProcess["start"]);
 		$('#distillation_stop').prop("disabled", true);
 		$('#distillation_add_sensor').prop("disabled", false);
 		$('#distillation_start').prop("disabled", false);
@@ -1774,26 +1772,18 @@ $(function () {
 		$("#distillation_process").find("div.text-danger").removeClass("text-danger");
 		clearInterval(sensorsProcessId);
 		clearInterval(sensorsIntervalId);
-		flagSendProcess = true;
-		globalSensorsJson["process"]["allow"] = 0;
-		distillationProcess["start"] = false;
-		setDistillation();
+		//setTimeout(function () {
+			flagSendProcess = true;
+			globalSensorsJson["process"]["allow"] = 0;
+			distillationProcess["start"] = false;
+			setDistillation();
+		//}, 1000);
 	}
 
 	$(document).on('stop-event','#distillation_stop', function(e) {
+		// console.log("stop-event-Distillation");
 		stopDistillation()
 	});
-	/*$(document).on('click', '#distillation_test', function (e) {
-		if(typeof e.originalEvent !== "undefined" /!*&& e.originalEvent.hasOwnProperty("MouseEvent")*!/) {
-			let event_prop = e.originalEvent;
-			console.log(e);
-			console.log(event_prop);
-			let evetn_mouse = Object.keys(event_prop);
-			console.log(evetn_mouse);
-			if(evetn_mouse === "MouseEvent")
-				console.log("MouseEvent");
-		}
-	});*/
 
 	//Установка значений для дистиляции
 	function setDistillation() {
@@ -2207,7 +2197,7 @@ $(function () {
 		if (!sensors_select && $.fn.objIsEmpty(refluxProcess["sensors"], false)) {
 			//console.log('empty');
 			$.ajax({
-				url: 'refluxSensorsGetTpl',
+				url: ajax_url_debug + 'refluxSensorsGetTpl',
 				data: {},
 				type: 'GET',
 				dataType: 'json',
@@ -2431,10 +2421,12 @@ $(function () {
 		$("#reflux_process").find("div.text-danger").removeClass("text-danger");
 		clearInterval(sensorsProcessId);
 		clearInterval(sensorsIntervalId);
-		flagSendProcess = true;
-		globalSensorsJson["process"]["allow"] = 0;
-		refluxProcess["start"] = false;
-		setReflux();
+		//setTimeout(function () {
+			flagSendProcess = true;
+			globalSensorsJson["process"]["allow"] = 0;
+			refluxProcess["start"] = false;
+			setReflux();
+		//}, 1000);
 	}
 
 	$(document).on('stop-event','#reflux_stop', function(e) {
@@ -2859,7 +2851,7 @@ $(function () {
 		if (!sensors_select && $.fn.objIsEmpty(mashingProcess["sensors"], false)) {
 			//console.log('empty');
 			$.ajax({
-				url: 'mashingSensorsGetTpl',
+				url: ajax_url_debug + 'mashingSensorsGetTpl',
 				data: {},
 				type: 'GET',
 				dataType: 'json',
@@ -3004,10 +2996,12 @@ $(function () {
 		$("#svg_mashing_start").css('stroke', "#000000");
 		clearInterval(sensorsProcessId);
 		clearInterval(sensorsIntervalId);
-		flagSendProcess = true;
-		globalSensorsJson["process"]["allow"] = 0;
-		mashingProcess["start"] = false;
-		setMashing();
+		//setTimeout(function () {
+			flagSendProcess = true;
+			globalSensorsJson["process"]["allow"] = 0;
+			mashingProcess["start"] = false;
+			setMashing();
+		//}, 1000);
 	}
 
 	$(document).on('stop-event','#mashing_stop', function(e) {
@@ -3537,14 +3531,8 @@ $(function () {
 					$("#sensor_val_" + sensor_key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 				}
 				//заполнение процесса дистиляции
-				if (distillationProcess["start"] !== true /*&& $.trim($("#distillation_process").html()) !== ""*/) {
+				if (distillationProcess["start"] !== true) {
 					$("#distillation_" + sensor_key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
-					/*if (sensor_key === "p1") {
-						$("#distillation_pressure").text(globalSensorsJson["sensors"][i]["p1"]["value"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
-
-						$("#distillation_alco_boil").text(globalSensorsJson["temperatureAlcoholBoil"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
-
-					}*/
 					$("#distillation_power_value").text(Number(globalSensorsJson["power"]).toFixed(0)).parent().find(".hidden").removeClass("hidden").addClass("show");
 					if(sensor_value < 150) {
 						$("#svg_distillation_" + sensor_key).text(sensor_value.toFixed(1) + '°С');
@@ -3552,31 +3540,13 @@ $(function () {
 						$("#svg_distillation_" + sensor_key).text('');
 					}
 					$("#svg_distillation_ten_t").text(Number(globalSensorsJson["power"]).toFixed(0) + '%');
-
-					if (process === 1) {
-						$('#nav-tabs li a[data-target="#distillation"]').tab('show');
-						setTimeout(function () {
-							$("#distillation_start").trigger("click");
-						}, 2000);
-					}
-
-					/*if(process > 0 && process !== 1)
-						$("#distillation_start_group_button").addClass("hidden");
-					if(process === 0)
-						$("#distillation_start_group_button").removeClass("hidden");*/
 				}
-				if (distillationProcess["start"] === true) {
-					if (process !== 1) {
-						$("#distillation_stop").trigger("stop-event");
-						//$("#distillation_stop").trigger("click");
-					}
-				}
+
 				//заполнение процесса ректификации
-				if (refluxProcess["start"] !== true /*&& $.trim($("#reflux_process").html()) !== ""*/) {
+				if (refluxProcess["start"] !== true) {
 					$("#reflux_" + sensor_key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 					if (sensor_key === "p1") {
 						$("#reflux_pressure").text(globalSensorsJson["sensors"][i]["p1"]["value"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
-
 						$("#reflux_alco_boil").text(globalSensorsJson["temperatureAlcoholBoil"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 						$("#reflux_power_value").text(Number(globalSensorsJson["power"]).toFixed(0)).parent().find(".hidden").removeClass("hidden").addClass("show");
 					}
@@ -3587,27 +3557,9 @@ $(function () {
 						$("#svg_reflux_" + sensor_key).text('');
 					}
 					$("#svg_reflux_ten_t").text(Number(globalSensorsJson["power"]).toFixed(0) + '%');
-
-					if (process === 2) {
-						$('#nav-tabs li a[data-target="#reflux"]').tab('show');
-						setTimeout(function () {
-							$("#reflux_start").trigger("click");
-						}, 2000);
-					}
-
-					/*if(process > 0 && process !== 2)
-						$("#reflux_start_group_button").addClass("hidden");
-					if(process === 0)
-						$("#reflux_start_group_button").removeClass("hidden");*/
-				}
-				if (refluxProcess["start"] === true) {
-					if (process !== 2) {
-						$("#reflux_stop").trigger("stop-event");
-						//$("#reflux_stop").trigger("click");
-					}
 				}
 				//заполнение процесса затирания
-				if (mashingProcess["start"] !== true /*&& $.trim($("#mashing_process").html()) !== ""*/) {
+				if (mashingProcess["start"] !== true) {
 					$("#mashing_" + sensor_key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 					// $("#mashing_power_value").text(Number(globalSensorsJson["power"]).toFixed(0)).parent().find(".hidden").removeClass("hidden").addClass("show");
 					if(sensor_value < 150) {
@@ -3616,37 +3568,12 @@ $(function () {
 						$("#svg_mashing_" + sensor_key).text('');
 					}
 					$("#svg_mashing_ten_t").text(Number(globalSensorsJson["power"]).toFixed(0) + '%');
-
-					if (process === 3) {
-						$('#nav-tabs li a[data-target="#mashing"]').tab('show');
-						setTimeout(function () {
-							$("#mashing_start").trigger("click");
-						}, 2000);
-					}
-				}
-				if (mashingProcess["start"] === true) {
-					if (process !== 3) {
-						$("#mashing_stop").trigger("stop-event");
-						//$("#mashing_stop").trigger("click");
-					}
 				}
 				//заполнение ПИД регулировки
 				if (pidProcess["start"] !== true) {
 					$("#pid_value_" + sensor_key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
-
-					if (process === 4) {
-						$('#nav-tabs li a[data-target="#pid"]').tab('show');
-						setTimeout(function () {
-							$("#pid_start").trigger("click");
-						}, 2000);
-					}
 				}
-				if (pidProcess["start"] === true) {
-					if (process !== 4) {
-						$("#pid_stop").trigger("stop-event");
-					}
-				}
-				if (process > 0 && process !== 2) {
+				/*if (process > 0 && process !== 2) {
 					$("#reflux_start_group_button").addClass("hidden");
 				}
 				if (process > 0 && process !== 1) {
@@ -3675,8 +3602,50 @@ $(function () {
 
 				}else{
 					$("#sensors_group_button").addClass("hidden");
-				}
+				}*/
 			});
+			//старт/стоп дистиляции
+			if (distillationProcess["start"] !== true && process === 1) {
+				$('#nav-tabs li a[data-target="#distillation"]').tab('show');
+				setTimeout(function () {
+					$("#distillation_start").trigger("click");
+				}, 2000);
+			}
+			if (distillationProcess["start"] === true && process !== 1) {
+				$("#distillation_stop").trigger("stop-event");
+			}
+			//старт/стоп ректификации
+			if (refluxProcess["start"] !== true && process === 2) {
+				$('#nav-tabs li a[data-target="#reflux"]').tab('show');
+				setTimeout(function () {
+					$("#reflux_start").trigger("click");
+				}, 2000);
+			}
+			if (refluxProcess["start"] === true && process !== 2) {
+				$("#reflux_stop").trigger("stop-event");
+			}
+			//старт/стоп затирания
+			if (mashingProcess["start"] !== true && process === 3) {
+				$('#nav-tabs li a[data-target="#mashing"]').tab('show');
+				setTimeout(function () {
+					$("#mashing_start").trigger("click");
+				}, 2000);
+			}
+			if (mashingProcess["start"] === true && process !== 3) {
+				$("#mashing_stop").trigger("stop-event");
+			}
+			//старт/стоп ПИД
+			if (pidProcess["start"] !== true && process === 4) {
+				$('#nav-tabs li a[data-target="#pid"]').tab('show');
+				setTimeout(function () {
+					$("#pid_start").trigger("click");
+				}, 2000);
+			}
+			if (pidProcess["start"] === true) {
+				if (process !== 4) {
+					$("#pid_stop").trigger("stop-event");
+				}
+			}
 			//очистка данных графиков и запуск
 			let oldTimeStart = Number(localStorage.getObj('timeStartProcess'));
 			//console.log(oldTimeStart);
@@ -3704,9 +3673,7 @@ $(function () {
 	let openModalError = false;
 	function getIntervalSensors() {
 		$.ajax({
-			//url: 'sensors.php',
-			url: 'SensorsOut',
-			//data: {"t":tmpTime},
+			url: ajax_url_debug + 'SensorsOut',
 			data: {},
 			type: 'GET',
 			dataType: 'json',
@@ -3762,7 +3729,7 @@ $(function () {
 	//Свойства TODO - переделать все свойства в один запрос
 	function getSettings() {
 		$.ajax({
-			url: 'configs.json',
+			url: ajax_url_debug + 'configs.json',
 			data: {},
 			type: 'GET',
 			dataType: 'json',
@@ -3805,7 +3772,7 @@ $(function () {
 		formData.append('update', $('#file_update')[0].files[0]);
 		//console.log(formData,$('#file_update')[0].files[0]);
 		$.ajax({
-			url: 'update',
+			url: ajax_url_debug + 'update',
 			type: 'POST',
 			data: formData,
 			cache: false,
