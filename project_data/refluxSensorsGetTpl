@@ -19,6 +19,7 @@
   "in2":{"value":0,"name":"","member":0},
   "in3":{"value":0,"name":"","member":0},
   "in4":{"value":0,"name":"","member":0},
+  "number":5,
   "powerLower":65,
   "powerHigh":85
 }

@@ -1406,7 +1406,7 @@ $(function () {
 		'</div>' +
 		'</div></div>'
 	;
-	//Привязка датчиков к процессу дистиляции, и запуск
+	//Привязка датчиков к процессу дистилляции, и запуск
 	let distillationProcess = {"sensors": {}, "powerHigh": 0, "powerLower": 0, "start": false};
 	$(document).on('click', '#distillation_add_sensor', function (e) {
 		e.preventDefault();
@@ -1414,7 +1414,7 @@ $(function () {
 		sendRequest("distillationSensorsSetLoad", {}, "json", selectSensorsDistillation, _this, $("#error_distillation"), false);
 	});
 
-	//Запрос датчиков для дистиляции и вывод их в диалоговое окно
+	//Запрос датчиков для дистилляции и вывод их в диалоговое окно
 	function selectSensorsDistillation(data) {
 		let sensors = data;//sensorsJson
 		//console.log(sensors);
@@ -1486,7 +1486,7 @@ $(function () {
 				section += '<tr><td colspan="4" class="text-center text-strong">Датчики безопасности</td></tr>' + tpl_safety;
 			}
 			section += '</table></section>';
-			$.fn.openModal('Выбор датчиков для дистиляции', section, "modal-md", false, {
+			$.fn.openModal('Выбор датчиков для дистилляции', section, "modal-md", false, {
 					text: "Выбрать",
 					id: "sensors_select",
 					class: "btn btn-success",
@@ -1739,7 +1739,7 @@ $(function () {
 	$(document).on('click', '#distillation_stop', function () {
 		//e.preventDefault();
 		//let _this = $(this);
-		$.fn.openModal('', '<p class="text-center text-danger text-strong">Вы действительно хотите остановить процесс дистиляции?</p>', "modal-sm", false, [{
+		$.fn.openModal('', '<p class="text-center text-danger text-strong">Вы действительно хотите остановить процесс дистилляции?</p>', "modal-sm", false, [{
 			text: "Да",
 			id: "return_restart",
 			class: "btn btn-primary btn-sm",
@@ -1785,7 +1785,7 @@ $(function () {
 		stopDistillation()
 	});
 
-	//Установка значений для дистиляции
+	//Установка значений для дистилляции
 	function setDistillation() {
 		console.log("setDistillation");
 		if ($.fn.objIsEmpty(distillationProcess["sensors"], false)){
@@ -2203,6 +2203,7 @@ $(function () {
 				dataType: 'json',
 				success: function (msg) {
 					refluxProcess["sensors"] = msg;
+					refluxProcess["number"] = Number(msg["number"]);
 					refluxProcess["powerHigh"] = Number(msg["powerHigh"]);
 					refluxProcess["powerLower"] = Number(msg["powerLower"]);
 					//console.log(refluxProcess["sensors"]);
@@ -2343,11 +2344,11 @@ $(function () {
 		$("#reflux_process").html(refluxTemplate);
 		$.fn.clearSelect($("#reflux_algorithm_select"));
 		$.fn.fillSelect($("#reflux_algorithm_select"), algorithmReflux, false);
-		$("#reflux_algorithm_select").val(globalSensorsJson["process"]["number"]).change();
+		$("#reflux_algorithm_select").val(refluxProcess["number"]).change();
 		$("#reflux_algorithm").removeClass("hidden");
 		//refluxProcess["powerHigh"] = Number(refluxProcess["powerHigh"]);
 		//refluxProcess["powerLower"] = Number(refluxProcess["powerLower"]);
-		refluxProcess["number"] = Number(globalSensorsJson["process"]["number"]);
+		//refluxProcess["number"] = Number(globalSensorsJson["process"]["number"]);
 		$("#reflux_power_set").val(refluxProcess["powerHigh"]);
 		$("#reflux_power_lower_set").val(refluxProcess["powerLower"]);
 		//console.log(refluxProcess);
@@ -3530,7 +3531,7 @@ $(function () {
 				if (sensor_key === "p1") {
 					$("#sensor_val_" + sensor_key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 				}
-				//заполнение процесса дистиляции
+				//заполнение процесса дистилляции
 				if (distillationProcess["start"] !== true) {
 					$("#distillation_" + sensor_key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 					$("#distillation_power_value").text(Number(globalSensorsJson["power"]).toFixed(0)).parent().find(".hidden").removeClass("hidden").addClass("show");
@@ -3604,7 +3605,7 @@ $(function () {
 					$("#sensors_group_button").addClass("hidden");
 				}*/
 			});
-			//старт/стоп дистиляции
+			//старт/стоп дистилляции
 			if (distillationProcess["start"] !== true && process === 1) {
 				$('#nav-tabs li a[data-target="#distillation"]').tab('show');
 				setTimeout(function () {
