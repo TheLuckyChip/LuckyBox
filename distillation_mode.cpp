@@ -17,6 +17,7 @@ float EEPROM_float_read_dist(int addr) {
 
 void loadEepromDistillation() {
 	int i;
+	EEPROM.begin(2048);
 	// Считаем что раньше сохраняли
 	uint16_t index = 1300;
 	if (EEPROM.read(index) == 1) {
@@ -26,12 +27,12 @@ void loadEepromDistillation() {
 			tpl2web.dsPriority[i] = EEPROM.read(index);  index++;
 			tpl2web.dsAllertValue[i] = EEPROM_float_read_dist(index); index += 4;
 			tpl2web.dsCutoff[i] = EEPROM.read(index);  index++;
-			if (processMode.allow == 1) {
+			//if (processMode.allow == 1) {
 				temperatureSensor[i].member = tpl2web.dsMember[i];
 				temperatureSensor[i].priority = tpl2web.dsPriority[i];
-				temperatureSensor[i].allertValue = tpl2web.dsAllertValue[i];
+				temperatureSensor[i].allertValueIn = tpl2web.dsAllertValue[i];
 				temperatureSensor[i].cutoff = tpl2web.dsCutoff[i];
-			}
+			//}
 		}
 		for (i = 0; i < 8; i++) {
 			tpl2web.pwmMember[i] = EEPROM.read(index);  index++;
@@ -64,6 +65,7 @@ void loadEepromDistillation() {
 			if (processMode.allow == 1) adcIn[i].member = 0;
 		}
 	}
+	EEPROM.end();
 }
 
 void initDistillation()
@@ -77,6 +79,17 @@ void handleDistillationTpl() {
 	int i, k;
 
 	loadEepromDistillation();
+	if (processMode.allow == 0) {
+		EEPROM.begin(2048);
+		power.inPowerHigh = EEPROM.read(1397);
+		if (power.inPowerHigh > 100) power.inPowerHigh = 100;
+		power.inPowerLow = EEPROM.read(1398);
+		if (power.inPowerLow > 100) power.inPowerLow = 65;
+		for (int i = 0; i < DS_Cnt; i++) {
+			if (temperatureSensor[i].cutoff == true) temperatureSensor[i].allertValue = temperatureSensor[i].allertValueIn;
+		}
+		EEPROM.end();
+	}
 
 	String dataForWeb = "{";
 	// датчики температуры
@@ -103,7 +116,8 @@ void handleDistillationTpl() {
 	dataForWeb += "\"in1\":{\"value\":" + String(adcIn[0].data) + ",\"name\":\"" + String(adcIn[0].name) + "\",\"member\":" + String(tpl2web.adcMember[0]) + "},";
 	dataForWeb += "\"in2\":{\"value\":" + String(adcIn[1].data) + ",\"name\":\"" + String(adcIn[1].name) + "\",\"member\":" + String(tpl2web.adcMember[1]) + "},";
 	dataForWeb += "\"in3\":{\"value\":" + String(adcIn[2].data) + ",\"name\":\"" + String(adcIn[2].name) + "\",\"member\":" + String(tpl2web.adcMember[2]) + "},";
-	dataForWeb += "\"in4\":{\"value\":" + String(adcIn[3].data) + ",\"name\":\"" + String(adcIn[3].name) + "\",\"member\":" + String(tpl2web.adcMember[3]) + "}}";
+	dataForWeb += "\"in4\":{\"value\":" + String(adcIn[3].data) + ",\"name\":\"" + String(adcIn[3].name) + "\",\"member\":" + String(tpl2web.adcMember[3]) + "},";
+	dataForWeb += "\"number\":" + String(processMode.number) + ",\"powerHigh\":" + String(power.inPowerHigh) + ",\"powerLower\":" + String(power.inPowerLow) + "}";
 	HTTP.send(200, "text/json", dataForWeb);
 }
 // Отправка - Добавить датчики для процесса
@@ -170,6 +184,7 @@ void handleDistillationSensorSetSave() {
 	HTTP.send(200, "text/json", "{\"result\":\"ok\"}");
 
 	// сохраним в EEPROM
+	EEPROM.begin(2048);
 	EEPROM.write(index, 0x01); index++; // 1-й процесс = дистилляция
 	// Датчики температуры
 	for (i = 0; i < 8; i++) {
@@ -186,6 +201,7 @@ void handleDistillationSensorSetSave() {
 	}
 
 	EEPROM.commit();
+	EEPROM.end();
 	delay(100);
 }
 
@@ -206,6 +222,15 @@ void distillationLoop() {
 		// пришли при старте дистилляции
 		case 0: {
 			loadEepromDistillation();
+			EEPROM.begin(2048);
+			power.inPowerHigh = EEPROM.read(1397);
+			if (power.inPowerHigh > 100) power.inPowerHigh = 100;
+			power.inPowerLow = EEPROM.read(1398);
+			if (power.inPowerLow > 100) power.inPowerLow = 65;
+			for (int i = 0; i < DS_Cnt; i++) {
+				if (temperatureSensor[i].cutoff == true) temperatureSensor[i].allertValue = temperatureSensor[i].allertValueIn;
+			}
+			EEPROM.end();
 			// подготовка данных для вывода на TFT
 #if defined TFT_Display
 			csOn(TFT_CS);

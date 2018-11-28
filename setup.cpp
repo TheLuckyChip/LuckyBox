@@ -17,6 +17,15 @@ void setup()
 	Serial.println("");
 	Serial.println("Start Setup");
 
+	String addrMac = WiFi.softAPmacAddress();
+	addrMacMod = "            ";
+	addrMacMod[0] = addrMac[0];	addrMacMod[1] = addrMac[1];
+	addrMacMod[2] = addrMac[3];	addrMacMod[3] = addrMac[4];
+	addrMacMod[4] = addrMac[6];	addrMacMod[5] = addrMac[7];
+	addrMacMod[6] = addrMac[9];	addrMacMod[7] = addrMac[10];
+	addrMacMod[8] = addrMac[12]; addrMacMod[9] = addrMac[13];
+	addrMacMod[10] = addrMac[15]; addrMacMod[11] = addrMac[16];
+
 	Wire.setClock(400000);
 	Wire.begin(pSDA, pSCL);
 	delay(100);
@@ -58,7 +67,7 @@ void setup()
 	EEPROM.begin(2048);
 	// 0 - датчики и устройства (1298 & 1299 переворот экрана и тачскрина)
 	// 1300 - сохраненные данные для процесса дистилляции
-	// 1400 - сохраненные данные для процесса ректификации (1499 № процесса по умолчанию)
+	// 1400 - сохраненные данные для процесса ректификации (1497 HiPower, 1498 LoPower, 1499 № процесса по умолчанию)
 	// 1500 - сохраненные данные для процесса затирания
 	// 1600 - сохраненные данные PID установок
 	// 1700 - 1759 имя ssdp, 1760 - 1819 имя ssid, 1820 - 1879 имя ssidAP
@@ -161,7 +170,6 @@ void setup()
 
 	// Инициализация EEPROM и датчиков температуры
 	Serial.println("Step 2 - DS Init");
-	//EEPROM.begin(2048);
 	senseWebInit();
 	dallSearch();
 
@@ -185,14 +193,6 @@ void setup()
 	//Запускаем WIFI
 	_ssidAPconnect = _ssidAP;
 	_ssidAPconnect += " - ";
-	String addrMac = WiFi.softAPmacAddress();
-	String addrMacMod = "            ";
-	addrMacMod[0] = addrMac[0];	addrMacMod[1] = addrMac[1];
-	addrMacMod[2] = addrMac[3];	addrMacMod[3] = addrMac[4];
-	addrMacMod[4] = addrMac[6];	addrMacMod[5] = addrMac[7];
-	addrMacMod[6] = addrMac[9];	addrMacMod[7] = addrMac[10];
-	addrMacMod[8] = addrMac[12]; addrMacMod[9] = addrMac[13];
-	addrMacMod[10] = addrMac[15]; addrMacMod[11] = addrMac[16];
 	_ssidAPconnect += addrMacMod;
 	initWifi();
 
@@ -309,6 +309,7 @@ void setup()
 
   processMode.allow = 0; // Стоп
   processMode.number = EEPROM.read(1499);// modeReflux;
+  EEPROM.end();
   if (processMode.number > 7) processMode.number = 0;
   processMode.step = 0;
   loadEepromPid();

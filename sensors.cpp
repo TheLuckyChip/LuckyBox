@@ -10,12 +10,21 @@ Adafruit_BME280 bmp;
 
 OneWire ds(DS_Pin);
 
-//struct processMashing[4];
-
 #define Lo(num1) (num1 & 0xFF)
 #define Hi(num2) ((num2 & 0xFF00) >> 8)
 //#define High(num3) ((num3 & 0xFF0000) >> 16)
 //#define Highest(num4) ((num4 & 0xFF000000) >> 24)
+
+void EEPROM_float_write_dsAllert(int addr, float val) {
+	byte *x = (byte *)&val;
+	for (byte i = 0; i < 4; i++) EEPROM.write(i + addr, x[i]);
+}
+float EEPROM_float_read_dsAllert(int addr) {
+	byte x[4];
+	for (byte i = 0; i < 4; i++) x[i] = EEPROM.read(i + addr);
+	float *y = (float *)&x;
+	return y[0];
+}
 
 void initPressureSensor()
 {
@@ -53,7 +62,7 @@ void dallSearch()
 	uint16_t index = 1;
 	int i, k, t;
 	bool newDS;
-
+        EEPROM.begin(2048);
 	if (EEPROM.read(0) != 0xFF) {
 		// датчики температуры
 		for (i = 0; i < 8; i++) {
@@ -215,6 +224,7 @@ void dallSearch()
 	Serial.println(DS_Count);
 	Serial.println("......");
 #endif
+	EEPROM.end();
 }
 
 void dallRead()
@@ -287,6 +297,7 @@ void sensorsUserSetInWeb() {
 	HTTP.send(200, "text/json", "{\"result\":\"ok\"}");
 
 	// сохраним в EEPROM
+	EEPROM.begin(2048);
 	EEPROM.write(index, DS_Count); index++; // кол-во датчиков и признак что данные в EEPROM были сохранены
 	for (i = 0; i < 8; i++) {
 		for (k = 0; k < 8; k++) { EEPROM.write(index, temperatureSensor[i].addr[k]); index++; }
@@ -314,6 +325,7 @@ void sensorsUserSetInWeb() {
 
 	EEPROM.commit();
 	delay(100);
+	EEPROM.end();
 	// перераспредилим датчики сразу
 	dallSearch();
 }
@@ -416,6 +428,9 @@ void handleProcessModeIn() {
 	float tmpAllertValue;
 	int i;
 	byte n;
+	float allertReadTmp;
+	bool allertSave = false;
+	EEPROM.begin(2048);
 	// парсим ответ от браузера в переменные
 	uint8_t processModeOld = processMode.allow;
 	processMode.allow = HTTP.arg("process[allow]").toInt();
@@ -442,7 +457,21 @@ void handleProcessModeIn() {
 			}
 			else temperatureSensor[i].allertValue = 0;
 			temperatureSensor[i].allertValueIn = tmpAllertValue;
-
+			// Запишем значение введенных отсечек или уставок в EEPROM
+			if (processMode.allow == 1) {
+				allertReadTmp = EEPROM_float_read_dsAllert(1303 + i * 7);
+				if (allertReadTmp != tmpAllertValue) {
+					EEPROM_float_write_dsAllert((1303 + i * 7), temperatureSensor[i].allertValueIn);
+					allertSave = true;
+				}
+			}
+			else if (processMode.allow == 2) {
+				allertReadTmp = EEPROM_float_read_dsAllert(1403 + i * 8);
+				if (allertReadTmp != tmpAllertValue) {
+					EEPROM_float_write_dsAllert((1403 + i * 8), temperatureSensor[i].allertValueIn);
+					allertSave = true;
+				}
+			}
 #if defined Debug_en
 			Serial.print(n); Serial.print(" Номер: ");  Serial.println(temperatureSensor[i].num);
 			Serial.print("Получили уставку: ");  Serial.println(tmpAllertValue);
@@ -461,8 +490,35 @@ void handleProcessModeIn() {
 	}
 
 	//power.heaterPower = HTTP.arg("power").toInt();
-	power.inPowerHigh = HTTP.arg("powerHigh").toInt();
-	power.inPowerLow = HTTP.arg("powerLower").toInt();
+
+	if (processMode.allow == 1) {
+		power.inPowerHigh = HTTP.arg("powerHigh").toInt();
+		if (power.inPowerHigh != EEPROM.read(1397)) {
+			EEPROM.write(1397, power.inPowerHigh);
+			allertSave = true;
+		}
+		power.inPowerLow = HTTP.arg("powerLower").toInt();
+		if (power.inPowerLow != EEPROM.read(1398)) {
+			EEPROM.write(1398, power.inPowerLow);
+			allertSave = true;
+		}
+	}
+	else if (processMode.allow == 2) {
+		power.inPowerHigh = HTTP.arg("powerHigh").toInt();
+		if (power.inPowerHigh != EEPROM.read(1497)) {
+			EEPROM.write(1497, power.inPowerHigh);
+			allertSave = true;
+		}
+		power.inPowerLow = HTTP.arg("powerLower").toInt();
+		if (power.inPowerLow != EEPROM.read(1498)) {
+			EEPROM.write(1498, power.inPowerLow);
+			allertSave = true;
+		}
+		if (processMode.number != EEPROM.read(1499)) {
+			EEPROM.write(1499, processMode.number);
+			allertSave = true;
+		}
+	}
 
 	HTTP.send(200, "text/json", "{\"result\":\"ok\"}");
 
@@ -472,16 +528,21 @@ void handleProcessModeIn() {
 	else if (processModeOld == 0 && processMode.allow != 0) {
 		processMode.step = 0;
 	}
+	if (allertSave == true) EEPROM.commit();
+	allertSave = false;
 	delay(500);
+	EEPROM.end();
 }
 
 void handleResetDataEeprom() {
 	if (HTTP.arg("reset").toInt() == 1) {
+		EEPROM.begin(2048);
 		for (int i = 0; i < 2048; i++) {
 			EEPROM.write(i, 0xFF);
 		}
 		EEPROM.commit();
 		delay(500);
+		EEPROM.end();
 		dallSearch();
 		HTTP.send(200, "text/json", "{\"result\":\"ok\"}");
 	}
@@ -489,8 +550,8 @@ void handleResetDataEeprom() {
 }
 
 void sensorLoop() {
-	if ((millis() - sensorTimeRead)	>= 1000) {
-		sensorTimeRead = millis();
+	if (millis() >= sensorTimeRead) {
+		sensorTimeRead = millis() + 1000;
 		processMode.timeStep++;//stepStartTime++;
 
 		// опрос датчиков
