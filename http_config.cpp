@@ -46,7 +46,7 @@ void initHTTP(void)
 					tft.setCursor(0, 10);
 					tft.setTextColor(ILI9341_WHITE);
 					tft.setTextSize(2);
-					tft.print(" Web files update");
+					tft.print(utf8rus("Обновление Web интерфейса")); //tft.print(" Web files update");
 					timeStartLoad = millis() + 500;
 					csOff(TFT_CS);
 #endif
@@ -66,7 +66,7 @@ void initHTTP(void)
 					tft.setCursor(0, 10);
 					tft.setTextColor(ILI9341_WHITE);
 					tft.setTextSize(2);
-					tft.print(" Sketch files update");
+					tft.print(utf8rus("Обновление кода программы")); //tft.print(" Sketch files update");
 					timeStartLoad = millis() + 500;
 					csOff(TFT_CS);
 #endif
@@ -83,9 +83,10 @@ void initHTTP(void)
 			csOn(TFT_CS);
 			tft.println();
 			tft.println();
-			tft.println(" Succes!");
 			tft.println();
-			tft.print(" Restart...");
+			tft.println(utf8rus("Обновление завершено!")); //tft.println(" Succes!");
+			tft.println();
+			tft.print(utf8rus("Перезагрузка...")); //tft.print(" Restart...");
 			timeStartLoad = millis() + 500;
 			csOff(TFT_CS);
 #endif
@@ -123,10 +124,12 @@ void handleSetSSDP()
 	//saveConfig();                 // Функция сохранения данных во Flash
 	HTTP.send(200, "text/plain", "OK"); // отправляем ответ о выполнении
 	// сохраним в EEPROM
+	EEPROM.begin(2048);
 	uint16_t index = 1700;
 	if (SSDP_Name.length() >= 2 && SSDP_Name.length() <= 60) {
 		for (uint8_t k = 0; k < 60; k++) { EEPROM.write(index, SSDP_Name[k]); index++; }
 		EEPROM.commit();
+		EEPROM.end();
 		delay(100);
 	}
 }
@@ -138,6 +141,7 @@ void handleSetSSID()
 	//saveConfig();                        // Функция сохранения данных во Flash
 	HTTP.send(200, "text/plain", "OK");   // отправляем ответ о выполнении
 	// сохраним в EEPROM
+	EEPROM.begin(2048);
 	uint16_t index = 1760;
 	if (_ssid.length() >= 2 && _ssid.length() <= 60 && _password.length() >= 8 && _password.length() <= 32) {
 		for (uint8_t k = 0; k < 60; k++) { EEPROM.write(index, _ssid[k]);  index++; }
@@ -146,6 +150,7 @@ void handleSetSSID()
 		EEPROM.commit();
 		delay(100);
 	}
+	EEPROM.end();
 }
 //Установка параметров внутренней точки доступа по запросу вида http://192.168.0.101/ssidap?ssidAP=home1&passwordAP=8765439
 void handleSetSSIDAP()
@@ -155,6 +160,7 @@ void handleSetSSIDAP()
 	//saveConfig();                         // Функция сохранения данных во Flash
 	HTTP.send(200, "text/plain", "OK");   // отправляем ответ о выполнении
 	// сохраним в EEPROM
+	EEPROM.begin(2048);
 	uint16_t index = 1820;
 	if (_ssidAP.length() >= 2 && _ssid.length() <= 60 && _passwordAP.length() >= 8 && _password.length() <= 32) {
 		for (uint8_t k = 0; k < 60; k++) { EEPROM.write(index, _ssidAP[k]);  index++; }
@@ -163,10 +169,12 @@ void handleSetSSIDAP()
 		EEPROM.commit();
 		delay(100);
 	}
+	EEPROM.end();
 }
 
 void handleSetRotate() {
 	uint8_t tft180, touch180;
+	EEPROM.begin(2048);
 	if (processMode.allow == 0) {
 		tft180 = HTTP.arg("tft_rotate").toInt();
 		touch180 = HTTP.arg("touchpad_rotate").toInt();
@@ -208,6 +216,7 @@ void handleSetRotate() {
 		}
 	}
 	else HTTP.send(200, "text/plain", "ERR");   // отправляем ответ о выполнении
+	EEPROM.end();
 }
 
 // Перезагрузка модуля по запросу вида http://192.168.0.101/restart?device=ok
@@ -227,7 +236,16 @@ void handleRestart()
 
 void handleConfigJSON()
 {
-	String root = "{}";  // Формируем строку для отправки в файл конфигурации в json формате
+	String dataForWeb = "{";
+	dataForWeb += "\"version\":\"" + String(curVersion) + "\",";
+	dataForWeb += "\"SSDP\":\"" + String(SSDP_Name) + "\",";
+	dataForWeb += "\"ssidAP\":\"" + String(_ssidAP) + "\",";
+	dataForWeb += "\"ssid\":\"" + String(_ssid) + "\",";
+	dataForWeb += "\"timezone\":" + String(timezone) + "}";
+	HTTP.send(200, "text/json", dataForWeb);
+
+
+	/*String root = "{}";  // Формируем строку для отправки в файл конфигурации в json формате
 						 //{"SSDP":"LuckyBox","ssid":"LuckyBox","password":"12345678","ssidAP":"WiFi","passwordAP":"","ip":"192.168.0.101" и т.д.}
 						 // Резервируем память для json объекта буфер может рости по мере необходимости, предпочтительно для ESP8266
 	DynamicJsonBuffer jsonBuffer;
@@ -254,5 +272,5 @@ void handleConfigJSON()
 	// Помещаем созданный json в переменную root
 	root = "";
 	json.printTo(root);
-	HTTP.send(200, "text/json", root);
+	HTTP.send(200, "text/json", root);*/
 }

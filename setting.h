@@ -111,6 +111,7 @@ extern PID myPID;
 // Для файловой системы
 //extern fs::File fsUploadFile;
 
+extern String curVersion;
 // Определяем переменные wifi
 extern String _ssid;
 extern String _password;
@@ -118,6 +119,7 @@ extern String _ssidAP;
 extern String _ssidAPconnect;
 extern String _passwordAP;
 extern String SSDP_Name;
+extern String addrMacMod;
 extern bool touchInvert;
 extern bool tftInvert;
 extern String jsonConfig;
@@ -156,6 +158,8 @@ extern unsigned long headValveOn;
 extern unsigned long headValveOff;
 extern byte touchArea;
 extern byte touchScreen;
+//extern uint8_t State;
+extern boolean outHeater;
 extern uint16_t Voltage;
 extern uint16_t servoOld;
 extern int modeWiFi;

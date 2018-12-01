@@ -8,3 +8,14 @@
 /LuckyBox.vcxproj.filters
 /Release
 /pcb
+
+#.gitignore
+# JetBrains CLion
+.idea/*
+CMakeLists.txt
+CMakeListsPrivate.txt
+/cmake/*
+/cmake-build-debug/*
+/cmake-build-release/*
+/project_data/data_old/
+/project_data/node_modules/

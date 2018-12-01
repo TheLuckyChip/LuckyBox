@@ -13,6 +13,7 @@ ESP8266WebServer HTTP;
 // PID
 PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
 
+String curVersion = "2.0RC7";
 // Определяем переменные wifi
 String _ssid;      // Для хранения SSID
 String _password;  // Для хранения пароля сети
@@ -20,6 +21,7 @@ String _ssidAP;  // SSID AP точки доступа
 String _ssidAPconnect;
 String _passwordAP;  // пароль точки доступа
 String SSDP_Name;  // Имя SSDP
+String addrMacMod;
 // Настройки TFT
 bool touchInvert = false;
 bool tftInvert = false;
@@ -47,6 +49,8 @@ struct PR_Type processMode;
 struct PR_Mashing processMashing[4];
 struct PR_Power power;
 
+//uint8_t State = LOW;
+boolean outHeater;
 uint16_t Voltage;
 uint16_t servoOld = 100;		// Старая позиция сервопривода
 unsigned long displayTimeInterval = 0;

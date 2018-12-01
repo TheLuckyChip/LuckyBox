@@ -3,9 +3,9 @@
 int	reg				=	0;		// переменная для расчетов
 int	tenRealPower	=	100;	// мощности ТЭН от напряжения сети, может быть от 50% (при напряжении сети 160В) до 135%(при напряжении сети 260В)
 int	errorBr			=	0;      // ошибка округления по алгоритму Брезенхема
-boolean outHeater;
+//boolean outHeater;
 unsigned long lastTime=0;       //время периода полуволны
-int State = LOW;
+uint8_t State = LOW;
 
 void ResOut();
 
@@ -37,14 +37,14 @@ void ResOut()
 	reg = power.heaterPowerCorr + errorBr;
 	if (reg < 50)
 	{
-		outHeater=0;
+		outHeater = LOW;
 		errorBr = reg;
 	}
 	else
 	{
-		outHeater=1;
+		outHeater = HIGH;
 		// ставим флаг измерения амплитудs напряжения сетb через 5мс после переходе через ноль
-		errorBr=reg - tenRealPower;
+		errorBr = reg - tenRealPower;
 	}
 	digitalWrite(heater, outHeater); //пин через который осуществляется дискретное управление реле
 	;

@@ -4,6 +4,7 @@
 bool loadConfig()
 {
 	// считаем конфигурацию WiFi
+	EEPROM.begin(2048);
 	uint16_t index = 1700;
 	uint8_t	cnt = 0;
 	SSDP_Name = "";
@@ -98,4 +99,5 @@ bool loadConfig()
 	Serial.print(addrMacMod);
 	Serial.print("    passwordAP = "); Serial.println(_passwordAP);
 	Serial.println();
+	EEPROM.end();
 }

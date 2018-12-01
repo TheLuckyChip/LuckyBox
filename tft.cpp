@@ -4,6 +4,7 @@ Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS_Lib, TFT_DC_Lib, TFT_RES_Lib);
 struct DS_Graph dallas_graph[4];
 String time_ntp_old;
 int temp_in_old, temp_convert;
+uint16_t grColor;
 unsigned long timeOffMenu;
 
 void fillScreenRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t color) {
@@ -65,16 +66,129 @@ void drawScreen4bitMonoBitmap(uint16_t x, uint16_t y, uint16_t w, uint16_t h, co
 	while (SPI1CMD & SPIBUSY) {}
 	SPI.endTransaction();
 }
+void drawScreenBigNum(uint16_t x, uint16_t y, uint8_t num, uint16_t color, uint16_t bgcolor) {
+	uint8_t simbol;
+	uint8_t i;
+	uint16_t drawColor;
+	const uint32_t mask = ~((SPIMMOSI << SPILMOSI) | (SPIMMISO << SPILMISO));
+	SPI1U1 = ((SPI1U1 & mask) | ((7 << SPILMOSI) | (7 << SPILMISO)));
+	tft.setAddrWindow(x, y, 32, 40);
+	SPI.beginTransaction(SPISettings(40000000, MSBFIRST, SPI_MODE0));
+	uint16_t ptr = num * 160;
+	uint8_t b = 160;
+	while (b) {
+		simbol = image_data_Font_Num[ptr];
+		for (i = 0; i < 8; i++) {
+			if (simbol & 0x80) drawColor = bgcolor;
+			else drawColor = color;
+			simbol <<= 1;
+			while (SPI1CMD & SPIBUSY) {}
+			SPI1W0 = drawColor >> 8;
+			SPI1CMD |= SPIBUSY;
+			while (SPI1CMD & SPIBUSY) {}
+			SPI1W0 = drawColor;
+			SPI1CMD |= SPIBUSY;
+		}
+		b--;
+		ptr++;
+	}
+	while (SPI1CMD & SPIBUSY) {}
+	SPI.endTransaction();
+}
+void drawBigTemp(uint16_t x, uint16_t y, int data, uint16_t color, uint16_t bgcolor) {
+	uint8_t r1, r2, r3;
+	if (data < 1000 && data > 0) {
+		r1 = (uint8_t)(data / 100);
+		data -= r1 * 100;
+		r2 = (uint8_t)(data / 10);
+		r3 = (uint8_t)(data - r2 * 10);
+	}
+	else {
+		r1 = 10;
+		r2 = 10;
+		r3 = 10;
+	}
+	if (r1 == 0) fillScreenRect(x, y, 32, 40, bgcolor);
+	else drawScreenBigNum(x, y, r1, color, bgcolor);
+	drawScreenBigNum(x + 32, y, r2, color, bgcolor);
+	tft.fillCircle(x + 67, y + 35, 3, color);
+	drawScreenBigNum(x + 72, 2, r3, color, bgcolor);
+	tft.drawCircle(x + 114, y + 5, 5, color);
+	tft.drawCircle(x + 114, y + 5, 4, color);
+	tft.drawCircle(x + 114, y + 5, 3, color);
+}
+String utf8rus(String source)
+{
+	int i, k;
+	String target;
+	unsigned char n;
+	char m[2] = { '0', '\0' };
+
+	k = source.length(); i = 0;
+
+	while (i < k) {
+		n = source[i]; i++;
+
+		if (n >= 0xC0) {
+			switch (n) {
+			case 0xD0: {
+				n = source[i]; i++;
+				if (n == 0x81) { n = 0xA8; break; }
+				if (n >= 0x90 && n <= 0xBF) n = n + 0x30;
+				break;
+			}
+			case 0xD1: {
+				n = source[i]; i++;
+				if (n == 0x91) { n = 0xB8; break; }
+				if (n >= 0x80 && n <= 0x8F) n = n + 0x70;
+				break;
+			}
+			}
+		}
+		m[0] = n; target = target + String(m);
+	}
+	return target;
+}
+void drawBitmapString(uint16_t x, uint16_t y, const tImage *image, uint16_t color, uint16_t bgcolor) {
+	uint16_t data;
+	uint8_t  data_mem;
+	uint16_t data_count = 0;
+	//uint16_t w = image->width;
+	//uint16_t h = image->height;
+	tft.setAddrWindow(x, y, image->width, image->height);
+	for (uint32_t t = (image->width*image->height)/8; t; t--) {
+		data_mem = pgm_read_byte_near(image->data + data_count);
+		for (uint8_t i = 0; i < 8; i++) {
+			if (data_mem & 0x80) data = bgcolor;
+			else data = color;
+			while (SPI1CMD & SPIBUSY) {}
+			SPI1W0 = data >> 8;
+			SPI1CMD |= SPIBUSY;
+			while (SPI1CMD & SPIBUSY) {}
+			SPI1W0 = data;
+			SPI1CMD |= SPIBUSY;
+			data_mem <<= 1;
+		}
+		data_count++;
+	}
+	while (SPI1CMD & SPIBUSY) {}
+	SPI.endTransaction();
+}
 
 void initTFT() {
 	tft.begin();
+	tft.cp437(true);
 	if (tftInvert == false) tft.setRotation(3);
 	else tft.setRotation(1);
 	fillScreenRect(0, 0, 320, 240, ILI9341_BLACK);
-	tft.setCursor(0, 0);
+	tft.setCursor(0, 2);
 	tft.setTextColor(ILI9341_WHITE);
 	tft.setTextSize(1);
-	tft.println("CTAPT...");
+	tft.print(utf8rus("Версия ПО: "));
+	tft.print(curVersion);
+	tft.setCursor(199, 2);
+	tft.print("    SN: ");
+	tft.print(addrMacMod);
 }
 void tftStartForGraph() {
 	fillScreenRect(0, 0, 320, 240, ILI9341_BLACK);
@@ -86,9 +200,9 @@ void tftStartForGraph() {
 	tft.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
 	tft.setTextSize(2);
 	tft.setCursor(0, 2);
-	if (processMode.allow == 1) tft.printf("Distil.");
-	else if (processMode.allow == 2) tft.printf("Reflux");
-	else if (processMode.allow == 3) tft.printf("Mashing");
+	if (processMode.allow == 1) drawScreen4bitMonoBitmap(0, 10, 32, 32, imageProcessDistillation);//tft.printf("Distil.");
+	else if (processMode.allow == 2) drawScreen4bitMonoBitmap(0, 10, 32, 32, imageProcessRectification);//tft.printf("Reflux");
+	else if (processMode.allow == 3) drawScreen4bitMonoBitmap(0, 10, 32, 32, imageProcessMashing);//tft.printf("Mashing");
 	else if (processMode.allow == 4) tft.printf("PID set");
 
 	if (temperatureSensor[DS_Cube].color == 0) dallas_graph[0].color = 0xFC4C; // розовый
@@ -113,7 +227,7 @@ void tftStartForGraph() {
 		dallas_graph[2].temp_in_tft[cnt] = temp_graph_3;
 		dallas_graph[3].temp_in_tft[cnt] = temp_graph_4;
 	}
-	temp_in_old = 0;// (int)(temperatureSensor[DS_Tube].data * 10);
+	temp_in_old = 0;
 }
 
 // вывод графика температуры от 20 до 100
@@ -183,110 +297,135 @@ void tftOutText(int temp_min, int temp_max) {
 		if (temp_min < 1000) tft.printf("%d.%d", temp_min / 10, temp_min % 10);
 		else tft.printf("--.-");
 	}
+
+	// вывод % остатка алкоголя в кубе
+	tft.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
+	tft.setCursor(0, 0);
+	tft.setTextSize(1);
+
+	switch (processMode.allow) {
+		case 1: {
+			tft.print(utf8rus(" Дистилляция"));
+			// какой шаг процесса
+			tft.setCursor(36, 10);
+			if (processMode.step < 2) tft.print(utf8rus("Нагрев"));
+			else if (processMode.step < 4) tft.print(utf8rus(" Отбор"));
+			else tft.print(utf8rus("  Стоп"));
+			// время шага
+			tft.setCursor(42, 20);
+			if (processMode.timeStep < 36000) tft.print(" ");
+			tft.print(processMode.timeStep / 3600);
+			if (((processMode.timeStep / 60) % 60) >= 10) tft.print(":");
+			else tft.print(":0");
+			tft.print((processMode.timeStep / 60) % 60);
+			// % алкоголя в кубе
+			tft.setCursor(42, 30);
+			if (temperatureCubeAlcohol <= 50 && temperatureCubeAlcohol >= 10) tft.printf("%.1f%%", temperatureCubeAlcohol);
+			else if (temperatureCubeAlcohol < 10 && temperatureCubeAlcohol >= 1) tft.printf(" %.1f%%", temperatureCubeAlcohol);
+			else tft.print("--.-%");
+			break;
+		}
+		case 2: {
+			tft.print(utf8rus("Ректификация"));
+			// какой шаг процесса
+			tft.setCursor(36, 10);
+			if (processMode.step < 2) tft.print(utf8rus("Нагрев"));
+			else if (processMode.step < 4) tft.print(utf8rus(" Стаб."));
+			else if (processMode.step < 6) tft.print(utf8rus("Головы"));
+			else if (processMode.step < 7) tft.print(utf8rus("  Тело"));
+			else tft.print(utf8rus("Стоп  "));
+			// время шага
+			tft.setCursor(42, 20);
+			if (processMode.timeStep < 36000) tft.print(" ");
+			tft.print(processMode.timeStep / 3600);
+			if (((processMode.timeStep / 60) % 60) >= 10) tft.print(":");
+			else tft.print(":0");
+			tft.print((processMode.timeStep / 60) % 60);
+			// % алкоголя в кубе
+			tft.setCursor(42, 30);
+			if (temperatureCubeAlcohol <= 50 && temperatureCubeAlcohol >= 10) tft.printf("%.1f%%", temperatureCubeAlcohol);
+			else if (temperatureCubeAlcohol < 10 && temperatureCubeAlcohol >= 1) tft.printf(" %.1f%%", temperatureCubeAlcohol);
+			else tft.print("--.-%");
+			break;
+		}
+		case 3: {
+			tft.print(utf8rus("Затирание"));
+			break;
+		}
+	}
+
 	// температура остальных датчиков нижней строкой
 	tft.setTextSize(2);
-
-
-	tft.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
-	tft.setCursor(0, 22);
-	//tft.print("Step ");
-	//tft.print(processMode.step);
-	if (temperatureCubeAlcohol <= 50 && temperatureCubeAlcohol >= 2) tft.printf("%.1f ", temperatureCubeAlcohol);
-	else tft.print("-.- ");
-
-
 	switch (tempBigOut) {
-	case 1: { 
-		tft.setCursor(26, DW_Y_axis + 5);
-		tft.setTextColor(dallas_graph[1].color, ILI9341_BLACK);
-		if (temperatureSensor[DS_Tube].data < 100.0) tft.printf("T2:%.1f ", temperatureSensor[DS_Tube].data);
-		else tft.printf("T2:--.-");
+		case 1: { 
+			tft.setCursor(26, DW_Y_axis + 5);
+			tft.setTextColor(dallas_graph[1].color, ILI9341_BLACK);
+			if (temperatureSensor[DS_Tube].data < 100.0) tft.printf("T2:%.1f ", temperatureSensor[DS_Tube].data);
+			else tft.printf("T2:--.-");
 
-		tft.setCursor(30 + 100, DW_Y_axis + 5);
-		tft.setTextColor(dallas_graph[2].color, ILI9341_BLACK);
-		if (temperatureSensor[DS_Out].data < 100.0) tft.printf("T3:%.1f ", temperatureSensor[DS_Out].data);
-		else tft.printf("T3:--.-");
+			tft.setCursor(30 + 100, DW_Y_axis + 5);
+			tft.setTextColor(dallas_graph[2].color, ILI9341_BLACK);
+			if (temperatureSensor[DS_Out].data < 100.0) tft.printf("T3:%.1f ", temperatureSensor[DS_Out].data);
+			else tft.printf("T3:--.-");
 
-		tft.setCursor(30 + 204, DW_Y_axis + 5);
-		tft.setTextColor(dallas_graph[3].color, ILI9341_BLACK);
-		if (temperatureSensor[DS_Def].data < 100.0) tft.printf("T4:%.1f ", temperatureSensor[DS_Def].data);
-		else tft.printf("T4:--.-");
-		break;
+			tft.setCursor(30 + 204, DW_Y_axis + 5);
+			tft.setTextColor(dallas_graph[3].color, ILI9341_BLACK);
+			if (temperatureSensor[DS_Def].data < 100.0) tft.printf("T4:%.1f ", temperatureSensor[DS_Def].data);
+			else tft.printf("T4:--.-");
+			break;
+		}
+		case 2: {
+			tft.setCursor(26, DW_Y_axis + 5);
+			tft.setTextColor(dallas_graph[0].color, ILI9341_BLACK);
+			if (temperatureSensor[DS_Cube].data < 100.0) tft.printf("T1:%.1f ", temperatureSensor[DS_Cube].data);
+			else tft.printf("T1:--.-");
+
+			tft.setCursor(30 + 100, DW_Y_axis + 5);
+			tft.setTextColor(dallas_graph[2].color, ILI9341_BLACK);
+			if (temperatureSensor[DS_Out].data < 100.0) tft.printf("T3:%.1f ", temperatureSensor[DS_Out].data);
+			else tft.printf("T3:--.-");
+
+			tft.setCursor(30 + 204, DW_Y_axis + 5);
+			tft.setTextColor(dallas_graph[3].color, ILI9341_BLACK);
+			if (temperatureSensor[DS_Def].data < 100.0) tft.printf("T4:%.1f ", temperatureSensor[DS_Def].data);
+			else tft.printf("T4:--.-");
+			break;
+		}
+		case 3: {
+			tft.setCursor(26, DW_Y_axis + 5);
+			tft.setTextColor(dallas_graph[0].color, ILI9341_BLACK);
+			if (temperatureSensor[DS_Cube].data < 100.0) tft.printf("T1:%.1f ", temperatureSensor[DS_Cube].data);
+			else tft.printf("T1:--.-");
+
+			tft.setCursor(30 + 100, DW_Y_axis + 5);
+			tft.setTextColor(dallas_graph[1].color, ILI9341_BLACK);
+			if (temperatureSensor[DS_Tube].data < 100.0) tft.printf("T2:%.1f ", temperatureSensor[DS_Tube].data);
+			else tft.printf("T2:--.-");
+
+			tft.setCursor(30 + 204, DW_Y_axis + 5);
+			tft.setTextColor(dallas_graph[3].color, ILI9341_BLACK);
+			if (temperatureSensor[DS_Def].data < 100.0) tft.printf("T4:%.1f ", temperatureSensor[DS_Def].data);
+			else tft.printf("T4:--.-");
+			break;
+		}
+		case 4: {
+			tft.setCursor(26, DW_Y_axis + 5);
+			tft.setTextColor(dallas_graph[0].color, ILI9341_BLACK);
+			if (temperatureSensor[DS_Cube].data < 100.0) tft.printf("T1:%.1f ", temperatureSensor[DS_Cube].data);
+			else tft.printf("T1:--.-");
+
+			tft.setCursor(30 + 100, DW_Y_axis + 5);
+			tft.setTextColor(dallas_graph[1].color, ILI9341_BLACK);
+			if (temperatureSensor[DS_Tube].data < 100.0) tft.printf("T2:%.1f ", temperatureSensor[DS_Tube].data);
+			else tft.printf("T2:--.-");
+
+			tft.setCursor(30 + 204, DW_Y_axis + 5);
+			tft.setTextColor(dallas_graph[2].color, ILI9341_BLACK);
+			if (temperatureSensor[DS_Out].data < 100.0) tft.printf("T3:%.1f ", temperatureSensor[DS_Out].data);
+			else tft.printf("T3:--.-");
+			break;
+		}
 	}
-	case 2: {
-		tft.setCursor(26, DW_Y_axis + 5);
-		tft.setTextColor(dallas_graph[0].color, ILI9341_BLACK);
-		if (temperatureSensor[DS_Cube].data < 100.0) tft.printf("T1:%.1f ", temperatureSensor[DS_Cube].data);
-		else tft.printf("T1:--.-");
-
-		tft.setCursor(30 + 100, DW_Y_axis + 5);
-		tft.setTextColor(dallas_graph[2].color, ILI9341_BLACK);
-		if (temperatureSensor[DS_Out].data < 100.0) tft.printf("T3:%.1f ", temperatureSensor[DS_Out].data);
-		else tft.printf("T3:--.-");
-
-		tft.setCursor(30 + 204, DW_Y_axis + 5);
-		tft.setTextColor(dallas_graph[3].color, ILI9341_BLACK);
-		if (temperatureSensor[DS_Def].data < 100.0) tft.printf("T4:%.1f ", temperatureSensor[DS_Def].data);
-		else tft.printf("T4:--.-");
-		break;
-	}
-	case 3: {
-		tft.setCursor(26, DW_Y_axis + 5);
-		tft.setTextColor(dallas_graph[0].color, ILI9341_BLACK);
-		if (temperatureSensor[DS_Cube].data < 100.0) tft.printf("T1:%.1f ", temperatureSensor[DS_Cube].data);
-		else tft.printf("T1:--.-");
-
-		tft.setCursor(30 + 100, DW_Y_axis + 5);
-		tft.setTextColor(dallas_graph[1].color, ILI9341_BLACK);
-		if (temperatureSensor[DS_Tube].data < 100.0) tft.printf("T2:%.1f ", temperatureSensor[DS_Tube].data);
-		else tft.printf("T2:--.-");
-
-		tft.setCursor(30 + 204, DW_Y_axis + 5);
-		tft.setTextColor(dallas_graph[3].color, ILI9341_BLACK);
-		if (temperatureSensor[DS_Def].data < 100.0) tft.printf("T4:%.1f ", temperatureSensor[DS_Def].data);
-		else tft.printf("T4:--.-");
-		break;
-	}
-	case 4: {
-		tft.setCursor(26, DW_Y_axis + 5);
-		tft.setTextColor(dallas_graph[0].color, ILI9341_BLACK);
-		if (temperatureSensor[DS_Cube].data < 100.0) tft.printf("T1:%.1f ", temperatureSensor[DS_Cube].data);
-		else tft.printf("T1:--.-");
-
-		tft.setCursor(30 + 100, DW_Y_axis + 5);
-		tft.setTextColor(dallas_graph[1].color, ILI9341_BLACK);
-		if (temperatureSensor[DS_Tube].data < 100.0) tft.printf("T2:%.1f ", temperatureSensor[DS_Tube].data);
-		else tft.printf("T2:--.-");
-
-		tft.setCursor(30 + 204, DW_Y_axis + 5);
-		tft.setTextColor(dallas_graph[2].color, ILI9341_BLACK);
-		if (temperatureSensor[DS_Out].data < 100.0) tft.printf("T3:%.1f ", temperatureSensor[DS_Out].data);
-		else tft.printf("T3:--.-");
-		break;
-	}
-	}
-
-	/*tft.setCursor(26, DW_Y_axis + 5);
-	if (processMode.allow == 2) {
-		tft.setTextColor(dallas_graph[0].color, ILI9341_BLACK);
-		if (temperatureSensor[DS_Cube].data < 100.0) tft.printf("T1:%.1f ", temperatureSensor[DS_Cube].data);
-		else tft.printf("--.-");
-	}
-	else {
-		tft.setTextColor(dallas_graph[1].color, ILI9341_BLACK);
-		if (temperatureSensor[DS_Tube].data < 100.0) tft.printf("T2:%.1f ", temperatureSensor[DS_Tube].data);
-		else tft.printf("--.-");
-	}
-
-	tft.setCursor(30 + 100, DW_Y_axis + 5);
-	tft.setTextColor(dallas_graph[2].color, ILI9341_BLACK);
-	if (temperatureSensor[DS_Out].data < 100.0) tft.printf("T3:%.1f ", temperatureSensor[DS_Out].data);
-	else tft.printf("--.-");
-
-	tft.setCursor(30 + 204, DW_Y_axis + 5);
-	tft.setTextColor(dallas_graph[3].color, ILI9341_BLACK);
-	if (temperatureSensor[DS_Def].data < 100.0) tft.printf("T4:%.1f ", temperatureSensor[DS_Def].data);
-	else tft.printf("--.-");*/
 
 	if (processMode.allow < 3) {
 		// состояние входов и выходов для дистилляции и ректификации
@@ -398,61 +537,24 @@ void tftOutText(int temp_min, int temp_max) {
 		tft.setTextSize(2);
 		tft.setCursor(0, 47);
 		tft.setTextColor(ILI9341_LIGHTGREY, ILI9341_BLACK);
-		if (timeOutTFT == 0) tft.printf(" Pause    ");
+		if (timeOutTFT == 0) tft.print(utf8rus(" Пауза    "));
 		else if (processMode.timeStep <= 1) tft.printf("> %.1f min. = ", timeOutTFT/60);
 		else tft.printf(" %.1f min. = ", timeOutTFT/60);
 		// температура
 		tft.printf("%.1f C    ", tempOutTFT);
 	}
-	/*else if (processMode.allow == 4) {
-		// в процессе настройки PID выводим время и температуру
 
-		// время
-		tft.setTextSize(2);
-		tft.setCursor(30, 47);
-		tft.setTextColor(ILI9341_LIGHTGREY, ILI9341_BLACK);
-		tft.printf("Calibration T1 = ");
-		tft.printf("%.1f", setTempForPID);
-	}*/
-
-	// крупно температура основного графика
 	switch (tempBigOut) {
-		case 1: temp_convert = (int)(temperatureSensor[DS_Cube].data * 10); tft.setTextColor(dallas_graph[0].color); break;
-		case 2: temp_convert = (int)(temperatureSensor[DS_Tube].data * 10); tft.setTextColor(dallas_graph[1].color); break;
-		case 3: temp_convert = (int)(temperatureSensor[DS_Out].data * 10); tft.setTextColor(dallas_graph[2].color); break;
-		case 4: temp_convert = (int)(temperatureSensor[DS_Def].data * 10); tft.setTextColor(dallas_graph[3].color); break;
+		case 1: temp_convert = (int)(temperatureSensor[DS_Cube].data * 10); grColor = dallas_graph[0].color; break;
+		case 2: temp_convert = (int)(temperatureSensor[DS_Tube].data * 10); grColor = dallas_graph[1].color; break;
+		case 3: temp_convert = (int)(temperatureSensor[DS_Out].data * 10); grColor = dallas_graph[2].color; break;
+		case 4: temp_convert = (int)(temperatureSensor[DS_Def].data * 10); grColor = dallas_graph[3].color; break;
 	}
-	//if (processMode.allow == 2) temp_convert = (int)(temperatureSensor[DS_Tube].data * 10);
-	//else temp_convert = (int)(temperatureSensor[DS_Cube].data * 10);
 	if (temp_in_old != temp_convert || tempBigOutOld != tempBigOut) {
 		tempBigOutOld = tempBigOut;
-		// сначала сотрем старый текст
-		/*tft.setTextSize(1);
-		tft.setFont(&FreeSerifBold24pt7b);
-		tft.setCursor(98, 36);
-		tft.setTextColor(ILI9341_BLACK);
-		if (temp_in_old < 1000) tft.printf("%d.%d", temp_in_old / 10, temp_in_old % 10);
-		else tft.printf("--.-");
-		int k = tft.getCursorX();
-		tft.setFont();
-		tft.setTextSize(2);
-		tft.setCursor(k + 8, 0);
-		tft.printf("o");*/
-		fillScreenRect(98, 3, 102, 35, ILI9341_BLACK);
-		// выведем новое значение
-		tft.setTextSize(1);
-		tft.setFont(&FreeSerifBold24pt7b);
-		tft.setCursor(98, 36);
-		//if (processMode.allow == 2) tft.setTextColor(dallas_graph[1].color);
-		//else tft.setTextColor(dallas_graph[0].color);
-		if (temp_convert < 1000) tft.printf("%d.%d", temp_convert / 10, temp_convert % 10);
-		else tft.printf("--.-");
-		int k = tft.getCursorX();
-		tft.setFont();
-		tft.setTextSize(2);
-		tft.setCursor(k + 8, 0);
-		tft.printf("o");
+		drawBigTemp(88, 2, temp_convert, grColor, ILI9341_BLACK);
 	}
+
 	// вывод времени и давления
 	tft.setTextSize(2);
 	tft.setCursor(223, 2);
@@ -467,7 +569,6 @@ void tftOutGraphDisplay() {
 	int count;
 
 	csOn(TFT_CS);
-	//SPI.beginTransaction(SPI_SETTING_HIGH);
 
 	if (graphOutInterval >= Display_out_temp) {
 		graphOutInterval = 1;
@@ -577,21 +678,14 @@ void tftStopLoop() {
 		fillScreenRect(25, 65, 270, 140, 0xFFF6);
 		tft.drawRect(27, 67, 266, 136, 0xFC00);
 		tft.drawRect(28, 68, 264, 134, 0xFC00);
-		fillScreenRect(45, 125, 100, 60, 0xFE53);
-		fillScreenRect(175, 125, 100, 60, 0xAFF3);
-		tft.setTextSize(1);
-		tft.setFont(&FreeSerifBold24pt7b);
-		//tft.setFont();
-		tft.setTextColor(ILI9341_RED);
-		//tft.setTextSize(3);
-		tft.setCursor(74, 110); //tft.setCursor(90, 82);
-		tft.printf("- EXIT -");
-		tft.setTextColor(ILI9341_BLACK);
-		tft.setCursor(60, 171); //tft.setCursor(80, 143);
-		tft.printf("NO");
-		tft.setCursor(180, 171); //tft.setCursor(200, 143);
-		tft.printf("YES");
-		tft.setFont();
+		fillScreenRect(45, 125, 100, 60, 0xFB6D);
+		tft.drawRect(45, 125, 100, 60, 0x0000);
+		fillScreenRect(175, 125, 100, 60, 0x67EC);
+		tft.drawRect(175, 125, 100, 60, 0x0000);
+
+		drawBitmapString(80, 78, &Exit, ILI9341_RED, 0xFFF6);
+		drawBitmapString(60, 141, &Esc, ILI9341_BLACK, 0xFB6D);
+		drawBitmapString(196, 140, &Ok, ILI9341_BLACK, 0x67EC);
 
 		csOff(TFT_CS);
 		touchScreen = 2;
@@ -629,17 +723,14 @@ void getTouchArea() {
 	if (touchArea == 1) {
 		processMode.allow = 1;
 		processMode.step = 0;
-		//handleDistillationTpl();
 	}
 	else if (touchArea == 2) {
 		processMode.allow = 2;
 		processMode.step = 0;
-		//handleRefluxSensorTpl();
 	}
 	else if (touchArea == 3) {
 		processMode.allow = 3;
 		processMode.step = 0;
-		//handleMashingSensorTpl();
 	}
 	else if (touchArea == 4) {
 		processMode.allow = 6;

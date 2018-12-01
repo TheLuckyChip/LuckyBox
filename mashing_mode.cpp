@@ -18,6 +18,7 @@ float EEPROM_float_read_mash(int addr) {
 void loadEepromMashing() {
 	int i;
 	// Считаем что раньше сохраняли
+	EEPROM.begin(2048);
 	uint16_t index = 1500;
 	if (EEPROM.read(index) == 3) {
 		index++;
@@ -66,6 +67,7 @@ void loadEepromMashing() {
 		processMashing[2].time = 120; processMashing[2].temperature = 65;
 		processMashing[3].time = 10; processMashing[3].temperature = 72;
 	}
+	EEPROM.end();
 }
 
 void initMashing() {
@@ -171,6 +173,7 @@ void handleMashingSensorSetSave() {
 	HTTP.send(200, "text/json", "{\"result\":\"ok\"}");
 
 	// сохраним в EEPROM
+	EEPROM.begin(2048);
 	EEPROM.write(index, 0x03); index++; // 1-й процесс = дистилляция
 										// Датчики температуры
 	for (i = 0; i < 8; i++) {
@@ -187,6 +190,7 @@ void handleMashingSensorSetSave() {
 
 	EEPROM.commit();
 	delay(100);
+	EEPROM.end();
 }
 
 void mashingLoop() {

@@ -23,6 +23,7 @@ float EEPROM_float_read_pid(int addr) {
 }
 
 void loadEepromPid() {
+	EEPROM.begin(2048);
 	uint16_t index = 1600;
 	if (EEPROM.read(index) == 4) {
 		index++;
@@ -31,6 +32,7 @@ void loadEepromPid() {
 		Kd = EEPROM_float_read_pid(index); index += 4;
 		setTempForPID = EEPROM_float_read_pid(index);
 	}
+	EEPROM.end();
 }
 
 void handlePidSet() {
@@ -62,6 +64,7 @@ void handlePidSet() {
 		Ki = setKi;
 		Kd = setKd;
 		// сохраним в EEPROM
+		EEPROM.begin(2048);
 		uint16_t index = 1600;
 		EEPROM.write(index, 0x04); index++;
 		EEPROM_float_write_pid(index, Kp); index += 4;
@@ -70,6 +73,7 @@ void handlePidSet() {
 		EEPROM_float_write_pid(index, setTempForPID);
 		EEPROM.commit();
 		delay(100);
+		EEPROM.end();
 	}
 	//else processMode.step = 0;
 
