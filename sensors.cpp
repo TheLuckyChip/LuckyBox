@@ -111,7 +111,7 @@ void dallSearch()
 	DS_Count = i;
 	for (k = i; k < DS_Cnt; k++) { temperatureSensor[k].data = 150.0; }
 	// проверим соответствие расстановки датчиков
-	for (i = 0; i < DS_Count; i++) {
+	for (i = 0; i < DS_Count; i++) {                           // ПРОВЕРИТЬ DS_Cnt ВМЕСТО DS_Count !!!!~!~~~~~!!!!!
 		newDS = true;
 		for (k = 0; k < DS_Cnt; k++) {
 			// нашли уже прописанный датчик
