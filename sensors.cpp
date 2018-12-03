@@ -445,7 +445,7 @@ void handleProcessModeIn() {
 			tmpAllertValue = HTTP.arg(arg + "[allertValue]").toFloat();
 			
 			if (tmpAllertValue > 10) temperatureSensor[i].allertValue = tmpAllertValue;
-			else if (tmpAllertValue > 0) {
+			else if (tmpAllertValue > 0 && tmpAllertValue != temperatureSensor[i].allertValueIn) {
 				if (settingBoilTube != tmpAllertValue) {
 					settingBoilTube = tmpAllertValue;
 					settingColumn = temperatureSensor[i].data;
@@ -465,7 +465,7 @@ void handleProcessModeIn() {
 					allertSave = true;
 				}
 			}
-			else if (processMode.allow == 2) {
+			else if (processMode.allow == 2 && processMode.number > 0) {
 				allertReadTmp = EEPROM_float_read_dsAllert(1403 + i * 8);
 				if (allertReadTmp != tmpAllertValue) {
 					EEPROM_float_write_dsAllert((1403 + i * 8), temperatureSensor[i].allertValueIn);

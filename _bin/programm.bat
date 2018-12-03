@@ -11,42 +11,57 @@ echo Q - Выход.
 echo.
 set /p InputFile=
 echo.
-IF /i "%InputFile%" == "1" goto progSketch
-IF /i "%InputFile%" == "2" goto progWeb
-IF /i "%InputFile%" == "3" goto ProgSketchAndWeb
-IF /i "%InputFile%" == "4" goto eraseProgSketchAndWeb
-IF /i "%InputFile%" == "Q" goto exitBat
-
+if /i "%InputFile%" == "1" goto stepSetCOM
+if /i "%InputFile%" == "2" goto stepSetCOM
+if /i "%InputFile%" == "3" goto stepSetCOM
+if /i "%InputFile%" == "4" goto stepSetCOM
+if /i "%InputFile%" == "Q" goto exitBat
 goto reEnter
 
-:progSketch
+:stepSetCOM
 echo Введите номер COM порта:
 echo.
-Set /p $InputCom=    
-.\DataFiles\esptool.exe -vv -cd nodemcu -cb 921600 -cp COM"%$InputCom%" -ca 0x00000 -cf .\DataFiles\LuckyBox.ino.bin
+Set /p InputCom=
+
+echo.
+echo Введите скорость COM порта:
+echo.
+echo 1 - 115200
+echo 2 - 256000
+echo 3 - 512000
+echo 4 - 921600
+echo.
+Set /p InputSpeed=
+echo.
+set "SpeedSet=115200"
+if /i "%InputSpeed%" == "1" set "SpeedSet=115200"
+if /i "%InputSpeed%" == "2" set "SpeedSet=256000"
+if /i "%InputSpeed%" == "3" set "SpeedSet=512000"
+if /i "%InputSpeed%" == "4" set "SpeedSet=921600"
+
+:goProg
+if /i "%InputFile%" == "1" goto progSketch
+if /i "%InputFile%" == "2" goto progWeb
+if /i "%InputFile%" == "3" goto ProgSketchAndWeb
+if /i "%InputFile%" == "4" goto eraseProgSketchAndWeb
+goto exitBat
+
+:progSketch
+.\DataFiles\esptool.exe -vv -cd nodemcu -cb "%SpeedSet%" -cp COM"%InputCom%" -ca 0x00000 -cf .\DataFiles\LuckyBox.ino.bin
 goto endBat
 
 :progWeb
-echo Введите номер COM порта:
-echo.
-Set /p $InputCom=
-.\DataFiles\esptool.exe -vv -cd nodemcu -cb 921600 -cp COM"%$InputCom%" -ca 0x300000 -cf .\DataFiles\LuckyBox.spiffs.bin
+.\DataFiles\esptool.exe -vv -cd nodemcu -cb "%SpeedSet%" -cp COM"%InputCom%" -ca 0x300000 -cf .\DataFiles\LuckyBox.spiffs.bin
 goto endBat
 
 :progSketchAndWeb
-echo Введите номер COM порта:
-echo.
-Set /p $InputCom=    
-.\DataFiles\esptool.exe -vv -cd nodemcu -cb 921600 -cp COM"%$InputCom%" -ca 0x00000 -cf .\DataFiles\LuckyBox.ino.bin
-.\DataFiles\esptool.exe -vv -cd nodemcu -cb 921600 -cp COM"%$InputCom%" -ca 0x300000 -cf .\DataFiles\LuckyBox.spiffs.bin
+.\DataFiles\esptool.exe -vv -cd nodemcu -cb "%SpeedSet%" -cp COM"%InputCom%" -ca 0x00000 -cf .\DataFiles\LuckyBox.ino.bin
+.\DataFiles\esptool.exe -vv -cd nodemcu -cb "%SpeedSet%" -cp COM"%InputCom%" -ca 0x300000 -cf .\DataFiles\LuckyBox.spiffs.bin
 goto endBat
 
 :eraseProgSketchAndWeb
-echo Введите номер COM порта:
-echo.
-Set /p $InputCom=    
-.\DataFiles\esptool.exe -vv -cd nodemcu -cb 921600 -cp COM"%$InputCom%" -ca 0x0 -cz 0x400000 -ca 0x00000 -cf .\DataFiles\LuckyBox.ino.bin
-.\DataFiles\esptool.exe -vv -cd nodemcu -cb 921600 -cp COM"%$InputCom%" -ca 0x300000 -cf .\DataFiles\LuckyBox.spiffs.bin
+.\DataFiles\esptool.exe -vv -cd nodemcu -cb "%SpeedSet%" -cp COM"%InputCom%" -ca 0x0 -cz 0x400000 -ca 0x00000 -cf .\DataFiles\LuckyBox.ino.bin
+.\DataFiles\esptool.exe -vv -cd nodemcu -cb "%SpeedSet%" -cp COM"%InputCom%" -ca 0x300000 -cf .\DataFiles\LuckyBox.spiffs.bin
 goto endBat
 
 :endBat

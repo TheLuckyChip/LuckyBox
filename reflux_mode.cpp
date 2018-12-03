@@ -248,12 +248,10 @@ void handleRefluxSensorSetSave() {
 void rfluxLoopMode_1() {
 	bool allerEn = false;
 
-	float temperatureTubeCurPressure;
 	// уставка
 	if (settingBoilTube != 0) {
 		temperatureStartPressure = settingColumn - (760 - pressureSensor.data)*0.037;
-		temperatureTubeCurPressure = temperatureSensor[DS_Tube].data - (760 - pressureSensor.data)*0.037;
-		temperatureSensor[DS_Tube].allertValue = temperatureStartPressure + settingBoilTube + (temperatureSensor[DS_Tube].data - temperatureTubeCurPressure);
+		temperatureSensor[DS_Tube].allertValue = temperatureStartPressure + settingBoilTube;
 	}
 	else temperatureSensor[DS_Tube].allertValue = 0;
  
@@ -263,6 +261,7 @@ void rfluxLoopMode_1() {
 // пришли при старте ректификации
 		case 0: {
 			loadEepromReflux();
+			settingBoilTube = 0;
 	#if defined TFT_Display
 			// подготовка данных для вывода на TFT
 			csOn(TFT_CS);
@@ -339,23 +338,6 @@ void rfluxLoopMode_1() {
 // PWM_CH1 - клапан отбора голов
 // PWM_CH3 - клапан подачи воды
 void rfluxLoopMode_2() {
-	if (processMode.step < 2) {
-		if (power.heaterPower != power.inPowerHigh) power.heaterPower = power.inPowerHigh;
-	}
-	else if (processMode.step < 7) {
-		if (power.heaterPower != power.inPowerLow) power.heaterPower = power.inPowerLow;
-	}
-	else power.heaterPower = 0;
-
-	float temperatureTubeCurPressure;
-	// уставку применим только после достижения 90 гр. в кубе
-	if (settingBoilTube != 0) {
-		temperatureStartPressure = settingColumn - (760 - pressureSensor.data)*0.037;
-		temperatureTubeCurPressure = temperatureSensor[DS_Tube].data - (760 - pressureSensor.data)*0.037;
-		temperatureSensor[DS_Tube].allertValue = temperatureStartPressure + settingBoilTube + (temperatureSensor[DS_Tube].data - temperatureTubeCurPressure);
-	}
-	else temperatureSensor[DS_Tube].allertValue = 0;
-
 	switch (processMode.step) {
 // пришли при старте ректификации
 		case 0: {
@@ -381,7 +363,7 @@ void rfluxLoopMode_2() {
 		}
 // ждем начала подъема температуры в царге и включаем воду на охлаждение и понижаем мощность на ТЭН
 		case 1: {
-			if (temperatureSensor[DS_Tube].data >= 45.0) {
+			if (temperatureSensor[DS_Tube].data >= 55.0) {
 				csOn(PWM_CH3);				// включаем клапан подачи воды
 				power.heaterPower = power.inPowerLow;			// установили мощность на ТЭН 65 %
 				settingAlarm = true;		// подаем звуковой сигнал
@@ -490,26 +472,6 @@ void rfluxLoopMode_3() {
 // PWM_CH1 - клапан отбора
 // PWM_CH3 - клапан подачи воды
 void rfluxLoopMode_4() {
-	if (processMode.step < 2) {
-		if (power.heaterPower != power.inPowerHigh) power.heaterPower = power.inPowerHigh;
-	}
-	else if (processMode.step < 7) {
-		if (power.heaterPower != power.inPowerLow) power.heaterPower = power.inPowerLow;
-	}
-	else power.heaterPower = 0;
-
-	// уставку применим только после 20 минут после отбора тела
-	if (allertSetTemperatureEn[DS_Tube] == true) {
-		if (settingBoilTube != 0) {
-			temperatureStartPressure = settingColumn - (760 - pressureSensor.data)*0.037;
-			float temperatureTubeCurPressure = temperatureSensor[DS_Tube].data - (760 - pressureSensor.data)*0.037;
-			temperatureSensor[DS_Tube].allertValue = temperatureStartPressure + settingBoilTube + (temperatureSensor[DS_Tube].data - temperatureTubeCurPressure);
-		}
-		else temperatureSensor[DS_Tube].allertValue = 0;
-	}
-	else temperatureSensor[DS_Tube].allertValue = 0;
-
-
 	switch (processMode.step) {
 // пришли при старте ректификации
 		case 0: {
@@ -535,7 +497,7 @@ void rfluxLoopMode_4() {
 		}
 // ждем начала подъема температуры в царге и включаем воду на охлаждение и понижаем мощность на ТЭН
 		case 1: {
-			if (temperatureSensor[DS_Tube].data >= 45.0) {
+			if (temperatureSensor[DS_Tube].data >= 55.0) {
 				csOn(PWM_CH3);				// включаем клапан подачи воды
 				power.heaterPower = power.inPowerLow;			// установили мощность на ТЭН 65 %
 				settingAlarm = true;		// подаем звуковой сигнал
@@ -672,25 +634,6 @@ void rfluxLoopMode_4() {
 // PWM_CH3 - клапан подачи воды
 // PWM_CH4 - клапан слива с ПБ
 void rfluxLoopMode_5() {
-	if (processMode.step < 2) {
-		if (power.heaterPower != power.inPowerHigh) power.heaterPower = power.inPowerHigh;
-	}
-	else if (processMode.step < 7) {
-		if (power.heaterPower != power.inPowerLow) power.heaterPower = power.inPowerLow;
-	}
-	else power.heaterPower = 0;
-
-	// уставку применим только после 20 минут после отбора тела
-	if (allertSetTemperatureEn[DS_Tube] == true) {
-		if (settingBoilTube != 0) {
-			temperatureStartPressure = settingColumn - (760 - pressureSensor.data)*0.037;
-			float temperatureTubeCurPressure = temperatureSensor[DS_Tube].data - (760 - pressureSensor.data)*0.037;
-			temperatureSensor[DS_Tube].allertValue = temperatureStartPressure + settingBoilTube + (temperatureSensor[DS_Tube].data - temperatureTubeCurPressure);
-		}
-		else temperatureSensor[DS_Tube].allertValue = 0;
-	}
-	else temperatureSensor[DS_Tube].allertValue = 0;
-
 	switch (processMode.step) {
 		// пришли при старте ректификации
 		case 0: {
@@ -892,25 +835,6 @@ void rfluxLoopMode_5() {
 // PWM_CH3 - клапан подачи воды
 // PWM_CH4 - клапан слива с ПБ
 void rfluxLoopMode_6() {
-	if (processMode.step < 2) {
-		if (power.heaterPower != power.inPowerHigh) power.heaterPower = power.inPowerHigh;
-	}
-	else if (processMode.step < 7) {
-		if (power.heaterPower != power.inPowerLow) power.heaterPower = power.inPowerLow;
-	}
-	else power.heaterPower = 0;
-
-	// уставку применим только после 20 минут после отбора тела
-	if (allertSetTemperatureEn[DS_Tube] == true) {
-		if (settingBoilTube != 0) {
-			temperatureStartPressure = settingColumn - (760 - pressureSensor.data)*0.037;
-			float temperatureTubeCurPressure = temperatureSensor[DS_Tube].data - (760 - pressureSensor.data)*0.037;
-			temperatureSensor[DS_Tube].allertValue = temperatureStartPressure + settingBoilTube + (temperatureSensor[DS_Tube].data - temperatureTubeCurPressure);
-		}
-		else temperatureSensor[DS_Tube].allertValue = 0;
-	}
-	else temperatureSensor[DS_Tube].allertValue = 0;
-
 	switch (processMode.step) {
 		// пришли при старте ректификации
 		case 0: {
@@ -1085,25 +1009,6 @@ void rfluxLoopMode_6() {
 }
 // БК регулировка охлаждением
 void rfluxLoopMode_7() {
-	if (processMode.step < 2) {
-		if (power.heaterPower != power.inPowerHigh) power.heaterPower = power.inPowerHigh;
-	}
-	else if (processMode.step < 7) {
-		if (power.heaterPower != power.inPowerLow) power.heaterPower = power.inPowerLow;
-	}
-	else power.heaterPower = 0;
-
-	// уставку применим только после 20 минут после отбора тела
-	if (allertSetTemperatureEn[DS_Tube] == true) {
-		if (settingBoilTube != 0) {
-			temperatureStartPressure = settingColumn - (760 - pressureSensor.data)*0.037;
-			float temperatureTubeCurPressure = temperatureSensor[DS_Tube].data - (760 - pressureSensor.data)*0.037;
-			temperatureSensor[DS_Tube].allertValue = temperatureStartPressure + settingBoilTube + (temperatureSensor[DS_Tube].data - temperatureTubeCurPressure);
-		}
-		else temperatureSensor[DS_Tube].allertValue = 0;
-	}
-	else temperatureSensor[DS_Tube].allertValue = 0;
-
 	switch (processMode.step) {
 		// пришли при старте ректификации
 		case 0: {
@@ -1166,6 +1071,7 @@ void rfluxLoopMode_7() {
 				settingAlarm = false;	// выключили звуковой сигнал
 				if (adcIn[0].member == 1) {		// датчик уровня присутствует
 					processMode.step = 5;		// перешли на следующий шаг алгоритма отбора голов
+					countHaedEnd = millis() + 10000;
 				}
 				else {
 					processMode.step = 6;		// пропустили следующий шаг алгоритма т.к. нет датчика уровня
@@ -1176,14 +1082,14 @@ void rfluxLoopMode_7() {
 			// ждем срабатывание датчика уровня в приемной емкоси голов если он есть, включаем пищалку, поднимаем мощность ТЭН для отбора
 		case 5: {
 			if (adcIn[0].allert == true) {
-				countHaedEnd++;
-				if (countHaedEnd > 10) {		// антирдебезг :)
+				//countHaedEnd++;
+				if (countHaedEnd <= millis()) {	// антирдебезг 10 сек. :)
 					settingAlarm = true;		// подаем звуковой сигнал
 					timePauseOff = millis();	// обнулим счетчик времени для зв.сигнала
 					processMode.step = 6;		// перешли на следующий шаг алгоритма
 				}
 			}
-			else countHaedEnd = 0;
+			else countHaedEnd = millis() + 10000;
 
 			if (processMode.step == 6) {
 				csOff(PWM_CH2);		// закрыли клапан доп. подачи воды
@@ -1272,6 +1178,7 @@ void rfluxLoopMode_8() {
 // если запущена ректификация
 // разгребаем на какой алгоритм уйти
 void refluxLoop() {
+	// Если только пришли в процесс ректификации, считаем из EEPROM значения мощности и номер процесса
 	if (processMode.step == 0) {
 		EEPROM.begin(2048);
 		power.inPowerHigh = EEPROM.read(1497);
@@ -1288,8 +1195,27 @@ void refluxLoop() {
 		graphOutInterval = Display_out_temp;
 		EEPROM.end();
 	}
+
+	// Мощности ТЭНа (разогрев / работа)
+	if (processMode.step < 2) { if (power.heaterPower != power.inPowerHigh) power.heaterPower = power.inPowerHigh; }
+	else if (processMode.step < 7) { if (power.heaterPower != power.inPowerLow) power.heaterPower = power.inPowerLow; }
+	else power.heaterPower = 0;
+
+	// Коррекция уставки от давления
+	if (processMode.number > 0) {
+		if (allertSetTemperatureEn[DS_Tube] == true) {
+			if (settingBoilTube != 0) {
+				temperatureStartPressure = settingColumn - (760 - pressureSensor.data)*0.037;
+				//float temperatureTubeCurPressure = temperatureSensor[DS_Tube].data - (760 - pressureSensor.data)*0.037;
+				temperatureSensor[DS_Tube].allertValue = temperatureStartPressure + settingBoilTube;// +(temperatureSensor[DS_Tube].data - temperatureTubeCurPressure);
+			}
+			else temperatureSensor[DS_Tube].allertValue = 0;
+		}
+		else temperatureSensor[DS_Tube].allertValue = 0;
+	}
+
+	// Уходим на выбранный алгоритм
 	switch (processMode.number) {
-		// пришли при старте ректификации
 		case 0: rfluxLoopMode_1(); break; // ручной режим, только сигнализация
 		case 1: rfluxLoopMode_2(); break; // Прима - головы по жидкости, тело по пару
 		case 2: rfluxLoopMode_3(); break; // РК по пару
