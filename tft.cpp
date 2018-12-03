@@ -320,20 +320,23 @@ void tftOutText(int temp_min, int temp_max) {
 			tft.print((processMode.timeStep / 60) % 60);
 			// % алкоголя в кубе
 			tft.setCursor(42, 30);
-			if (temperatureCubeAlcohol <= 50 && temperatureCubeAlcohol >= 10) tft.printf("%.1f%%", temperatureCubeAlcohol);
-			else if (temperatureCubeAlcohol < 10 && temperatureCubeAlcohol >= 1) tft.printf(" %.1f%%", temperatureCubeAlcohol);
-			else tft.print("--.-%");
+			if (temperatureCubeAlcohol <= 50 && temperatureCubeAlcohol >= 10) tft.printf("%.1f%% ", temperatureCubeAlcohol);
+			else if (temperatureCubeAlcohol < 10 && temperatureCubeAlcohol >= 1) tft.printf(" %.1f%% ", temperatureCubeAlcohol);
+			else tft.print("--.-% ");
 			break;
 		}
 		case 2: {
 			tft.print(utf8rus("Ректификация"));
 			// какой шаг процесса
 			tft.setCursor(36, 10);
-			if (processMode.step < 2) tft.print(utf8rus("Нагрев"));
-			else if (processMode.step < 4) tft.print(utf8rus(" Стаб."));
-			else if (processMode.step < 6) tft.print(utf8rus("Головы"));
-			else if (processMode.step < 7) tft.print(utf8rus("  Тело"));
-			else tft.print(utf8rus("Стоп  "));
+			if (processMode.number > 0) {
+				if (processMode.step < 2) tft.print(utf8rus("Нагрев"));
+				else if (processMode.step < 4) tft.print(utf8rus(" Стаб."));
+				else if (processMode.step < 6) tft.print(utf8rus("Головы"));
+				else if (processMode.step < 7) tft.print(utf8rus("  Тело"));
+				else tft.print(utf8rus("Стоп  "));
+			}
+			else tft.print(utf8rus(" Отбор"));
 			// время шага
 			tft.setCursor(42, 20);
 			if (processMode.timeStep < 36000) tft.print(" ");
@@ -343,9 +346,9 @@ void tftOutText(int temp_min, int temp_max) {
 			tft.print((processMode.timeStep / 60) % 60);
 			// % алкоголя в кубе
 			tft.setCursor(42, 30);
-			if (temperatureCubeAlcohol <= 50 && temperatureCubeAlcohol >= 10) tft.printf("%.1f%%", temperatureCubeAlcohol);
-			else if (temperatureCubeAlcohol < 10 && temperatureCubeAlcohol >= 1) tft.printf(" %.1f%%", temperatureCubeAlcohol);
-			else tft.print("--.-%");
+			if (temperatureCubeAlcohol <= 50 && temperatureCubeAlcohol >= 10) tft.printf("%.1f%% ", temperatureCubeAlcohol);
+			else if (temperatureCubeAlcohol < 10 && temperatureCubeAlcohol >= 1) tft.printf(" %.1f%% ", temperatureCubeAlcohol);
+			else tft.print("--.-% ");
 			break;
 		}
 		case 3: {

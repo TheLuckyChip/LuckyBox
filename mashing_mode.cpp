@@ -61,12 +61,12 @@ void loadEepromMashing() {
 			if (processMode.allow == 3) adcIn[i].member = 0;
 		}
 	}
-	if (processMode.allow != 3) {
+	/*
 		processMashing[0].time = 20; processMashing[0].temperature = 45;
 		processMashing[1].time = 30; processMashing[1].temperature = 55;
 		processMashing[2].time = 120; processMashing[2].temperature = 65;
 		processMashing[3].time = 10; processMashing[3].temperature = 72;
-	}
+	*/
 	EEPROM.end();
 }
 
