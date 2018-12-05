@@ -20,6 +20,10 @@
 #define		AN1				1
 #define		AN2				2
 #define		AN3				3
+#define		thresholdAN0	1000
+#define		thresholdAN1	2000
+#define		thresholdAN2	1000
+#define		thresholdAN3	1000
 // Используем TFT дисплей или нет
 #define		TFT_Display
 // ТачСкрин

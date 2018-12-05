@@ -111,7 +111,7 @@ void dallSearch()
 	DS_Count = i;
 	for (k = i; k < DS_Cnt; k++) { temperatureSensor[k].data = 150.0; }
 	// проверим соответствие расстановки датчиков
-	for (i = 0; i < DS_Count; i++) {                           // ПРОВЕРИТЬ DS_Cnt ВМЕСТО DS_Count !!!!~!~~~~~!!!!!
+	for (i = 0; i < DS_Count; i++) {
 		newDS = true;
 		for (k = 0; k < DS_Cnt; k++) {
 			// нашли уже прописанный датчик
@@ -119,16 +119,26 @@ void dallSearch()
 				&& temperatureSensor[i].addrSearch[2] == temperatureSensor[k].addr[2] && temperatureSensor[i].addrSearch[3] == temperatureSensor[k].addr[3]
 				&& temperatureSensor[i].addrSearch[4] == temperatureSensor[k].addr[4] && temperatureSensor[i].addrSearch[5] == temperatureSensor[k].addr[5]
 				&& temperatureSensor[i].addrSearch[6] == temperatureSensor[k].addr[6] && temperatureSensor[i].addrSearch[7] == temperatureSensor[k].addr[7]) {
-				// i = найденный датчик, k = прописанный в EEPROM датчик
-				temperatureSensor[i].allert = temperatureSensor[k].allert;
-				temperatureSensor[i].color = temperatureSensor[k].color;
-				temperatureSensor[i].member = temperatureSensor[k].member;
-				temperatureSensor[i].num = temperatureSensor[k].num;
-				temperatureSensor[i].priority = temperatureSensor[k].priority;
-				for (t = 0; t < 8; t++) { temperatureSensor[i].addr[t] = temperatureSensor[i].addrSearch[t]; }
-				for (t = 0; t < 60; t++) { temperatureSensor[i].name[t] = temperatureSensor[k].name[t]; }
-				newDS = false;
-				//break;
+					// i = найденный датчик, k = прописанный в EEPROM датчик
+					temperatureSensor[i].allert = temperatureSensor[k].allert;
+					temperatureSensor[i].color = temperatureSensor[k].color;
+					temperatureSensor[i].member = temperatureSensor[k].member;
+					temperatureSensor[i].num = temperatureSensor[k].num;
+					temperatureSensor[i].priority = temperatureSensor[k].priority;
+					for (t = 0; t < 8; t++) { temperatureSensor[i].addr[t] = temperatureSensor[i].addrSearch[t]; }
+					for (t = 0; t < 60; t++) { temperatureSensor[i].name[t] = temperatureSensor[k].name[t]; }
+					newDS = false;
+					//break;
+
+					if (temperatureSensor[i].num == 1) DS_Cube = i;
+					else if (temperatureSensor[i].num == 2) DS_Tube = i;
+					else if (temperatureSensor[i].num == 3) DS_Out = i;
+					else if (temperatureSensor[i].num == 4) DS_Def = i;
+					else if (temperatureSensor[i].num == 5) DS_Res1 = i;
+					else if (temperatureSensor[i].num == 6) DS_Res2 = i;
+					else if (temperatureSensor[i].num == 7) DS_Res3 = i;
+					else if (temperatureSensor[i].num == 8) DS_Res4 = i;
+
 			}
 		}
 		// иначе датчик отсутствует в нашем списке
@@ -188,14 +198,18 @@ void dallSearch()
 	Serial.println(temperatureSensor[7].num);
 #endif
 	for (i = 0; i < DS_Cnt; i++) {
-		if (temperatureSensor[i].num == 1) DS_Cube = i;
+		temperatureSensor[i].dataT[0] = 150.0;
+		temperatureSensor[i].dataT[1] = 150.0;
+		temperatureSensor[i].dataT[2] = 150.0;
+		temperatureSensor[i].dataT[3] = 150.0;
+		/*if (temperatureSensor[i].num == 1) DS_Cube = i;
 		else if (temperatureSensor[i].num == 2) DS_Tube = i;
 		else if (temperatureSensor[i].num == 3) DS_Out = i;
 		else if (temperatureSensor[i].num == 4) DS_Def = i;
 		else if (temperatureSensor[i].num == 5) DS_Res1 = i;
 		else if (temperatureSensor[i].num == 6) DS_Res2 = i;
 		else if (temperatureSensor[i].num == 7) DS_Res3 = i;
-		else if (temperatureSensor[i].num == 8) DS_Res4 = i;
+		else if (temperatureSensor[i].num == 8) DS_Res4 = i;*/
 	}
 
 

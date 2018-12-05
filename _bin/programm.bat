@@ -1,7 +1,8 @@
 @Echo Off
+Setlocal EnableDelayedExpansion
 :reEnter
 echo.
-echo Выберите соответствующий пункт:
+echo Выберите соответствующий пункт для программирования:
 echo.
 echo 1 - Обновляем только программу.
 echo 2 - Обновляем только Web интерфейс.
@@ -19,9 +20,20 @@ if /i "%InputFile%" == "Q" goto exitBat
 goto reEnter
 
 :stepSetCOM
-echo Введите номер COM порта:
+echo Введите номер COM порта из доступных:
+for /f "tokens=*" %%i in ('REG QUERY HKLM\HARDWARE\DEVICEMAP\SERIALCOMM /s') do (
+Set a1=%%i
+Set a1=!a1:~-7!
+Set a2=!a1:~0,1!
+Set a1=!a1: =!
+Set a3=!a1:COM=!
+if "!a2!" EQU " " echo.!a3! - !a1!
+)
+echo Q - Выход.
 echo.
 Set /p InputCom=
+if /i "%InputCom%" == "Q" goto exitBat
+Set InputCom=%InputCom:COM=%
 
 echo.
 echo Введите скорость COM порта:
@@ -30,6 +42,7 @@ echo 1 - 115200
 echo 2 - 256000
 echo 3 - 512000
 echo 4 - 921600
+echo Q - Выход.
 echo.
 Set /p InputSpeed=
 echo.
@@ -38,6 +51,7 @@ if /i "%InputSpeed%" == "1" set "SpeedSet=115200"
 if /i "%InputSpeed%" == "2" set "SpeedSet=256000"
 if /i "%InputSpeed%" == "3" set "SpeedSet=512000"
 if /i "%InputSpeed%" == "4" set "SpeedSet=921600"
+if /i "%InputSpeed%" == "Q" goto exitBat
 
 :goProg
 if /i "%InputFile%" == "1" goto progSketch
