@@ -323,5 +323,13 @@ void setup()
 
   Serial.println("Setup Done!");
 
-  //Serial.println(ESP.getFreeSketchSpace());
+  /*Serial.println();
+  Serial.print("T1 = num:"); Serial.print(temperatureSensor[0].num); Serial.print(" name:"); Serial.println(DS_Cube);
+  Serial.print("T2 = num:"); Serial.print(temperatureSensor[1].num); Serial.print(" name:"); Serial.println(DS_Tube);
+  Serial.print("T3 = num:"); Serial.print(temperatureSensor[2].num); Serial.print(" name:"); Serial.println(DS_Out);
+  Serial.print("T4 = num:"); Serial.print(temperatureSensor[3].num); Serial.print(" name:"); Serial.println(DS_Def);
+  Serial.print("Т5 = num:"); Serial.print(temperatureSensor[4].num); Serial.print(" name:"); Serial.println(DS_Res1);
+  Serial.print("Т6 = num:"); Serial.print(temperatureSensor[5].num); Serial.print(" name:"); Serial.println(DS_Res2);
+  Serial.print("Т7 = num:"); Serial.print(temperatureSensor[6].num); Serial.print(" name:"); Serial.println(DS_Res3);
+  Serial.print("Т8 = num:"); Serial.print(temperatureSensor[7].num); Serial.print(" name:"); Serial.println(DS_Res4);*/
 }
