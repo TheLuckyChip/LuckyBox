@@ -45,6 +45,7 @@ struct DS_Str
 struct BMP_Str
 {
 	float		data;			// значение атмосферного давления
+	float		dataStart;		// значение атмосферного давления для коррекции дельты
 	bool		status;			// наличие датчика
 	uint16_t	color;			// цвет для графика
 	bool		member;			// участвует в выводе или нет

@@ -128,7 +128,6 @@ void dallSearch()
 					for (t = 0; t < 8; t++) { temperatureSensor[i].addr[t] = temperatureSensor[i].addrSearch[t]; }
 					for (t = 0; t < 60; t++) { temperatureSensor[i].name[t] = temperatureSensor[k].name[t]; }
 					newDS = false;
-					//break;
 
 					if (temperatureSensor[i].num == 1) DS_Cube = i;
 					else if (temperatureSensor[i].num == 2) DS_Tube = i;
@@ -138,7 +137,6 @@ void dallSearch()
 					else if (temperatureSensor[i].num == 6) DS_Res2 = i;
 					else if (temperatureSensor[i].num == 7) DS_Res3 = i;
 					else if (temperatureSensor[i].num == 8) DS_Res4 = i;
-
 			}
 		}
 		// иначе датчик отсутствует в нашем списке
@@ -202,25 +200,7 @@ void dallSearch()
 		temperatureSensor[i].dataT[1] = 150.0;
 		temperatureSensor[i].dataT[2] = 150.0;
 		temperatureSensor[i].dataT[3] = 150.0;
-		/*if (temperatureSensor[i].num == 1) DS_Cube = i;
-		else if (temperatureSensor[i].num == 2) DS_Tube = i;
-		else if (temperatureSensor[i].num == 3) DS_Out = i;
-		else if (temperatureSensor[i].num == 4) DS_Def = i;
-		else if (temperatureSensor[i].num == 5) DS_Res1 = i;
-		else if (temperatureSensor[i].num == 6) DS_Res2 = i;
-		else if (temperatureSensor[i].num == 7) DS_Res3 = i;
-		else if (temperatureSensor[i].num == 8) DS_Res4 = i;*/
 	}
-
-
-	//temperatureSensor[0].num = 1;
-	//temperatureSensor[1].num = 2;
-	//temperatureSensor[2].num = 3;
-	//temperatureSensor[3].num = 4;
-	//temperatureSensor[4].num = 5;
-	//temperatureSensor[5].num = 6;
-	//temperatureSensor[6].num = 7;
-	//temperatureSensor[7].num = 8;
 	
 	// установим разрядность, и пропустим симофоры
 	for (i = 0; i < DS_Count; i++) {
@@ -272,9 +252,6 @@ void dallRead()
 	ds.reset();
 	ds.write(0xCC); //Обращение ко всем датчикам
 	ds.write(0x44); //Команда на конвертацию
-
-	//temperatureAlcoholBoil = 78.91 - (780 - pressureSensor.data)*0.038; // расчет температуры кипения спирта при данном давлении
-	//settingColumnShow = settingColumn + (temperatureAlcoholBoil - temperatureStartPressure); // расчет уставки при изменившемся атмосферном давлении
 
 	// расчет остатка спирта в кубе
 	if (temperatureSensor[DS_Cube].data > 80) {
@@ -463,6 +440,7 @@ void handleProcessModeIn() {
 				if (settingBoilTube != tmpAllertValue) {
 					settingBoilTube = tmpAllertValue;
 					settingColumn = temperatureSensor[i].data;
+					pressureSensor.dataStart = pressureSensor.data;
 				}
 			}
 			else if (tmpAllertValue == 0 && temperatureSensor[i].delta != 0) {
