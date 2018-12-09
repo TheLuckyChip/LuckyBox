@@ -61,7 +61,7 @@
 #define		PWM_CH8_Invert	true
 #define		PWM_CH9_Invert	true
 // переменные временных интервалов на отбор голов для РК
-#define		headValveOpen	700
+#define		headValveOpen	800
 #define		headValveClose	5000
 // используется "Полский буфер" с клапаном слива в канале PWM_CH4
 //#define		Polish_Buffer
