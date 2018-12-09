@@ -250,8 +250,12 @@ void rfluxLoopMode_1() {
 
 	// уставка
 	if (settingBoilTube != 0) {
-		temperatureStartPressure = settingColumn - (760 - pressureSensor.data)*0.037;
-		temperatureSensor[DS_Tube].allertValue = temperatureStartPressure + settingBoilTube;
+		// температура кипения спирта при старте
+		temperatureStartPressure = 78.14 - (760 - pressureSensor.dataStart)*0.037;
+		// температура кипения спирта текущее
+		float temperatureCurrentPressure = 78.14 - (760 - pressureSensor.data)*0.037;
+		// скорректированная температура отсечки
+		temperatureSensor[DS_Tube].allertValue = settingColumn + settingBoilTube + temperatureCurrentPressure - temperatureStartPressure;
 	}
 	else temperatureSensor[DS_Tube].allertValue = 0;
  
@@ -802,6 +806,7 @@ void rfluxLoopMode_5() {
 				allertSetTemperatureEn[DS_Tube] = true;
 				settingBoilTube = temperatureSensor[DS_Tube].allertValueIn;
 				settingColumn = temperatureSensor[DS_Tube].data;
+				pressureSensor.dataStart = pressureSensor.data;
 				settingColumnSet = false;
 			}
 
@@ -980,6 +985,7 @@ void rfluxLoopMode_6() {
 				allertSetTemperatureEn[DS_Tube] = true;
 				settingBoilTube = temperatureSensor[DS_Tube].allertValueIn;
 				settingColumn = temperatureSensor[DS_Tube].data;
+				pressureSensor.dataStart = pressureSensor.data;
 				settingColumnSet = false;
 			}
 
@@ -1132,6 +1138,7 @@ void rfluxLoopMode_7() {
 				allertSetTemperatureEn[DS_Tube] = true;
 				settingBoilTube = temperatureSensor[DS_Tube].allertValueIn;
 				settingColumn = temperatureSensor[DS_Tube].data;
+				pressureSensor.dataStart = pressureSensor.data;
 				settingColumnSet = false;
 			}
 
@@ -1205,9 +1212,12 @@ void refluxLoop() {
 	if (processMode.number > 0) {
 		if (allertSetTemperatureEn[DS_Tube] == true) {
 			if (settingBoilTube != 0) {
-				temperatureStartPressure = settingColumn - (760 - pressureSensor.data)*0.037;
-				//float temperatureTubeCurPressure = temperatureSensor[DS_Tube].data - (760 - pressureSensor.data)*0.037;
-				temperatureSensor[DS_Tube].allertValue = temperatureStartPressure + settingBoilTube;// +(temperatureSensor[DS_Tube].data - temperatureTubeCurPressure);
+				// температура кипения спирта при старте
+				temperatureStartPressure = 78.14 - (760 - pressureSensor.dataStart)*0.037;
+				// температура кипения спирта текущее
+				float temperatureCurrentPressure = 78.14 - (760 - pressureSensor.data)*0.037;
+				// скорректированная температура отсечки
+				temperatureSensor[DS_Tube].allertValue = settingColumn + settingBoilTube + temperatureCurrentPressure - temperatureStartPressure;
 			}
 			else temperatureSensor[DS_Tube].allertValue = 0;
 		}
