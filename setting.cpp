@@ -1,7 +1,3 @@
-// 
-// 
-// 
-
 #include "setting.h"
 
 Ticker tickerSet;
@@ -9,43 +5,93 @@ Ticker tickerSet;
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
 // Объект для обновления с web страницы 
-ESP32HTTPUpdateServer httpUpdater;
+//ESP8266HTTPUpdateServer httpUpdater;
 
 // Web интерфейс для устройства
-ESP32WebServer HTTP;
+ESP8266WebServer HTTP;
 
-// Для файловой системы
-File fsUploadFile;
+// PID
+PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
 
+String curVersion = "2.0RC9";
 // Определяем переменные wifi
-String _ssid       = "SSID";      // Для хранения SSID
-String _password   = "PASSWORD";  // Для хранения пароля сети
-String _ssidAP     = "LuckyBox";  // SSID AP точки доступа
-String _passwordAP = "12345678";  // пароль точки доступа
-String SSDP_Name   = "LuckyBox";  // Имя SSDP
-String jsonConfig  = "{}";
+String _ssid;      // Для хранения SSID
+String _password;  // Для хранения пароля сети
+String _ssidAP;  // SSID AP точки доступа
+String _ssidAPconnect;
+String _passwordAP;  // пароль точки доступа
+String SSDP_Name;  // Имя SSDP
+String addrMacMod;
+// Настройки TFT
+bool touchInvert = false;
+bool tftInvert = false;
+String jsonConfig	= "{}";
 int port = 80;
 
-int timezone = 3;                 // часовой пояс GTM
-int DS_Count;
-struct DS_Str dallas_my_sensor[DS_Cnt];
-float pressure = 760.0;				// Давление
-bool  pressureStatus = 0;			// Если датчик давления отсутствует
-unsigned long displayTimeInterval;				// Инетрал времени для вывода графика температуры если показания неизменны
-unsigned long sensorTimeRead = 0;				// Интервал чтения датчиков
+int timezone;                 // часовой пояс GTM
+byte DS_Count;
+int temp_min;
+int temp_max;
+byte DS_Cube = 10;
+byte DS_Tube = 10;
+byte DS_Out = 10;
+byte DS_Def = 10;
+byte DS_Res1 = 10;
+byte DS_Res2 = 10;
+byte DS_Res3 = 10;
+byte DS_Res4 = 10;
+struct TPL_Str tpl2web;
+struct DS_Str temperatureSensor[DS_Cnt];
+struct BMP_Str pressureSensor;
+struct OUT_Pwm pwmOut[PWM_Cnt];
+struct IN_Adc adcIn[ADC_Cnt];
+struct PR_Type processMode;
+struct PR_Mashing processMashing[4];
+struct PR_Power power;
+
+//uint8_t State = LOW;
+boolean outHeater;
+uint16_t Voltage;
+uint16_t servoOld = 100;		// Старая позиция сервопривода
+unsigned long displayTimeInterval = 0;
+unsigned long sdTimeWriteInterval = 0;
+uint16_t graphOutInterval = Display_out_temp;	// Инетрал времени для вывода графика температуры если показания неизменны
+uint16_t scaleCount;
+byte tempBigOut;
+byte tempBigOutOld;
+float settingBoilTube;
+float settingColumn = 101;         // Температура срабатывания оповещения от датчика в царге
+float temperatureStartPressure = 78;   //Температура кипения спирта при запуске отслеживания ректификации
+float settingColumnShow = 0;
+float temperatureAlcoholBoil = 0;
+float temperatureCubeAlcohol;
+unsigned long timePauseOff;
+unsigned long sensorTimeRead = millis();		// Интервал чтения датчиков
+unsigned long adcTimeRead = millis();			// Интервал опроста АЦП
 unsigned long touchTimeRead = millis();			// Интервал опроста тачскрина
-int timeWiFiReconnect = 0;
-bool settingAlarm = false;          // Пересечение границы уставки
+bool settingAlarm = false;						// Пересечение границы уставки
+bool headValve;									// Состояние клапана отбора
+unsigned long headValveOn;						// контроль времени клапана отбора в открытом состоянии
+unsigned long headValveOff;						// контроль времени клапана отбора в закрытом состоянии
+byte touchArea = 0;								// Область нажатия
+byte touchScreen = 0;							// На каком экране контролируем нажатие
 int modeWiFi;
 uint8_t DefCubOut = 9;
-extern int16_t touch_x = 0;
-extern int16_t touch_y = 0;
-extern bool touch_in = false;
-
-void csOff(uint8_t ch) {
-	pwm.setPWM(ch, 4096, 0); // CS TFT = 1
-}
-void csOn(uint8_t ch) {
-	pwm.setPWM(ch, 0, 4096); // CS TFT = 0
-	delay(1);
-}
+int16_t touch_x = 0;
+int16_t touch_y = 0;
+bool touch_in = false;
+bool sdStatus = false;
+uint8_t numSenseMashBrew;
+double Setpoint, Input, Output;
+double Kp = 120, Ki = 0.02, Kd = 75;
+double setKp, setKi, setKd;
+float setTempForPID = 65;
+int WindowSize = 250;
+unsigned long windowStartTime, stepTime;
+unsigned long stepStartTime;
+unsigned long wifiTimeInterval;
+String nameProcessStep = " ";
+bool CH1 = false;
+bool CH2 = false;
+bool CH3 = false;
+bool CH4 = false;

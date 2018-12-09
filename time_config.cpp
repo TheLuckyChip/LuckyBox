@@ -1,8 +1,4 @@
 #include "time_config.h"
-#include "file_config.h"
-#include "setting.h"
-#include <WiFi.h>
-#include <time.h>               //Содержится в пакете
 
 void initTime()
 {
@@ -16,6 +12,7 @@ void timeSynch(int zone)
 	{
 		// Настройка соединения с NTP сервером
 		configTime(zone * 3600, 0, "pool.ntp.org", "ru.pool.ntp.org");
+		//configTime(zone * 3600, 0, "169.254.0.210", "mail.khbk.ru");
 		int i = 0;
 		Serial.println("\nWaiting for time");
 		while (!time(nullptr) && i < 10)
@@ -34,8 +31,18 @@ void timeSynch(int zone)
 void handleTimeZone()
 {
 	timezone = HTTP.arg("timezone").toInt(); // Получаем значение timezone из запроса конвертируем в int сохраняем в глобальной переменной
-	saveConfig();
+	//saveConfig();
 	HTTP.send(200, "text/plain", "OK");
+	// сохраним в EEPROM
+	EEPROM.begin(2048);
+	uint16_t index = 1980;
+	if (timezone <= 23) {
+		EEPROM.write(index, timezone);
+		EEPROM.commit();
+		delay(100);
+	}
+	else timezone = 3;
+	EEPROM.end();
 }
 
 void handleTime()
@@ -66,6 +73,3 @@ String GetDate()
 	Data.replace(Time, ""); // Удаляем из строки 8 символов времени и пробел
 	return Data; // Возврашаем полученную дату
 }
-
-
-

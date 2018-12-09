@@ -1,10 +1,6 @@
-#include "brewing_mode.h"
-#include "heater.h"
-#include "setting.h"
-#include <ArduinoJson.h>
-#include "time_config.h"
+//  Затирание
 
-// Затирание
+#include "brewing_mode.h"
 
 // Переменные для пауз затирания
 float pauseTemp1 = 48;
@@ -51,127 +47,78 @@ void handleBrewingJSON()
 {
 	String root = "{}";  // Формируем строку для отправки в файл конфигурации в json формате
 
-	DynamicJsonBuffer jsonBuffer;
-	JsonObject& json = jsonBuffer.parseObject(root);
-
-	json["pauseTemp1"] = pauseTemp1;
-	json["pauseTemp2"] = pauseTemp2;
-	json["pauseTemp3"] = pauseTemp3;
-	json["pauseTemp4"] = pauseTemp4;
-
-	json["pauseTime1"] = pauseTime1;
-	json["pauseTime2"] = pauseTime2;
-	json["pauseTime3"] = pauseTime3;
-	json["pauseTime4"] = pauseTime4;
-
-	json["time"] = GetTime();
-	json["temperature"] = dallas_my_sensor[DS_Cube].temperature;
-	json["startBrewing"] = startBrewing;    // Передаем значение исключительно для отладки ПО
-	json["stepBrewing"] = stepBrewing;
-
-	root = "";
-	json.printTo(root);
 	HTTP.send(200, "text/json", root);
 }
 
 void brewingLoop()
 {
-
-	currentTime = millis() / 1000;         // текущее время в сек.
-
-	if (startBrewing)
-	{
-		switch (stepBrewing)
-		{
-			case 0:
-				heaterStatus=0;
-				//stepBrewing=0;       
-				break;
-
-			case 1:
-				if (dallas_my_sensor[DS_Cube].temperature < pauseTemp1) { heaterStatus = 1; }
-				else
-				{
-					heaterStatus = 0;
-					stepBrewing++;                                       // добавить перекраску цвета пауз
-					processStartTime = currentTime;
-				}
-				break;
-
-			case 2:
-				if (processStartTime + pauseTime1 * 60 < currentTime) { stepBrewing++; }
-				else
-				{
-					heaterStatus=0;
-					if (dallas_my_sensor[DS_Cube].temperature < pauseTemp1) { heaterStatus = 1; }         //добавить гистерезис
-				}
-				break;
-
-			case 3:
-				if (dallas_my_sensor[DS_Cube].temperature < pauseTemp2) { heaterStatus = 1; }
-				else
-				{
-					heaterStatus = 0;
-					stepBrewing++;
-					processStartTime = currentTime;
-				}
-				break;
-
-			case 4:
-				if (processStartTime + pauseTime2 * 60 < currentTime) { stepBrewing++; }
-				else
-				{
-					heaterStatus = 0;
-					if (dallas_my_sensor[DS_Cube].temperature < pauseTemp2) { heaterStatus = 1; }
-				}
-				break;
-
-			case 5:
-				if (dallas_my_sensor[DS_Cube].temperature < pauseTemp3) { heaterStatus = 1; }
-				else
-				{
-					heaterStatus = 0;
-					stepBrewing++;
-					processStartTime = currentTime;
-				}
-				break;
-
-			case 6:
-				if (processStartTime + pauseTime3 * 60 < currentTime) { stepBrewing++; }
-				else
-				{
-					heaterStatus = 0;
-					if (dallas_my_sensor[DS_Cube].temperature < pauseTemp3) { heaterStatus = 1; }
-				}
-				break;
-
-			case 7:
-				if (dallas_my_sensor[DS_Cube].temperature < pauseTemp4) { heaterStatus = 1; }
-				else
-				{
-					heaterStatus = 0;
-					stepBrewing++;
-					processStartTime = currentTime;
-				}
-				break;
-
-			case 8:
-				if (processStartTime + pauseTime4 * 60 < currentTime)
-				{
-					stepBrewing = 0;
-					heaterStatus = 0;
-					startBrewing = 0;
-				}
-				else
-				{
-					heaterStatus = 0;
-					if (dallas_my_sensor[DS_Cube].temperature < pauseTemp4) { heaterStatus = 1; }
-				}
-				break;
+	switch (processMode.step) {
+		// пришли при старте затирания
+	case 0: {
+		// подготовка данных для вывода на TFT
+#if defined TFT_Display
+		csOn(TFT_CS);
+		//tft.fillScreen(ILI9341_BLACK);
+		tftStartForGraph();
+		displayTimeInterval = millis() + 1000;
+		DefCubOut = Display_out_temp;
+		csOff(TFT_CS);
+#endif
+		tempBigOut = 1;
+		temperatureSensor[DS_Cube].member = 1;
+		myPID.SetOutputLimits(0, WindowSize);
+		myPID.SetMode(AUTOMATIC);
+		Setpoint = 45.0;
+		windowStartTime = millis();
+		processMode.step = 1;	// перешли на следующий шаг алгоритма
+		break;
+	}
+	case 1: {
+		if (temperatureSensor[DS_Cube].data >= Setpoint) {
+			stepTime = millis();
+			processMode.step = 2;
 		}
-		// digitalWrite(heater, heaterStatus);
-
+		break;
+	}
+	case 2: {
+		if (millis() - stepTime >= 1200000) {
+			processMode.step = 3;
+			Setpoint = 65.0;
+			windowStartTime = millis();
+		}
+		break;
+	}
+	case 3: {
+		if (temperatureSensor[DS_Cube].data >= Setpoint) {
+			stepTime = millis();
+			processMode.step = 4;
+		}
+		break;
+	}
+	case 4: {
+		if (millis() - stepTime >= 1200000) {
+			processMode.step = 0;
+			processMode.allow = 0;
+		}
+		break;
+	}
 	}
 
-}
+	Input = temperatureSensor[DS_Cube].data;
+	myPID.Compute();
 
+	if (millis() > WindowSize + windowStartTime) {
+		windowStartTime += WindowSize;
+		if (windowStartTime > millis()) windowStartTime = 0;    // защита от переполнения
+	}
+	if (Output < millis() - windowStartTime) digitalWrite(heater, LOW);
+	else digitalWrite(heater, HIGH);
+
+	delay(100);
+
+	//Serial.print("Output: ");
+	//Serial.print(Output);
+	//Serial.print("     Time: ");
+	//Serial.println(millis() - windowStartTime);
+
+}
