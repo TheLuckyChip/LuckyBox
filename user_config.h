@@ -66,7 +66,7 @@
 // используется "Полский буфер" с клапаном слива в канале PWM_CH4
 //#define		Polish_Buffer
 // Время стабилизации в минутах
-#define		timeStabilizationReflux		15
+#define		timeStabilizationReflux		20
 // Периодичность вывода температурного графика в секундах на экран
 #define		Display_out_temp	15
 // Периодичность записи лог.файла на SD

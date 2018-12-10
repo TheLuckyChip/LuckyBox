@@ -371,7 +371,7 @@ void rfluxLoopMode_2() {
 				csOn(PWM_CH3);				// включаем клапан подачи воды
 				power.heaterPower = power.inPowerLow;			// установили мощность на ТЭН 65 %
 				settingAlarm = true;		// подаем звуковой сигнал
-				timePauseOff = millis();	// обнулим счетчик времени для зв.сигнала
+				timePauseOff = millis() + 10000;	// установим счетчик времени для зв.сигнала 10 сек.
 				processMode.timeStep = 0;
 				nameProcessStep = "Стабилизация колонны";
 				processMode.step = 2;		// перешли на следующий шаг алгоритма
@@ -380,16 +380,17 @@ void rfluxLoopMode_2() {
 		}
 // пищалка на 10 сек.
 		case 2: {
-			if (timePauseOff < millis() && millis() >= 10000 + timePauseOff) {
+			if (timePauseOff <= millis()) {
 				settingAlarm = false;	// выключили звуковой сигнал
+				timePauseOff = timeStabilizationReflux * 60000; // время стабилизации колонны
 				processMode.step = 3;	// перешли на следующий шаг алгоритма
 			}
 			break;
 		}
 // ждем окончание стабилизации 20 минут
 		case 3: {
-			if (timePauseOff < millis() && (millis() - timePauseOff) >= 1190000) {
-				timePauseOff = millis();	// обнулим счетчик времени для зв.сигнала
+			if (timePauseOff <= millis()) {
+				timePauseOff = millis() + 10000;	// установим счетчик времени для зв.сигнала 10 сек.
 				settingAlarm = true;		// подаем звуковой сигнал
 				csOn(PWM_CH1);				// открыть клапан отбора по жидкости (головы)
 				processMode.timeStep = 0;
@@ -400,7 +401,7 @@ void rfluxLoopMode_2() {
 		}
 // пищалка на 10 сек.
 		case 4: {
-			if (timePauseOff < millis() && (millis() - timePauseOff) >= 10000) {
+			if (timePauseOff <= millis()) {
 				settingAlarm = false;			// выключили звуковой сигнал
 				if (adcIn[0].member == 1) {		// датчик уровня присутствует
 					processMode.step = 5;		// перешли на следующий шаг алгоритма отбора голов
@@ -505,7 +506,7 @@ void rfluxLoopMode_4() {
 				csOn(PWM_CH3);				// включаем клапан подачи воды
 				power.heaterPower = power.inPowerLow;			// установили мощность на ТЭН 65 %
 				settingAlarm = true;		// подаем звуковой сигнал
-				timePauseOff = millis();	// обнулим счетчик времени для зв.сигнала
+				timePauseOff = millis() + 10000;	// установим счетчик времени для зв.сигнала 10 сек.
 				processMode.timeStep = 0;
 				nameProcessStep = "Стабилизация колонны";
 				processMode.step = 2;		// перешли на следующий шаг алгоритма
@@ -514,16 +515,17 @@ void rfluxLoopMode_4() {
 		}
 // пищалка на 10 сек.
 		case 2: {
-			if (timePauseOff < millis() && millis() >= 10000 + timePauseOff) {
+			if (timePauseOff <= millis()) {
 				settingAlarm = false;	// выключили звуковой сигнал
+				timePauseOff = timeStabilizationReflux * 60000; // время стабилизации колонны
 				processMode.step = 3;	// перешли на следующий шаг алгоритма
 			}
 			break;
 		}
 // ждем окончание стабилизации 20 минут
 		case 3: {
-			if (timePauseOff < millis() && (millis() - timePauseOff) >= 1190000) {
-				timePauseOff = millis();	// обнулим счетчик времени для зв.сигнала
+			if (timePauseOff <= millis()) {
+				timePauseOff = millis() + 10000;	// установим счетчик времени для зв.сигнала 10 сек.
 				settingAlarm = true;	// подаем звуковой сигнал
 										//power.heaterPower = power.inPowerLow;		// установили мощность на ТЭН 65 %
 				processMode.timeStep = 0;
@@ -534,7 +536,7 @@ void rfluxLoopMode_4() {
 		}
 // пищалка на 10 сек.
 		case 4: {
-			if (timePauseOff < millis() && (millis() - timePauseOff) >= 10000) {
+			if (timePauseOff <= millis()) {
 				settingAlarm = false;	// выключили звуковой сигнал
 				if (adcIn[0].member == 1) {		// датчик уровня присутствует
 					processMode.step = 5;		// перешли на следующий шаг алгоритма отбора голов
@@ -669,7 +671,7 @@ void rfluxLoopMode_5() {
 				csOn(PWM_CH3);				// включаем клапан подачи воды
 				power.heaterPower = power.inPowerLow;			// установили мощность на ТЭН 65 %
 				settingAlarm = true;		// подаем звуковой сигнал
-				timePauseOff = millis();	// обнулим счетчик времени для зв.сигнала
+				timePauseOff = millis() + 10000;	// установим счетчик времени для зв.сигнала 10 сек.
 				processMode.timeStep = 0;
 				nameProcessStep = "Стабилизация колонны";
 				processMode.step = 2;		// перешли на следующий шаг алгоритма
@@ -678,16 +680,17 @@ void rfluxLoopMode_5() {
 		}
 				// пищалка на 10 сек.
 		case 2: {
-			if (timePauseOff < millis() && millis() >= 10000 + timePauseOff) {
+			if (timePauseOff <= millis()) {
 				settingAlarm = false;	// выключили звуковой сигнал
+				timePauseOff = timeStabilizationReflux * 60000; // время стабилизации колонны
 				processMode.step = 3;	// перешли на следующий шаг алгоритма
 			}
 			break;
 		}
 				// ждем окончание стабилизации 20 минут
 		case 3: {
-			if (timePauseOff < millis() && (millis() - timePauseOff) >= 1190000) {
-				timePauseOff = millis();	// обнулим счетчик времени для зв.сигнала
+			if (timePauseOff <= millis()) {
+				timePauseOff = millis() + 10000;	// установим счетчик времени для зв.сигнала 10 сек.
 				settingAlarm = true;	// подаем звуковой сигнал
 										//power.heaterPower = power.inPowerLow;		// установили мощность на ТЭН 65 %
 				processMode.timeStep = 0;
@@ -699,7 +702,7 @@ void rfluxLoopMode_5() {
 		}
 				// пищалка на 10 сек.
 		case 4: {
-			if (timePauseOff < millis() && (millis() - timePauseOff) >= 10000) {
+			if (timePauseOff <= millis()) {
 				settingAlarm = false;	// выключили звуковой сигнал
 				if (adcIn[0].member == 1) {		// датчик уровня присутствует
 					processMode.step = 5;		// перешли на следующий шаг алгоритма отбора голов
@@ -871,7 +874,7 @@ void rfluxLoopMode_6() {
 				csOn(PWM_CH3);				// включаем клапан подачи воды
 				power.heaterPower = power.inPowerLow;			// установили мощность на ТЭН 65 %
 				settingAlarm = true;		// подаем звуковой сигнал
-				timePauseOff = millis();	// обнулим счетчик времени для зв.сигнала
+				timePauseOff = millis() + 10000;	// установим счетчик времени для зв.сигнала 10 сек.
 				processMode.timeStep = 0;
 				nameProcessStep = "Стабилизация колонны";
 				processMode.step = 2;		// перешли на следующий шаг алгоритма
@@ -880,16 +883,17 @@ void rfluxLoopMode_6() {
 		}
 			// пищалка на 10 сек.
 		case 2: {
-			if (timePauseOff < millis() && millis() >= 10000 + timePauseOff) {
+			if (timePauseOff <= millis()) {
 				settingAlarm = false;	// выключили звуковой сигнал
+				timePauseOff = timeStabilizationReflux * 60000; // время стабилизации колонны
 				processMode.step = 3;	// перешли на следующий шаг алгоритма
 			}
 			break;
 		}
 			// ждем окончание стабилизации 20 минут
 		case 3: {
-			if (timePauseOff < millis() && (millis() - timePauseOff) >= 1190000) {
-				timePauseOff = millis();	// обнулим счетчик времени для зв.сигнала
+			if (timePauseOff <= millis()) {
+				timePauseOff = millis() + 10000;	// установим счетчик времени для зв.сигнала 10 сек.
 				settingAlarm = true;	// подаем звуковой сигнал
 										//power.heaterPower = power.inPowerLow;		// установили мощность на ТЭН 65 %
 				processMode.timeStep = 0;
@@ -901,7 +905,7 @@ void rfluxLoopMode_6() {
 		}
 			// пищалка на 10 сек.
 		case 4: {
-			if (timePauseOff < millis() && (millis() - timePauseOff) >= 10000) {
+			if (timePauseOff <= millis()) {
 				settingAlarm = false;	// выключили звуковой сигнал
 				if (adcIn[0].member == 1) {		// датчик уровня присутствует
 					processMode.step = 5;		// перешли на следующий шаг алгоритма отбора голов
@@ -1044,7 +1048,7 @@ void rfluxLoopMode_7() {
 				csOn(PWM_CH2);				// включаем клапан доп. подачи воды
 				power.heaterPower = power.inPowerLow;			// установили мощность на ТЭН 65 %
 				settingAlarm = true;		// подаем звуковой сигнал
-				timePauseOff = millis();	// обнулим счетчик времени для зв.сигнала
+				timePauseOff = millis() + 10000;	// установим счетчик времени для зв.сигнала 10 сек.
 				processMode.timeStep = 0;
 				nameProcessStep = "Стабилизация колонны";
 				processMode.step = 2;		// перешли на следующий шаг алгоритма
@@ -1053,18 +1057,18 @@ void rfluxLoopMode_7() {
 		}
 			// пищалка на 10 сек.
 		case 2: {
-			if (timePauseOff < millis() && millis() >= 10000 + timePauseOff) {
+			if (timePauseOff <= millis()) {
 				settingAlarm = false;	// выключили звуковой сигнал
+				timePauseOff = timeStabilizationReflux * 60000; // время стабилизации колонны
 				processMode.step = 3;	// перешли на следующий шаг алгоритма
 			}
 			break;
 		}
 			// ждем окончание стабилизации 20 минут
 		case 3: {
-			if (timePauseOff < millis() && (millis() - timePauseOff) >= (timeStabilizationReflux * 60000)) {
-				timePauseOff = millis();	// обнулим счетчик времени для зв.сигнала
+			if (timePauseOff <= millis()) {
+				timePauseOff = millis() + 10000;	// установим счетчик времени для зв.сигнала 10 сек.
 				settingAlarm = true;	// подаем звуковой сигнал
-										//power.heaterPower = power.inPowerLow;		// установили мощность на ТЭН 65 %
 				processMode.timeStep = 0;
 				nameProcessStep = "Отбор голов";
 				processMode.step = 4;	// перешли на следующий шаг алгоритма
@@ -1073,7 +1077,7 @@ void rfluxLoopMode_7() {
 		}
 			// пищалка на 10 сек.
 		case 4: {
-			if (timePauseOff < millis() && (millis() - timePauseOff) >= 10000) {
+			if (timePauseOff <= millis()) {
 				settingAlarm = false;	// выключили звуковой сигнал
 				if (adcIn[0].member == 1) {		// датчик уровня присутствует
 					processMode.step = 5;		// перешли на следующий шаг алгоритма отбора голов
