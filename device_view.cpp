@@ -101,7 +101,7 @@ void deviceViewLoop() {
 					tft.setCursor(0, 22);
 					if (DS_Out != 10 && temperatureSensor[DS_Out].color != ILI9341_BLACK) tft.setTextColor(temperatureSensor[DS_Out].color, ILI9341_BLACK);
 					else tft.setTextColor(ILI9341_DARKDARK, ILI9341_BLACK);
-					if (DS_Out != 10 && temperatureSensor[DS_Out].data < 100.0) tft.printf("T2:%.1f ", temperatureSensor[DS_Out].data);
+					if (DS_Out != 10 && temperatureSensor[DS_Out].data < 100.0) tft.printf("T3:%.1f ", temperatureSensor[DS_Out].data);
 					else tft.print("T3:--.-");
 					tft.setCursor(110, 22);
 					if (DS_Def != 10 && temperatureSensor[DS_Def].color != ILI9341_BLACK) tft.setTextColor(temperatureSensor[DS_Def].color, ILI9341_BLACK);

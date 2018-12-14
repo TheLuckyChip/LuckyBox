@@ -65,7 +65,8 @@ float temperatureStartPressure = 78;   //Температура кипения �
 float settingColumnShow = 0;
 float temperatureAlcoholBoil = 0;
 float temperatureCubeAlcohol;
-unsigned long timePauseOff;
+unsigned long timePauseOff = millis();			// интервал времени для применения определенных параметров или ожидания в алгоритмах
+unsigned long timeAllertInterval = millis();	// интервал времени для звукового сигнала
 unsigned long sensorTimeRead = millis();		// Интервал чтения датчиков
 unsigned long adcTimeRead = millis();			// Интервал опроста АЦП
 unsigned long touchTimeRead = millis();			// Интервал опроста тачскрина

@@ -138,6 +138,7 @@ extern byte DS_Res2;
 extern byte DS_Res3;
 extern byte DS_Res4;
 extern unsigned long timePauseOff;
+extern unsigned long timeAllertInterval;
 extern unsigned long displayTimeInterval;
 extern unsigned long adcTimeRead;
 extern unsigned long sdTimeWriteInterval;
