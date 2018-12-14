@@ -61,10 +61,10 @@
 #define		PWM_CH8_Invert	true
 #define		PWM_CH9_Invert	true
 // переменные временных интервалов на отбор голов для РК
-#define		headValveOpen	1800
+#define		headValveOpen	800
 #define		headValveClose	5000
 // используется "Полский буфер" с клапаном слива в канале PWM_CH4
-#define		Polish_Buffer
+//#define		Polish_Buffer
 // Время стабилизации в минутах
 #define		timeStabilizationReflux		20
 // Периодичность вывода температурного графика в секундах на экран
