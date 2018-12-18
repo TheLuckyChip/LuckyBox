@@ -1160,6 +1160,10 @@ void refluxLoop() {
 		}
 		if (countTemperatureCutoffAp > 0) settingAlarm = true;
 		else if (timeAllertInterval < millis()) settingAlarm = false;
+		// датчики температуры по уставке
+		if (temperatureSensor[DS_Tube].member == 1 && temperatureSensor[DS_Tube].delta > 0 && temperatureSensor[DS_Tube].allertValue >= temperatureSensor[DS_Tube].data) {
+			settingAlarm = true;
+		}
 		// датчики безопасности
 #ifdef Polish_Buffer
 		if (adcIn[1].member == 1 && adcIn[1].allert == true) settingAlarm = true;
