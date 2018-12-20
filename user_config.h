@@ -21,7 +21,7 @@
 #define		AN2				2
 #define		AN3				3
 #define		thresholdAN0	1000
-#define		thresholdAN1	2000
+#define		thresholdAN1	5000
 #define		thresholdAN2	1000
 #define		thresholdAN3	1000
 // Используем TFT дисплей или нет
@@ -61,12 +61,12 @@
 #define		PWM_CH8_Invert	true
 #define		PWM_CH9_Invert	true
 // переменные временных интервалов на отбор голов для РК
-#define		headValveOpen	750
+#define		headValveOpen	800
 #define		headValveClose	5000
 // используется "Полский буфер" с клапаном слива в канале PWM_CH4
 //#define		Polish_Buffer
 // Время стабилизации в минутах
-#define		timeStabilizationReflux		15
+#define		timeStabilizationReflux		20
 // Периодичность вывода температурного графика в секундах на экран
 #define		Display_out_temp	15
 // Периодичность записи лог.файла на SD

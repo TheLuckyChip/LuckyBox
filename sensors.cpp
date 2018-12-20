@@ -437,7 +437,7 @@ void handleProcessModeIn() {
 			
 			if (tmpAllertValue > 10) temperatureSensor[i].allertValue = tmpAllertValue;
 			else if (tmpAllertValue > 0 && tmpAllertValue != temperatureSensor[i].allertValueIn) {
-				if (settingBoilTube != tmpAllertValue) {
+				if (settingBoilTube != tmpAllertValue && temperatureSensor[i].num == 2) {
 					settingBoilTube = tmpAllertValue;
 					settingColumn = temperatureSensor[i].data;
 					pressureSensor.dataStart = pressureSensor.data;
