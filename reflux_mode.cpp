@@ -467,6 +467,8 @@ void rfluxLoopMode_2() {
 				temperatureSensor[DS_Cube].allert = false;	// сигнализация для WEB
 				processMode.allow = 0;						// вышли из режима ректификации
 				processMode.step = 0;						// обнулили шаг алгоритма
+				commandWriteSD = "Процесс завершен";
+				commandSD_en = true;
 			}
 			break;
 		}
@@ -615,6 +617,8 @@ void rfluxLoopMode_4() {
 				temperatureSensor[DS_Cube].allert = false;	// сигнализация для WEB
 				processMode.allow = 0;						// вышли из режима ректификации
 				processMode.step = 0;						// обнулили шаг алгоритма
+				commandWriteSD = "Процесс завершен";
+				commandSD_en = true;
 			}
 			break;
 		}
@@ -798,6 +802,8 @@ void rfluxLoopMode_5() {
 				temperatureSensor[DS_Cube].allert = false;	// сигнализация для WEB
 				processMode.allow = 0;						// вышли из режима ректификации
 				processMode.step = 0;						// обнулили шаг алгоритма
+				commandWriteSD = "Процесс завершен";
+				commandSD_en = true;
 			}
 			break;
 		}
@@ -959,6 +965,8 @@ void rfluxLoopMode_6() {
 				temperatureSensor[DS_Cube].allert = false;	// сигнализация для WEB
 				processMode.allow = 0;						// вышли из режима ректификации
 				processMode.step = 0;						// обнулили шаг алгоритма
+				commandWriteSD = "Процесс завершен";
+				commandSD_en = true;
 			}
 			break;
 		}
@@ -1096,6 +1104,8 @@ void rfluxLoopMode_7() {
 				temperatureSensor[DS_Cube].allert = false;	// сигнализация для WEB
 				processMode.allow = 0;						// вышли из режима ректификации
 				processMode.step = 0;						// обнулили шаг алгоритма
+				commandWriteSD = "Процесс завершен";
+				commandSD_en = true;
 			}
 			break;
 		}
