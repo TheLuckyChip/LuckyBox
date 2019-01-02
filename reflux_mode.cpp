@@ -608,6 +608,14 @@ void rfluxLoopMode_4() {
 				csOn(PWM_CH1);	// открыли клапан отбора
 			}
 
+			if (timePauseOff <= millis() && settingColumnSet == true) { // прошло 30 минут, применим уставку
+				allertSetTemperatureEn[DS_Tube] = true;
+				settingBoilTube = temperatureSensor[DS_Tube].allertValueIn;
+				settingColumn = temperatureSensor[DS_Tube].data;
+				pressureSensor.dataStart = pressureSensor.data;
+				settingColumnSet = false;
+			}
+
 			break;
 		}
 // после завершения процесса ждем 120 сек. и выключаем клапана и пищалку
