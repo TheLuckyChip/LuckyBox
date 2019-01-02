@@ -230,6 +230,7 @@ void mashingLoop() {
 			processMode.timeStep = 0;					// для расчета и вывода времени прошедшего с начала текущего шага
 			windowStartTime = millis();					// для расчетов в алгоритме PID
 			processMode.timeStart = time(nullptr);
+			nameProcessStep = "1-я пауза нагрев";
 			processMode.step = 1;			// перешли на следующий шаг алгоритма
 			break;
 		}
@@ -241,12 +242,14 @@ void mashingLoop() {
 				processMashing[0].step = 0;
 				processMashing[1].step = 1;					// для индикации обрабатываемой температурной паузы в WEB
 				windowStartTime = millis();					// для расчетов в алгоритме PID
+				nameProcessStep = "2-я пауза нагрев";
 				processMode.step = 3;			// пропускаем шаг
 			}
 			else if (Input >= Setpoint) {
 				stepTime = millis();			// для расчетов в алгоритме PID
 				settingAlarm = true;			// подаем звуковой сигнал
-				timePauseOff = millis();		// обнулим счетчик времени для зв.сигнала
+				timePauseOff = millis() + 6000;		// счетчик времени для зв.сигнала
+				nameProcessStep = "1-я пауза стаб.";
 				processMode.step = 2;			// перешли на следующий шаг алгоритма
 			}
 			processMode.timeStep = 0;			// для расчета и вывода времени прошедшего с начала текущего шага
@@ -254,6 +257,7 @@ void mashingLoop() {
 		}
 		// Ждем окончание 1-й паузы
 		case 2: {
+			if (millis() >= timePauseOff) settingAlarm = false;	// выключили звуковой сигнал
 			Setpoint = processMashing[0].temperature;	// температура которую надо поддерживать PID алгоритму (1-й шаг)
 			if (millis() >= 60000 * processMashing[0].time + stepTime && processMashing[0].stop == 0) {
 				Setpoint = processMashing[1].temperature;	// температура которую надо поддерживать PID алгоритму (2-й шаг)
@@ -261,117 +265,144 @@ void mashingLoop() {
 				processMashing[1].step = 1;					// для индикации обрабатываемой температурной паузы в WEB
 				windowStartTime = millis();					// для расчетов в алгоритме PID
 				settingAlarm = true;			// подаем звуковой сигнал
-				timePauseOff = millis();		// обнулим счетчик времени для зв.сигнала
+				timePauseOff = millis() + 6000;		// счетчик времени для зв.сигнала
+				nameProcessStep = "2-я пауза нагрев";
 				processMode.step = 3;			// перешли на следующий шаг алгоритма
 			}
-			if (timePauseOff < millis() && millis() >= 6000 + timePauseOff) settingAlarm = false;	// выключили звуковой сигнал
 			break;
 		}
+
+
+
 		// Нагрев до температуры 2-й паузы если она задана
 		case 3: {
+			if (millis() >= timePauseOff) settingAlarm = false;	// выключили звуковой сигнал
 			Setpoint = processMashing[1].temperature;	// температура которую надо поддерживать PID алгоритму (2-й шаг)
 			if ((processMashing[1].time == 0 || processMashing[1].temperature == 0) && processMashing[1].stop == 0) { // если 2-й шаг надо пропустить
 				Setpoint = processMashing[2].temperature;	// температура которую надо поддерживать PID алгоритму (3-й шаг)
 				processMashing[1].step = 0;
 				processMashing[2].step = 1;					// для индикации обрабатываемой температурной паузы в WEB
 				windowStartTime = millis();					// для расчетов в алгоритме PID
+				nameProcessStep = "3-я пауза нагрев";
 				processMode.step = 5;			// пропускаем шаг
 			}
 			else if (Input >= Setpoint) {
 				stepTime = millis();			// для расчетов в алгоритме PID
 				settingAlarm = true;			// подаем звуковой сигнал
-				timePauseOff = millis();		// обнулим счетчик времени для зв.сигнала
+				timePauseOff = millis() + 6000;		// счетчик времени для зв.сигнала
+				nameProcessStep = "2-я пауза стаб.";
 				processMode.step = 4;			// перешли на следующий шаг алгоритма
 			}
 			processMode.timeStep = 0;			// для расчета и вывода времени прошедшего с начала текущего шага
-			if (timePauseOff < millis() && millis() >= 6000 + timePauseOff) settingAlarm = false;	// выключили звуковой сигнал
 			break;
 		}
 		// Ждем окончание 2-й паузы
 		case 4: {
+			if (millis() >= timePauseOff) settingAlarm = false;	// выключили звуковой сигнал
 			Setpoint = processMashing[1].temperature;	// температура которую надо поддерживать PID алгоритму (2-й шаг)
 			if (millis() >= 60000 * processMashing[1].time + stepTime && processMashing[1].stop == 0) {
 				Setpoint = processMashing[2].temperature;	// температура которую надо поддерживать PID алгоритму (3-й шаг)
 				processMashing[1].step = 0;
 				processMashing[2].step = 1;					// для индикации обрабатываемой температурной паузы в WEB
 				windowStartTime = millis();					// для расчетов в алгоритме PID
-				settingAlarm = true;			// подаем звуковой сигнал
-				timePauseOff = millis();		// обнулим счетчик времени для зв.сигнала
+				settingAlarm = true;						// подаем звуковой сигнал
+				timePauseOff = millis() + 6000;				// счетчик времени для зв.сигнала
+				nameProcessStep = "3-я пауза нагрев";
 				processMode.step = 5;			// перешли на следующий шаг алгоритма
 			}
-			if (timePauseOff < millis() && millis() >= 6000 + timePauseOff) settingAlarm = false;	// выключили звуковой сигнал
 			break;
 		}
+
+
+
 		// Нагрев до температуры 3-й паузы если она задана
 		case 5: {
+			if (millis() >= timePauseOff) settingAlarm = false;	// выключили звуковой сигнал
 			Setpoint = processMashing[2].temperature;	// температура которую надо поддерживать PID алгоритму (3-й шаг)
 			if ((processMashing[2].time == 0 || processMashing[2].temperature == 0) && processMashing[2].stop == 0) { // если 3-й шаг надо пропустить
 				Setpoint = processMashing[3].temperature;	// температура которую надо поддерживать PID алгоритму (4-й шаг)
 				processMashing[2].step = 0;
 				processMashing[3].step = 1;					// для индикации обрабатываемой температурной паузы в WEB
 				windowStartTime = millis();					// для расчетов в алгоритме PID
+				nameProcessStep = "4-я пауза нагрев";
 				processMode.step = 7;			// пропускаем шаг
 			}
 			else if (Input >= Setpoint) {
 				stepTime = millis();			// для расчетов в алгоритме PID
 				settingAlarm = true;			// подаем звуковой сигнал
-				timePauseOff = millis();		// обнулим счетчик времени для зв.сигнала
+				timePauseOff = millis() + 6000;		// счетчик времени для зв.сигнала
+				nameProcessStep = "3-я пауза стаб.";
 				processMode.step = 6;			// перешли на следующий шаг алгоритма
 			}
 			processMode.timeStep = 0;			// для расчета и вывода времени прошедшего с начала текущего шага
-			if (timePauseOff < millis() && millis() >= 6000 +  timePauseOff) settingAlarm = false;	// выключили звуковой сигнал
 			break;
 		}
 		// Ждем окончание 3-й паузы
 		case 6: {
+			if (millis() >= timePauseOff) settingAlarm = false;	// выключили звуковой сигнал
 			Setpoint = processMashing[2].temperature;	// температура которую надо поддерживать PID алгоритму (3-й шаг)
 			if (millis() >= 60000 * processMashing[2].time + stepTime && processMashing[2].stop == 0) {
 				Setpoint = processMashing[3].temperature;	// температура которую надо поддерживать PID алгоритму (4-й шаг)
 				processMashing[2].step = 0;
 				processMashing[3].step = 1;					// для индикации обрабатываемой температурной паузы в WEB
 				windowStartTime = millis();					// для расчетов в алгоритме PID
-				settingAlarm = true;			// подаем звуковой сигнал
-				timePauseOff = millis();		// обнулим счетчик времени для зв.сигнала
+				settingAlarm = true;				// подаем звуковой сигнал
+				timePauseOff = millis() + 6000;		// счетчик времени для зв.сигнала
+				nameProcessStep = "4-я пауза нагрев";
 				processMode.step = 7;			// перешли на следующий шаг алгоритма
 			}
-			if (timePauseOff < millis() && millis() >= 6000 + timePauseOff) settingAlarm = false;	// выключили звуковой сигнал
 			break;
 		}
+
+
+
 		// Нагрев до температуры 4-й паузы если она задана
 		case 7: {
+			if (millis() >= timePauseOff) settingAlarm = false;	// выключили звуковой сигнал
 			Setpoint = processMashing[3].temperature;	// температура которую надо поддерживать PID алгоритму (4-й шаг)
 			if ((processMashing[3].time == 0 || processMashing[3].temperature == 0) && processMashing[3].stop == 0) { // если 4-й шаг надо пропустить
 				// нет последней паузы, окончание процесса
-				while (millis() < 6000 + timePauseOff);
-				settingAlarm = false;	// выключили звуковой сигнал
-				processMashing[3].step = 0;					
-				processMode.step = 0;
-				processMode.allow = 0;
+				timePauseOff = millis() + 10000;		// счетчик времени для зв.сигнала
+				settingAlarm = true;			// включили звуковой сигнал
+				processMashing[3].step = 0;
 				processMode.timeStep = 0;
+				stepTime = millis();			// для расчетов в алгоритме PID
+				processMode.step = 9;			// перешли на следующий шаг алгоритма
 			}
 			else if (Input >= Setpoint) {
 				stepTime = millis();			// для расчетов в алгоритме PID
 				settingAlarm = true;			// подаем звуковой сигнал
-				timePauseOff = millis();		// обнулим счетчик времени для зв.сигнала
+				timePauseOff = millis() + 6000;		// счетчик времени для зв.сигнала
+				nameProcessStep = "4-я пауза стаб.";
 				processMode.step = 8;			// перешли на следующий шаг алгоритма
 			}
 			processMode.timeStep = 0;			// для расчета и вывода времени прошедшего с начала текущего шага
-			if (timePauseOff < millis() && millis() >= 6000 + timePauseOff) settingAlarm = false;	// выключили звуковой сигнал
 			break;
 		}
 		// Ждем окончание 4-й паузы
 		case 8: {
+			if (millis() >= timePauseOff) settingAlarm = false;	// выключили звуковой сигнал
 			Setpoint = processMashing[3].temperature;	// температура которую надо поддерживать PID алгоритму (4-й шаг)
 			if (millis() >= 60000 * processMashing[3].time + stepTime && processMashing[3].stop == 0) {
 				settingAlarm = true;			// подаем звуковой сигнал
-				timePauseOff = millis();		// обнулим счетчик времени для зв.сигнала
-				while (millis() < 6000 + timePauseOff);
-				settingAlarm = false;	// выключили звуковой сигнал
+				timePauseOff = millis() + 10000;		// счетчик времени для зв.сигнала
 				processMashing[3].step = 0;
+				Setpoint = 0;
+				processMode.step = 9;			// перешли на следующий шаг алгоритма
+			}
+			break;
+		}
+
+
+
+		case 9: {
+			if (millis() >= timePauseOff) {
+				settingAlarm = false;		// выключили звуковой сигнал
 				processMode.step = 0;
 				processMode.allow = 0;
+				commandWriteSD = "Процесс завершен";
+				commandSD_en = true;
 			}
-			if (timePauseOff < millis() && millis() >= 6000 + timePauseOff) settingAlarm = false;	// выключили звуковой сигнал
 			break;
 		}
 	}

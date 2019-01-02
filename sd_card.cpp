@@ -58,13 +58,14 @@ void sdWriteHeader() {
 	if (day < 10) fileName += "0" + String(day) + ".log";
 	else fileName += String(day) + ".log";
 
-
 	switch (processMode.allow) {
 		case 0: fileData = "Простой"; break;
 		case 1: fileData = "Дистилляция"; break;
 		case 2: fileData = "Ректификация"; break;
 		case 3: fileData = "Затирание"; break;
 		case 4: fileData = "Пивоварение"; break;
+		case 5: fileData = ""; break;
+		case 6: fileData = ""; break;
 	}
 	//Serial.println(fileName);
 	//Serial.println(fileData);
@@ -109,7 +110,12 @@ void sdWriteLog() {
 	//Serial.println(fileData);
 	csOn(SD_CS);
 	myFile = SD.open(fileName, FILE_WRITE);
-	myFile.println(fileData);
+	if (commandSD_en == true) {
+		//myFile.println(fileData);
+		myFile.println(commandWriteSD);
+		commandSD_en = false;
+	}
+	else myFile.println(fileData);
 	myFile.close();
 	csOff(SD_CS);
 }
@@ -117,7 +123,7 @@ void sdWriteLog() {
 void logfileLoop() {
 	if (sdTimeWriteInterval <= millis()) {
 		sdTimeWriteInterval = SD_out_temp * 1000 + millis();
-		if (processMode.allow > 0 && processMode.allow < 6 && sdStatus == true) {
+		if (processMode.allow > 0 && processMode.allow < 4 && sdStatus == true) {
 
 			csOn(TFT_CS);
 			tft.fillCircle(7, 236, 3, ILI9341_RED);
@@ -129,6 +135,19 @@ void logfileLoop() {
 				sdWriteHeader();
 			}
 			sdWriteLog();
+		}
+		else if (commandSD_en == true && sdStatus == true) {
+			csOn(TFT_CS);
+			tft.fillCircle(7, 236, 3, ILI9341_RED);
+			csOff(TFT_CS);
+
+			csOn(SD_CS);
+			myFile = SD.open(fileName, FILE_WRITE);
+			myFile.println(commandWriteSD);
+			if (processMode.allow == 0) myFile.println();
+			commandSD_en = false;
+			myFile.close();
+			csOff(SD_CS);
 		}
 		else startWrite = false;
 	}
