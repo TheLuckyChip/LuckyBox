@@ -420,6 +420,7 @@ void handleProcessModeIn() {
 	int i;
 	byte n;
 	float allertReadTmp;
+	//commandWriteSD = "WebSend: ";
 	bool allertSave = false;
 	EEPROM.begin(2048);
 	// парсим ответ от браузера в переменные
@@ -513,6 +514,13 @@ void handleProcessModeIn() {
 	}
 
 	HTTP.send(200, "text/json", "{\"result\":\"ok\"}");
+
+	// для записи лога на SD
+	if (processModeOld != processMode.allow && processMode.allow < 4) {
+		if (processMode.allow == 0) commandWriteSD = "WebSend: Стоп";
+		else commandWriteSD = "WebSend: Старт";
+		commandSD_en = true;
+	}
 
 	if (processModeOld != 0 && processMode.allow == 0) {
 		processMode.step = 0;

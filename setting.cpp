@@ -92,6 +92,8 @@ unsigned long windowStartTime, stepTime;
 unsigned long stepStartTime;
 unsigned long wifiTimeInterval;
 String nameProcessStep = " ";
+String commandWriteSD;
+bool commandSD_en = false;
 bool CH1 = false;
 bool CH2 = false;
 bool CH3 = false;

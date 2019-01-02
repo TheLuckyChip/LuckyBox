@@ -467,6 +467,8 @@ void rfluxLoopMode_2() {
 				temperatureSensor[DS_Cube].allert = false;	// сигнализация для WEB
 				processMode.allow = 0;						// вышли из режима ректификации
 				processMode.step = 0;						// обнулили шаг алгоритма
+				commandWriteSD = "Процесс завершен";
+				commandSD_en = true;
 			}
 			break;
 		}
@@ -606,6 +608,14 @@ void rfluxLoopMode_4() {
 				csOn(PWM_CH1);	// открыли клапан отбора
 			}
 
+			if (timePauseOff <= millis() && settingColumnSet == true) { // прошло 30 минут, применим уставку
+				allertSetTemperatureEn[DS_Tube] = true;
+				settingBoilTube = temperatureSensor[DS_Tube].allertValueIn;
+				settingColumn = temperatureSensor[DS_Tube].data;
+				pressureSensor.dataStart = pressureSensor.data;
+				settingColumnSet = false;
+			}
+
 			break;
 		}
 // после завершения процесса ждем 120 сек. и выключаем клапана и пищалку
@@ -615,6 +625,8 @@ void rfluxLoopMode_4() {
 				temperatureSensor[DS_Cube].allert = false;	// сигнализация для WEB
 				processMode.allow = 0;						// вышли из режима ректификации
 				processMode.step = 0;						// обнулили шаг алгоритма
+				commandWriteSD = "Процесс завершен";
+				commandSD_en = true;
 			}
 			break;
 		}
@@ -798,6 +810,8 @@ void rfluxLoopMode_5() {
 				temperatureSensor[DS_Cube].allert = false;	// сигнализация для WEB
 				processMode.allow = 0;						// вышли из режима ректификации
 				processMode.step = 0;						// обнулили шаг алгоритма
+				commandWriteSD = "Процесс завершен";
+				commandSD_en = true;
 			}
 			break;
 		}
@@ -959,6 +973,8 @@ void rfluxLoopMode_6() {
 				temperatureSensor[DS_Cube].allert = false;	// сигнализация для WEB
 				processMode.allow = 0;						// вышли из режима ректификации
 				processMode.step = 0;						// обнулили шаг алгоритма
+				commandWriteSD = "Процесс завершен";
+				commandSD_en = true;
 			}
 			break;
 		}
@@ -1096,6 +1112,8 @@ void rfluxLoopMode_7() {
 				temperatureSensor[DS_Cube].allert = false;	// сигнализация для WEB
 				processMode.allow = 0;						// вышли из режима ректификации
 				processMode.step = 0;						// обнулили шаг алгоритма
+				commandWriteSD = "Процесс завершен";
+				commandSD_en = true;
 			}
 			break;
 		}

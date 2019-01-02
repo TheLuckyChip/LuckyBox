@@ -544,11 +544,14 @@ void tftOutText(int temp_min, int temp_max) {
 		tft.setTextSize(2);
 		tft.setCursor(0, 47);
 		tft.setTextColor(ILI9341_LIGHTGREY, ILI9341_BLACK);
-		if (timeOutTFT == 0) tft.print(utf8rus(" Пауза    "));
-		else if (processMode.timeStep <= 1) tft.printf("> %.1f min. = ", timeOutTFT/60);
-		else tft.printf(" %.1f min. = ", timeOutTFT/60);
-		// температура
-		tft.printf("%.1f C    ", tempOutTFT);
+		if (processMode.step < 9) {
+			if (timeOutTFT == 0) tft.print(utf8rus(" Пауза    "));
+			else if (processMode.timeStep <= 1) tft.printf("> %.1f min. = ", timeOutTFT / 60);
+			else tft.printf(" %.1f min. = ", timeOutTFT / 60);
+			// температура
+			tft.printf("%.1f C    ", tempOutTFT);
+		}
+		else tft.print(utf8rus(" Процесс завершен       "));
 	}
 
 	switch (tempBigOut) {
@@ -717,6 +720,10 @@ void tftStopLoop() {
 				CH3 = false; csOff(PWM_CH3);
 				CH4 = false; csOff(PWM_CH4);
 			}
+			if (processMode.allow < 4) {
+				commandWriteSD = "TouchSend: Стоп";
+				commandSD_en = true;
+			}
 			processMode.step = 0;
 			processMode.allow = 0;
 			touchArea = 0;
@@ -728,14 +735,20 @@ void tftStopLoop() {
 
 void getTouchArea() {
 	if (touchArea == 1) {
+		commandWriteSD = "TouchSend: Старт";
+		commandSD_en = true;
 		processMode.allow = 1;
 		processMode.step = 0;
 	}
 	else if (touchArea == 2) {
+		commandWriteSD = "TouchSend: Старт";
+		commandSD_en = true;
 		processMode.allow = 2;
 		processMode.step = 0;
 	}
 	else if (touchArea == 3) {
+		commandWriteSD = "TouchSend: Старт";
+		commandSD_en = true;
 		processMode.allow = 3;
 		processMode.step = 0;
 	}

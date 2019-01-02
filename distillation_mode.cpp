@@ -297,6 +297,8 @@ void distillationLoop() {
 				settingAlarm = false;	// выключили звуковой сигнал
 				processMode.allow = 0;  // вышли из режима дистилляции
 				processMode.step = 0;	// обнулили шаг алгоритма
+				commandWriteSD = "Процесс завершен";
+				commandSD_en = true;
 			}
 			break;
 		}
