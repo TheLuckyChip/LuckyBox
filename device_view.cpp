@@ -89,44 +89,59 @@ void deviceViewLoop() {
 				if (touchScreen == 0) {
 					// вывод температур
 					tft.setCursor(0, 2);
-					if (temperatureSensor[DS_Cube].color != ILI9341_BLACK) tft.setTextColor(temperatureSensor[DS_Cube].color, ILI9341_BLACK);
-					else tft.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
-					if (temperatureSensor[DS_Cube].data < 100.0) tft.printf("T1:%.1f ", temperatureSensor[DS_Cube].data);
+					if (DS_Cube != 10 && temperatureSensor[DS_Cube].color != ILI9341_BLACK) tft.setTextColor(temperatureSensor[DS_Cube].color, ILI9341_BLACK);
+					else tft.setTextColor(ILI9341_DARKDARK, ILI9341_BLACK);
+					if (DS_Cube != 10 && temperatureSensor[DS_Cube].data < 150.0) tft.printf("T1:%.1f ", temperatureSensor[DS_Cube].data);
+					else if (temperatureSensor[0].data < 150.0) tft.printf("T1:%.1f ", temperatureSensor[0].data);
 					else tft.print("T1:--.-");
+
 					tft.setCursor(110, 2);
-					if (temperatureSensor[DS_Tube].color != ILI9341_BLACK) tft.setTextColor(temperatureSensor[DS_Tube].color, ILI9341_BLACK);
-					else tft.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
-					if (temperatureSensor[DS_Tube].data < 100.0) tft.printf("T2:%.1f ", temperatureSensor[DS_Tube].data);
+					if (DS_Tube != 10 && temperatureSensor[DS_Tube].color != ILI9341_BLACK) tft.setTextColor(temperatureSensor[DS_Tube].color, ILI9341_BLACK);
+					else tft.setTextColor(ILI9341_DARKDARK, ILI9341_BLACK);
+					if (DS_Tube != 10 && temperatureSensor[DS_Tube].data < 150.0) tft.printf("T2:%.1f ", temperatureSensor[DS_Tube].data);
+					else if (temperatureSensor[1].data < 150.0) tft.printf("T2:%.1f ", temperatureSensor[1].data);
 					else tft.print("T2:--.-");
+					
 					tft.setCursor(0, 22);
-					if (temperatureSensor[DS_Out].color != ILI9341_BLACK) tft.setTextColor(temperatureSensor[DS_Out].color, ILI9341_BLACK);
-					else tft.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
-					if (temperatureSensor[DS_Out].data < 100.0) tft.printf("T2:%.1f ", temperatureSensor[DS_Out].data);
+					if (DS_Out != 10 && temperatureSensor[DS_Out].color != ILI9341_BLACK) tft.setTextColor(temperatureSensor[DS_Out].color, ILI9341_BLACK);
+					else tft.setTextColor(ILI9341_DARKDARK, ILI9341_BLACK);
+					if (DS_Out != 10 && temperatureSensor[DS_Out].data < 150.0) tft.printf("T3:%.1f ", temperatureSensor[DS_Out].data);
+					else if (temperatureSensor[2].data < 150.0) tft.printf("T3:%.1f ", temperatureSensor[2].data);
 					else tft.print("T3:--.-");
+					
 					tft.setCursor(110, 22);
-					if (temperatureSensor[DS_Def].color != ILI9341_BLACK) tft.setTextColor(temperatureSensor[DS_Def].color, ILI9341_BLACK);
-					else tft.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
-					if (temperatureSensor[DS_Def].data < 100.0) tft.printf("T4:%.1f ", temperatureSensor[DS_Def].data);
+					if (DS_Def != 10 && temperatureSensor[DS_Def].color != ILI9341_BLACK) tft.setTextColor(temperatureSensor[DS_Def].color, ILI9341_BLACK);
+					else tft.setTextColor(ILI9341_DARKDARK, ILI9341_BLACK);
+					if (DS_Def != 10 && temperatureSensor[DS_Def].data < 150.0) tft.printf("T4:%.1f ", temperatureSensor[DS_Def].data);
+					else if (temperatureSensor[3].data < 150.0) tft.printf("T4:%.1f ", temperatureSensor[3].data);
 					else tft.print("T4:--.-");
+					
 					tft.setCursor(0, 42);
-					if (temperatureSensor[DS_Res1].color != ILI9341_BLACK) tft.setTextColor(temperatureSensor[DS_Res1].color, ILI9341_BLACK);
-					else tft.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
-					if (temperatureSensor[DS_Res1].data < 100.0) tft.printf("T5:%.1f ", temperatureSensor[DS_Res1].data);
+					if (DS_Res1 != 10 && temperatureSensor[DS_Res1].color != ILI9341_BLACK) tft.setTextColor(temperatureSensor[DS_Res1].color, ILI9341_BLACK);
+					else tft.setTextColor(ILI9341_DARKDARK, ILI9341_BLACK);
+					if (DS_Res1 != 10 && temperatureSensor[DS_Res1].data < 150.0) tft.printf("T5:%.1f ", temperatureSensor[DS_Res1].data);
+					else if (temperatureSensor[4].data < 150.0) tft.printf("T5:%.1f ", temperatureSensor[4].data);
 					else tft.print("T5:--.-");
+					
 					tft.setCursor(110, 42);
-					if (temperatureSensor[DS_Res2].color != ILI9341_BLACK) tft.setTextColor(temperatureSensor[DS_Res2].color, ILI9341_BLACK);
-					else tft.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
-					if (temperatureSensor[DS_Res2].data < 100.0) tft.printf("T6:%.1f ", temperatureSensor[DS_Res2].data);
+					if (DS_Res2 != 10 && temperatureSensor[DS_Res2].color != ILI9341_BLACK) tft.setTextColor(temperatureSensor[DS_Res2].color, ILI9341_BLACK);
+					else tft.setTextColor(ILI9341_DARKDARK, ILI9341_BLACK);
+					if (DS_Res2 != 10 && temperatureSensor[DS_Res2].data < 150.0) tft.printf("T6:%.1f ", temperatureSensor[DS_Res2].data);
+					else if (temperatureSensor[5].data < 150.0) tft.printf("T6:%.1f ", temperatureSensor[5].data);
 					else tft.print("T6:--.-");
+					
 					tft.setCursor(0, 62);
-					if (temperatureSensor[DS_Res3].color != ILI9341_BLACK) tft.setTextColor(temperatureSensor[DS_Res3].color, ILI9341_BLACK);
-					else tft.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
-					if (temperatureSensor[DS_Res3].data < 100.0) tft.printf("T7:%.1f ", temperatureSensor[DS_Res3].data);
+					if (DS_Res3 != 10 && temperatureSensor[DS_Res3].color != ILI9341_BLACK) tft.setTextColor(temperatureSensor[DS_Res3].color, ILI9341_BLACK);
+					else tft.setTextColor(ILI9341_DARKDARK, ILI9341_BLACK);
+					if (DS_Res3 != 10 && temperatureSensor[DS_Res3].data < 150.0) tft.printf("T7:%.1f ", temperatureSensor[DS_Res3].data);
+					else if (temperatureSensor[6].data < 150.0) tft.printf("T7:%.1f ", temperatureSensor[6].data);
 					else tft.print("T7:--.-");
+					
 					tft.setCursor(110, 62);
-					if (temperatureSensor[DS_Res4].color != ILI9341_BLACK) tft.setTextColor(temperatureSensor[DS_Res4].color, ILI9341_BLACK);
-					else tft.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
-					if (temperatureSensor[DS_Res4].data < 100.0) tft.printf("T8:%.1f ", temperatureSensor[DS_Res4].data);
+					if (DS_Res4 != 10 && temperatureSensor[DS_Res4].color != ILI9341_BLACK) tft.setTextColor(temperatureSensor[DS_Res4].color, ILI9341_BLACK);
+					else tft.setTextColor(ILI9341_DARKDARK, ILI9341_BLACK);
+					if (DS_Res4 != 10 && temperatureSensor[DS_Res4].data < 150.0) tft.printf("T8:%.1f ", temperatureSensor[DS_Res4].data);
+					else if (temperatureSensor[7].data < 150.0) tft.printf("T8:%.1f ", temperatureSensor[7].data);
 					else tft.print("T8:--.-");
 
 					// вывод датчиков безопасности

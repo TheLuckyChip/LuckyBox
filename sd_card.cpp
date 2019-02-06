@@ -58,26 +58,41 @@ void sdWriteHeader() {
 	if (day < 10) fileName += "0" + String(day) + ".log";
 	else fileName += String(day) + ".log";
 
-
 	switch (processMode.allow) {
 		case 0: fileData = "Простой"; break;
 		case 1: fileData = "Дистилляция"; break;
 		case 2: fileData = "Ректификация"; break;
 		case 3: fileData = "Затирание"; break;
 		case 4: fileData = "Пивоварение"; break;
+		case 5: fileData = ""; break;
+		case 6: fileData = ""; break;
 	}
-	Serial.println(fileName);
-	Serial.println(fileData);
+	//Serial.println(fileName);
+	//Serial.println(fileData);
 	csOn(SD_CS);
 	myFile = SD.open(fileName, FILE_WRITE);
 	myFile.println(fileData);
+	if (processMode.allow == 2) {
+		switch (processMode.number) {
+		case 0: fileData = "Алгоритм: ручной режим, только сигнализация"; break;
+		case 1: fileData = "Алгоритм: Прима - головы по жидкости, тело по пару"; break;
+		case 2: fileData = "Алгоритм: РК с отбором по пару"; break;
+		case 3: fileData = "Алгоритм: РК с отбором по жидкости 1 клапан (головы - шим, тело - уставка)"; break;
+		case 4: fileData = "Алгоритм: РК с отбором по жидкости 2 клапана (головы - шим, тело - уставка)"; break;
+		case 5: fileData = "Алгоритм: РК с отбором по жидкости 2 клапана (головы - отрыт, тело - уставка)"; break;
+		case 6: fileData = "Алгоритм: БК регулировка отбора охлаждением"; break;
+		case 7: fileData = "Алгоритм: БК регулировка отбора мощностью"; break;
+		}
+		myFile.println(fileData);
+	}
 	myFile.close();
 	csOff(SD_CS);
 }
 
 void sdWriteLog() {
-	if (hour < 10) fileData = "0" + String(hour) + ":";
-	else fileData = String(hour) + ":";
+	fileData = String(nameProcessStep) + " ";// +String(processMode.timeStep) + "сек. ";
+	if (hour < 10) fileData += "0" + String(hour) + ":";
+	else fileData += String(hour) + ":";
 	if (minute < 10) fileData += "0" + String(minute) + ":";
 	else fileData += String(minute) + ":";
 	if (second < 10) fileData += "0" + String(second) + "\t";
@@ -87,19 +102,28 @@ void sdWriteLog() {
 		if (temperatureSensor[i].member != 0) fileData += String(temperatureSensor[i].name) + " = " + String(temperatureSensor[i].data) + "\t";
 	}
 	fileData += "Давление = " + String(pressureSensor.data) + "\t";
+	if (processMode.allow == 2) {
+		fileData += "Уставка дельта = " + String(temperatureSensor[DS_Tube].allertValueIn) + "\t";
+		fileData += "Уставка температура = " + String(temperatureSensor[DS_Tube].allertValue) + "\t";
+	}
 	fileData += "Мощность = " + String(power.heaterPower);
-	Serial.println(fileData);
+	//Serial.println(fileData);
 	csOn(SD_CS);
 	myFile = SD.open(fileName, FILE_WRITE);
-	myFile.println(fileData);
+	if (commandSD_en == true) {
+		//myFile.println(fileData);
+		myFile.println(commandWriteSD);
+		commandSD_en = false;
+	}
+	else myFile.println(fileData);
 	myFile.close();
 	csOff(SD_CS);
 }
 
 void logfileLoop() {
-	if ((millis() - sdTimeWriteInterval) >= (SD_out_temp * 1000)) {
-		sdTimeWriteInterval = millis();
-		if (processMode.allow > 0 && sdStatus == true) {
+	if (sdTimeWriteInterval <= millis()) {
+		sdTimeWriteInterval = SD_out_temp * 1000 + millis();
+		if (processMode.allow > 0 && processMode.allow < 4 && sdStatus == true) {
 
 			csOn(TFT_CS);
 			tft.fillCircle(7, 236, 3, ILI9341_RED);
@@ -111,6 +135,19 @@ void logfileLoop() {
 				sdWriteHeader();
 			}
 			sdWriteLog();
+		}
+		else if (commandSD_en == true && sdStatus == true) {
+			csOn(TFT_CS);
+			tft.fillCircle(7, 236, 3, ILI9341_RED);
+			csOff(TFT_CS);
+
+			csOn(SD_CS);
+			myFile = SD.open(fileName, FILE_WRITE);
+			myFile.println(commandWriteSD);
+			if (processMode.allow == 0) myFile.println();
+			commandSD_en = false;
+			myFile.close();
+			csOff(SD_CS);
 		}
 		else startWrite = false;
 	}

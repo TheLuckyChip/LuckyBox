@@ -13,7 +13,7 @@ ESP8266WebServer HTTP;
 // PID
 PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
 
-String curVersion = "2.0RC8";
+String curVersion = "2.0RC9";
 // Определяем переменные wifi
 String _ssid;      // Для хранения SSID
 String _password;  // Для хранения пароля сети
@@ -32,14 +32,14 @@ int timezone;                 // часовой пояс GTM
 byte DS_Count;
 int temp_min;
 int temp_max;
-byte DS_Cube = 2;
-byte DS_Tube = 1;
-byte DS_Out = 0;
-byte DS_Def = 3;
-byte DS_Res1 = 4;
-byte DS_Res2 = 5;
-byte DS_Res3 = 6;
-byte DS_Res4 = 7;
+byte DS_Cube = 10;
+byte DS_Tube = 10;
+byte DS_Out = 10;
+byte DS_Def = 10;
+byte DS_Res1 = 10;
+byte DS_Res2 = 10;
+byte DS_Res3 = 10;
+byte DS_Res4 = 10;
 struct TPL_Str tpl2web;
 struct DS_Str temperatureSensor[DS_Cnt];
 struct BMP_Str pressureSensor;
@@ -65,7 +65,8 @@ float temperatureStartPressure = 78;   //Температура кипения �
 float settingColumnShow = 0;
 float temperatureAlcoholBoil = 0;
 float temperatureCubeAlcohol;
-unsigned long timePauseOff;
+unsigned long timePauseOff = millis();			// интервал времени для применения определенных параметров или ожидания в алгоритмах
+unsigned long timeAllertInterval = millis();	// интервал времени для звукового сигнала
 unsigned long sensorTimeRead = millis();		// Интервал чтения датчиков
 unsigned long adcTimeRead = millis();			// Интервал опроста АЦП
 unsigned long touchTimeRead = millis();			// Интервал опроста тачскрина
@@ -91,6 +92,8 @@ unsigned long windowStartTime, stepTime;
 unsigned long stepStartTime;
 unsigned long wifiTimeInterval;
 String nameProcessStep = " ";
+String commandWriteSD;
+bool commandSD_en = false;
 bool CH1 = false;
 bool CH2 = false;
 bool CH3 = false;

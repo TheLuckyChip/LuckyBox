@@ -30,7 +30,7 @@ void initPressureSensor()
 {
 	pressureSensor.status = 0;
 #if defined Pressure_BMP085 || defined Pressure_BMP180
-	if (!bmp.begin(BMP085_HIGHRES)) Serial.println("Ooops, no Pressure sensor BMP085 detected ... Check your wiring or I2C Addres!");
+	if (!bmp.begin(BMP085_STANDARD)) Serial.println("Ooops, no Pressure sensor BMP085 detected ... Check your wiring or I2C Addres!");
 	else pressureSensor.status = 1;
 #elif defined Pressure_BMP280
 	if (!bmp.begin(0x76, 0x58))	Serial.println("Ooops, no Pressure sensor BMP280 detected ... Check your wiring or I2C Addres!");
@@ -111,7 +111,7 @@ void dallSearch()
 	DS_Count = i;
 	for (k = i; k < DS_Cnt; k++) { temperatureSensor[k].data = 150.0; }
 	// проверим соответствие расстановки датчиков
-	for (i = 0; i < DS_Count; i++) {                           // ПРОВЕРИТЬ DS_Cnt ВМЕСТО DS_Count !!!!~!~~~~~!!!!!
+	for (i = 0; i < DS_Count; i++) {
 		newDS = true;
 		for (k = 0; k < DS_Cnt; k++) {
 			// нашли уже прописанный датчик
@@ -119,16 +119,24 @@ void dallSearch()
 				&& temperatureSensor[i].addrSearch[2] == temperatureSensor[k].addr[2] && temperatureSensor[i].addrSearch[3] == temperatureSensor[k].addr[3]
 				&& temperatureSensor[i].addrSearch[4] == temperatureSensor[k].addr[4] && temperatureSensor[i].addrSearch[5] == temperatureSensor[k].addr[5]
 				&& temperatureSensor[i].addrSearch[6] == temperatureSensor[k].addr[6] && temperatureSensor[i].addrSearch[7] == temperatureSensor[k].addr[7]) {
-				// i = найденный датчик, k = прописанный в EEPROM датчик
-				temperatureSensor[i].allert = temperatureSensor[k].allert;
-				temperatureSensor[i].color = temperatureSensor[k].color;
-				temperatureSensor[i].member = temperatureSensor[k].member;
-				temperatureSensor[i].num = temperatureSensor[k].num;
-				temperatureSensor[i].priority = temperatureSensor[k].priority;
-				for (t = 0; t < 8; t++) { temperatureSensor[i].addr[t] = temperatureSensor[i].addrSearch[t]; }
-				for (t = 0; t < 60; t++) { temperatureSensor[i].name[t] = temperatureSensor[k].name[t]; }
-				newDS = false;
-				//break;
+					// i = найденный датчик, k = прописанный в EEPROM датчик
+					temperatureSensor[i].allert = temperatureSensor[k].allert;
+					temperatureSensor[i].color = temperatureSensor[k].color;
+					temperatureSensor[i].member = temperatureSensor[k].member;
+					temperatureSensor[i].num = temperatureSensor[k].num;
+					temperatureSensor[i].priority = temperatureSensor[k].priority;
+					for (t = 0; t < 8; t++) { temperatureSensor[i].addr[t] = temperatureSensor[i].addrSearch[t]; }
+					for (t = 0; t < 60; t++) { temperatureSensor[i].name[t] = temperatureSensor[k].name[t]; }
+					newDS = false;
+
+					if (temperatureSensor[i].num == 1) DS_Cube = i;
+					else if (temperatureSensor[i].num == 2) DS_Tube = i;
+					else if (temperatureSensor[i].num == 3) DS_Out = i;
+					else if (temperatureSensor[i].num == 4) DS_Def = i;
+					else if (temperatureSensor[i].num == 5) DS_Res1 = i;
+					else if (temperatureSensor[i].num == 6) DS_Res2 = i;
+					else if (temperatureSensor[i].num == 7) DS_Res3 = i;
+					else if (temperatureSensor[i].num == 8) DS_Res4 = i;
 			}
 		}
 		// иначе датчик отсутствует в нашем списке
@@ -188,25 +196,11 @@ void dallSearch()
 	Serial.println(temperatureSensor[7].num);
 #endif
 	for (i = 0; i < DS_Cnt; i++) {
-		if (temperatureSensor[i].num == 1) DS_Cube = i;
-		else if (temperatureSensor[i].num == 2) DS_Tube = i;
-		else if (temperatureSensor[i].num == 3) DS_Out = i;
-		else if (temperatureSensor[i].num == 4) DS_Def = i;
-		else if (temperatureSensor[i].num == 5) DS_Res1 = i;
-		else if (temperatureSensor[i].num == 6) DS_Res2 = i;
-		else if (temperatureSensor[i].num == 7) DS_Res3 = i;
-		else if (temperatureSensor[i].num == 8) DS_Res4 = i;
+		temperatureSensor[i].dataT[0] = 150.0;
+		temperatureSensor[i].dataT[1] = 150.0;
+		temperatureSensor[i].dataT[2] = 150.0;
+		temperatureSensor[i].dataT[3] = 150.0;
 	}
-
-
-	//temperatureSensor[0].num = 1;
-	//temperatureSensor[1].num = 2;
-	//temperatureSensor[2].num = 3;
-	//temperatureSensor[3].num = 4;
-	//temperatureSensor[4].num = 5;
-	//temperatureSensor[5].num = 6;
-	//temperatureSensor[6].num = 7;
-	//temperatureSensor[7].num = 8;
 	
 	// установим разрядность, и пропустим симофоры
 	for (i = 0; i < DS_Count; i++) {
@@ -258,9 +252,6 @@ void dallRead()
 	ds.reset();
 	ds.write(0xCC); //Обращение ко всем датчикам
 	ds.write(0x44); //Команда на конвертацию
-
-	//temperatureAlcoholBoil = 78.91 - (780 - pressureSensor.data)*0.038; // расчет температуры кипения спирта при данном давлении
-	//settingColumnShow = settingColumn + (temperatureAlcoholBoil - temperatureStartPressure); // расчет уставки при изменившемся атмосферном давлении
 
 	// расчет остатка спирта в кубе
 	if (temperatureSensor[DS_Cube].data > 80) {
@@ -429,6 +420,7 @@ void handleProcessModeIn() {
 	int i;
 	byte n;
 	float allertReadTmp;
+	//commandWriteSD = "WebSend: ";
 	bool allertSave = false;
 	EEPROM.begin(2048);
 	// парсим ответ от браузера в переменные
@@ -446,9 +438,10 @@ void handleProcessModeIn() {
 			
 			if (tmpAllertValue > 10) temperatureSensor[i].allertValue = tmpAllertValue;
 			else if (tmpAllertValue > 0 && tmpAllertValue != temperatureSensor[i].allertValueIn) {
-				if (settingBoilTube != tmpAllertValue) {
+				if (settingBoilTube != tmpAllertValue && temperatureSensor[i].num == 2) {
 					settingBoilTube = tmpAllertValue;
 					settingColumn = temperatureSensor[i].data;
+					pressureSensor.dataStart = pressureSensor.data;
 				}
 			}
 			else if (tmpAllertValue == 0 && temperatureSensor[i].delta != 0) {
@@ -521,6 +514,13 @@ void handleProcessModeIn() {
 	}
 
 	HTTP.send(200, "text/json", "{\"result\":\"ok\"}");
+
+	// для записи лога на SD
+	if (processModeOld != processMode.allow && processMode.allow < 4) {
+		if (processMode.allow == 0) commandWriteSD = "WebSend: Стоп";
+		else commandWriteSD = "WebSend: Старт";
+		commandSD_en = true;
+	}
 
 	if (processModeOld != 0 && processMode.allow == 0) {
 		processMode.step = 0;

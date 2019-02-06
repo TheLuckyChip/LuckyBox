@@ -45,6 +45,7 @@ struct DS_Str
 struct BMP_Str
 {
 	float		data;			// значение атмосферного давления
+	float		dataStart;		// значение атмосферного давления для коррекции дельты
 	bool		status;			// наличие датчика
 	uint16_t	color;			// цвет для графика
 	bool		member;			// участвует в выводе или нет
@@ -137,6 +138,7 @@ extern byte DS_Res2;
 extern byte DS_Res3;
 extern byte DS_Res4;
 extern unsigned long timePauseOff;
+extern unsigned long timeAllertInterval;
 extern unsigned long displayTimeInterval;
 extern unsigned long adcTimeRead;
 extern unsigned long sdTimeWriteInterval;
@@ -178,6 +180,8 @@ extern unsigned long windowStartTime, stepTime;
 extern unsigned long stepStartTime;
 extern unsigned long wifiTimeInterval;
 extern String nameProcessStep;
+extern String commandWriteSD;
+extern bool commandSD_en;
 extern bool CH1;
 extern bool CH2;
 extern bool CH3;

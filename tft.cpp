@@ -200,21 +200,25 @@ void tftStartForGraph() {
 	tft.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
 	tft.setTextSize(2);
 	tft.setCursor(0, 2);
-	if (processMode.allow == 1) drawScreen4bitMonoBitmap(0, 10, 32, 32, imageProcessDistillation);//tft.printf("Distil.");
-	else if (processMode.allow == 2) drawScreen4bitMonoBitmap(0, 10, 32, 32, imageProcessRectification);//tft.printf("Reflux");
-	else if (processMode.allow == 3) drawScreen4bitMonoBitmap(0, 10, 32, 32, imageProcessMashing);//tft.printf("Mashing");
-	else if (processMode.allow == 4) tft.printf("PID set");
+	if (processMode.allow == 1) drawScreen4bitMonoBitmap(0, 10, 32, 32, imageProcessDistillation);
+	else if (processMode.allow == 2) drawScreen4bitMonoBitmap(0, 10, 32, 32, imageProcessRectification);
+	else if (processMode.allow == 3) drawScreen4bitMonoBitmap(0, 10, 32, 32, imageProcessMashing);
+	else if (processMode.allow == 4) tft.print("PID set");
 
-	if (temperatureSensor[DS_Cube].color == 0) dallas_graph[0].color = 0xFC4C; // розовый
+	if (DS_Cube == 10) dallas_graph[0].color = ILI9341_DARKDARK;
+	else if (temperatureSensor[DS_Cube].color == 0) dallas_graph[0].color = 0xFC4C; // розовый
 	else dallas_graph[0].color = temperatureSensor[DS_Cube].color;
 
-	if (temperatureSensor[DS_Tube].color == 0) dallas_graph[1].color = ILI9341_YELLOW; // желтый
+	if (DS_Tube == 10) dallas_graph[1].color = ILI9341_DARKDARK;
+	else if (temperatureSensor[DS_Tube].color == 0) dallas_graph[1].color = ILI9341_YELLOW; // желтый
 	else dallas_graph[1].color = temperatureSensor[DS_Tube].color;
 	
-	if (temperatureSensor[DS_Out].color == 0) dallas_graph[2].color = 0x1EE1; // зеленый
+	if (DS_Out == 10) dallas_graph[2].color = ILI9341_DARKDARK;
+	else if (temperatureSensor[DS_Out].color == 0) dallas_graph[2].color = 0x1EE1; // зеленый
 	else dallas_graph[2].color = temperatureSensor[DS_Out].color;
 
-	if (temperatureSensor[DS_Def].color == 0) dallas_graph[3].color = 0x419F; // светло синий
+	if (DS_Def == 10) dallas_graph[3].color = ILI9341_DARKDARK;
+	else if (temperatureSensor[DS_Def].color == 0) dallas_graph[3].color = 0x419F; // светло синий
 	else dallas_graph[3].color = temperatureSensor[DS_Def].color;
 
 	int temp_graph_1 = temperatureSensor[DS_Cube].data * 10.0;
@@ -363,68 +367,68 @@ void tftOutText(int temp_min, int temp_max) {
 		case 1: { 
 			tft.setCursor(26, DW_Y_axis + 5);
 			tft.setTextColor(dallas_graph[1].color, ILI9341_BLACK);
-			if (temperatureSensor[DS_Tube].data < 100.0) tft.printf("T2:%.1f ", temperatureSensor[DS_Tube].data);
+			if (DS_Tube != 10 && temperatureSensor[DS_Tube].data < 100.0) tft.printf("T2:%.1f ", temperatureSensor[DS_Tube].data);
 			else tft.printf("T2:--.-");
 
 			tft.setCursor(30 + 100, DW_Y_axis + 5);
 			tft.setTextColor(dallas_graph[2].color, ILI9341_BLACK);
-			if (temperatureSensor[DS_Out].data < 100.0) tft.printf("T3:%.1f ", temperatureSensor[DS_Out].data);
+			if (DS_Out != 10 && temperatureSensor[DS_Out].data < 100.0) tft.printf("T3:%.1f ", temperatureSensor[DS_Out].data);
 			else tft.printf("T3:--.-");
 
 			tft.setCursor(30 + 204, DW_Y_axis + 5);
 			tft.setTextColor(dallas_graph[3].color, ILI9341_BLACK);
-			if (temperatureSensor[DS_Def].data < 100.0) tft.printf("T4:%.1f ", temperatureSensor[DS_Def].data);
+			if (DS_Def != 10 && temperatureSensor[DS_Def].data < 100.0) tft.printf("T4:%.1f ", temperatureSensor[DS_Def].data);
 			else tft.printf("T4:--.-");
 			break;
 		}
 		case 2: {
 			tft.setCursor(26, DW_Y_axis + 5);
 			tft.setTextColor(dallas_graph[0].color, ILI9341_BLACK);
-			if (temperatureSensor[DS_Cube].data < 100.0) tft.printf("T1:%.1f ", temperatureSensor[DS_Cube].data);
+			if (DS_Cube != 10 && temperatureSensor[DS_Cube].data < 100.0) tft.printf("T1:%.1f ", temperatureSensor[DS_Cube].data);
 			else tft.printf("T1:--.-");
 
 			tft.setCursor(30 + 100, DW_Y_axis + 5);
 			tft.setTextColor(dallas_graph[2].color, ILI9341_BLACK);
-			if (temperatureSensor[DS_Out].data < 100.0) tft.printf("T3:%.1f ", temperatureSensor[DS_Out].data);
+			if (DS_Out != 10 && temperatureSensor[DS_Out].data < 100.0) tft.printf("T3:%.1f ", temperatureSensor[DS_Out].data);
 			else tft.printf("T3:--.-");
 
 			tft.setCursor(30 + 204, DW_Y_axis + 5);
 			tft.setTextColor(dallas_graph[3].color, ILI9341_BLACK);
-			if (temperatureSensor[DS_Def].data < 100.0) tft.printf("T4:%.1f ", temperatureSensor[DS_Def].data);
+			if (DS_Def != 10 && temperatureSensor[DS_Def].data < 100.0) tft.printf("T4:%.1f ", temperatureSensor[DS_Def].data);
 			else tft.printf("T4:--.-");
 			break;
 		}
 		case 3: {
 			tft.setCursor(26, DW_Y_axis + 5);
 			tft.setTextColor(dallas_graph[0].color, ILI9341_BLACK);
-			if (temperatureSensor[DS_Cube].data < 100.0) tft.printf("T1:%.1f ", temperatureSensor[DS_Cube].data);
+			if (DS_Cube != 10 && temperatureSensor[DS_Cube].data < 100.0) tft.printf("T1:%.1f ", temperatureSensor[DS_Cube].data);
 			else tft.printf("T1:--.-");
 
 			tft.setCursor(30 + 100, DW_Y_axis + 5);
 			tft.setTextColor(dallas_graph[1].color, ILI9341_BLACK);
-			if (temperatureSensor[DS_Tube].data < 100.0) tft.printf("T2:%.1f ", temperatureSensor[DS_Tube].data);
+			if (DS_Tube != 10 && temperatureSensor[DS_Tube].data < 100.0) tft.printf("T2:%.1f ", temperatureSensor[DS_Tube].data);
 			else tft.printf("T2:--.-");
 
 			tft.setCursor(30 + 204, DW_Y_axis + 5);
 			tft.setTextColor(dallas_graph[3].color, ILI9341_BLACK);
-			if (temperatureSensor[DS_Def].data < 100.0) tft.printf("T4:%.1f ", temperatureSensor[DS_Def].data);
+			if (DS_Def != 10 && temperatureSensor[DS_Def].data < 100.0) tft.printf("T4:%.1f ", temperatureSensor[DS_Def].data);
 			else tft.printf("T4:--.-");
 			break;
 		}
 		case 4: {
 			tft.setCursor(26, DW_Y_axis + 5);
 			tft.setTextColor(dallas_graph[0].color, ILI9341_BLACK);
-			if (temperatureSensor[DS_Cube].data < 100.0) tft.printf("T1:%.1f ", temperatureSensor[DS_Cube].data);
+			if (DS_Cube != 10 && temperatureSensor[DS_Cube].data < 100.0) tft.printf("T1:%.1f ", temperatureSensor[DS_Cube].data);
 			else tft.printf("T1:--.-");
 
 			tft.setCursor(30 + 100, DW_Y_axis + 5);
 			tft.setTextColor(dallas_graph[1].color, ILI9341_BLACK);
-			if (temperatureSensor[DS_Tube].data < 100.0) tft.printf("T2:%.1f ", temperatureSensor[DS_Tube].data);
+			if (DS_Tube != 10 && temperatureSensor[DS_Tube].data < 100.0) tft.printf("T2:%.1f ", temperatureSensor[DS_Tube].data);
 			else tft.printf("T2:--.-");
 
 			tft.setCursor(30 + 204, DW_Y_axis + 5);
 			tft.setTextColor(dallas_graph[2].color, ILI9341_BLACK);
-			if (temperatureSensor[DS_Out].data < 100.0) tft.printf("T3:%.1f ", temperatureSensor[DS_Out].data);
+			if (DS_Out != 10 && temperatureSensor[DS_Out].data < 100.0) tft.printf("T3:%.1f ", temperatureSensor[DS_Out].data);
 			else tft.printf("T3:--.-");
 			break;
 		}
@@ -540,11 +544,14 @@ void tftOutText(int temp_min, int temp_max) {
 		tft.setTextSize(2);
 		tft.setCursor(0, 47);
 		tft.setTextColor(ILI9341_LIGHTGREY, ILI9341_BLACK);
-		if (timeOutTFT == 0) tft.print(utf8rus(" Пауза    "));
-		else if (processMode.timeStep <= 1) tft.printf("> %.1f min. = ", timeOutTFT/60);
-		else tft.printf(" %.1f min. = ", timeOutTFT/60);
-		// температура
-		tft.printf("%.1f C    ", tempOutTFT);
+		if (processMode.step < 9) {
+			if (timeOutTFT == 0) tft.print(utf8rus(" Пауза    "));
+			else if (processMode.timeStep <= 1) tft.printf("> %.1f min. = ", timeOutTFT / 60);
+			else tft.printf(" %.1f min. = ", timeOutTFT / 60);
+			// температура
+			tft.printf("%.1f C    ", tempOutTFT);
+		}
+		else tft.print(utf8rus(" Процесс завершен       "));
 	}
 
 	switch (tempBigOut) {
@@ -713,6 +720,10 @@ void tftStopLoop() {
 				CH3 = false; csOff(PWM_CH3);
 				CH4 = false; csOff(PWM_CH4);
 			}
+			if (processMode.allow < 4) {
+				commandWriteSD = "TouchSend: Стоп";
+				commandSD_en = true;
+			}
 			processMode.step = 0;
 			processMode.allow = 0;
 			touchArea = 0;
@@ -724,14 +735,20 @@ void tftStopLoop() {
 
 void getTouchArea() {
 	if (touchArea == 1) {
+		commandWriteSD = "TouchSend: Старт";
+		commandSD_en = true;
 		processMode.allow = 1;
 		processMode.step = 0;
 	}
 	else if (touchArea == 2) {
+		commandWriteSD = "TouchSend: Старт";
+		commandSD_en = true;
 		processMode.allow = 2;
 		processMode.step = 0;
 	}
 	else if (touchArea == 3) {
+		commandWriteSD = "TouchSend: Старт";
+		commandSD_en = true;
 		processMode.allow = 3;
 		processMode.step = 0;
 	}

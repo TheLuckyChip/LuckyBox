@@ -3,6 +3,53 @@
 byte touchRead = 0;
 
 void displayLoop() {
+	// Вывод на экран
+	if ((millis() - displayTimeInterval) >= 1000) {
+		displayTimeInterval = millis();
+#if defined TFT_Display
+		// проверка сохраненных областей тачскрина
+		if (touchArea == 10 || touchScreen != 0) {
+			tftStopLoop();
+		}
+		else if (touchArea == 11 && touchScreen == 0) {
+			touchArea = 0;
+			tempBigOutOld = tempBigOut;
+			switch (tempBigOut) {
+			case 1: tempBigOut = 2; break;
+			case 2: tempBigOut = 1; break;
+			case 3: tempBigOut = 1; break;
+			case 4: tempBigOut = 1; break;
+			}
+		}
+		else if (touchArea == 12 && touchScreen == 0) {
+			touchArea = 0;
+			tempBigOutOld = tempBigOut;
+			switch (tempBigOut) {
+			case 1: tempBigOut = 3; break;
+			case 2: tempBigOut = 3; break;
+			case 3: tempBigOut = 2; break;
+			case 4: tempBigOut = 2; break;
+			}
+		}
+		else if (touchArea == 13 && touchScreen == 0) {
+			touchArea = 0;
+			tempBigOutOld = tempBigOut;
+			switch (tempBigOut) {
+			case 1: tempBigOut = 4; break;
+			case 2: tempBigOut = 4; break;
+			case 3: tempBigOut = 4; break;
+			case 4: tempBigOut = 3; break;
+			}
+		}
+
+		// вывод рабочих экранов
+		if (processMode.allow != 0 && processMode.allow != 6 && processMode.step != 0 && touchScreen == 0) tftOutGraphDisplay(); // вывод на дисплей графиков, если он есть
+		DefCubOut++;
+#endif
+	}
+}
+
+void touchLoop() {
 	// опрос тачскрина
 #if defined TFT_Display
 	if (touch_in == true) {
@@ -69,57 +116,7 @@ void displayLoop() {
 			touch_in = false;
 			attachInterrupt(intTouch, touchscreenUpdateSet, FALLING);
 		}
-		
-	}
 
-	if (touchArea == 10 || touchScreen != 0) {
-		tftStopLoop();
-	}
-	else if (touchArea == 11 && touchScreen == 0) {
-		touchArea = 0;
-		tempBigOutOld = tempBigOut;
-		switch (tempBigOut) {
-		case 1: tempBigOut = 2; break;
-		case 2: tempBigOut = 1; break;
-		case 3: tempBigOut = 1; break;
-		case 4: tempBigOut = 1; break;
-		}
-	}
-	else if (touchArea == 12 && touchScreen == 0) {
-		touchArea = 0;
-		tempBigOutOld = tempBigOut;
-		switch (tempBigOut) {
-		case 1: tempBigOut = 3; break;
-		case 2: tempBigOut = 3; break;
-		case 3: tempBigOut = 2; break;
-		case 4: tempBigOut = 2; break;
-		}
-	}
-	else if (touchArea == 13 && touchScreen == 0) {
-		touchArea = 0;
-		tempBigOutOld = tempBigOut;
-		switch (tempBigOut) {
-		case 1: tempBigOut = 4; break;
-		case 2: tempBigOut = 4; break;
-		case 3: tempBigOut = 4; break;
-		case 4: tempBigOut = 3; break;
-		}
 	}
 #endif
-
-	// Вывод на экран
-	if ((millis() - displayTimeInterval) >= 1000) {
-		displayTimeInterval = millis();
-#if defined TFT_Display
-		if (processMode.allow != 0 && processMode.allow != 6 && processMode.step != 0 && touchScreen == 0) tftOutGraphDisplay(); // вывод на дисплей графиков, если он есть
-		DefCubOut++;
-#endif
-	}
-	// проверка WiFi
-	/*if ((millis() - wifiTimeInterval) >= (setRestartWiFi * 1000)) {
-		wifiTimeInterval = millis();
-
-		reconnectWiFi();
-
-	}*/
 }
