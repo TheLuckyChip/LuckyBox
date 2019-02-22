@@ -20,10 +20,10 @@
 #define		AN1				1
 #define		AN2				2
 #define		AN3				3
-#define		thresholdAN0	1000
-#define		thresholdAN1	5000
-#define		thresholdAN2	1000
-#define		thresholdAN3	1000
+#define		thresholdAN0	2000
+#define		thresholdAN1	20000
+#define		thresholdAN2	2000
+#define		thresholdAN3	2000
 // Используем TFT дисплей или нет
 #define		TFT_Display
 // ТачСкрин
@@ -58,11 +58,12 @@
 #define		PWM_CH5_Invert	false
 #define		PWM_CH6_Invert	false
 #define		PWM_CH7_Invert	false
-#define		PWM_CH8_Invert	true
-#define		PWM_CH9_Invert	true
+#define		PWM_CH8_Invert	false
+#define		PWM_CH9_Invert	false
 // переменные временных интервалов на отбор голов для РК
 #define		headValveOpen	800
 #define		headValveClose	5000
+#define		valveCiclePeriod	10000  // период работы клапанов в импульсном режиме
 // используется "Полский буфер" с клапаном слива в канале PWM_CH4
 //#define		Polish_Buffer
 // Время стабилизации в минутах

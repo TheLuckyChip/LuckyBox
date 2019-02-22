@@ -770,10 +770,10 @@ void tftMenuLoop() {
 		csOff(PWM_CH2);
 		csOff(PWM_CH3);
 		csOff(PWM_CH4);
-		csOff(PWM_CH5);
-		csOff(PWM_CH6);
-		csOff(PWM_CH7);
-		csOff(PWM_CH8);
+		//csOff(PWM_CH5);
+		//csOff(PWM_CH6);
+		//csOff(PWM_CH7);
+		//csOff(PWM_CH8);
 	}
 #if defined TFT_Display
 	// processMode.num = 0 вывод экрана, processMode.num = 1 ждем нажатия

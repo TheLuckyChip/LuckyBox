@@ -41,31 +41,46 @@ void csOff(byte ch) {
 		if (pwmOut[7].invert == false) pwm.setPWM(ch, 4096, 0);
 		else pwm.setPWM(ch, 0, 4096);
 	}
-	else if (ch == PWM_CH9) {
-		pwmOut[8].allert = 0;
-		if (pwmOut[8].invert == false) pwm.setPWM(ch, 4096, 0);
-		else pwm.setPWM(ch, 0, 4096);
-	}
 	else pwm.setPWM(ch, 4096, 0);
 }
 // включение канала
 void csOn(byte ch) {
 	if (ch == PWM_CH1) {
+		// включаем доп. подачу напряжения
+		if (pwmOut[8].invert == false) pwm.setPWM(PWM_CH9, 0, 4096);
+		else pwm.setPWM(PWM_CH9, 4096, 0);
+		timeSetHighVoltage = millis() + 500;
+		// включаем сам клапан
 		pwmOut[0].allert = 1;
 		if (pwmOut[0].invert == false) pwm.setPWM(ch, 0, 4096);
 		else pwm.setPWM(ch, 4096, 0);
 	}
 	else if (ch == PWM_CH2) {
+		// включаем доп. подачу напряжения
+		if (pwmOut[8].invert == false) pwm.setPWM(PWM_CH9, 0, 4096);
+		else pwm.setPWM(PWM_CH9, 4096, 0);
+		timeSetHighVoltage = millis() + 500;
+		// включаем сам клапан
 		pwmOut[1].allert = 1;
 		if (pwmOut[1].invert == false) pwm.setPWM(ch, 0, 4096);
 		else pwm.setPWM(ch, 4096, 0);
 	}
 	else if (ch == PWM_CH3) {
+		// включаем доп. подачу напряжения
+		if (pwmOut[8].invert == false) pwm.setPWM(PWM_CH9, 0, 4096);
+		else pwm.setPWM(PWM_CH9, 4096, 0);
+		timeSetHighVoltage = millis() + 500;
+		// включаем сам клапан
 		pwmOut[2].allert = 1;
 		if (pwmOut[2].invert == false) pwm.setPWM(ch, 0, 4096);
 		else pwm.setPWM(ch, 4096, 0);
 	}
 	else if (ch == PWM_CH4) {
+		// включаем доп. подачу напряжения
+		if (pwmOut[8].invert == false) pwm.setPWM(PWM_CH9, 0, 4096);
+		else pwm.setPWM(PWM_CH9, 4096, 0);
+		timeSetHighVoltage = millis() + 500;
+		// включаем сам клапан
 		pwmOut[3].allert = 1;
 		if (pwmOut[3].invert == false) pwm.setPWM(ch, 0, 4096);
 		else pwm.setPWM(ch, 4096, 0);
@@ -90,13 +105,10 @@ void csOn(byte ch) {
 		if (pwmOut[7].invert == false) pwm.setPWM(ch, 0, 4096);
 		else pwm.setPWM(ch, 4096, 0);
 	}
-	else if (ch == PWM_CH9) {
-		pwmOut[8].allert = 1;
-		if (pwmOut[8].invert == false) pwm.setPWM(ch, 0, 4096);
-		else pwm.setPWM(ch, 4096, 0);
+	else {
+		pwm.setPWM(ch, 0, 4096);
+		delay(2);
 	}
-	else pwm.setPWM(ch, 0, 4096);
-	delay(2);
 }
 // задать скважность ШИМ
 void setPWM(byte ch, uint16_t Pon, uint16_t Poff) {

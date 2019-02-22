@@ -7,6 +7,9 @@ bool beepEnd;
 bool allertSetTemperatureEn[8];
 bool settingColumnSet;
 
+bool OnOff = false;
+unsigned long timeValveMs;
+
 void EEPROM_float_write_refl(int addr, float val) {
 	byte *x = (byte *)&val;
 	for (byte i = 0; i < 4; i++) EEPROM.write(i + addr, x[i]);
@@ -1120,8 +1123,86 @@ void rfluxLoopMode_7() {
 	}
 }
 // БК регулировка мощностью
+// Для теста импульсный режим работы клапанов на отбор голов и тела
 void rfluxLoopMode_8() {
-	rfluxLoopMode_1();
+
+	unsigned long timeOn = (valveCiclePeriod * power.inPowerHigh) / 100;
+	unsigned long timeOff = valveCiclePeriod - timeOn;
+
+
+	switch (processMode.step) {
+		// пришли при старте ректификации
+	case 0: {
+		loadEepromReflux();
+#if defined TFT_Display
+		// подготовка данных для вывода на TFT
+		csOn(TFT_CS);
+		tftStartForGraph();
+		displayTimeInterval = millis() + 1000;
+		DefCubOut = Display_out_temp;
+		csOff(TFT_CS);
+#endif
+		tempBigOut = 2;
+		senseHeadcontrol = adcIn[0].member;
+		power.heaterStatus = 1;		// включили нагрев
+		power.heaterPower = power.inPowerHigh;		// установили мощность на ТЭН 100 %
+		processMode.timeStep = 0;
+		nameProcessStep = "Нагрев куба";
+		processMode.step = 1;	// перешли на следующий шаг алгоритма
+		countHaedEnd = 0;
+#if defined Polish_Buffer
+		csOn(PWM_CH4);			// клапан в буфер открыт
+#endif
+		timeValveMs = millis() + timeOn;
+		break;
+	}
+			// ждем начала подъема температуры в царге и включаем воду на охлаждение и понижаем мощность на ТЭН
+	case 1: {
+
+		if (OnOff) {
+			// клапан On
+			if (timeValveMs < millis() + 500) {
+				yield();
+				while (timeValveMs > millis());
+				csOff(PWM_CH2);
+				timeValveMs = millis() + timeOff;
+				OnOff = false;
+				// если следующий период очень мал
+				if (timeValveMs < millis() + 500) {
+					yield();
+					while (timeValveMs > millis());
+					csOn(PWM_CH2);
+					timeValveMs = millis() + timeOn;
+					OnOff = true;
+				}
+			}
+		}
+		else {
+			// клапан Off
+			if (timeValveMs < millis() + 500) {
+				yield();
+				while (timeValveMs > millis());
+				csOn(PWM_CH2);
+				timeValveMs = millis() + timeOn;
+				OnOff = true;
+				if (timeValveMs < millis() + 500) {
+					yield();
+					while (timeValveMs > millis());
+					csOff(PWM_CH2);
+					timeValveMs = millis() + timeOff;
+					OnOff = false;
+				}
+			}
+		}
+
+		break;
+	}
+	}
+
+
+
+
+	//rfluxLoopMode_1();
 }
 
 // если запущена ректификация

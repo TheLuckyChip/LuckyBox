@@ -19,7 +19,6 @@
 
 void loop() {
   HTTP.handleClient();
-  touchLoop();
   switch (processMode.allow) {
     case 0: tftMenuLoop(); break;
 	case 1: distillationLoop(); break;
@@ -29,16 +28,19 @@ void loop() {
 	//case 5: brewingLoop(); break;
 	case 6: deviceViewLoop(); break;
   }
-  touchLoop();
   adcLoop();
-  touchLoop();
   heaterLoop();
-  touchLoop();
   sensorLoop();
-  touchLoop();
   displayLoop();
-  touchLoop();
   logfileLoop();
-  touchLoop();
+
+  // Выключение повышенного напряжения на клапана
+  if (timeSetHighVoltage < millis()) {
+	  if (pwmOut[8].invert == false) pwm.setPWM(PWM_CH9, 4096, 0);
+	  else pwm.setPWM(PWM_CH9, 0, 4096);
+  }
+  // Тест управления шаровым краном
+  setPWM(PWM_CH5, 0, (power.inPowerHigh * 20));
+
   yield();
 }

@@ -160,6 +160,7 @@ extern unsigned long headValveOn;
 extern unsigned long headValveOff;
 extern byte touchArea;
 extern byte touchScreen;
+extern byte touchScreenDV;
 //extern uint8_t State;
 extern boolean outHeater;
 extern uint16_t Voltage;
@@ -186,5 +187,11 @@ extern bool CH1;
 extern bool CH2;
 extern bool CH3;
 extern bool CH4;
+extern unsigned long timeSetHighVoltage;
+
+extern unsigned long timeSetHeadValveOpen;
+extern unsigned long timeSetHeadValveClose;
+extern unsigned long timeSetBodyValveOpen;
+extern unsigned long timeSetBodyValveClose;
 
 #endif

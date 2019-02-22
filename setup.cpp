@@ -56,8 +56,9 @@ void setup()
 	csOff(PWM_CH5);
 	csOff(PWM_CH6);
 	csOff(PWM_CH7);
-	csOff(PWM_CH8);
+	//csOn(PWM_CH8);
 	csOff(PWM_CH9);
+	setPWM(PWM_CH8, 0, 2047);
 	delay(2);
 	csOn(TFT_RES_PRG);
 	delay(10);

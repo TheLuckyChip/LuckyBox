@@ -76,6 +76,7 @@ unsigned long headValveOn;						// контроль времени клапан�
 unsigned long headValveOff;						// контроль времени клапана отбора в закрытом состоянии
 byte touchArea = 0;								// Область нажатия
 byte touchScreen = 0;							// На каком экране контролируем нажатие
+byte touchScreenDV = 0;							// Нажатие на клапана для перерисовки
 int modeWiFi;
 uint8_t DefCubOut = 9;
 int16_t touch_x = 0;
@@ -98,3 +99,9 @@ bool CH1 = false;
 bool CH2 = false;
 bool CH3 = false;
 bool CH4 = false;
+unsigned long timeSetHighVoltage;
+
+unsigned long timeSetHeadValveOpen;
+unsigned long timeSetHeadValveClose;
+unsigned long timeSetBodyValveOpen;
+unsigned long timeSetBodyValveClose;
