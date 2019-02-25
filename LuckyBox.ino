@@ -40,7 +40,7 @@ void loop() {
 	  else pwm.setPWM(PWM_CH9, 0, 4096);
   }
   // Тест управления шаровым краном
-  setPWM(PWM_CH5, 0, (power.inPowerHigh * 20));
+  //setPWM(PWM_CH5, 0, (power.inPowerHigh * 20));
 
   yield();
 }
