@@ -7,10 +7,10 @@
   "t6":{"value":150.00,"name":"","color":0,"member":0,"delta":0,"cutoff":0,"priority":0,"allertValue":0},
   "t7":{"value":150.00,"name":"","color":0,"member":0,"delta":0,"cutoff":0,"priority":0,"allertValue":0},
   "t8":{"value":150.00,"name":"","color":0,"member":0,"delta":0,"cutoff":0,"priority":0,"allertValue":0},
-  "out1":{"value":0,"name":"Клапан давления","member":1},
-  "out2":{"value":0,"name":"","member":0},
-  "out3":{"value":0,"name":"","member":0},
-  "out4":{"value":0,"name":"","member":0},
+  "out1":{"value":0,"name":"Клапан на головы","member":1,"allert":0},
+  "out2":{"value":0,"name":"Клапан на тело","member":1,"allert":0},
+  "out3":{"value":0,"name":"Клапан подачи воды","member":0,"allert":0},
+  "out4":{"value":0,"name":"Польский буфер","member":0,"allert":0},
   "out5":{"value":0,"name":"","member":0},
   "out6":{"value":0,"name":"","member":0},
   "out7":{"value":0,"name":"","member":0},
@@ -19,7 +19,7 @@
   "in2":{"value":0,"name":"","member":0},
   "in3":{"value":0,"name":"","member":0},
   "in4":{"value":0,"name":"","member":0},
-  "number":5,
+  "number":3,
   "powerLower":65,
   "powerHigh":85
 }
