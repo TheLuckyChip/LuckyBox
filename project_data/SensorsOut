@@ -2,7 +2,7 @@
 	"process":{"allow":0,"number":0,"step":"","time":0,"timeStart":0},
 	"sensors":[
 	{"t1":{"value":50.00,"name":"В кубе","color":64588,"member":1,"priority":0,"allertValue":0}},
-	{"t2":{"value":55.00,"name":"В царге","color":7905,"member":0,"priority":0,"allertValue":0}},
+	{"t2":{"value":55.00,"name":"В царге","color":7905,"member":0,"priority":0,"allertValue":53.00}},
 	{"t3":{"value":78.00,"name":"В узле отбора","color":65504,"member":0,"priority":0,"allertValue":0}},
 	{"t4":{"value":25.00,"name":"Вода на выходе","color":16799,"member":0,"priority":0,"allertValue":0}},
 	{"t5":{"value":35.00,"name":"Датчик в струе","color":64870,"member":1,"priority":1,"allertValue":0}},
@@ -43,8 +43,8 @@
 	{"out8":{"value":0,"name":"","member":0,"allert":0}}
 ],
 	"valwe": [
-	{"head":{"timeCycle":0,"timeOn":0.5}},
-	{"body":{"timeCycle":0,"timeOn":0.0,"decline":0}}
+	{"head":{"timeCycle":5,"timeOn":1}},
+	{"body":{"timeCycle":5,"timeOn":1,"decline":1}}
 ],
 	"safety":[
 	{"in1":{"value":0,"name":"Датчик протечки","member":0,"allert":0}},
