@@ -2474,7 +2474,7 @@ $(function () {
 									if(key === "t2"){
 										name = "Датчик в струе";
 									}
-									mashingProcess["sensors"][key] = {"name": name, "priority": priority, "color": color,"member":1};
+									mashingProcess["sensors"][key] = {"name": name, "priority": (priority ? 1 : 0), "color": color,"member":1};
 								}
 							}
 						});
@@ -2577,6 +2577,7 @@ $(function () {
 				if (re_t.test(sensor_key) && Number(e["member"]) !== 0) {
 					sensorsMashingSend[sensor_key]["color"] = e["color"];
 					sensorsMashingSend[sensor_key]["member"] = 1;
+					sensorsMashingSend[sensor_key]["priority"] = e["priority"];
 					tpl_all_body += '<div class="row row-striped">' +
 						'<div class="pt-10 pb-10 clearfix">' +
 						'<div class="col-xs-12 col-sm-4 text-center-xs text-strong" id="mashing_step_text_'+sensor_key+'">t&#176' + name_sensor + '</div>' +
