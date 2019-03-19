@@ -199,7 +199,7 @@ extern float headtimeOn;
 extern uint8_t bodyTimeCycle;
 extern float bodytimeOn;
 extern byte decline;
-extern uint8_t bodyTimeOffCount;
+extern unsigned long bodyTimeOffCount;
 // переход на следующий шаг
 extern uint8_t stepNext;
 // подтверждение обмена в web

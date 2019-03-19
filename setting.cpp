@@ -107,7 +107,7 @@ float headtimeOn = 3.5;
 uint8_t bodyTimeCycle = 12;
 float bodytimeOn = 8.5;
 byte decline = 0;
-uint8_t bodyTimeOffCount;
+unsigned long bodyTimeOffCount;
 uint8_t stepNext = 0;
 uint8_t answer = 0;
 

@@ -442,7 +442,7 @@ void handleProcessSensorOut() {
 	// импульсный режим на клапана
 	dataForWeb += "}}],\"valwe\":[";
 	dataForWeb += "{\"head\":{\"timeCycle\":" + String(headTimeCycle) + ",\"timeOn\":" + String(headtimeOn) + "}},";
-	dataForWeb += "{\"body\":{\"timeCycle\":" + String(bodyTimeCycle) + ",\"timeOn\":" + String(bodytimeOn) + ",\"decline\":" + String(decline);
+	dataForWeb += "{\"body\":{\"timeCycle\":" + String(bodyTimeCycle) + ",\"timeOn\":" + String(bodytimeOn) + ",\"decline\":" + String(decline) + ",\"Ttime\":" + String(processMode.timeStep - bodyTimeOffCount) + ",\"Cnt\":" + String(counterStartStop);
 	// АЦП
 	dataForWeb += "}}],\"safety\":[";
 	for (i = 0; i < ADC_Cnt; i++) {

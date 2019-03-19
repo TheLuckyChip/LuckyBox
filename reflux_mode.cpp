@@ -847,7 +847,6 @@ void stopErr() {
 	power.heaterPower = 0;							// установили мощность на ТЭН 0 %
 	timeAllertInterval = millis() + 10000;			// установим счетчик времени для зв.сигнала
 	processMode.timeStep = 0;
-	nameProcessStep = "Стоп по аварии";
 	timePauseOff = 60000 * 2 + millis();
 	processMode.step = 7;
 }
@@ -928,7 +927,7 @@ void refluxLoop() {
 		else if (adcIn[3].member == 1 && adcIn[3].allert == true) settingAlarm = true;
 		else if (timeAllertInterval < millis()) settingAlarm = false;
 		if (!errA) timePauseErrA = millis() + 10000; // 10 секунд
-		else if (timePauseErrA <= millis()) stopErr();
+		else if (timePauseErrA <= millis()) { stopErr(); nameProcessStep = "Стоп по аварии ADC"; }
 
 		// датчики безопасности по температурным датчикам кроме Т куба и Т царги
 		errT = false;
@@ -944,13 +943,15 @@ void refluxLoop() {
 			errT = true; }
 		else if (temperatureSensor[DS_Res4].cutoff == 1 && temperatureSensor[DS_Res4].member == 1 && temperatureSensor[DS_Res4].allertValue > 0 && temperatureSensor[DS_Res4].data >= temperatureSensor[DS_Res4].allertValue) {
 			errT = true; }
-
 		if (!errT) timePauseErrT = millis() + 10000; // 10 секунд
-		else if (timePauseErrT <= millis()) stopErr();
+		else if (timePauseErrT <= millis()) { stopErr(); nameProcessStep = "Стоп по аварии T"; }
 	}
 	if (processMode.number == 3 && processMode.step == 6) {
 		// завершение отбора по времени закрытого состояния клапана на отборе тела
-		if (counterStartStop > 0 && bodyValveSet == true && processMode.timeStep >= (timeStabilizationReflux * 60 + bodyTimeOffCount)) stopErr();
+		if (counterStartStop > 0 && processMode.timeStep >= (timeStabilizationReflux * 60 + bodyTimeOffCount)) {
+			stopErr();
+			nameProcessStep = "Стоп по времени Старт/Стоп";
+		}
 	}
 
 	// Выключение повышенного напряжения на клапана
