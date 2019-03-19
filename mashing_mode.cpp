@@ -196,7 +196,6 @@ void handleMashingSensorSetSave() {
 void mashingLoop() {
 	// поиск выбранного датчика и начальная инициализация
 	if (processMode.step == 0) {
-		loadEepromMashing();
 		if (temperatureSensor[0].member == 1) numSenseMashBrew = 0;
 		else if (temperatureSensor[1].member == 1) numSenseMashBrew = 1;
 		else if (temperatureSensor[2].member == 1) numSenseMashBrew = 2;

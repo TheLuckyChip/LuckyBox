@@ -257,18 +257,18 @@ void setup()
 
 	Serial.println("Step 16 - Variables Init");
 
-	dallRead();
+	dallRead(10);
 	delay(750);
-	dallRead();
+	dallRead(10);
 #if defined TFT_Display
 	// рисуем квадратики для индикации загрузки
 	scaleCount += 20;
 	if (scaleCount <= 282) tft.writeFillRect(scaleCount, 215, 15, 15, 0xFFFF);
 #endif
 	delay(750);
-	dallRead();
+	dallRead(10);
 	delay(750);
-	dallRead();
+	dallRead(10);
 #if defined TFT_Display
 	// рисуем квадратики для индикации загрузки
 	scaleCount += 20;

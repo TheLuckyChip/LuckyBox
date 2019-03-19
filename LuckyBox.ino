@@ -1,6 +1,6 @@
 //   Система автоматики винокура. 
 //   Проект центра открытого проектирования у Счастливчика https://LuckyCenter.ru
-//   Версия 2.0 Release Candidate 9
+//   Версия 2.0 Release Candidate 10
 
 #include "device_view.h"
 #include "pid_config.h"
@@ -33,14 +33,6 @@ void loop() {
   sensorLoop();
   displayLoop();
   logfileLoop();
-
-  // Выключение повышенного напряжения на клапана
-  if (timeSetHighVoltage < millis()) {
-	  if (pwmOut[8].invert == false) pwm.setPWM(PWM_CH9, 4096, 0);
-	  else pwm.setPWM(PWM_CH9, 0, 4096);
-  }
-  // Тест управления шаровым краном
-  //setPWM(PWM_CH5, 0, (power.inPowerHigh * 20));
 
   yield();
 }

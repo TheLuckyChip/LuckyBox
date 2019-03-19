@@ -13,7 +13,7 @@ ESP8266WebServer HTTP;
 // PID
 PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
 
-String curVersion = "2.0RC9";
+String curVersion = "2.0RC10";
 // Определяем переменные wifi
 String _ssid;      // Для хранения SSID
 String _password;  // Для хранения пароля сети
@@ -67,9 +67,10 @@ float temperatureAlcoholBoil = 0;
 float temperatureCubeAlcohol;
 unsigned long timePauseOff = millis();			// интервал времени для применения определенных параметров или ожидания в алгоритмах
 unsigned long timeAllertInterval = millis();	// интервал времени для звукового сигнала
-unsigned long sensorTimeRead = millis();		// Интервал чтения датчиков
+//uint8_t sensorTimeRead = 0;						// Интервал чтения датчиков
+uint8_t sensorNumberRead = 0;					// № датчика температуры для текущего опроса
 unsigned long adcTimeRead = millis();			// Интервал опроста АЦП
-unsigned long touchTimeRead = millis();			// Интервал опроста тачскрина
+unsigned long timeSec = millis();				// Секундный интервал
 bool settingAlarm = false;						// Пересечение границы уставки
 bool headValve;									// Состояние клапана отбора
 unsigned long headValveOn;						// контроль времени клапана отбора в открытом состоянии
@@ -101,7 +102,12 @@ bool CH3 = false;
 bool CH4 = false;
 unsigned long timeSetHighVoltage;
 
-unsigned long timeSetHeadValveOpen;
-unsigned long timeSetHeadValveClose;
-unsigned long timeSetBodyValveOpen;
-unsigned long timeSetBodyValveClose;
+uint8_t headTimeCycle = 10;
+float headtimeOn = 3.5;
+uint8_t bodyTimeCycle = 12;
+float bodytimeOn = 8.5;
+byte decline = 0;
+uint8_t stepNext = 0;
+uint8_t answer = 0;
+
+//bool touchStart = false;						// старт с дисплея

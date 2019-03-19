@@ -206,7 +206,6 @@ void handleDistillationSensorSetSave() {
 }
 
 void distillationLoop() {
-
 	if (processMode.step < 2) {
 		if (power.heaterPower != power.inPowerHigh) power.heaterPower = power.inPowerHigh;
 	}

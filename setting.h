@@ -31,6 +31,7 @@ struct DS_Str
 	byte		addr[8];		// серийный номер датчика
 	byte		num;			// порядковый номер датчика
 	bool		member;			// участвует в выводе или нет
+	byte		timeErr;		// секунды ошибочного опроса (не совпала CRC)
 	float		data;			// значение температуры
 	float		dataT[4];		// значение температуры для усреднения и исключения глюков опроса
 	uint16_t	color;			// цвет для графика
@@ -152,8 +153,9 @@ extern float temperatureStartPressure;
 extern float settingColumnShow;
 extern float temperatureAlcoholBoil;
 extern float temperatureCubeAlcohol;
-extern unsigned long sensorTimeRead;
-extern unsigned long touchTimeRead;
+//extern uint8_t sensorTimeRead;
+extern uint8_t sensorNumberRead;
+extern unsigned long timeSec;
 extern bool settingAlarm;
 extern bool headValve;
 extern unsigned long headValveOn;
@@ -189,9 +191,18 @@ extern bool CH3;
 extern bool CH4;
 extern unsigned long timeSetHighVoltage;
 
-extern unsigned long timeSetHeadValveOpen;
-extern unsigned long timeSetHeadValveClose;
-extern unsigned long timeSetBodyValveOpen;
-extern unsigned long timeSetBodyValveClose;
+// для импульсного режима руления клапанам
+// для web
+extern uint8_t headTimeCycle;
+extern float headtimeOn;
+extern uint8_t bodyTimeCycle;
+extern float bodytimeOn;
+extern byte decline;
+// переход на следующий шаг
+extern uint8_t stepNext;
+// подтверждение обмена в web
+extern uint8_t answer;
+
+//extern bool touchStart;
 
 #endif

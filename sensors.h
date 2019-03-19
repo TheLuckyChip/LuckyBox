@@ -32,7 +32,7 @@ extern void initPressureSensor();
 extern void pressureRead();
 extern void senseWebInit();
 extern void dallSearch();
-extern void dallRead();
+extern void dallRead(uint8_t numTerm);
 extern void sensorsUserSetInWeb();
 extern void sensorsUserSetOutWeb();
 extern void handleProcessSensorOut();
