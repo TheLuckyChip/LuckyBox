@@ -310,6 +310,17 @@ void setup()
 
   processMode.allow = 0; // Стоп
   processMode.number = EEPROM.read(1499);// modeReflux;
+  int index = 1477;
+  headTimeCycle = EEPROM.read(index);  index++;                     // начало в EEPROM = 1477
+  if (headTimeCycle < 5 || headTimeCycle > 30) headTimeCycle = 10;
+  headtimeOn = EEPROM_float_read(index); index += 4;
+  if (isnan(headtimeOn) || headtimeOn < 0 || headtimeOn > 100) headtimeOn = 3;
+  bodyTimeCycle = EEPROM.read(index);  index++;
+  if (bodyTimeCycle < 5 || bodyTimeCycle > 30) bodyTimeCycle = 12;
+  bodytimeOn = EEPROM_float_read(index); index += 4;
+  if (isnan(bodytimeOn) || bodytimeOn < 0 || bodytimeOn > 100) bodytimeOn = 8;
+  decline = EEPROM.read(index);
+  if (decline < 0 || decline > 1) decline = 0;
   EEPROM.end();
   if (processMode.number > 7) processMode.number = 0;
   processMode.step = 0;

@@ -13,6 +13,7 @@
 #include <Ticker.h>
 #include <Adafruit_PWMServoDriver.h>
 #include <ESP8266WebServer.h>
+#include <EEPROM.h>
 #include <PID_v1.h>
 
 struct TPL_Str
@@ -153,7 +154,7 @@ extern float temperatureStartPressure;
 extern float settingColumnShow;
 extern float temperatureAlcoholBoil;
 extern float temperatureCubeAlcohol;
-//extern uint8_t sensorTimeRead;
+extern uint8_t counterStartStop;
 extern uint8_t sensorNumberRead;
 extern unsigned long timeSec;
 extern bool settingAlarm;
@@ -198,11 +199,13 @@ extern float headtimeOn;
 extern uint8_t bodyTimeCycle;
 extern float bodytimeOn;
 extern byte decline;
+extern uint8_t bodyTimeOffCount;
 // переход на следующий шаг
 extern uint8_t stepNext;
 // подтверждение обмена в web
 extern uint8_t answer;
 
-//extern bool touchStart;
+extern float EEPROM_float_read(int addr);
+extern void EEPROM_float_write(int addr, float val);
 
 #endif

@@ -4,7 +4,7 @@
 
 #include "mashing_mode.h"
 
-void EEPROM_float_write_mash(int addr, float val) {
+/*void EEPROM_float_write_mash(int addr, float val) {
 	byte *x = (byte *)&val;
 	for (byte i = 0; i < 4; i++) EEPROM.write(i + addr, x[i]);
 }
@@ -13,7 +13,7 @@ float EEPROM_float_read_mash(int addr) {
 	for (byte i = 0; i < 4; i++) x[i] = EEPROM.read(i + addr);
 	float *y = (float *)&x;
 	return y[0];
-}
+}*/
 
 void loadEepromMashing() {
 	int i;

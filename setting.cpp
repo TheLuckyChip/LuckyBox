@@ -67,7 +67,7 @@ float temperatureAlcoholBoil = 0;
 float temperatureCubeAlcohol;
 unsigned long timePauseOff = millis();			// интервал времени для применения определенных параметров или ожидания в алгоритмах
 unsigned long timeAllertInterval = millis();	// интервал времени для звукового сигнала
-//uint8_t sensorTimeRead = 0;						// Интервал чтения датчиков
+uint8_t counterStartStop = 0;					// Счетчик срабатываний Старт/Стоп
 uint8_t sensorNumberRead = 0;					// № датчика температуры для текущего опроса
 unsigned long adcTimeRead = millis();			// Интервал опроста АЦП
 unsigned long timeSec = millis();				// Секундный интервал
@@ -107,7 +107,17 @@ float headtimeOn = 3.5;
 uint8_t bodyTimeCycle = 12;
 float bodytimeOn = 8.5;
 byte decline = 0;
+uint8_t bodyTimeOffCount;
 uint8_t stepNext = 0;
 uint8_t answer = 0;
 
-//bool touchStart = false;						// старт с дисплея
+float EEPROM_float_read(int addr) {
+	byte x[4];
+	for (byte i = 0; i < 4; i++) x[i] = EEPROM.read(i + addr);
+	float *y = (float *)&x;
+	return y[0];
+}
+void EEPROM_float_write(int addr, float val) {
+	byte *x = (byte *)&val;
+	for (byte i = 0; i < 4; i++) EEPROM.write(i + addr, x[i]);
+}

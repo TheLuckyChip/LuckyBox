@@ -18,7 +18,7 @@ unsigned long timeValveMs;
 unsigned long timePauseErrA;
 unsigned long timePauseErrT;
 
-void EEPROM_float_write_refl(int addr, float val) {
+/*void EEPROM_float_write_refl(int addr, float val) {
 	byte *x = (byte *)&val;
 	for (byte i = 0; i < 4; i++) EEPROM.write(i + addr, x[i]);
 }
@@ -27,7 +27,7 @@ float EEPROM_float_read_refl(int addr) {
 	for (byte i = 0; i < 4; i++) x[i] = EEPROM.read(i + addr);
 	float *y = (float *)&x;
 	return y[0];
-}
+}*/
 
 void loadEepromReflux() {
 	int i;
@@ -39,7 +39,7 @@ void loadEepromReflux() {
 		for (i = 0; i < 8; i++) {
 			tpl2web.dsMember[i] = EEPROM.read(index);  index++;
 			tpl2web.dsPriority[i] = EEPROM.read(index);  index++;
-			tpl2web.dsAllertValue[i] = EEPROM_float_read_refl(index); index += 4;
+			tpl2web.dsAllertValue[i] = EEPROM_float_read(index); index += 4;
 			tpl2web.dsDelta[i] = EEPROM.read(index);  index++;
 			tpl2web.dsCutoff[i] = EEPROM.read(index);  index++;
 
@@ -60,11 +60,11 @@ void loadEepromReflux() {
 		}
 		headTimeCycle = EEPROM.read(index);  index++;                     // начало в EEPROM = 1477
 		if (headTimeCycle < 5 || headTimeCycle > 30) headTimeCycle = 10;
-		headtimeOn = EEPROM_float_read_refl(index); index += 4;
+		headtimeOn = EEPROM_float_read(index); index += 4;
 		if (isnan(headtimeOn) || headtimeOn < 0 || headtimeOn > 100) headtimeOn = 3;
 		bodyTimeCycle = EEPROM.read(index);  index++;
 		if (bodyTimeCycle < 5 || bodyTimeCycle > 30) bodyTimeCycle = 12;
-		bodytimeOn = EEPROM_float_read_refl(index); index += 4;
+		bodytimeOn = EEPROM_float_read(index); index += 4;
 		if (isnan(bodytimeOn) || bodytimeOn < 0 || bodytimeOn > 100) bodytimeOn = 8;
 		decline = EEPROM.read(index);
 		if (decline < 0 || decline > 1) decline = 0;
@@ -276,7 +276,7 @@ void handleRefluxSensorSetSave() {
 	for (i = 0; i < 8; i++) { // 64 байта
 		EEPROM.write(index, temperatureSensor[i].member);  index++;
 		EEPROM.write(index, temperatureSensor[i].priority);  index++;
-		EEPROM_float_write_refl(index, temperatureSensor[i].allertValueIn); index += 4;
+		EEPROM_float_write(index, temperatureSensor[i].allertValueIn); index += 4;
 		EEPROM.write(index, temperatureSensor[i].delta); index++;
 		EEPROM.write(index, temperatureSensor[i].cutoff); index++;
 	}
@@ -300,7 +300,14 @@ void valveSet(uint8_t ch) {
 	else {
 		valveCiclePeriod = (unsigned long)bodyTimeCycle * 1000;
 		timeOn = (valveCiclePeriod * bodytimeOn) / 100;
+		// применим декремент на уменьшение скорости отбора после N-го кол-ва Старт/Стопа
+		if (decline != 0) {
+			unsigned long calc = counterStartStop * decrementStartStopTime;
+			if (calc > 100) calc = 100;
+			timeOn = timeOn - ((timeOn * calc) / 100);
+		}
 	}
+
 	timeOff = valveCiclePeriod - timeOn;
 
 	if (OnOff) {
@@ -487,7 +494,7 @@ void rfluxLoopMode_2() {
 
 ///////////////////////////////////
 				processMode.timeStep = 0;
-				timePauseOff = millis() + (1000 * 60 * 30); // 30 минут для применения уставки
+				//timePauseOff = millis() + (60000 * timeBoilTubeSetReflux); // timeBoilTubeSetReflux = N минут для применения уставки
 				settingColumnSet = true;
 				bodyValveSet = true;
 				nameProcessStep = "Отбор тела";
@@ -508,6 +515,15 @@ void rfluxLoopMode_2() {
 				stepNext = 0;
 				nameProcessStep = "Процесс закончен";
 				processMode.step = 7;						// перешли на следующий шаг алгоритма
+			}
+
+			// если прошло timeBoilTubeSetReflux минут, применим уставку
+			if (processMode.timeStep >= (timeBoilTubeSetReflux * 60) && settingColumnSet == true) {
+				allertSetTemperatureEn[DS_Tube] = true;
+				settingBoilTube = temperatureSensor[DS_Tube].allertValueIn;
+				settingColumn = temperatureSensor[DS_Tube].data;
+				pressureSensor.dataStart = pressureSensor.data;
+				settingColumnSet = false;
 			}
 // надо вставить контроль Т в царге
 
@@ -544,6 +560,7 @@ void rfluxLoopMode_4() {
 	switch (processMode.step) {
 // пришли при старте ректификации
 		case 0: {
+			counterStartStop = 0;
 			processMode.step = 1;	// перешли на следующий шаг алгоритма
 			break;
 		}
@@ -603,7 +620,8 @@ void rfluxLoopMode_4() {
 				if (typeRefOfValwe == 3) csOff(PWM_CH1);	// закрыли клапан отбора голов т.к. 2 клапана на отбор
 				if (pwmOut[3].member == 1) csOff(PWM_CH4);		// закрыли клапан слива ПБ
 				processMode.timeStep = 0;
-				timePauseOff = millis() + (1000 * 60 * 30); // 30 минут для применения уставки
+				bodyTimeOffCount = 0;
+				//timePauseOff = millis() + (60000 * timeBoilTubeSetReflux); // timeBoilTubeSetReflux = N минут для применения уставки
 				settingColumnSet = true;
 				bodyValveSet = true;
 				nameProcessStep = "Отбор тела";
@@ -635,6 +653,9 @@ void rfluxLoopMode_4() {
 				temperatureSensor[DS_Tube].allert = true;	// сигнализация для WEB
 				csOff(PWM_CH1);
 				csOff(PWM_CH2);								// закрыли клапан отбора
+				if (bodyValveSet) counterStartStop++;
+				// если первый стоп пищим 10 сек.
+				if (counterStartStop == 1) timeAllertInterval = millis() + 10000;			// установим счетчик времени для зв.сигнала
 				bodyValveSet = false;
 				// если есть польский буфер, работаем до первого стопа
 				if (pwmOut[3].member == 1) {
@@ -650,12 +671,8 @@ void rfluxLoopMode_4() {
 				}
 			}
 
-			// без ПБ рулим по уставке
-			if (temperatureSensor[DS_Tube].data <= temperatureSensor[DS_Tube].allertValue - settingBoilTube && pwmOut[3].member == 0) {
-				bodyValveSet = true;							// признак, что надо открыть клапан отбора
-			}
-
-			if (timePauseOff <= millis() && settingColumnSet == true) { // прошло 30 минут, применим уставку
+			// если прошло timeBoilTubeSetReflux минут, применим уставку
+			if (processMode.timeStep >= (timeBoilTubeSetReflux * 60) && settingColumnSet == true) {
 				allertSetTemperatureEn[DS_Tube] = true;
 				settingBoilTube = temperatureSensor[DS_Tube].allertValueIn;
 				settingColumn = temperatureSensor[DS_Tube].data;
@@ -663,9 +680,15 @@ void rfluxLoopMode_4() {
 				settingColumnSet = false;
 			}
 
+			// без ПБ рулим по уставке
+			if (temperatureSensor[DS_Tube].data <= temperatureSensor[DS_Tube].allertValue - settingBoilTube && pwmOut[3].member == 0) {
+				bodyValveSet = true;							// признак, что надо открыть клапан отбора
+			}
+
 			if (bodyValveSet == true && processMode.step != 7) {
 				if (typeRefOfValwe == 1) valveSet(PWM_CH1);
 				else if (typeRefOfValwe == 2 || typeRefOfValwe == 3) valveSet(PWM_CH2);
+				bodyTimeOffCount = processMode.timeStep;
 			}
 			else {
 				csOff(PWM_CH1);
@@ -924,6 +947,10 @@ void refluxLoop() {
 
 		if (!errT) timePauseErrT = millis() + 10000; // 10 секунд
 		else if (timePauseErrT <= millis()) stopErr();
+	}
+	if (processMode.number == 3 && processMode.step == 6) {
+		// завершение отбора по времени закрытого состояния клапана на отборе тела
+		if (counterStartStop > 0 && bodyValveSet == true && processMode.timeStep >= (timeStabilizationReflux * 60 + bodyTimeOffCount)) stopErr();
 	}
 
 	// Выключение повышенного напряжения на клапана

@@ -4,7 +4,7 @@
 
 float settingTank = 99.5;                   // температура отключени¤ нагрева куба при дистилл¤ции браги в спирт-сырец
 
-void EEPROM_float_write_dist(int addr, float val) {
+/*void EEPROM_float_write_dist(int addr, float val) {
 	byte *x = (byte *)&val;
 	for (byte i = 0; i < 4; i++) EEPROM.write(i + addr, x[i]);
 }
@@ -13,7 +13,7 @@ float EEPROM_float_read_dist(int addr) {
 	for (byte i = 0; i < 4; i++) x[i] = EEPROM.read(i + addr);
 	float *y = (float *)&x;
 	return y[0];
-}
+}*/
 
 void loadEepromDistillation() {
 	int i;
@@ -25,7 +25,7 @@ void loadEepromDistillation() {
 		for (i = 0; i < 8; i++) {
 			tpl2web.dsMember[i] = EEPROM.read(index);  index++;
 			tpl2web.dsPriority[i] = EEPROM.read(index);  index++;
-			tpl2web.dsAllertValue[i] = EEPROM_float_read_dist(index); index += 4;
+			tpl2web.dsAllertValue[i] = EEPROM_float_read(index); index += 4;
 			tpl2web.dsCutoff[i] = EEPROM.read(index);  index++;
 			//if (processMode.allow == 1) {
 				temperatureSensor[i].member = tpl2web.dsMember[i];
@@ -190,7 +190,7 @@ void handleDistillationSensorSetSave() {
 	for (i = 0; i < 8; i++) {
 		EEPROM.write(index, temperatureSensor[i].member);  index++;
 		EEPROM.write(index, temperatureSensor[i].priority);  index++;
-		EEPROM_float_write_dist(index, temperatureSensor[i].allertValue); index += 4;
+		EEPROM_float_write(index, temperatureSensor[i].allertValue); index += 4;
 		EEPROM.write(index, temperatureSensor[i].cutoff); index++;
 	}
 	for (i = 0; i < 8; i++) {
