@@ -1810,6 +1810,7 @@ $(function () {
 			let tpl_temperature = '';
 			let tpl_devices = '';
 			let tpl_safety = '';
+			let tpl_stab = '';
 			for (let key in sensors) {
 				if (sensors.hasOwnProperty(key)) {
 					let sensor_name = (sensors[key].hasOwnProperty("name") ? sensors[key]["name"] : "");
@@ -1854,8 +1855,23 @@ $(function () {
 								'<td></td>' +
 								'</tr>';
 						}
+						if(key === "stab"){
+							tpl_stab += '<tr>'+
+								'<td>' + sensor_name + '</td>'+
+								'<td colspan="3" class="text-center">' + returnTplHtml([{id: "stab", value: sensors[key]["allertValue"], min: '0', max: '120', step: '1'}], deltaTempl) + '</td>'+
+								'</tr>';
+						}
+						if(key === "point"){
+							tpl_stab += '<tr>'+
+								'<td>' + sensor_name + '</td>'+
+								'<td colspan="3" class="text-center">' + returnTplHtml([{id: "point", value: sensors[key]["allertValue"], min: '0', max: '60', step: '1'}], deltaTempl) + '</td>'+
+								'</tr>';
+						}
 					}
 				}
+			}
+			if (tpl_stab !== '') {
+				section += tpl_stab;
 			}
 			if (tpl_temperature !== '') {
 				section += '<tr><td colspan="4" class="text-center text-strong">Датчики температуры</td></tr>' + tpl_temperature;
@@ -1937,6 +1953,8 @@ $(function () {
 			"t6": {"name": "", "delta": 0, "cutoff": 0, "color": 0, "member": 0, "priority": 0, "allertValue": 0},
 			"t7": {"name": "", "delta": 0, "cutoff": 0, "color": 0, "member": 0, "priority": 0, "allertValue": 0},
 			"t8": {"name": "", "delta": 0, "cutoff": 0, "color": 0, "member": 0, "priority": 0, "allertValue": 0},
+			"stab":{"name": "Время стабилизации колонны", "allertValue": 0},
+			"point":{"name": "Время до применения уставки", "allertValue": 0},
 			"out1": {"name": "", "member": 0},
 			"out2": {"name": "", "member": 0},
 			"out3": {"name": "", "member": 0},
@@ -3428,15 +3446,16 @@ $(function () {
 		//if(tmpTime<100 && refluxProcess["start"] === true)
 		//tmpTime ++;
 	}
-	/*function startInterval(){
+	function startInterval(){
 		sensorsIntervalId = setInterval(getIntervalSensors, 1000);
-	}*/
+	}
 
 	//clearInterval(sensorsIntervalId);
 	$(document).ready(function () {
 		console.log('ready');
+		startInterval();
 		//setTimeout(getSettings, 2000);
-		sensorsIntervalId = setInterval(getIntervalSensors, 1000);
+		// sensorsIntervalId = setInterval(getIntervalSensors, 1000);
 		/*setTimeout(function () {
 			startInterval();
 		}, 3000);*/
