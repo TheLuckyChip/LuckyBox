@@ -1975,8 +1975,8 @@ $(function () {
 			"in2": {"name": "", "member": 0},
 			"in3": {"name": "", "member": 0},
 			"in4": {"name": "", "member": 0},
-			"stab":{"name": "Время стабилизации колонны", "allertValue": 0},
-			"point":{"name": "Время до применения уставки", "allertValue": 0}
+			"stab": 0,
+			"point": 0
 		};
 		let refluxTemplate = '';
 		let tpl_devices_body = '';
@@ -2020,9 +2020,9 @@ $(function () {
 			let tpl_cutoff_body = '';
 			let tpl_all_body = '';
 			let head_devices = '<div class="row-xs clearfix">' +
-				'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-4 text-center text-middle text-primary text-nowrap">Период сек.</div>' +
-				'<div class="col-xs-2 col-xs-offset-3 col-sm-3 col-sm-offset-1 text-center text-middle text-primary text-nowrap">Открыт %</div>'+
-				'<div class="col-xs-2 col-xs-offset-1 col-sm-1 col-sm-offset-0 text-center text-middle text-primary text-nowrap">%&#8595;</div></div>';
+				'<div class="col-xs-4 col-xs-offset-0 col-sm-3 col-sm-offset-3 text-center text-middle text-primary text-nowrap">Период сек.</div>' +
+				'<div class="col-xs-4 col-xs-offset-3_ col-sm-3 col-sm-offset-1_ text-center text-middle text-primary text-nowrap">Открыт %</div>'+
+				'<div class="col-xs-4 col-xs-offset-1_ col-sm-3 col-sm-offset-0_ text-center text-middle text-primary text-nowrap">%&#8595;</div></div>';
 			tpl_stab = '<div class="row row-striped">' +
 				'<div class="pt-10 clearfix">' +
 				'<div class="col-xs-12 col-sm-4 text-center-xs text-middle text-strong">Время стабилизации колонны</div>' +
@@ -2034,6 +2034,9 @@ $(function () {
 				'<div class="col-xs-12 col-sm-3 text-center text-middle text-strong pb-10"><span id="reflux_point"></span>'+
 				refluxProcess["point"] +
 				' <span>мин.</span></div></div></div>';
+
+			sensorsRefluxSend["stab"] = refluxProcess["stab"];
+			sensorsRefluxSend["point"] = refluxProcess["point"];
 
 			let flagout1 = false;
 			$.each(refluxProcess["sensors"], function (i, e) {
@@ -2054,10 +2057,10 @@ $(function () {
 							'<div class="row row-striped">' + tpl_delta_thead +
 							'<div id="reflux_alert_bg_' + sensor_key + '" class="pt-10 pb-10 clearfix">' +
 							'<div id="reflux_alert_text_' + sensor_key + '" class="col-xs-12 col-sm-4 text-middle text-center-xs text-strong">t&#176' + e["name"] + '</div>' +
-							'<div class="col-xs-4 col-xs-offset-0 col-sm-3 col-sm-offset-0 text-center text-middle text-strong"><span id="reflux_' + sensor_key + '"></span><span' +
-							' class="hidden">&#176С</span></div>' +
+							'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle text-strong text-nowrap">' +
+							'<span id="reflux_' + sensor_key + '"></span><span class="hidden">&#176С</span></div>' +
 							'<div class="col-xs-4 col-sm-3">' + tpl_delta + '</div>' +
-							'<div class="col-xs-4 col-xs-offset-0 col-sm-2 col-sm-offset-0 text-center text-middle text-strong">' + tpl_delta_result +
+							'<div class="col-xs-4 col-xs-offset-0 col-sm-2 col-sm-offset-0 text-center text-middle text-strong text-nowrap">' + tpl_delta_result +
 							'</div>' +
 							'</div>' +
 							'</div>';
@@ -2105,11 +2108,11 @@ $(function () {
 						tpl_devices_body += '<div class="row row-striped">' +
 							head_devices +
 							'<div class="pt-10 pb-10 clearfix">' +
-							'<div class="col-xs-12 col-sm-4 text-middle text-center-xs text-strong">Клапан отбора голов</div>' +
+							'<div class="col-xs-12 col-sm-3 text-middle text-center-xs text-strong">Клапан отбора голов</div>' +
 							//'<div class="col-xs-6 col-sm-2 text-center-xs text-middle text-strong pb-10">Период</div>' +
-							'<div class="col-xs-4 col-xs-offset-1 col-sm-3 col-sm-offset-0">' + tpl_head_cycle + '</div>' +
+							'<div class="col-xs-4 col-xs-offset-1_ col-sm-3 col-sm-offset-0_">' + tpl_head_cycle + '</div>' +
 							//'<div class="col-xs-6 col-sm-2 text-center-xs text-middle text-strong text-nowrap">Откр.%</div>' +
-							'<div class="col-xs-4 col-xs-offset-1 col-sm-3 col-sm-offset-1">' + tpl_head_time + '</div>' +
+							'<div class="col-xs-4 col-xs-offset-1_ col-sm-3 col-sm-offset-1_">' + tpl_head_time + '</div>' +
 							'</div></div>';
 
 						let val_body_cycle = (globalSensorsJson.hasOwnProperty("valwe") ? globalSensorsJson["valwe"][1]["body"]["timeCycle"] : 5);
@@ -2141,11 +2144,11 @@ $(function () {
 							tpl_devices_body += '<div class="row row-striped">' +
 								head_devices +
 								'<div class="pt-10 pb-10 clearfix">' +
-								'<div class="col-xs-12 col-sm-4 text-middle text-center-xs text-strong">Клапан отбора голов</div>' +
+								'<div class="col-xs-12 col-sm-3 text-middle text-center-xs text-strong">Клапан отбора голов</div>' +
 								//'<div class="col-xs-6 col-sm-2 text-center-xs text-middle text-strong pb-10">Период</div>' +
-								'<div class="col-xs-4 col-xs-offset-1 col-sm-3 col-sm-offset-0">' + tpl_head_cycle + '</div>' +
+								'<div class="col-xs-4 col-xs-offset-1_ col-sm-3 col-sm-offset-0_">' + tpl_head_cycle + '</div>' +
 								//'<div class="col-xs-6 col-sm-2 text-center-xs text-middle text-strong text-nowrap">Откр.%</div>' +
-								'<div class="col-xs-4 col-xs-offset-1 col-sm-3 col-sm-offset-1">' + tpl_head_time + '</div>' +
+								'<div class="col-xs-4 col-xs-offset-1_ col-sm-3 col-sm-offset-1_">' + tpl_head_time + '</div>' +
 								'</div></div>';
 
 							let val_body_cycle = (globalSensorsJson.hasOwnProperty("valwe") ? globalSensorsJson["valwe"][1]["body"]["timeCycle"] : 5);
