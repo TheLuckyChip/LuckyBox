@@ -1794,7 +1794,15 @@ $(function () {
 	}
 
 	//Привязка датчиков к процессу ректификации, и запуск
-	let refluxProcess = {"sensors": {}, "powerHigh": 0, "powerLower": 0, "number": 0, "start": false};//"devices":[],"safety":[],
+	let refluxProcess = {
+		"sensors": {},
+		"stab": 0,
+		"point": 0,
+		"powerHigh": 0,
+		"powerLower": 0,
+		"number": 0,
+		"start": false
+	};//"devices":[],"safety":[],
 	$(document).on('click', '#reflux_add_sensor', function (e) {
 		e.preventDefault();
 		let _this = $(this);
@@ -1810,6 +1818,7 @@ $(function () {
 			let tpl_temperature = '';
 			let tpl_devices = '';
 			let tpl_safety = '';
+			let tpl_stab = '';
 			for (let key in sensors) {
 				if (sensors.hasOwnProperty(key)) {
 					let sensor_name = (sensors[key].hasOwnProperty("name") ? sensors[key]["name"] : "");
@@ -1855,6 +1864,18 @@ $(function () {
 								'</tr>';
 						}
 					}
+					if(key === "stab"){
+						tpl_stab += '<tr>'+
+							'<td>Время стабилизации колонны</td>'+
+							'<td colspan="3" class="text-center">' + returnTplHtml([{id: "stab", value: sensors[key], min: '0', max: '120', step: '1'}], deltaTempl) + '</td>'+
+							'</tr>';
+					}
+					if(key === "point"){
+						tpl_stab += '<tr>'+
+							'<td>Время до применения уставки</td>'+
+							'<td colspan="3" class="text-center">' + returnTplHtml([{id: "point", value: sensors[key], min: '0', max: '60', step: '1'}], deltaTempl) + '</td>'+
+							'</tr>';
+					}
 				}
 			}
 			if (tpl_temperature !== '') {
@@ -1865,6 +1886,9 @@ $(function () {
 			}
 			if (tpl_safety !== '') {
 				section += '<tr><td colspan="4" class="text-center text-strong">Датчики безопасности</td></tr>' + tpl_safety;
+			}
+			if (tpl_stab !== '') {
+				section += '<tr><td colspan="4" class="text-center text-strong">Настройки колонны</td></tr>' + tpl_stab;
 			}
 			section += '</table></section>';
 			$.fn.openModal('Выбор датчиков для ректификации', section, "modal-md", false, {
@@ -1895,6 +1919,8 @@ $(function () {
 								}
 							}
 						});
+						refluxProcess["stab"] = Number($("#stab").val());
+						refluxProcess["point"] = Number($("#point").val());
 						$(this).closest(".modal").modal("hide");
 						$.fn.pasteRefluxSensors(true);
 					}
@@ -1948,11 +1974,14 @@ $(function () {
 			"in1": {"name": "", "member": 0},
 			"in2": {"name": "", "member": 0},
 			"in3": {"name": "", "member": 0},
-			"in4": {"name": "", "member": 0}
+			"in4": {"name": "", "member": 0},
+			"stab":{"name": "Время стабилизации колонны", "allertValue": 0},
+			"point":{"name": "Время до применения уставки", "allertValue": 0}
 		};
 		let refluxTemplate = '';
 		let tpl_devices_body = '';
 		let tpl_safety_body = '';
+		let tpl_stab = '';
 		if (!sensors_select && $.fn.objIsEmpty(refluxProcess["sensors"], false)) {
 			$.ajax({
 				url: ajax_url_debug + 'refluxSensorsGetTpl',
@@ -1961,6 +1990,8 @@ $(function () {
 				dataType: 'json',
 				success: function (msg) {
 					refluxProcess["sensors"] = msg;
+					refluxProcess["stab"] = Number(msg["stab"]);
+					refluxProcess["point"] = Number(msg["point"]);
 					refluxProcess["number"] = Number(msg["number"]);
 					refluxProcess["powerHigh"] = Number(msg["powerHigh"]);
 					refluxProcess["powerLower"] = Number(msg["powerLower"]);
@@ -1992,6 +2023,18 @@ $(function () {
 				'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-4 text-center text-middle text-primary text-nowrap">Период сек.</div>' +
 				'<div class="col-xs-2 col-xs-offset-3 col-sm-3 col-sm-offset-1 text-center text-middle text-primary text-nowrap">Открыт %</div>'+
 				'<div class="col-xs-2 col-xs-offset-1 col-sm-1 col-sm-offset-0 text-center text-middle text-primary text-nowrap">%&#8595;</div></div>';
+			tpl_stab = '<div class="row row-striped">' +
+				'<div class="pt-10 clearfix">' +
+				'<div class="col-xs-12 col-sm-4 text-center-xs text-middle text-strong">Время стабилизации колонны</div>' +
+				'<div class="col-xs-12 col-sm-3 text-center text-middle text-strong"><span id="reflux_stab"></span>' +
+				refluxProcess["stab"] +
+				' <span>мин.</span></div></div>' +
+				'<div class="pt-10 clearfix">' +
+				'<div class="col-xs-12 col-sm-4 text-center-xs text-middle text-strong">Время до применения уставки</div>' +
+				'<div class="col-xs-12 col-sm-3 text-center text-middle text-strong pb-10"><span id="reflux_point"></span>'+
+				refluxProcess["point"] +
+				' <span>мин.</span></div></div></div>';
+
 			let flagout1 = false;
 			$.each(refluxProcess["sensors"], function (i, e) {
 				let sensor_key = i;
@@ -2159,7 +2202,7 @@ $(function () {
 			refluxTemplate = timeStepTemplate +
 				returnTplHtml([{id_value: "reflux_power_value", id_set: "reflux_power_set"}], powerTempl) +
 				returnTplHtml([{id_lower_set: "reflux_power_lower_set"}], powerLowerTempl) +
-				refluxTemplate + pressureTemplate + tpl_devices_body + tpl_safety_body;
+				tpl_stab + refluxTemplate + pressureTemplate + tpl_devices_body + tpl_safety_body;
 
 			$("#reflux_start_group_button").removeClass("hidden");
 		} else {
@@ -3428,15 +3471,16 @@ $(function () {
 		//if(tmpTime<100 && refluxProcess["start"] === true)
 		//tmpTime ++;
 	}
-	/*function startInterval(){
+	function startInterval(){
 		sensorsIntervalId = setInterval(getIntervalSensors, 1000);
-	}*/
+	}
 
 	//clearInterval(sensorsIntervalId);
 	$(document).ready(function () {
 		console.log('ready');
+		startInterval();
 		//setTimeout(getSettings, 2000);
-		sensorsIntervalId = setInterval(getIntervalSensors, 1000);
+		// sensorsIntervalId = setInterval(getIntervalSensors, 1000);
 		/*setTimeout(function () {
 			startInterval();
 		}, 3000);*/

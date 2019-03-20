@@ -7,8 +7,6 @@
   "t6":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
   "t7":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
   "t8":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0},
-  "stab":{"name": "Время стабилизации колонны", "allertValue": 0},
-  "point":{"name": "Время до применения уставки", "allertValue": 0},
   "out1":{"value":0,"name":"Клапан на головы","member":1,"allert":0},
   "out2":{"value":0,"name":"Клапан на тело","member":1,"allert":0},
   "out3":{"value":0,"name":"Клапан подачи воды","member":0,"allert":0},
@@ -20,5 +18,7 @@
   "in1":{"value":0,"name":"Датчик протечки","member":0},
   "in2":{"value":0,"name":"","member":0},
   "in3":{"value":0,"name":"","member":0},
-  "in4":{"value":0,"name":"","member":0}
+  "in4":{"value":0,"name":"","member":0},
+  "stab":0,
+  "point":0
 }
