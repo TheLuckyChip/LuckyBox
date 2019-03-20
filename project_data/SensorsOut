@@ -44,7 +44,7 @@
 ],
 	"valwe": [
 	{"head":{"timeCycle":5,"timeOn":1}},
-	{"body":{"timeCycle":5,"timeOn":1,"decline":1}}
+	{"body":{"timeCycle":5,"timeOn":0,"decline":0}}
 ],
 	"safety":[
 	{"in1":{"value":0,"name":"Датчик протечки","member":0,"allert":0}},

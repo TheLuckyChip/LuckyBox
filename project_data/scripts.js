@@ -2114,20 +2114,23 @@ $(function () {
 
 						let val_body_cycle = (globalSensorsJson.hasOwnProperty("valwe") ? globalSensorsJson["valwe"][1]["body"]["timeCycle"] : 5);
 						let tpl_body_cycle = returnTplHtml([{id: "reflux_body_cycle", value: val_body_cycle, min: '5', max: '30', step: '1'}], deltaTempl);
-						let val_body_time = (globalSensorsJson.hasOwnProperty("valwe") ? globalSensorsJson["valwe"][1]["body"]["timeOn"] : 1);
-						let tpl_body_time = returnTplHtml([{id: "reflux_body_time", value: val_body_time, min: '1', max: '100', step: '0.5'}], deltaTempl);
-						let checked_body_decline = (Number(globalSensorsJson["valwe"][1]["body"]["decline"]) > 0 ? " checked" : "");
+						let val_body_time = (globalSensorsJson.hasOwnProperty("valwe") ? globalSensorsJson["valwe"][1]["body"]["timeOn"] : 0);
+						let tpl_body_time = returnTplHtml([{id: "reflux_body_time", value: val_body_time, min: '0', max: '100', step: '0.5'}], deltaTempl);
+						let val_body_decline = (globalSensorsJson.hasOwnProperty("valwe") ? globalSensorsJson["valwe"][1]["body"]["decline"] : 0);
+						let tpl_body_decline = returnTplHtml([{id: "reflux_body_decline", value: val_body_decline, min: '0', max: '30', step: '1'}], deltaTempl);
+							//(Number(globalSensorsJson["valwe"][1]["body"]["decline"]) > 0 ? " checked" : "");
 						//if(flagout1){ head_devices = '';}
 						tpl_devices_body += '<div class="row row-striped">' +
 							//head_devices +
 							'<div class="pt-10 pb-10 clearfix">' +
-							'<div class="col-xs-12 col-sm-4 text-middle text-center-xs text-strong">Клапан отбора тела</div>' +
+							'<div class="col-xs-12 col-sm-3 pxs-10 text-middle text-center-xs text-strong">Клапан отбора тела</div>' +
 							//'<div class="col-xs-6 col-sm-2 text-center-xs text-middle text-strong pb-10">Период</div>' +
-							'<div class="col-xs-5 col-sm-3">' + tpl_body_cycle + '</div>' +
+							'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_cycle + '</div>' +
 							//'<div class="col-xs-4 col-sm-2 text-center-xs text-middle text-strong text-nowrap">Откр.%</div>' +
-							'<div class="col-xs-5 col-xs-offset-0 col-sm-3 col-sm-offset-1">' + tpl_body_time + '</div>' +
-							'<div class="col-xs-2 col-sm-1 text-center text-middle"><label class="checkbox-inline">' +
-							'<input class="noSwipe" id="reflux_body_decline"' + checked_body_decline + ' type="checkbox" value="Y"></label></div>' +
+							'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_time + '</div>' +
+							'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_decline + '</div>' +
+							//'<div class="col-xs-2 col-sm-1 text-center text-middle"><label class="checkbox-inline">' +
+							//'<input class="noSwipe" id="reflux_body_decline"' + checked_body_decline + ' type="checkbox" value="Y"></label></div>' +
 							'</div></div>';
 					}else if(sensor_key === "out2"){
 						if(!flagout1) {
@@ -2148,19 +2151,22 @@ $(function () {
 							let val_body_cycle = (globalSensorsJson.hasOwnProperty("valwe") ? globalSensorsJson["valwe"][1]["body"]["timeCycle"] : 5);
 							let tpl_body_cycle = returnTplHtml([{id: "reflux_body_cycle", value: val_body_cycle, min: '5', max: '30', step: '1'}], deltaTempl);
 							let val_body_time = (globalSensorsJson.hasOwnProperty("valwe") ? globalSensorsJson["valwe"][1]["body"]["timeOn"] : 1);
-							let tpl_body_time = returnTplHtml([{id: "reflux_body_time", value: val_body_time, min: '1', max: '100', step: '0.5'}], deltaTempl);
-							let checked_body_decline = (Number(globalSensorsJson["valwe"][1]["body"]["decline"]) > 0 ? " checked" : "");
+							let tpl_body_time = returnTplHtml([{id: "reflux_body_time", value: val_body_time, min: '0', max: '100', step: '0.5'}], deltaTempl);
+							let val_body_decline = (globalSensorsJson.hasOwnProperty("valwe") ? globalSensorsJson["valwe"][1]["body"]["decline"] : 0);
+							let tpl_body_decline = returnTplHtml([{id: "reflux_body_decline", value: val_body_decline, min: '0', max: '30', step: '1'}], deltaTempl);
+							//(Number(globalSensorsJson["valwe"][1]["body"]["decline"]) > 0 ? " checked" : "");
 							//if(flagout1){ head_devices = '';}
 							tpl_devices_body += '<div class="row row-striped">' +
 								//head_devices +
 								'<div class="pt-10 pb-10 clearfix">' +
-								'<div class="col-xs-12 col-sm-4 text-middle text-center-xs text-strong">Клапан отбора тела</div>' +
+								'<div class="col-xs-12 col-sm-3 pxs-10 text-middle text-center-xs text-strong">Клапан отбора тела</div>' +
 								//'<div class="col-xs-6 col-sm-2 text-center-xs text-middle text-strong pb-10">Период</div>' +
-								'<div class="col-xs-5 col-sm-3">' + tpl_body_cycle + '</div>' +
+								'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_cycle + '</div>' +
 								//'<div class="col-xs-4 col-sm-2 text-center-xs text-middle text-strong text-nowrap">Откр.%</div>' +
-								'<div class="col-xs-5 col-xs-offset-0 col-sm-3 col-sm-offset-1">' + tpl_body_time + '</div>' +
-								'<div class="col-xs-2 col-sm-1 text-center text-middle"><label class="checkbox-inline">' +
-								'<input class="noSwipe" id="reflux_body_decline"' + checked_body_decline + ' type="checkbox" value="Y"></label></div>' +
+								'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_time + '</div>' +
+								'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_decline + '</div>' +
+								//'<div class="col-xs-2 col-sm-1 text-center text-middle"><label class="checkbox-inline">' +
+								//'<input class="noSwipe" id="reflux_body_decline"' + checked_body_decline + ' type="checkbox" value="Y"></label></div>' +
 								'</div></div>';
 						}
 					}else {
@@ -2422,7 +2428,7 @@ $(function () {
 				refluxSendData["body"]["timeOn"] = val_reflux_body_time;
 			}
 			if (reflux_body_decline.length) {
-				let val_reflux_body_decline = (reflux_body_decline.prop("checked") ? 1 : 0);
+				let val_reflux_body_decline = Number(reflux_body_decline.val());
 				if (Number(globalSensorsJson["valwe"][1]["body"]["decline"]) !== val_reflux_body_decline) {
 					flagSendProcess = true;
 				}
