@@ -2012,6 +2012,7 @@ $(function () {
 				}
 			});
 		}
+		let visible_reflux_out_3 = (refluxProcess["number"] === 3 ? "" : " hidden");
 		if (!$.fn.objIsEmpty(refluxProcess["sensors"], false)) {
 			let tpl_delta_thead =
 				'<div class="row-xs clearfix">' +
@@ -2113,7 +2114,8 @@ $(function () {
 						let tpl_head_cycle = returnTplHtml([{id: "reflux_head_cycle", value: val_head_cycle, min: '5', max: '30', step: '1'}], deltaTempl);
 						let val_head_time = (globalSensorsJson.hasOwnProperty("valwe") ? globalSensorsJson["valwe"][0]["head"]["timeOn"] : 1);
 						let tpl_head_time = returnTplHtml([{id: "reflux_head_time", value: val_head_time, min: '1', max: '100', step: '0.5'}], deltaTempl);
-						tpl_devices_body += '<div class="row row-striped">' +
+						tpl_devices_body += '<div id="reflux_out_3" class="row' + visible_reflux_out_3 +'"><div class="col-xs-12">' +
+							'<div class="row row-striped">' +
 							head_devices +
 							'<div class="pt-10 pb-10 clearfix">' +
 							'<div class="col-xs-12 col-sm-3 text-middle text-center-xs text-strong">Клапан отбора голов</div>' +
@@ -2142,6 +2144,7 @@ $(function () {
 							'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_decline + '</div>' +
 							//'<div class="col-xs-2 col-sm-1 text-center text-middle"><label class="checkbox-inline">' +
 							//'<input class="noSwipe" id="reflux_body_decline"' + checked_body_decline + ' type="checkbox" value="Y"></label></div>' +
+							'</div></div>'+
 							'</div></div>';
 					}else if(sensor_key === "out2"){
 						if(!flagout1) {
@@ -2149,7 +2152,8 @@ $(function () {
 							let tpl_head_cycle = returnTplHtml([{id: "reflux_head_cycle", value: val_head_cycle, min: '5', max: '30', step: '1'}], deltaTempl);
 							let val_head_time = (globalSensorsJson.hasOwnProperty("valwe") ? globalSensorsJson["valwe"][0]["head"]["timeOn"] : 1);
 							let tpl_head_time = returnTplHtml([{id: "reflux_head_time", value: val_head_time, min: '1', max: '100', step: '0.5'}], deltaTempl);
-							tpl_devices_body += '<div class="row row-striped">' +
+							tpl_devices_body += '<div id="reflux_out_3" class="row' + visible_reflux_out_3 +'"><div class="col-xs-12">' +
+								'<div class="row row-striped">' +
 								head_devices +
 								'<div class="pt-10 pb-10 clearfix">' +
 								'<div class="col-xs-12 col-sm-3 text-middle text-center-xs text-strong">Клапан отбора голов</div>' +
@@ -2178,6 +2182,7 @@ $(function () {
 								'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_decline + '</div>' +
 								//'<div class="col-xs-2 col-sm-1 text-center text-middle"><label class="checkbox-inline">' +
 								//'<input class="noSwipe" id="reflux_body_decline"' + checked_body_decline + ' type="checkbox" value="Y"></label></div>' +
+								'</div></div>'+
 								'</div></div>';
 						}
 					}else {
@@ -2246,7 +2251,16 @@ $(function () {
 		}
 	};
 	$(document).on('change', '#reflux_algorithm_select', function () {
-		refluxProcess["number"] = $(this).find(":selected").val();
+		let algorithm_val = Number($(this).find(":selected").val());
+		refluxProcess["number"] = algorithm_val;
+		if($("#reflux_out_3").length > 0) {
+			console.log("reflux_out_3", algorithm_val);
+			if (algorithm_val === 3) {
+				$("#reflux_out_3").removeClass("hidden");
+			}else{
+				$("#reflux_out_3").addClass("hidden");
+			}
+		}
 	});
 
 	function launchReflux(){
