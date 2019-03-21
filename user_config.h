@@ -60,9 +60,6 @@
 #define		PWM_CH7_Invert	false
 #define		PWM_CH8_Invert	false
 #define		PWM_CH9_Invert	false
-// переменные временных интервалов на отбор голов для РК
-#define		headValveOpen	800
-#define		headValveClose	5000
 // Периодичность вывода температурного графика в секундах на экран
 #define		Display_out_temp	15
 // Периодичность записи лог.файла на SD

@@ -13,7 +13,7 @@ OneWire ds(DS_Pin);
 #define Lo(num1) (num1 & 0xFF)
 #define Hi(num2) ((num2 & 0xFF00) >> 8)
 
-void EEPROM_float_write_dsAllert(int addr, float val) {
+/*void EEPROM_float_write_dsAllert(int addr, float val) {
 	byte *x = (byte *)&val;
 	for (byte i = 0; i < 4; i++) EEPROM.write(i + addr, x[i]);
 }
@@ -22,7 +22,7 @@ float EEPROM_float_read_dsAllert(int addr) {
 	for (byte i = 0; i < 4; i++) x[i] = EEPROM.read(i + addr);
 	float *y = (float *)&x;
 	return y[0];
-}
+}*/
 
 void initPressureSensor()
 {
@@ -500,16 +500,16 @@ void handleProcessModeIn() {
 			temperatureSensor[i].allertValueIn = tmpAllertValue;
 			// Запишем значение введенных отсечек или уставок в EEPROM
 			if (processMode.allow == 1) {
-				allertReadTmp = EEPROM_float_read_dsAllert(1303 + i * 7);
+				allertReadTmp = EEPROM_float_read(1303 + i * 7);
 				if (allertReadTmp != tmpAllertValue) { // дистилляция
-					EEPROM_float_write_dsAllert((1303 + i * 7), temperatureSensor[i].allertValueIn);
+					EEPROM_float_write((1303 + i * 7), temperatureSensor[i].allertValueIn);
 					allertSave = true;
 				}
 			}
 			else if (processMode.allow == 2 && processMode.number > 0) {
-				allertReadTmp = EEPROM_float_read_dsAllert(1403 + i * 8);
+				allertReadTmp = EEPROM_float_read(1403 + i * 8);
 				if (allertReadTmp != tmpAllertValue) { // ректификация
-					EEPROM_float_write_dsAllert((1403 + i * 8), temperatureSensor[i].allertValueIn);
+					EEPROM_float_write((1403 + i * 8), temperatureSensor[i].allertValueIn);
 					allertSave = true;
 				}
 			}
@@ -570,16 +570,16 @@ void handleProcessModeIn() {
 			EEPROM.write(1477, headTimeCycle);
 			allertSave = true;
 		}
-		if (headtimeOn != EEPROM_float_read_dsAllert(1478)) {
-			EEPROM_float_write_dsAllert(1478, headtimeOn);
+		if (headtimeOn != EEPROM_float_read(1478)) {
+			EEPROM_float_write(1478, headtimeOn);
 			allertSave = true;
 		}
 		if (bodyTimeCycle != EEPROM.read(1482)) {
 			EEPROM.write(1482, bodyTimeCycle);
 			allertSave = true;
 		}
-		if (bodytimeOn != EEPROM_float_read_dsAllert(1483)) {
-			EEPROM_float_write_dsAllert(1483, bodytimeOn);
+		if (bodytimeOn != EEPROM_float_read(1483)) {
+			EEPROM_float_write(1483, bodytimeOn);
 			allertSave = true;
 		}
 		if (decline != EEPROM.read(1487)) {
@@ -597,7 +597,7 @@ void handleProcessModeIn() {
 	else if (headtimeOn > 100) headtimeOn = 100;
 	if (bodyTimeCycle < 5) bodyTimeCycle = 5;
 	else if (bodyTimeCycle > 30) bodyTimeCycle = 30;
-	if (bodytimeOn < 1) bodytimeOn = 1;
+	if (bodytimeOn < 0) bodytimeOn = 0;
 	else if (bodytimeOn > 100) bodytimeOn = 100;
 	if (decline > 30) decline = 10;
 
