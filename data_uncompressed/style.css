@@ -474,5 +474,23 @@ span.show {
 		/*padding-left: 10px;*/
 		/*padding-right: 10px;*/
 	}
+	.number-group{
+		width: 105px;
+	}
+	.number-group input.input-number{
+		padding: 5px 5px;
+	}
+	.pxs-10{
+		padding-left: 10px;
+		padding-right: 10px;
+	}
+	.pxs-5{
+		padding-left: 5px;
+		padding-right: 5px;
+	}
+	.pxs-0{
+		padding-left: 0;
+		padding-right: 0;
+	}
 }
 

@@ -63,15 +63,6 @@
 // переменные временных интервалов на отбор голов для РК
 #define		headValveOpen	800
 #define		headValveClose	5000
-//#define		valveCiclePeriod	10000  // период работы клапанов в импульсном режиме
-// используется "Полский буфер" с клапаном слива в канале PWM_CH4
-//#define		Polish_Buffer
-// Время стабилизации в минутах
-#define		timeStabilizationReflux		20
-// Время до применения уставки в минутах
-#define		timeBoilTubeSetReflux		5
-// % снижения отбора после Старт/Стопа
-#define		decrementStartStopTime		10
 // Периодичность вывода температурного графика в секундах на экран
 #define		Display_out_temp	15
 // Периодичность записи лог.файла на SD

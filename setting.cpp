@@ -101,12 +101,14 @@ bool CH2 = false;
 bool CH3 = false;
 bool CH4 = false;
 unsigned long timeSetHighVoltage;
+uint8_t timeStabilizationReflux = 20;
+uint8_t timeBoilTubeSetReflux = 5;
 
 uint8_t headTimeCycle = 10;
 float headtimeOn = 3.5;
 uint8_t bodyTimeCycle = 12;
 float bodytimeOn = 8.5;
-byte decline = 0;
+uint8_t decline = 10;
 unsigned long bodyTimeOffCount;
 uint8_t stepNext = 0;
 uint8_t answer = 0;

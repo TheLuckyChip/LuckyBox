@@ -18,17 +18,6 @@ unsigned long timeValveMs;
 unsigned long timePauseErrA;
 unsigned long timePauseErrT;
 
-/*void EEPROM_float_write_refl(int addr, float val) {
-	byte *x = (byte *)&val;
-	for (byte i = 0; i < 4; i++) EEPROM.write(i + addr, x[i]);
-}
-float EEPROM_float_read_refl(int addr) {
-	byte x[4];
-	for (byte i = 0; i < 4; i++) x[i] = EEPROM.read(i + addr);
-	float *y = (float *)&x;
-	return y[0];
-}*/
-
 void loadEepromReflux() {
 	int i;
 	// Считаем что раньше сохраняли
@@ -62,12 +51,16 @@ void loadEepromReflux() {
 		if (headTimeCycle < 5 || headTimeCycle > 30) headTimeCycle = 10;
 		headtimeOn = EEPROM_float_read(index); index += 4;
 		if (isnan(headtimeOn) || headtimeOn < 0 || headtimeOn > 100) headtimeOn = 3;
-		bodyTimeCycle = EEPROM.read(index);  index++;
+		bodyTimeCycle = EEPROM.read(index); index++;
 		if (bodyTimeCycle < 5 || bodyTimeCycle > 30) bodyTimeCycle = 12;
 		bodytimeOn = EEPROM_float_read(index); index += 4;
 		if (isnan(bodytimeOn) || bodytimeOn < 0 || bodytimeOn > 100) bodytimeOn = 8;
-		decline = EEPROM.read(index);
-		if (decline < 0 || decline > 1) decline = 0;
+		decline = EEPROM.read(index); index++;
+		if (decline > 30) decline = 10;
+		timeStabilizationReflux = EEPROM.read(index); index++;
+		if (timeStabilizationReflux > 120) timeStabilizationReflux = 20;
+		timeBoilTubeSetReflux = EEPROM.read(index);
+		if (timeBoilTubeSetReflux > 60) timeBoilTubeSetReflux = 10;
 
 		power.inPowerHigh = EEPROM.read(1497);
 		if (power.inPowerHigh > 100) power.inPowerHigh = 100;
@@ -104,7 +97,9 @@ void loadEepromReflux() {
 		headtimeOn = 3.5;
 		bodyTimeCycle = 12;
 		bodytimeOn = 8.5;
-		decline = 0;
+		decline = 10;
+		timeStabilizationReflux = 20;
+		timeBoilTubeSetReflux = 10;
 		power.inPowerHigh = 100;
 		power.inPowerLow = 65;
 		processMode.number = 0;
@@ -138,18 +133,10 @@ void handleRefluxSensorTpl() {
 
 	loadEepromReflux();
 	if (processMode.allow == 0) {
-		//EEPROM.begin(2048);
-		//power.inPowerHigh = EEPROM.read(1497);
-		//if (power.inPowerHigh > 100) power.inPowerHigh = 100;
-		//power.inPowerLow = EEPROM.read(1498);
-		//if (power.inPowerLow > 100) power.inPowerLow = 65;
-		//processMode.number = EEPROM.read(1499);
-		//if (processMode.number > 5) processMode.number = 0;
 		for (int i = 0; i < DS_Cnt; i++) {
 			allertSetTemperatureEn[i] = false;
 			if (temperatureSensor[i].cutoff == true) temperatureSensor[i].allertValue = temperatureSensor[i].allertValueIn;
 		}
-		//EEPROM.end();
 	}
 
 	String dataForWeb = "{";
@@ -187,7 +174,9 @@ void handleRefluxSensorTpl() {
 	dataForWeb += "\"in2\":{\"value\":" + String(adcIn[1].data) + ",\"name\":\"" + String(adcIn[1].name) + "\",\"member\":" + String(tpl2web.adcMember[1]) + "},";
 	dataForWeb += "\"in3\":{\"value\":" + String(adcIn[2].data) + ",\"name\":\"" + String(adcIn[2].name) + "\",\"member\":" + String(tpl2web.adcMember[2]) + "},";
 	dataForWeb += "\"in4\":{\"value\":" + String(adcIn[3].data) + ",\"name\":\"" + String(adcIn[3].name) + "\",\"member\":" + String(tpl2web.adcMember[3]) + "},";
-	dataForWeb += "\"number\":" + String(processMode.number) + ",\"powerHigh\":" + String(power.inPowerHigh) + ",\"powerLower\":" + String(power.inPowerLow) + "}";
+	// остальные параметры
+	dataForWeb += "\"stab\":" + String(timeStabilizationReflux) + ",\"point\":" + String(timeBoilTubeSetReflux);
+	dataForWeb += ",\"number\":" + String(processMode.number) + ",\"powerHigh\":" + String(power.inPowerHigh) + ",\"powerLower\":" + String(power.inPowerLow) + "}";
 	HTTP.send(200, "text/json", dataForWeb);
 }
 // Отправка - Добавить датчики для процесса
@@ -226,7 +215,8 @@ void handleRefluxSensorSetLoad() {
 	dataForWeb += "\"in1\":{\"value\":" + String(adcIn[0].data) + ",\"name\":\"" + String(adcIn[0].name) + "\",\"member\":" + String(adcIn[0].member) + "},";
 	dataForWeb += "\"in2\":{\"value\":" + String(adcIn[1].data) + ",\"name\":\"" + String(adcIn[1].name) + "\",\"member\":" + String(adcIn[0].member) + "},";
 	dataForWeb += "\"in3\":{\"value\":" + String(adcIn[2].data) + ",\"name\":\"" + String(adcIn[2].name) + "\",\"member\":" + String(adcIn[0].member) + "},";
-	dataForWeb += "\"in4\":{\"value\":" + String(adcIn[3].data) + ",\"name\":\"" + String(adcIn[3].name) + "\",\"member\":" + String(adcIn[0].member) + "}}";
+	dataForWeb += "\"in4\":{\"value\":" + String(adcIn[3].data) + ",\"name\":\"" + String(adcIn[3].name) + "\",\"member\":" + String(adcIn[0].member) + "},";
+	dataForWeb += "\"stab\":" + String(timeStabilizationReflux) + ",\"point\":" + String(timeBoilTubeSetReflux) + "}";
 	HTTP.send(200, "text/json", dataForWeb);
 }
 // Прием выбранных датчиков
@@ -267,6 +257,8 @@ void handleRefluxSensorSetSave() {
 		arg = "in" + String(i + 1);
 		adcIn[i].member = HTTP.arg(arg + "[member]").toInt();
 	}
+	timeStabilizationReflux = HTTP.arg("stab").toInt();
+	timeBoilTubeSetReflux = HTTP.arg("point").toInt();
 	HTTP.send(200, "text/json", "{\"result\":\"ok\"}");
 
 	// сохраним в EEPROM
@@ -286,10 +278,13 @@ void handleRefluxSensorSetSave() {
 	for (i = 0; i < 4; i++) { // 4 байта
 		EEPROM.write(index, adcIn[i].member);  index++;
 	}
-
-	EEPROM.commit();
-	delay(100);
+	// для колонны
+	index = 1488;
+	EEPROM.write(index, timeStabilizationReflux); index++;
+	EEPROM.write(index, timeBoilTubeSetReflux);
+	
 	EEPROM.end();
+	delay(200);
 }
 
 void valveSet(uint8_t ch) {
@@ -302,7 +297,7 @@ void valveSet(uint8_t ch) {
 		timeOn = (valveCiclePeriod * bodytimeOn) / 100;
 		// применим декремент на уменьшение скорости отбора после N-го кол-ва Старт/Стопа
 		if (decline != 0) {
-			unsigned long calc = counterStartStop * decrementStartStopTime;
+			unsigned long calc = counterStartStop * decline;
 			if (calc > 100) calc = 100;
 			timeOn = timeOn - ((timeOn * calc) / 100);
 		}

@@ -4,17 +4,6 @@
 
 float settingTank = 99.5;                   // температура отключени¤ нагрева куба при дистилл¤ции браги в спирт-сырец
 
-/*void EEPROM_float_write_dist(int addr, float val) {
-	byte *x = (byte *)&val;
-	for (byte i = 0; i < 4; i++) EEPROM.write(i + addr, x[i]);
-}
-float EEPROM_float_read_dist(int addr) {
-	byte x[4];
-	for (byte i = 0; i < 4; i++) x[i] = EEPROM.read(i + addr);
-	float *y = (float *)&x;
-	return y[0];
-}*/
-
 void loadEepromDistillation() {
 	int i;
 	EEPROM.begin(2048);
@@ -181,7 +170,6 @@ void handleDistillationSensorSetSave() {
 		arg = "in" + String(i + 1);
 		adcIn[i].member = HTTP.arg(arg + "[member]").toInt();
 	}
-	HTTP.send(200, "text/json", "{\"result\":\"ok\"}");
 
 	// сохраним в EEPROM
 	EEPROM.begin(2048);
@@ -200,9 +188,9 @@ void handleDistillationSensorSetSave() {
 		EEPROM.write(index, adcIn[i].member);  index++;
 	}
 
-	EEPROM.commit();
 	EEPROM.end();
-	delay(100);
+	delay(200);
+	HTTP.send(200, "text/json", "{\"result\":\"ok\"}");
 }
 
 void distillationLoop() {

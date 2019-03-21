@@ -442,7 +442,7 @@ void handleProcessSensorOut() {
 	// импульсный режим на клапана
 	dataForWeb += "}}],\"valwe\":[";
 	dataForWeb += "{\"head\":{\"timeCycle\":" + String(headTimeCycle) + ",\"timeOn\":" + String(headtimeOn) + "}},";
-	dataForWeb += "{\"body\":{\"timeCycle\":" + String(bodyTimeCycle) + ",\"timeOn\":" + String(bodytimeOn) + ",\"decline\":" + String(decline) + ",\"Ttime\":" + String(processMode.timeStep - bodyTimeOffCount) + ",\"Cnt\":" + String(counterStartStop);
+	dataForWeb += "{\"body\":{\"timeCycle\":" + String(bodyTimeCycle) + ",\"timeOn\":" + String(bodytimeOn) + ",\"decline\":" + String(decline);// +",\"Tmp1\":" + String(timeStabilizationReflux) + ",\"Tmp2\":" + String(timeBoilTubeSetReflux);
 	// АЦП
 	dataForWeb += "}}],\"safety\":[";
 	for (i = 0; i < ADC_Cnt; i++) {
@@ -591,8 +591,6 @@ void handleProcessModeIn() {
 	stepNext = HTTP.arg("stepNext").toInt();
 	answer = HTTP.arg("answer").toInt();
 
-	HTTP.send(200, "text/json", "{\"result\":\"ok\"}");
-
 	if (headTimeCycle < 5) headTimeCycle = 5;
 	else if (headTimeCycle > 30) headTimeCycle = 30;
 	if (headtimeOn < 1) headtimeOn = 1;
@@ -601,7 +599,7 @@ void handleProcessModeIn() {
 	else if (bodyTimeCycle > 30) bodyTimeCycle = 30;
 	if (bodytimeOn < 1) bodytimeOn = 1;
 	else if (bodytimeOn > 100) bodytimeOn = 100;
-	if (decline > 1) decline = 1;
+	if (decline > 30) decline = 10;
 
 	// для записи лога на SD
 	if (processModeOld != processMode.allow && processMode.allow < 4) {
@@ -618,8 +616,9 @@ void handleProcessModeIn() {
 	}
 	if (allertSave == true) EEPROM.commit();
 	allertSave = false;
-	delay(500);
 	EEPROM.end();
+	delay(250);
+	HTTP.send(200, "text/json", "{\"result\":\"ok\"}");
 }
 
 void handleResetDataEeprom() {
@@ -628,9 +627,10 @@ void handleResetDataEeprom() {
 		for (int i = 0; i < 2048; i++) {
 			EEPROM.write(i, 0xFF);
 		}
-		EEPROM.commit();
-		delay(500);
+		//EEPROM.commit();
+		
 		EEPROM.end();
+		delay(100);
 		dallSearch();
 		HTTP.send(200, "text/json", "{\"result\":\"ok\"}");
 	}

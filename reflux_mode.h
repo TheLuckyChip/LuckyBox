@@ -15,6 +15,7 @@
 #include "pwm_out.h"
 #include <EEPROM.h>
 
+extern void loadEepromReflux();
 extern float settingColumn;
 extern float temperatureStartPressure;
 extern float settingColumnShow;

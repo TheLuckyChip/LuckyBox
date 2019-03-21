@@ -74,7 +74,7 @@ void setup()
 	// 1700 - 1759 имя ssdp, 1760 - 1819 имя ssid, 1820 - 1879 имя ssidAP
 	// 1900 - 1931 пароль ssid, 1940 - 1971 пароль ssidAP, 1980 - часовой пояс
 	timezone = EEPROM.read(1980);
-	if (timezone > 23) timezone = 3;
+	if (timezone < -12 || timezone > 12) timezone = 3;
 	// Считаем инверсию экрана и тачскрина
 	uint8_t tft180 = EEPROM.read(1298);
 	uint8_t touch180 = EEPROM.read(1299);
@@ -307,23 +307,7 @@ void setup()
   pinMode(intTouch, INPUT); // прерывание от тачскрина
   attachInterrupt(intTouch, touchscreenUpdateSet, FALLING);
 #endif
-
-  processMode.allow = 0; // Стоп
-  processMode.number = EEPROM.read(1499);// modeReflux;
-  int index = 1477;
-  headTimeCycle = EEPROM.read(index);  index++;                     // начало в EEPROM = 1477
-  if (headTimeCycle < 5 || headTimeCycle > 30) headTimeCycle = 10;
-  headtimeOn = EEPROM_float_read(index); index += 4;
-  if (isnan(headtimeOn) || headtimeOn < 0 || headtimeOn > 100) headtimeOn = 3;
-  bodyTimeCycle = EEPROM.read(index);  index++;
-  if (bodyTimeCycle < 5 || bodyTimeCycle > 30) bodyTimeCycle = 12;
-  bodytimeOn = EEPROM_float_read(index); index += 4;
-  if (isnan(bodytimeOn) || bodytimeOn < 0 || bodytimeOn > 100) bodytimeOn = 8;
-  decline = EEPROM.read(index);
-  if (decline < 0 || decline > 1) decline = 0;
-  EEPROM.end();
-  if (processMode.number > 7) processMode.number = 0;
-  processMode.step = 0;
+  loadEepromReflux();
   loadEepromPid();
   setKp = Kp;
   setKi = Ki;

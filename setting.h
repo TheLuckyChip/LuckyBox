@@ -198,12 +198,14 @@ extern uint8_t headTimeCycle;
 extern float headtimeOn;
 extern uint8_t bodyTimeCycle;
 extern float bodytimeOn;
-extern byte decline;
+extern uint8_t decline;
 extern unsigned long bodyTimeOffCount;
 // переход на следующий шаг
 extern uint8_t stepNext;
 // подтверждение обмена в web
 extern uint8_t answer;
+extern uint8_t timeStabilizationReflux;
+extern uint8_t timeBoilTubeSetReflux;
 
 extern float EEPROM_float_read(int addr);
 extern void EEPROM_float_write(int addr, float val);
