@@ -1515,13 +1515,17 @@ $(function () {
 	};
 
 	function launchDistillation(){
+		distillationProcess["start"] = flagSendProcess = true;
 		$('#distillation_start').prop("disabled", true);
 		$('#distillation_add_sensor').prop("disabled", true);
 		$('#distillation_stop').prop("disabled", false);
-		distillationProcess["start"] = flagSendProcess = true;
-		localStorage.setObj('oldStartProcess', 1);
 		clearInterval(sensorsProcessId);
-		setDistillation();
+		stopInterval();
+		localStorage.setObj('oldStartProcess', 1);
+		// setDistillation();
+		setTimeout(function () {
+			setDistillation();
+		}, 1000);
 	}
 	$(document).on('start-event','#distillation_start', function(e) {
 		console.log("start-event-Distillation");
@@ -1578,7 +1582,8 @@ $(function () {
 		$("#distillation_process").find("div.bg-danger").removeClass("bg-danger");
 		$("#distillation_process").find("div.text-danger").removeClass("text-danger");
 		clearInterval(sensorsProcessId);
-		clearInterval(sensorsIntervalId);
+		// clearInterval(sensorsIntervalId);
+		stopInterval();
 		flagSendProcess = true;
 		globalSensorsJson["process"]["allow"] = 0;
 		distillationProcess["start"] = false;
@@ -1637,7 +1642,8 @@ $(function () {
 			if (flagSendProcess) {
 				flagSendProcess = false;
 				clearInterval(sensorsProcessId);
-				clearInterval(sensorsIntervalId);
+				// clearInterval(sensorsIntervalId);
+				stopInterval();
 				sendRequest("SensorsIn", distillationSendData, "json", startDistillation, false, $("#error_distillation"), false);
 			}
 		}
@@ -1657,8 +1663,10 @@ $(function () {
 		console.log("startDistillation");
 		setTimeout(function () {
 			clearInterval(sensorsProcessId);
-			clearInterval(sensorsIntervalId);
-			sensorsIntervalId = setInterval(getIntervalSensors, 1000);
+			// clearInterval(sensorsIntervalId);
+			stopInterval();
+			startInterval();
+			// sensorsIntervalId = setInterval(getIntervalSensors, 1000);
 			if(distillationProcess["start"] === true) {
 				sensorsProcessId = setInterval(getDistillation, 2000);
 			}
@@ -2242,16 +2250,19 @@ $(function () {
 	});
 
 	function launchReflux(){
+		refluxProcess["start"] = flagSendProcess = true;
 		$('#reflux_start').prop("disabled", true);
 		$('#reflux_add_sensor').prop("disabled", true);
 		$('#reflux_stop').prop("disabled", false);
 		$('#reflux_next').prop("disabled", false);
 		$("#reflux_algorithm_select option[value=" + refluxProcess["number"] + "]").prop('selected',true);
 		$('#reflux_algorithm_select').prop("disabled", true);
-		localStorage.setObj('oldStartProcess', 2);
-		refluxProcess["start"] = flagSendProcess = true;
 		clearInterval(sensorsProcessId);
-		setReflux();
+		stopInterval();
+		localStorage.setObj('oldStartProcess', 2);
+		setTimeout(function () {
+			setReflux();
+		}, 1000);
 	}
 	$(document).on('start-event','#reflux_start', function(e) {
 		console.log("start-event-Reflux");
@@ -2320,6 +2331,7 @@ $(function () {
 	});
 	function stopReflux(){
 		$('#reflux_stop').prop("disabled", true);
+		$('#reflux_next').prop("disabled", true);
 		$('#reflux_add_sensor').prop("disabled", false);
 		$('#reflux_start').prop("disabled", false);
 		$('#reflux_algorithm_select').prop("disabled", false);
@@ -2331,7 +2343,8 @@ $(function () {
 		$("#reflux_process").find("div.bg-danger").removeClass("bg-danger");
 		$("#reflux_process").find("div.text-danger").removeClass("text-danger");
 		clearInterval(sensorsProcessId);
-		clearInterval(sensorsIntervalId);
+		// clearInterval(sensorsIntervalId);
+		stopInterval();
 		flagSendProcess = true;
 		globalSensorsJson["process"]["allow"] = 0;
 		refluxProcess["start"] = false;
@@ -2446,7 +2459,8 @@ $(function () {
 			if (flagSendProcess) {
 				flagSendProcess = false;
 				clearInterval(sensorsProcessId);
-				clearInterval(sensorsIntervalId);
+				// clearInterval(sensorsIntervalId);
+				stopInterval();
 				sendRequest("SensorsIn", refluxSendData, "json", startReflux, false, $("#error_reflux"), false);
 			}
 		}
@@ -2466,8 +2480,10 @@ $(function () {
 		console.log("startReflux");
 		setTimeout(function () {
 			clearInterval(sensorsProcessId);
-			clearInterval(sensorsIntervalId);
-			sensorsIntervalId = setInterval(getIntervalSensors, 1000);
+			// clearInterval(sensorsIntervalId);
+			stopInterval();
+			startInterval();
+			// sensorsIntervalId = setInterval(getIntervalSensors, 1000);
 			if(refluxProcess["start"] === true) {
 				sensorsProcessId = setInterval(getReflux, 2000);
 			}
@@ -2821,13 +2837,16 @@ $(function () {
 		}
 	};
 	function launchMashing(){
+		mashingProcess["start"] = flagSendProcess = true;
 		$('#mashing_start').prop("disabled", true);
 		$('#mashing_add_sensor').prop("disabled", true);
 		$('#mashing_stop').prop("disabled", false);
-		mashingProcess["start"] = flagSendProcess = true;
-		localStorage.setObj('oldStartProcess', 3);
 		clearInterval(sensorsProcessId);
-		setMashing();
+		stopInterval();
+		localStorage.setObj('oldStartProcess', 3);
+		setTimeout(function () {
+			setMashing();
+		}, 1000);
 	}
 	$(document).on('start-event','#mashing_start', function(e) {
 		console.log("start-event-Mashing");
@@ -2878,7 +2897,8 @@ $(function () {
 		$('#mashing_start').prop("disabled", false);
 		$("#svg_mashing_start").css('stroke', "#000000");
 		clearInterval(sensorsProcessId);
-		clearInterval(sensorsIntervalId);
+		// clearInterval(sensorsIntervalId);
+		stopInterval();
 		flagSendProcess = true;
 		globalSensorsJson["process"]["allow"] = 0;
 		mashingProcess["start"] = false;
@@ -2935,7 +2955,8 @@ $(function () {
 			if (flagSendProcess) {
 				flagSendProcess = false;
 				clearInterval(sensorsProcessId);
-				clearInterval(sensorsIntervalId);
+				// clearInterval(sensorsIntervalId);
+				stopInterval();
 				sendRequest("SensorsIn", mashingSendData, "json", startMashing, false, $("#error_mashing"), false);
 
 			}
@@ -2957,8 +2978,10 @@ $(function () {
 		console.log("startMashing");
 		setTimeout(function () {
 			clearInterval(sensorsProcessId);
-			clearInterval(sensorsIntervalId);
-			sensorsIntervalId = setInterval(getIntervalSensors, 1000);
+			// clearInterval(sensorsIntervalId);
+			stopInterval();
+			startInterval();
+			// sensorsIntervalId = setInterval(getIntervalSensors, 1000);
 			if(mashingProcess["start"] === true) {
 				sensorsProcessId = setInterval(getMashing, 2000);
 			}
@@ -3058,13 +3081,16 @@ $(function () {
 	//настройка ПИД
 	let pidProcess = {"pid": {}, "start": false};
 	function launchPid(){
+		pidProcess["start"] = flagSendProcess = true;
 		$('#pid_start').prop("disabled", true);
 		$('#pid_stop').prop("disabled", false);
 		$('#set_pid').prop("disabled", true);
-		pidProcess["start"] = flagSendProcess = true;
-		localStorage.setObj('oldStartProcess', 4);
 		clearInterval(sensorsProcessId);
-		setPid();
+		stopInterval();
+		localStorage.setObj('oldStartProcess', 4);
+		setTimeout(function () {
+			setPid();
+		}, 1000);
 	}
 	$(document).on('start-event','#pid_start', function(e) {
 		console.log("start-event-Pid");
@@ -3192,7 +3218,8 @@ $(function () {
 			if (flagSendProcess) {
 				flagSendProcess = false;
 				clearInterval(sensorsProcessId);
-				clearInterval(sensorsIntervalId);
+				// clearInterval(sensorsIntervalId);
+				stopInterval();
 				sendRequest("pidMashingSet", pidSendData, "json", startPid, false, $("#error_pid"), false);
 			}
 		}
@@ -3213,8 +3240,10 @@ $(function () {
 		console.log("startPid");
 		setTimeout(function () {
 			clearInterval(sensorsProcessId);
-			clearInterval(sensorsIntervalId);
-			sensorsIntervalId = setInterval(getIntervalSensors, 1000);
+			// clearInterval(sensorsIntervalId);
+			stopInterval();
+			startInterval();
+			// sensorsIntervalId = setInterval(getIntervalSensors, 1000);
 			if(pidProcess["start"] === true) {
 				if (!$.fn.objIsEmpty(request, false)) {
 					$.each(request["settings"], function (j, q) {
@@ -3460,7 +3489,8 @@ $(function () {
 								class: "btn btn-success hidden",
 								click: function () {
 									$(this).closest(".modal").modal("hide");
-									sensorsIntervalId = setInterval(getIntervalSensors, 1000);
+									startInterval();
+									// sensorsIntervalId = setInterval(getIntervalSensors, 1000);
 								}
 							});
 					}
@@ -3469,7 +3499,8 @@ $(function () {
 					if (tmpTime > stopTime) {
 						$("#modal_time_out").text('Запрос датчиков остановлен');
 						$("#return_interval").removeClass("hidden");
-						clearInterval(sensorsIntervalId);
+						// clearInterval(sensorsIntervalId);
+						stopInterval();
 						clearInterval(sensorsProcessId);
 						tmpTime = 0;
 						openModalError = false;
@@ -3482,6 +3513,9 @@ $(function () {
 	}
 	function startInterval(){
 		sensorsIntervalId = setInterval(getIntervalSensors, 1000);
+	}
+	function stopInterval(){
+		clearInterval(sensorsIntervalId);
 	}
 
 	//clearInterval(sensorsIntervalId);
@@ -3541,18 +3575,12 @@ $(function () {
 		}
 	});
 
-	/*function timeUpdate(){
-		$("#modal_time_out").text((stopTime - tmpTime) + ' сек.');
-		tmpTime++;
-		if(tmpTime > stopTime) {
-			location.reload(true)
-		}
-	}*/
 	let modal_interval = 0;
 
 	$("form#firmware_update").submit(function (e) {
 		e.preventDefault();
-		clearInterval(sensorsIntervalId);
+		// clearInterval(sensorsIntervalId);
+		stopInterval();
 		let formData = new FormData();
 		formData.append('update', $('#file_update')[0].files[0]);
 		//console.log(formData,$('#file_update')[0].files[0]);
@@ -3584,13 +3612,13 @@ $(function () {
 				if(msg.hasOwnProperty('update') && msg['update'] === 'ok'){
 					setTimeout(function () {
 						clearInterval(modal_interval);
-						$("#modal_text_info").html('Файл обновления успешно загружен, контроллер будет перезагружен.<br><br>Страница будет автоматически обновлена, через 2 минуты').removeClass('text-danger').addClass('text-success');
+						$("#modal_text_info").html('Файл обновления успешно загружен, контроллер будет перезагружен.<br><br>Страница будет автоматически обновлена, через 1 минуту').removeClass('text-danger').addClass('text-success');
 						// console.log("success", msg);
 						tmpTime = 0;
 						modal_interval = setInterval(function () {
 							tmpTime++;
 							$("#modal_time_out").text((tmpTime) + ' сек.');
-							if(tmpTime >= 120) {
+							if(tmpTime >= 60) {
 							 	location.reload(true)
 							}
 						}, 1000)

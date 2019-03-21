@@ -39,22 +39,23 @@
 #define		TOUCH_CS	12
 #define		BUZ_VOL		13
 #define		BUZ_OUT		14
-#define		SIREN_OUT	1
-#define		PWM_CH1		11
-#define		PWM_CH2		10
-#define		PWM_CH3		9
-#define		PWM_CH4		8
-#define		PWM_CH5		2
-#define		PWM_CH6		3
-#define		PWM_CH7		4
-#define		PWM_CH8		5
-#define		PWM_CH9		6
+#define		SIREN_OUT	1       // Активная пищалка с внутренним генератором
+#define		PWM_CH1		11	// Клапан на головы
+#define		PWM_CH2		10	// Клапан на тело
+#define		PWM_CH3		9       // Клапан на воду
+#define		PWM_CH4		8       // Клапан в ПБ
+#define		PWM_CH5		2       // Управление 0 - 10 вольт
+#define		PWM_CH6		3       // Дополнительная группа на дополнительные ТЭНы
+#define		PWM_CH7		4       // ШИМ для х.з. пока чего
+#define		PWM_CH8		5	// ШИМ для формирования напряжения + 15 вольт
+#define		PWM_CH9		6	// Импульс повышающего напряжения на клапана
 // Если клапан нормально закрыты ставим false
 // Если клапан нормально открытый ставим true
 #define		PWM_CH1_Invert	false
 #define		PWM_CH2_Invert	false
 #define		PWM_CH3_Invert	false
 #define		PWM_CH4_Invert	false
+// Дальше не трогаем
 #define		PWM_CH5_Invert	false
 #define		PWM_CH6_Invert	false
 #define		PWM_CH7_Invert	false

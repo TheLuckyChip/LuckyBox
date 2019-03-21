@@ -229,9 +229,10 @@ void distillationLoop() {
 			csOff(TFT_CS);
 #endif
 			tempBigOut = 1;
-			csOn(PWM_CH1);				// открыть клапан отбора
-			power.heaterStatus = 1;		// включили нагрев
-			power.heaterPower = 100;	// установили мощность на ТЭН 100 %
+			csOn(PWM_CH1);							// открыть клапан отбора
+			power.heaterStatus = 1;					// включили нагрев
+			csOn(PWM_CH6);							// включить дополнительный ТЭН на разгон
+			power.heaterPower = power.inPowerHigh;	// установили мощность на ТЭН
 			processMode.timeStep = 0;
 			nameProcessStep = "Нагрев куба";
 			processMode.timeStart = time(nullptr);
@@ -242,6 +243,8 @@ void distillationLoop() {
 			// ждем нагрев куба до 80 градусов
 			if (temperatureSensor[DS_Cube].data >= 80.0) {
 				csOn(PWM_CH3);			// включаем клапан подачи воды
+				csOff(PWM_CH6);			// выключить дополнительный ТЭН на разгон
+				power.heaterPower = power.inPowerLow;	// установили мощность на ТЭН
 				settingAlarm = true;	// подаем звуковой сигнал
 				timePauseOff = millis();// обнулим счетчик времени для зв.сигнала
 				processMode.timeStep = 0;
