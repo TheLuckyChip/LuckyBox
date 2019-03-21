@@ -77,13 +77,13 @@ void loadEepromReflux() {
 			tpl2web.dsAllertValue[i] = 0;
 			tpl2web.dsDelta[i] = 0;
 			tpl2web.dsCutoff[i] = 0;
-			if (processMode.allow == 2) {
+			//if (processMode.allow == 2) {
 				temperatureSensor[i].member = 0;
 				temperatureSensor[i].priority = 0;
 				temperatureSensor[i].allertValue = 0;
 				temperatureSensor[i].delta = 0;
 				temperatureSensor[i].cutoff = 0;
-			}
+			//}
 		}
 		for (i = 0; i < 8; i++) {
 			tpl2web.pwmMember[i] = 0;
@@ -430,9 +430,10 @@ void rfluxLoopMode_2() {
 // ждем начала подъема температуры в царге и включаем воду на охлаждение и понижаем мощность на ТЭН
 		case 1: {
 			if (temperatureSensor[DS_Tube].data >= 55.0 || stepNext == 1) {
-				if (pwmOut[2].member == 1) csOn(PWM_CH3);				// включаем клапан подачи воды
-				power.heaterPower = power.inPowerLow;			// установили мощность на ТЭН 65 %
-				timeAllertInterval = millis() + 10000;	// установим счетчик времени для зв.сигнала 10 сек.
+				if (pwmOut[2].member == 1) csOn(PWM_CH3);	// включаем клапан подачи воды
+				csOff(PWM_CH6);								// выключить дополнительный ТЭН на разгон
+				power.heaterPower = power.inPowerLow;		// установили мощность на ТЭН 65 %
+				timeAllertInterval = millis() + 10000;		// установим счетчик времени для зв.сигнала 10 сек.
 				processMode.timeStep = 0;
 				nameProcessStep = "Стабилизация колонны";
 				processMode.step = 2;		// перешли на следующий шаг алгоритма
@@ -563,8 +564,9 @@ void rfluxLoopMode_4() {
 		case 1: {
 			if (temperatureSensor[DS_Tube].data >= 55.0 || stepNext == 1) {
 				if (pwmOut[2].member == 1) csOn(PWM_CH3);				// включаем клапан подачи воды
-				power.heaterPower = power.inPowerLow;			// установили мощность на ТЭН 65 %
-				timeAllertInterval = millis() + 10000;	// установим счетчик времени для зв.сигнала 10 сек.
+				csOff(PWM_CH6);								// выключить дополнительный ТЭН на разгон
+				power.heaterPower = power.inPowerLow;		// установили мощность на ТЭН 65 %
+				timeAllertInterval = millis() + 10000;		// установим счетчик времени для зв.сигнала 10 сек.
 				processMode.timeStep = 0;
 				nameProcessStep = "Стабилизация колонны";
 				processMode.step = 2;		// перешли на следующий шаг алгоритма
@@ -722,8 +724,9 @@ void rfluxLoopMode_5() {
 			if (temperatureSensor[DS_Tube].data >= 55.0) {
 				csOn(PWM_CH3);
 				csOn(PWM_CH2);				// включаем клапан доп. подачи воды
-				power.heaterPower = power.inPowerLow;			// установили мощность на ТЭН 65 %
-				timeAllertInterval = millis() + 10000;	// установим счетчик времени для зв.сигнала 10 сек.
+				csOff(PWM_CH6);								// выключить дополнительный ТЭН на разгон
+				power.heaterPower = power.inPowerLow;		// установили мощность на ТЭН 65 %
+				timeAllertInterval = millis() + 10000;		// установим счетчик времени для зв.сигнала 10 сек.
 				processMode.timeStep = 0;
 				nameProcessStep = "Стабилизация колонны";
 				processMode.step = 2;		// перешли на следующий шаг алгоритма
@@ -838,9 +841,10 @@ void rfluxLoopMode_6() {
 }
 
 void stopErr() {
-	power.heaterStatus = 0;							// выключили ТЭН
-	power.heaterPower = 0;							// установили мощность на ТЭН 0 %
-	timeAllertInterval = millis() + 10000;			// установим счетчик времени для зв.сигнала
+	csOff(PWM_CH6);								// выключить дополнительный ТЭН на разгон
+	power.heaterStatus = 0;						// выключили ТЭН
+	power.heaterPower = 0;						// установили мощность на ТЭН 0 %
+	timeAllertInterval = millis() + 10000;		// установим счетчик времени для зв.сигнала
 	processMode.timeStep = 0;
 	timePauseOff = 60000 * 2 + millis();
 	processMode.step = 7;
@@ -861,8 +865,9 @@ void refluxLoop() {
 #endif
 		tempBigOut = 2;
 		//senseHeadcontrol = adcIn[0].member;
-		if (pwmOut[3].member == 1) csOn(PWM_CH4);			// клапан в буфер открыт
-		power.heaterStatus = 1;		// включили нагрев
+		if (pwmOut[3].member == 1) csOn(PWM_CH4);	// клапан в буфер открыт
+		power.heaterStatus = 1;						// включили нагрев
+		csOn(PWM_CH6);								// дополнительный разгон на ТЭНы
 		power.heaterPower = power.inPowerHigh;		// установили мощность на ТЭН 100 %
 		processMode.timeStep = 0;
 		stepNext = 0;
@@ -879,8 +884,12 @@ void refluxLoop() {
 	}
 
 	// Мощности ТЭНа (разогрев / работа)
-	if (processMode.step == 1) { if (power.heaterPower != power.inPowerHigh) power.heaterPower = power.inPowerHigh; }
-	else if (processMode.step < 7) { if (power.heaterPower != power.inPowerLow) power.heaterPower = power.inPowerLow; }
+	if (processMode.step == 1) {
+		if (power.heaterPower != power.inPowerHigh) power.heaterPower = power.inPowerHigh;
+	}
+	else if (processMode.step < 7) {
+		if (power.heaterPower != power.inPowerLow) power.heaterPower = power.inPowerLow;
+	}
 	else power.heaterPower = 0;
 	
 	if (processMode.number > 0) {

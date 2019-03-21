@@ -15,19 +15,19 @@ void loadEepromMashing() {
 			tpl2web.dsMember[i] = EEPROM.read(index);  index++;
 			tpl2web.dsPriority[i] = EEPROM.read(index);  index++;
 			tpl2web.dsCutoff[i] = EEPROM.read(index);  index++;
-			if (processMode.allow == 3) {
+			//if (processMode.allow == 3) {
 				temperatureSensor[i].member = tpl2web.dsMember[i];
 				temperatureSensor[i].priority = tpl2web.dsPriority[i];
 				temperatureSensor[i].cutoff = tpl2web.dsCutoff[i];
-			}
+			//}
 		}
 		for (i = 0; i < 8; i++) {
 			tpl2web.pwmMember[i] = EEPROM.read(index);  index++;
-			if (processMode.allow == 3) pwmOut[i].member = tpl2web.pwmMember[i];
+			pwmOut[i].member = tpl2web.pwmMember[i]; //if (processMode.allow == 3) pwmOut[i].member = tpl2web.pwmMember[i];
 		}
 		for (i = 0; i < 4; i++) {
 			tpl2web.adcMember[i] = EEPROM.read(index);  index++;
-			if (processMode.allow == 3) adcIn[i].member = tpl2web.adcMember[i];
+			adcIn[i].member = tpl2web.adcMember[i]; //if (processMode.allow == 3) adcIn[i].member = tpl2web.adcMember[i];
 		}
 	}
 	else {
@@ -35,19 +35,19 @@ void loadEepromMashing() {
 			tpl2web.dsMember[i] = 0;
 			tpl2web.dsPriority[i] = 0;
 			tpl2web.dsCutoff[i] = 0;
-			if (processMode.allow == 3) {
+			//if (processMode.allow == 3) {
 				temperatureSensor[i].member = 0;
 				temperatureSensor[i].priority = 0;
 				temperatureSensor[i].cutoff = 0;
-			}
+			//}
 		}
 		for (i = 0; i < 8; i++) {
 			tpl2web.pwmMember[i] = 0;
-			if (processMode.allow == 3) pwmOut[i].member = 0;
+			pwmOut[i].member = 0; //if (processMode.allow == 3) pwmOut[i].member = 0;
 		}
 		for (i = 0; i < 4; i++) {
 			tpl2web.adcMember[i] = 0;
-			if (processMode.allow == 3) adcIn[i].member = 0;
+			adcIn[i].member = 0; //if (processMode.allow == 3) adcIn[i].member = 0;
 		}
 	}
 	/*
@@ -159,7 +159,6 @@ void handleMashingSensorSetSave() {
 		arg = "in" + String(i + 1);
 		adcIn[i].member = HTTP.arg(arg + "[member]").toInt();
 	}
-	HTTP.send(200, "text/json", "{\"result\":\"ok\"}");
 
 	// сохраним в EEPROM
 	EEPROM.begin(2048);
@@ -176,15 +175,17 @@ void handleMashingSensorSetSave() {
 	for (i = 0; i < 4; i++) {
 		EEPROM.write(index, adcIn[i].member); index++;
 	}
-
-	EEPROM.commit();
-	delay(100);
+	
 	EEPROM.end();
+	delay(200);
+
+	HTTP.send(200, "text/json", "{\"result\":\"ok\"}");
 }
 
 void mashingLoop() {
 	// поиск выбранного датчика и начальная инициализация
 	if (processMode.step == 0) {
+		// если при выборе нет приоритета берем первый из выбранных
 		if (temperatureSensor[0].member == 1) numSenseMashBrew = 0;
 		else if (temperatureSensor[1].member == 1) numSenseMashBrew = 1;
 		else if (temperatureSensor[2].member == 1) numSenseMashBrew = 2;
@@ -193,6 +194,15 @@ void mashingLoop() {
 		else if (temperatureSensor[5].member == 1) numSenseMashBrew = 5;
 		else if (temperatureSensor[6].member == 1) numSenseMashBrew = 6;
 		else if (temperatureSensor[7].member == 1) numSenseMashBrew = 7;
+		// если есть приоритет
+		if (temperatureSensor[0].priority == 1) numSenseMashBrew = 0;
+		else if (temperatureSensor[1].priority == 1) numSenseMashBrew = 1;
+		else if (temperatureSensor[2].priority == 1) numSenseMashBrew = 2;
+		else if (temperatureSensor[3].priority == 1) numSenseMashBrew = 3;
+		else if (temperatureSensor[4].priority == 1) numSenseMashBrew = 4;
+		else if (temperatureSensor[5].priority == 1) numSenseMashBrew = 5;
+		else if (temperatureSensor[6].priority == 1) numSenseMashBrew = 6;
+		else if (temperatureSensor[7].priority == 1) numSenseMashBrew = 7;
 	}
 	// запомним текущую температуру для PID регулировки
 	Input = temperatureSensor[numSenseMashBrew].data;
@@ -394,19 +404,20 @@ void mashingLoop() {
 			break;
 		}
 	}
+
+	myPID.Compute();											// расчет времени для PID регулировки
+
+	if (millis() > WindowSize + windowStartTime) {
+		windowStartTime += WindowSize;
+		if (windowStartTime > millis()) windowStartTime = 0;    // защита от переполнения
+	}
+
 	// Если идет предварительный нагрев (до температуры поддержания Т стабилизации минус 4 градуса)
-	/*if (Input < Setpoint - 4) {
+	if (Input < Setpoint - 4) {
 		digitalWrite(heater, HIGH);
-		stepTime = millis();
-	}*/
-	// ПИД регулировка температуры
-	//else {
-		myPID.Compute();											// расчет времени для PID регулировки
-		if (millis() > WindowSize + windowStartTime) {
-			windowStartTime += WindowSize;
-			if (windowStartTime > millis()) windowStartTime = 0;    // защита от переполнения
-		}
-		// включить или выключить ТЭН в зависимости от расчетов временного PID регулирования
+	}
+	// включить или выключить ТЭН в зависимости от расчетов временного PID регулирования
+	else {
 		if (Output < millis() - windowStartTime) {
 			digitalWrite(heater, LOW);
 			power.heaterPower = 0;
@@ -415,7 +426,8 @@ void mashingLoop() {
 			digitalWrite(heater, HIGH);
 			power.heaterPower = 100;
 		}
-	//}
+	}
+
 	delay(100);
 
 	if (processMode.allow == 0) {

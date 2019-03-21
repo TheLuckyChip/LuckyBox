@@ -13,17 +13,6 @@ OneWire ds(DS_Pin);
 #define Lo(num1) (num1 & 0xFF)
 #define Hi(num2) ((num2 & 0xFF00) >> 8)
 
-/*void EEPROM_float_write_dsAllert(int addr, float val) {
-	byte *x = (byte *)&val;
-	for (byte i = 0; i < 4; i++) EEPROM.write(i + addr, x[i]);
-}
-float EEPROM_float_read_dsAllert(int addr) {
-	byte x[4];
-	for (byte i = 0; i < 4; i++) x[i] = EEPROM.read(i + addr);
-	float *y = (float *)&x;
-	return y[0];
-}*/
-
 void initPressureSensor()
 {
 	pressureSensor.status = 0;
@@ -60,7 +49,7 @@ void dallSearch()
 	uint16_t index = 1;
 	int i, k, t;
 	bool newDS;
-        EEPROM.begin(2048);
+	EEPROM.begin(2048);
 	if (EEPROM.read(0) != 0xFF) {
 		// датчики температуры
 		for (i = 0; i < 8; i++) {
@@ -161,7 +150,7 @@ void dallSearch()
 #endif
 	// проверим нумерацию
 	byte n1, n2, n3, n4, n5, n6, n7, n8;
-	for (i = 1; i <= DS_Cnt; i++) {
+	for (i = 0; i < DS_Cnt; i++) {
 		n1 = temperatureSensor[0].num;
 		n2 = temperatureSensor[1].num;
 		n3 = temperatureSensor[2].num;
@@ -172,14 +161,14 @@ void dallSearch()
 		n8 = temperatureSensor[7].num;
 		// датчик не имеет номер 1 - 8
 		if (temperatureSensor[i].num < 1 || temperatureSensor[i].num > 8) {
-			if (n1 != 1 && n2 != 1 && n3 != 1 && n4 != 1 && n5 != 1 && n6 != 1 && n7 != 1 && n8 != 1) temperatureSensor[i-1].num = 1;
-			else if (n1 != 2 && n2 != 2 && n3 != 2 && n4 != 2 && n5 != 2 && n6 != 2 && n7 != 2 && n8 != 2) temperatureSensor[i-1].num = 2;
-			else if (n1 != 3 && n2 != 3 && n3 != 3 && n4 != 3 && n5 != 3 && n6 != 3 && n7 != 3 && n8 != 3) temperatureSensor[i-1].num = 3;
-			else if (n1 != 4 && n2 != 4 && n3 != 4 && n4 != 4 && n5 != 4 && n6 != 4 && n7 != 4 && n8 != 4) temperatureSensor[i-1].num = 4;
-			else if (n1 != 5 && n2 != 5 && n3 != 5 && n4 != 5 && n5 != 5 && n6 != 5 && n7 != 5 && n8 != 5) temperatureSensor[i-1].num = 5;
-			else if (n1 != 6 && n2 != 6 && n3 != 6 && n4 != 6 && n5 != 6 && n6 != 6 && n7 != 6 && n8 != 6) temperatureSensor[i-1].num = 6;
-			else if (n1 != 7 && n2 != 7 && n3 != 7 && n4 != 7 && n5 != 7 && n6 != 7 && n7 != 7 && n8 != 7) temperatureSensor[i-1].num = 7;
-			else if (n1 != 8 && n2 != 8 && n3 != 8 && n4 != 8 && n5 != 8 && n6 != 8 && n7 != 8 && n8 != 8) temperatureSensor[i-1].num = 8;
+			if (n1 != 1 && n2 != 1 && n3 != 1 && n4 != 1 && n5 != 1 && n6 != 1 && n7 != 1 && n8 != 1) temperatureSensor[i].num = 1;
+			else if (n1 != 2 && n2 != 2 && n3 != 2 && n4 != 2 && n5 != 2 && n6 != 2 && n7 != 2 && n8 != 2) temperatureSensor[i].num = 2;
+			else if (n1 != 3 && n2 != 3 && n3 != 3 && n4 != 3 && n5 != 3 && n6 != 3 && n7 != 3 && n8 != 3) temperatureSensor[i].num = 3;
+			else if (n1 != 4 && n2 != 4 && n3 != 4 && n4 != 4 && n5 != 4 && n6 != 4 && n7 != 4 && n8 != 4) temperatureSensor[i].num = 4;
+			else if (n1 != 5 && n2 != 5 && n3 != 5 && n4 != 5 && n5 != 5 && n6 != 5 && n7 != 5 && n8 != 5) temperatureSensor[i].num = 5;
+			else if (n1 != 6 && n2 != 6 && n3 != 6 && n4 != 6 && n5 != 6 && n6 != 6 && n7 != 6 && n8 != 6) temperatureSensor[i].num = 6;
+			else if (n1 != 7 && n2 != 7 && n3 != 7 && n4 != 7 && n5 != 7 && n6 != 7 && n7 != 7 && n8 != 7) temperatureSensor[i].num = 7;
+			else if (n1 != 8 && n2 != 8 && n3 != 8 && n4 != 8 && n5 != 8 && n6 != 8 && n7 != 8 && n8 != 8) temperatureSensor[i].num = 8;
 		}
 	}
 #if defined Debug_en
@@ -229,7 +218,7 @@ void dallRead(uint8_t numTerm) {
 	if (numTerm > DS_Count) {
 		while (i) {
 			ds.reset();
-			ds.select(temperatureSensor[i - 1].addrSearch);
+			ds.select(temperatureSensor[i-1].addrSearch);
 			ds.write(0xBE); //Считывание значения с датчика
 			temperatureSensor[i-1].dataT[3] = temperatureSensor[i-1].dataT[2];
 			temperatureSensor[i-1].dataT[2] = temperatureSensor[i-1].dataT[1];
@@ -237,18 +226,18 @@ void dallRead(uint8_t numTerm) {
 			temperatureSensor[i-1].dataT[0] = (short)(ds.read() | ds.read() << 8);
 			temperatureSensor[i-1].dataT[0] *= 0.0625;
 			temperatureSensor[i-1].dataT[0] *= 100;
-			temperatureSensor[i-1].dataT[0] = floor(temperatureSensor[i - 1].dataT[0] + 0.5);
+			temperatureSensor[i-1].dataT[0] = floor(temperatureSensor[i-1].dataT[0] + 0.5);
 			temperatureSensor[i-1].dataT[0] /= 100;
 
 			// вычислим ближайший к текущему значению результат
-			dt1 = abs(temperatureSensor[i - 1].dataT[0] - temperatureSensor[i - 1].data);
-			dt2 = abs(temperatureSensor[i - 1].dataT[1] - temperatureSensor[i - 1].data);
-			dt3 = abs(temperatureSensor[i - 1].dataT[2] - temperatureSensor[i - 1].data);
-			dt4 = abs(temperatureSensor[i - 1].dataT[3] - temperatureSensor[i - 1].data);
-			if (dt1 <= dt2 && dt1 <= dt3 && dt1 <= dt4 && temperatureSensor[i - 1].dataT[0] > 0) temperatureSensor[i - 1].data = temperatureSensor[i - 1].dataT[0];
-			else if (dt2 <= dt1 && dt2 <= dt3 && dt2 <= dt4 && temperatureSensor[i - 1].dataT[1] > 0) temperatureSensor[i - 1].data = temperatureSensor[i - 1].dataT[1];
-			else if (dt3 <= dt1 && dt3 <= dt2 && dt3 <= dt4 && temperatureSensor[i - 1].dataT[2] > 0) temperatureSensor[i - 1].data = temperatureSensor[i - 1].dataT[2];
-			else if (dt4 <= dt1 && dt4 <= dt2 && dt4 <= dt3 && temperatureSensor[i - 1].dataT[3] > 0) temperatureSensor[i - 1].data = temperatureSensor[i - 1].dataT[3];
+			dt1 = abs(temperatureSensor[i-1].dataT[0] - temperatureSensor[i-1].data);
+			dt2 = abs(temperatureSensor[i-1].dataT[1] - temperatureSensor[i-1].data);
+			dt3 = abs(temperatureSensor[i-1].dataT[2] - temperatureSensor[i-1].data);
+			dt4 = abs(temperatureSensor[i-1].dataT[3] - temperatureSensor[i-1].data);
+			if (dt1 <= dt2 && dt1 <= dt3 && dt1 <= dt4 && temperatureSensor[i-1].dataT[0] > 0) temperatureSensor[i-1].data = temperatureSensor[i-1].dataT[0];
+			else if (dt2 <= dt1 && dt2 <= dt3 && dt2 <= dt4 && temperatureSensor[i-1].dataT[1] > 0) temperatureSensor[i-1].data = temperatureSensor[i-1].dataT[1];
+			else if (dt3 <= dt1 && dt3 <= dt2 && dt3 <= dt4 && temperatureSensor[i-1].dataT[2] > 0) temperatureSensor[i-1].data = temperatureSensor[i-1].dataT[2];
+			else if (dt4 <= dt1 && dt4 <= dt2 && dt4 <= dt3 && temperatureSensor[i-1].dataT[3] > 0) temperatureSensor[i-1].data = temperatureSensor[i-1].dataT[3];
 			i--;
 		}
 		ds.reset();
@@ -309,6 +298,7 @@ void sensorsUserSetInWeb() {
 	uint16_t index = 0;
 	int i, k;
 	// парсим ответ от браузера в переменные
+	StateDsReset = 0;
 	for (i = 0; i < 8; i++) {
 		arg = "t" + String(i + 1);
 		temperatureSensor[i].num = HTTP.arg(arg + "[number]").toInt();
@@ -327,8 +317,6 @@ void sensorsUserSetInWeb() {
 		name = HTTP.arg(arg + "[name]");
 		strcpy(adcIn[i].name, name.c_str());
 	}
-
-	HTTP.send(200, "text/json", "{\"result\":\"ok\"}");
 
 	// сохраним в EEPROM
 	EEPROM.begin(2048);
@@ -357,11 +345,12 @@ void sensorsUserSetInWeb() {
 		for (k = 0; k < 60; k++) { EEPROM.write(index, adcIn[i].name[k]);  index++; }
 	}
 
-	EEPROM.commit();
-	delay(100);
+	delay(250);
 	EEPROM.end();
+	HTTP.send(200, "text/json", "{\"result\":\"ok\"}");
 	// перераспредилим датчики сразу
 	dallSearch();
+	dallRead(10);
 }
 // отправка параметров датчиков
 void sensorsUserSetOutWeb() {
@@ -411,6 +400,9 @@ void handleProcessSensorOut() {
 			if (temperatureSensor[k].num == i) {
 				dataForWeb += "{\"t" + String(i) + "\":{\"value\":" + String(temperatureSensor[k].data);
 				dataForWeb += ",\"name\":\"" + String(temperatureSensor[k].name) + "\",\"color\":" + String(temperatureSensor[k].color);
+
+				//dataForWeb += ",\"number\":" + String(temperatureSensor[k].num);
+
 				dataForWeb += ",\"member\":" + String(temperatureSensor[k].member) + ",\"priority\":" + String(temperatureSensor[k].priority);
 				dataForWeb += ",\"allertValue\":" + String(temperatureSensor[k].allertValue) + "}},";
 				break;
@@ -506,7 +498,8 @@ void handleProcessModeIn() {
 					allertSave = true;
 				}
 			}
-			else if (processMode.allow == 2 && processMode.number > 0) {
+			//else if (processMode.allow == 2 && processMode.number > 0) {
+			else if (processMode.allow == 2) {
 				allertReadTmp = EEPROM_float_read(1403 + i * 8);
 				if (allertReadTmp != tmpAllertValue) { // ректификация
 					EEPROM_float_write((1403 + i * 8), temperatureSensor[i].allertValueIn);
@@ -521,7 +514,8 @@ void handleProcessModeIn() {
 #endif
 		}
 	}
-	if (processMode.allow == 0 || processMode.allow == 3 || processMode.allow == 4) {
+	//if (processMode.allow == 0 || processMode.allow == 3 || processMode.allow == 4) {
+	if (processMode.allow == 3) {
 		for (i = 0; i < 4; i++) {
 			arg = "pause" + String(i + 1);
 			processMashing[i].time = HTTP.arg(arg + "[time]").toInt();
@@ -529,12 +523,6 @@ void handleProcessModeIn() {
 			processMashing[i].stop = HTTP.arg(arg + "[stop]").toInt();
 		}
 	}
-
-	headTimeCycle = HTTP.arg("head[timeCycle]").toInt();
-	headtimeOn = HTTP.arg("head[timeOn]").toFloat();
-	bodyTimeCycle = HTTP.arg("body[timeCycle]").toInt();
-	bodytimeOn = HTTP.arg("body[timeOn]").toFloat();
-	decline = HTTP.arg("body[decline]").toInt();
 
 	if (processMode.allow == 1) {
 		// запись в EEPROM параметров мощности для дистилляции
@@ -566,6 +554,11 @@ void handleProcessModeIn() {
 			allertSave = true;
 		}
 		// запись в EEPROM параметров для клапанов
+		headTimeCycle = HTTP.arg("head[timeCycle]").toInt();
+		headtimeOn = HTTP.arg("head[timeOn]").toFloat();
+		bodyTimeCycle = HTTP.arg("body[timeCycle]").toInt();
+		bodytimeOn = HTTP.arg("body[timeOn]").toFloat();
+		decline = HTTP.arg("body[decline]").toInt();
 		if (headTimeCycle != EEPROM.read(1477)) {
 			EEPROM.write(1477, headTimeCycle);
 			allertSave = true;
@@ -617,7 +610,8 @@ void handleProcessModeIn() {
 	if (allertSave == true) EEPROM.commit();
 	allertSave = false;
 	EEPROM.end();
-	delay(250);
+	delay(500);
+
 	HTTP.send(200, "text/json", "{\"result\":\"ok\"}");
 }
 
@@ -627,12 +621,12 @@ void handleResetDataEeprom() {
 		for (int i = 0; i < 2048; i++) {
 			EEPROM.write(i, 0xFF);
 		}
-		//EEPROM.commit();
-		
+		StateDsReset = 0xFF;
 		EEPROM.end();
-		delay(100);
-		dallSearch();
+		delay(250);
 		HTTP.send(200, "text/json", "{\"result\":\"ok\"}");
+		dallSearch();
+		dallRead(10);
 	}
 	else HTTP.send(200, "text/json", "{\"result\":\"err\"}");
 }
@@ -656,6 +650,7 @@ void sensorLoop() {
 		// опрос датчиков
 		pressureRead();
 		if (sensorNumberRead >= DS_Count) sensorNumberRead = 0;
+		//dallRead(10);
 		dallRead(sensorNumberRead);
 		sensorNumberRead++;
 

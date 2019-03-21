@@ -51,13 +51,12 @@ void adcLoop() {
 		float deltaPercent = 100 - (Voltage / 2.3);
 
 		// вычислим коррекцию для ТЭНа
-		if (power.heaterPower > 0) {
-			//if (outHeater == HIGH) {
+		if (power.heaterPower == 100) power.heaterPowerCorr = 100;
+		else if (power.heaterPower > 0) {
 			deltaPercent /= (100 / power.heaterPower);
 			if ((power.heaterPower + deltaPercent) <= 100 && (power.heaterPower + deltaPercent) >= 0) power.heaterPowerCorr = uint8_t(power.heaterPower + deltaPercent);
 			else if ((power.heaterPower + deltaPercent) > 100) power.heaterPowerCorr = 100;
 			else if ((power.heaterPower + deltaPercent) < 0) power.heaterPowerCorr = 0;
-			//}
 		}
 		else power.heaterPowerCorr = 0;
 
