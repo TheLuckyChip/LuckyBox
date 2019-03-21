@@ -1515,6 +1515,7 @@ $(function () {
 	};
 
 	function launchDistillation(){
+		distillationProcess["start"] = flagSendProcess = true;
 		$('#distillation_start').prop("disabled", true);
 		$('#distillation_add_sensor').prop("disabled", true);
 		$('#distillation_stop').prop("disabled", false);
@@ -1523,7 +1524,6 @@ $(function () {
 		localStorage.setObj('oldStartProcess', 1);
 		// setDistillation();
 		setTimeout(function () {
-			distillationProcess["start"] = flagSendProcess = true;
 			setDistillation();
 		}, 1000);
 	}
@@ -2250,6 +2250,7 @@ $(function () {
 	});
 
 	function launchReflux(){
+		refluxProcess["start"] = flagSendProcess = true;
 		$('#reflux_start').prop("disabled", true);
 		$('#reflux_add_sensor').prop("disabled", true);
 		$('#reflux_stop').prop("disabled", false);
@@ -2260,7 +2261,6 @@ $(function () {
 		stopInterval();
 		localStorage.setObj('oldStartProcess', 2);
 		setTimeout(function () {
-			refluxProcess["start"] = flagSendProcess = true;
 			setReflux();
 		}, 1000);
 	}
@@ -2837,6 +2837,7 @@ $(function () {
 		}
 	};
 	function launchMashing(){
+		mashingProcess["start"] = flagSendProcess = true;
 		$('#mashing_start').prop("disabled", true);
 		$('#mashing_add_sensor').prop("disabled", true);
 		$('#mashing_stop').prop("disabled", false);
@@ -2844,7 +2845,6 @@ $(function () {
 		stopInterval();
 		localStorage.setObj('oldStartProcess', 3);
 		setTimeout(function () {
-			mashingProcess["start"] = flagSendProcess = true;
 			setMashing();
 		}, 1000);
 	}
@@ -3081,6 +3081,7 @@ $(function () {
 	//настройка ПИД
 	let pidProcess = {"pid": {}, "start": false};
 	function launchPid(){
+		pidProcess["start"] = flagSendProcess = true;
 		$('#pid_start').prop("disabled", true);
 		$('#pid_stop').prop("disabled", false);
 		$('#set_pid').prop("disabled", true);
@@ -3088,7 +3089,6 @@ $(function () {
 		stopInterval();
 		localStorage.setObj('oldStartProcess', 4);
 		setTimeout(function () {
-			pidProcess["start"] = flagSendProcess = true;
 			setPid();
 		}, 1000);
 	}
