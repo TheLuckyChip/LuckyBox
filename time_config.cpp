@@ -15,16 +15,17 @@ void timeSynch(int zone)
 		//configTime(zone * 3600, 0, "169.254.0.210", "mail.khbk.ru");
 		int i = 0;
 		Serial.println("\nWaiting for time");
-		while (!time(nullptr) && i < 10)
-		{
+		while (time(nullptr) < 946684800 && i < 10) {
 			Serial.print(".");
 			i++;
 			delay(1000);
 		}
 		Serial.println("");
-		Serial.println("ITime Ready!");
-		Serial.println(GetTime());
-		Serial.println(GetDate());
+		if (i < 10) {
+			Serial.println("I.Time Ready!");
+			Serial.println(GetTime());
+			Serial.println(GetDate());
+		}
 	}
 }
 // Установка параметров временной зоны по запросу вида http://192.168.0.101/TimeZone?timezone=3
@@ -36,7 +37,7 @@ void handleTimeZone()
 	// сохраним в EEPROM
 	EEPROM.begin(2048);
 	uint16_t index = 1980;
-	if (timezone <= 23) {
+	if (timezone <= 12 && timezone >= -12) {
 		EEPROM.write(index, timezone);
 		EEPROM.commit();
 		delay(100);

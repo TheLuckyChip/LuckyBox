@@ -4,17 +4,6 @@
 
 float settingTank = 99.5;                   // температура отключени¤ нагрева куба при дистилл¤ции браги в спирт-сырец
 
-void EEPROM_float_write_dist(int addr, float val) {
-	byte *x = (byte *)&val;
-	for (byte i = 0; i < 4; i++) EEPROM.write(i + addr, x[i]);
-}
-float EEPROM_float_read_dist(int addr) {
-	byte x[4];
-	for (byte i = 0; i < 4; i++) x[i] = EEPROM.read(i + addr);
-	float *y = (float *)&x;
-	return y[0];
-}
-
 void loadEepromDistillation() {
 	int i;
 	EEPROM.begin(2048);
@@ -25,7 +14,7 @@ void loadEepromDistillation() {
 		for (i = 0; i < 8; i++) {
 			tpl2web.dsMember[i] = EEPROM.read(index);  index++;
 			tpl2web.dsPriority[i] = EEPROM.read(index);  index++;
-			tpl2web.dsAllertValue[i] = EEPROM_float_read_dist(index); index += 4;
+			tpl2web.dsAllertValue[i] = EEPROM_float_read(index); index += 4;
 			tpl2web.dsCutoff[i] = EEPROM.read(index);  index++;
 			//if (processMode.allow == 1) {
 				temperatureSensor[i].member = tpl2web.dsMember[i];
@@ -181,7 +170,6 @@ void handleDistillationSensorSetSave() {
 		arg = "in" + String(i + 1);
 		adcIn[i].member = HTTP.arg(arg + "[member]").toInt();
 	}
-	HTTP.send(200, "text/json", "{\"result\":\"ok\"}");
 
 	// сохраним в EEPROM
 	EEPROM.begin(2048);
@@ -190,7 +178,7 @@ void handleDistillationSensorSetSave() {
 	for (i = 0; i < 8; i++) {
 		EEPROM.write(index, temperatureSensor[i].member);  index++;
 		EEPROM.write(index, temperatureSensor[i].priority);  index++;
-		EEPROM_float_write_dist(index, temperatureSensor[i].allertValue); index += 4;
+		EEPROM_float_write(index, temperatureSensor[i].allertValue); index += 4;
 		EEPROM.write(index, temperatureSensor[i].cutoff); index++;
 	}
 	for (i = 0; i < 8; i++) {
@@ -200,13 +188,12 @@ void handleDistillationSensorSetSave() {
 		EEPROM.write(index, adcIn[i].member);  index++;
 	}
 
-	EEPROM.commit();
 	EEPROM.end();
-	delay(100);
+	delay(200);
+	HTTP.send(200, "text/json", "{\"result\":\"ok\"}");
 }
 
 void distillationLoop() {
-
 	if (processMode.step < 2) {
 		if (power.heaterPower != power.inPowerHigh) power.heaterPower = power.inPowerHigh;
 	}

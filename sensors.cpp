@@ -12,10 +12,8 @@ OneWire ds(DS_Pin);
 
 #define Lo(num1) (num1 & 0xFF)
 #define Hi(num2) ((num2 & 0xFF00) >> 8)
-//#define High(num3) ((num3 & 0xFF0000) >> 16)
-//#define Highest(num4) ((num4 & 0xFF000000) >> 24)
 
-void EEPROM_float_write_dsAllert(int addr, float val) {
+/*void EEPROM_float_write_dsAllert(int addr, float val) {
 	byte *x = (byte *)&val;
 	for (byte i = 0; i < 4; i++) EEPROM.write(i + addr, x[i]);
 }
@@ -24,13 +22,13 @@ float EEPROM_float_read_dsAllert(int addr) {
 	for (byte i = 0; i < 4; i++) x[i] = EEPROM.read(i + addr);
 	float *y = (float *)&x;
 	return y[0];
-}
+}*/
 
 void initPressureSensor()
 {
 	pressureSensor.status = 0;
 #if defined Pressure_BMP085 || defined Pressure_BMP180
-	if (!bmp.begin(BMP085_HIGHRES)) Serial.println("Ooops, no Pressure sensor BMP085 detected ... Check your wiring or I2C Addres!");
+	if (!bmp.begin(BMP085_STANDARD)) Serial.println("Ooops, no Pressure sensor BMP085 detected ... Check your wiring or I2C Addres!");
 	else pressureSensor.status = 1;
 #elif defined Pressure_BMP280
 	if (!bmp.begin(0x76, 0x58))	Serial.println("Ooops, no Pressure sensor BMP280 detected ... Check your wiring or I2C Addres!");
@@ -52,7 +50,7 @@ void senseWebInit() {
 	// инициализация Web и чтение из памяти ранее запомненных датчиков
 	HTTP.on("/sensorsInSet", sensorsUserSetInWeb);    // прием и сохранение параметров датчиков
 	HTTP.on("/sensorsOutSet", sensorsUserSetOutWeb);  // отправка параметров датчиков
-	HTTP.on("/SensorsOut", handleProcessSensorOut);		// отправка всех датчиков и входов выходов для интикации в процессе рект.
+	HTTP.on("/SensorsOut", handleProcessSensorOut);		// отправка всех датчиков и входов выходов для индикации в процессе рект.
 	HTTP.on("/SensorsIn", handleProcessModeIn);			// прием старт, стоп, уставок для всех процессов
 	HTTP.on("/resetData", handleResetDataEeprom);		// очистка сохраненной структуры датчиков
 }
@@ -221,37 +219,82 @@ void dallSearch()
 	EEPROM.end();
 }
 
-void dallRead()
-{
+void dallRead(uint8_t numTerm) {
 	int i = DS_Count;
 	float dt1, dt2, dt3, dt4;
 	float TiCube;
-	while (i) {
+	byte ii;
+	byte data[12];
+
+	if (numTerm > DS_Count) {
+		while (i) {
+			ds.reset();
+			ds.select(temperatureSensor[i - 1].addrSearch);
+			ds.write(0xBE); //Считывание значения с датчика
+			temperatureSensor[i-1].dataT[3] = temperatureSensor[i-1].dataT[2];
+			temperatureSensor[i-1].dataT[2] = temperatureSensor[i-1].dataT[1];
+			temperatureSensor[i-1].dataT[1] = temperatureSensor[i-1].dataT[0];
+			temperatureSensor[i-1].dataT[0] = (short)(ds.read() | ds.read() << 8);
+			temperatureSensor[i-1].dataT[0] *= 0.0625;
+			temperatureSensor[i-1].dataT[0] *= 100;
+			temperatureSensor[i-1].dataT[0] = floor(temperatureSensor[i - 1].dataT[0] + 0.5);
+			temperatureSensor[i-1].dataT[0] /= 100;
+
+			// вычислим ближайший к текущему значению результат
+			dt1 = abs(temperatureSensor[i - 1].dataT[0] - temperatureSensor[i - 1].data);
+			dt2 = abs(temperatureSensor[i - 1].dataT[1] - temperatureSensor[i - 1].data);
+			dt3 = abs(temperatureSensor[i - 1].dataT[2] - temperatureSensor[i - 1].data);
+			dt4 = abs(temperatureSensor[i - 1].dataT[3] - temperatureSensor[i - 1].data);
+			if (dt1 <= dt2 && dt1 <= dt3 && dt1 <= dt4 && temperatureSensor[i - 1].dataT[0] > 0) temperatureSensor[i - 1].data = temperatureSensor[i - 1].dataT[0];
+			else if (dt2 <= dt1 && dt2 <= dt3 && dt2 <= dt4 && temperatureSensor[i - 1].dataT[1] > 0) temperatureSensor[i - 1].data = temperatureSensor[i - 1].dataT[1];
+			else if (dt3 <= dt1 && dt3 <= dt2 && dt3 <= dt4 && temperatureSensor[i - 1].dataT[2] > 0) temperatureSensor[i - 1].data = temperatureSensor[i - 1].dataT[2];
+			else if (dt4 <= dt1 && dt4 <= dt2 && dt4 <= dt3 && temperatureSensor[i - 1].dataT[3] > 0) temperatureSensor[i - 1].data = temperatureSensor[i - 1].dataT[3];
+			i--;
+		}
 		ds.reset();
-		ds.select(temperatureSensor[i-1].addrSearch);
-		ds.write(0xBE); //Считывание значения с датчика
-		temperatureSensor[i-1].dataT[3] = temperatureSensor[i-1].dataT[2];
-		temperatureSensor[i-1].dataT[2] = temperatureSensor[i-1].dataT[1];
-		temperatureSensor[i-1].dataT[1] = temperatureSensor[i-1].dataT[0];
-		temperatureSensor[i-1].dataT[0] = (short)(ds.read() | ds.read() << 8); //Принимаем два байта температуры
-		temperatureSensor[i-1].dataT[0] *= 0.0625;
-		temperatureSensor[i-1].dataT[0] *= 100;
-		temperatureSensor[i-1].dataT[0] = floor(temperatureSensor[i-1].dataT[0] + 0.5);
-		temperatureSensor[i-1].dataT[0] /= 100;
-		// вычислим ближайший к текущему значению результат
-		dt1 = abs(temperatureSensor[i-1].dataT[0] - temperatureSensor[i-1].data);
-		dt2 = abs(temperatureSensor[i-1].dataT[1] - temperatureSensor[i-1].data);
-		dt3 = abs(temperatureSensor[i-1].dataT[2] - temperatureSensor[i-1].data);
-		dt4 = abs(temperatureSensor[i-1].dataT[3] - temperatureSensor[i-1].data);
-		if (dt1 <= dt2 && dt1 <= dt3 && dt1 <= dt4 && temperatureSensor[i - 1].dataT[0] > 0) temperatureSensor[i - 1].data = temperatureSensor[i - 1].dataT[0];
-		else if (dt2 <= dt1 && dt2 <= dt3 && dt2 <= dt4 && temperatureSensor[i - 1].dataT[1] > 0) temperatureSensor[i - 1].data = temperatureSensor[i - 1].dataT[1];
-		else if (dt3 <= dt1 && dt3 <= dt2 && dt3 <= dt4 && temperatureSensor[i - 1].dataT[2] > 0) temperatureSensor[i - 1].data = temperatureSensor[i - 1].dataT[2];
-		else if (dt4 <= dt1 && dt4 <= dt2 && dt4 <= dt3 && temperatureSensor[i - 1].dataT[3] > 0) temperatureSensor[i - 1].data = temperatureSensor[i - 1].dataT[3];
-		i--;
+		ds.write(0xCC); //Обращение ко всем датчикам
+		ds.write(0x44); //Команда на конвертацию
 	}
-	ds.reset();
-	ds.write(0xCC); //Обращение ко всем датчикам
-	ds.write(0x44); //Команда на конвертацию
+	else {
+		i = numTerm;
+		ds.reset();
+		ds.select(temperatureSensor[i].addrSearch);
+		ds.write(0xBE); //Считывание значения с датчика
+		temperatureSensor[i].dataT[3] = temperatureSensor[i].dataT[2];
+		temperatureSensor[i].dataT[2] = temperatureSensor[i].dataT[1];
+		temperatureSensor[i].dataT[1] = temperatureSensor[i].dataT[0];
+
+		for (ii = 0; ii < 9; ii++) {           // читаем всю память датчика
+			data[ii] = ds.read();
+		}
+		if (ds.crc8(data, 8) == data[8]) {
+			temperatureSensor[i].dataT[0] = (short)(data[0] | data[1] << 8);
+			temperatureSensor[i].timeErr = 0;
+			temperatureSensor[i].dataT[0] *= 0.0625;
+			temperatureSensor[i].dataT[0] *= 100;
+			temperatureSensor[i].dataT[0] = floor(temperatureSensor[i].dataT[0] + 0.5);
+			temperatureSensor[i].dataT[0] /= 100;
+		}
+		else {
+			if (temperatureSensor[i].timeErr < 15) temperatureSensor[i].timeErr++;  // 15 секунд - допуск на ошибку
+			else temperatureSensor[i].dataT[0] = 150;
+		}
+		
+		// вычислим ближайший к текущему значению результат
+		dt1 = abs(temperatureSensor[i].dataT[0] - temperatureSensor[i].data);
+		dt2 = abs(temperatureSensor[i].dataT[1] - temperatureSensor[i].data);
+		dt3 = abs(temperatureSensor[i].dataT[2] - temperatureSensor[i].data);
+		dt4 = abs(temperatureSensor[i].dataT[3] - temperatureSensor[i].data);
+		if (dt1 <= dt2 && dt1 <= dt3 && dt1 <= dt4 && temperatureSensor[i].dataT[0] > 0) temperatureSensor[i].data = temperatureSensor[i].dataT[0];
+		else if (dt2 <= dt1 && dt2 <= dt3 && dt2 <= dt4 && temperatureSensor[i].dataT[1] > 0) temperatureSensor[i].data = temperatureSensor[i].dataT[1];
+		else if (dt3 <= dt1 && dt3 <= dt2 && dt3 <= dt4 && temperatureSensor[i].dataT[2] > 0) temperatureSensor[i].data = temperatureSensor[i].dataT[2];
+		else if (dt4 <= dt1 && dt4 <= dt2 && dt4 <= dt3 && temperatureSensor[i].dataT[3] > 0) temperatureSensor[i].data = temperatureSensor[i].dataT[3];
+		if (i >= (DS_Count - 1)) {
+			ds.reset();
+			ds.write(0xCC); //Обращение ко всем датчикам
+			ds.write(0x44); //Команда на конвертацию
+		}
+	}
 
 	// расчет остатка спирта в кубе
 	if (temperatureSensor[DS_Cube].data > 80) {
@@ -396,6 +439,11 @@ void handleProcessSensorOut() {
 		dataForWeb += "{\"out" + String(i + 1) + "\":{\"value\":" + String(pwmOut[i].data) + ",\"member\":" + String(pwmOut[i].member) + ",\"allert\":" + String(pwmOut[i].allert);
 		if (i < (PWM_Cnt - 1)) dataForWeb += "}},";
 	}
+	// импульсный режим на клапана
+	dataForWeb += "}}],\"valwe\":[";
+	dataForWeb += "{\"head\":{\"timeCycle\":" + String(headTimeCycle) + ",\"timeOn\":" + String(headtimeOn) + "}},";
+	dataForWeb += "{\"body\":{\"timeCycle\":" + String(bodyTimeCycle) + ",\"timeOn\":" + String(bodytimeOn) + ",\"decline\":" + String(decline);// +",\"Tmp1\":" + String(timeStabilizationReflux) + ",\"Tmp2\":" + String(timeBoilTubeSetReflux);
+	// АЦП
 	dataForWeb += "}}],\"safety\":[";
 	for (i = 0; i < ADC_Cnt; i++) {
 		dataForWeb += "{\"in" + String(i + 1) + "\":{\"value\":" + String(adcIn[i].data) + ",\"member\":" + String(adcIn[i].member) + ",\"allert\":" + String(adcIn[i].allert);
@@ -406,10 +454,9 @@ void handleProcessSensorOut() {
 	dataForWeb += "{\"Ki\":{\"userSetValue\":" + String(Ki) + "}},";
 	dataForWeb += "{\"Kd\":{\"userSetValue\":" + String(Kd) + "}},";
 	dataForWeb += "{\"t1\":{\"userSetValue\":" + String(setTempForPID) + "}}],";
-
-	//dataForWeb += "\"power\":" + String(power.heaterPower) + ",\"temperatureAlcoholBoil\":" + String(temperatureAlcoholBoil);
+	// power & other
 	dataForWeb += "\"power\":" + String(power.heaterPower) + ",\"powerHigh\":" + String(power.inPowerHigh) + ",\"powerLower\":" + String(power.inPowerLow) + ",\"temperatureAlcoholBoil\":" + String(temperatureAlcoholBoil);
-	dataForWeb += ",\"temperatureStartPressure\":" + String(settingColumnShow) + ",\"cubeAlcohol\":" + String(cubeAlcohol) + ",\"sound\":" + String(settingAlarm) + "}";
+	dataForWeb += ",\"temperatureStartPressure\":" + String(settingColumnShow) + ",\"cubeAlcohol\":" + String(cubeAlcohol) + ",\"sound\":" + String(settingAlarm) + ",\"answer\":" + String(answer) + "}";
 
 	HTTP.send(200, "text/json", dataForWeb);
 }
@@ -427,6 +474,7 @@ void handleProcessModeIn() {
 	uint8_t processModeOld = processMode.allow;
 	processMode.allow = HTTP.arg("process[allow]").toInt();
 	processMode.number = HTTP.arg("process[number]").toInt();
+	
 	if (processMode.allow < 3) {
 #if defined Debug_en
 		Serial.println(""); Serial.println("Прием уставок:");
@@ -452,16 +500,16 @@ void handleProcessModeIn() {
 			temperatureSensor[i].allertValueIn = tmpAllertValue;
 			// Запишем значение введенных отсечек или уставок в EEPROM
 			if (processMode.allow == 1) {
-				allertReadTmp = EEPROM_float_read_dsAllert(1303 + i * 7);
-				if (allertReadTmp != tmpAllertValue) {
-					EEPROM_float_write_dsAllert((1303 + i * 7), temperatureSensor[i].allertValueIn);
+				allertReadTmp = EEPROM_float_read(1303 + i * 7);
+				if (allertReadTmp != tmpAllertValue) { // дистилляция
+					EEPROM_float_write((1303 + i * 7), temperatureSensor[i].allertValueIn);
 					allertSave = true;
 				}
 			}
 			else if (processMode.allow == 2 && processMode.number > 0) {
-				allertReadTmp = EEPROM_float_read_dsAllert(1403 + i * 8);
-				if (allertReadTmp != tmpAllertValue) {
-					EEPROM_float_write_dsAllert((1403 + i * 8), temperatureSensor[i].allertValueIn);
+				allertReadTmp = EEPROM_float_read(1403 + i * 8);
+				if (allertReadTmp != tmpAllertValue) { // ректификация
+					EEPROM_float_write((1403 + i * 8), temperatureSensor[i].allertValueIn);
 					allertSave = true;
 				}
 			}
@@ -482,9 +530,14 @@ void handleProcessModeIn() {
 		}
 	}
 
-	//power.heaterPower = HTTP.arg("power").toInt();
+	headTimeCycle = HTTP.arg("head[timeCycle]").toInt();
+	headtimeOn = HTTP.arg("head[timeOn]").toFloat();
+	bodyTimeCycle = HTTP.arg("body[timeCycle]").toInt();
+	bodytimeOn = HTTP.arg("body[timeOn]").toFloat();
+	decline = HTTP.arg("body[decline]").toInt();
 
 	if (processMode.allow == 1) {
+		// запись в EEPROM параметров мощности для дистилляции
 		power.inPowerHigh = HTTP.arg("powerHigh").toInt();
 		if (power.inPowerHigh != EEPROM.read(1397)) {
 			EEPROM.write(1397, power.inPowerHigh);
@@ -497,6 +550,7 @@ void handleProcessModeIn() {
 		}
 	}
 	else if (processMode.allow == 2) {
+		// запись в EEPROM параметров мощности для ректификации
 		power.inPowerHigh = HTTP.arg("powerHigh").toInt();
 		if (power.inPowerHigh != EEPROM.read(1497)) {
 			EEPROM.write(1497, power.inPowerHigh);
@@ -511,9 +565,41 @@ void handleProcessModeIn() {
 			EEPROM.write(1499, processMode.number);
 			allertSave = true;
 		}
+		// запись в EEPROM параметров для клапанов
+		if (headTimeCycle != EEPROM.read(1477)) {
+			EEPROM.write(1477, headTimeCycle);
+			allertSave = true;
+		}
+		if (headtimeOn != EEPROM_float_read(1478)) {
+			EEPROM_float_write(1478, headtimeOn);
+			allertSave = true;
+		}
+		if (bodyTimeCycle != EEPROM.read(1482)) {
+			EEPROM.write(1482, bodyTimeCycle);
+			allertSave = true;
+		}
+		if (bodytimeOn != EEPROM_float_read(1483)) {
+			EEPROM_float_write(1483, bodytimeOn);
+			allertSave = true;
+		}
+		if (decline != EEPROM.read(1487)) {
+			EEPROM.write(1487, decline);
+			allertSave = true;
+		}
 	}
 
-	HTTP.send(200, "text/json", "{\"result\":\"ok\"}");
+	stepNext = HTTP.arg("stepNext").toInt();
+	answer = HTTP.arg("answer").toInt();
+
+	if (headTimeCycle < 5) headTimeCycle = 5;
+	else if (headTimeCycle > 30) headTimeCycle = 30;
+	if (headtimeOn < 1) headtimeOn = 1;
+	else if (headtimeOn > 100) headtimeOn = 100;
+	if (bodyTimeCycle < 5) bodyTimeCycle = 5;
+	else if (bodyTimeCycle > 30) bodyTimeCycle = 30;
+	if (bodytimeOn < 0) bodytimeOn = 0;
+	else if (bodytimeOn > 100) bodytimeOn = 100;
+	if (decline > 30) decline = 10;
 
 	// для записи лога на SD
 	if (processModeOld != processMode.allow && processMode.allow < 4) {
@@ -530,8 +616,9 @@ void handleProcessModeIn() {
 	}
 	if (allertSave == true) EEPROM.commit();
 	allertSave = false;
-	delay(500);
 	EEPROM.end();
+	delay(250);
+	HTTP.send(200, "text/json", "{\"result\":\"ok\"}");
 }
 
 void handleResetDataEeprom() {
@@ -540,9 +627,10 @@ void handleResetDataEeprom() {
 		for (int i = 0; i < 2048; i++) {
 			EEPROM.write(i, 0xFF);
 		}
-		EEPROM.commit();
-		delay(500);
+		//EEPROM.commit();
+		
 		EEPROM.end();
+		delay(100);
 		dallSearch();
 		HTTP.send(200, "text/json", "{\"result\":\"ok\"}");
 	}
@@ -550,13 +638,10 @@ void handleResetDataEeprom() {
 }
 
 void sensorLoop() {
-	if (millis() >= sensorTimeRead) {
-		sensorTimeRead = millis() + 1000;
-		processMode.timeStep++;//stepStartTime++;
+	if (millis() >= timeSec) {
 
-		// опрос датчиков
-		pressureRead();
-		dallRead();
+		timeSec = millis() + 1000;
+		processMode.timeStep++;
 
 		// Пищалка для WEB
 		if (settingAlarm == true) {
@@ -567,6 +652,12 @@ void sensorLoop() {
 			setPWM(BUZ_VOL, 0, 650);
 			deinitBuzzer();
 		}
+
+		// опрос датчиков
+		pressureRead();
+		if (sensorNumberRead >= DS_Count) sensorNumberRead = 0;
+		dallRead(sensorNumberRead);
+		sensorNumberRead++;
 
 		// Отладочная информация
 #if defined Debug_en

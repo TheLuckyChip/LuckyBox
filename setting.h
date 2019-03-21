@@ -13,6 +13,7 @@
 #include <Ticker.h>
 #include <Adafruit_PWMServoDriver.h>
 #include <ESP8266WebServer.h>
+#include <EEPROM.h>
 #include <PID_v1.h>
 
 struct TPL_Str
@@ -31,6 +32,7 @@ struct DS_Str
 	byte		addr[8];		// серийный номер датчика
 	byte		num;			// порядковый номер датчика
 	bool		member;			// участвует в выводе или нет
+	byte		timeErr;		// секунды ошибочного опроса (не совпала CRC)
 	float		data;			// значение температуры
 	float		dataT[4];		// значение температуры для усреднения и исключения глюков опроса
 	uint16_t	color;			// цвет для графика
@@ -152,14 +154,16 @@ extern float temperatureStartPressure;
 extern float settingColumnShow;
 extern float temperatureAlcoholBoil;
 extern float temperatureCubeAlcohol;
-extern unsigned long sensorTimeRead;
-extern unsigned long touchTimeRead;
+extern uint8_t counterStartStop;
+extern uint8_t sensorNumberRead;
+extern unsigned long timeSec;
 extern bool settingAlarm;
 extern bool headValve;
 extern unsigned long headValveOn;
 extern unsigned long headValveOff;
 extern byte touchArea;
 extern byte touchScreen;
+extern byte touchScreenDV;
 //extern uint8_t State;
 extern boolean outHeater;
 extern uint16_t Voltage;
@@ -186,5 +190,24 @@ extern bool CH1;
 extern bool CH2;
 extern bool CH3;
 extern bool CH4;
+extern unsigned long timeSetHighVoltage;
+
+// для импульсного режима руления клапанам
+// для web
+extern uint8_t headTimeCycle;
+extern float headtimeOn;
+extern uint8_t bodyTimeCycle;
+extern float bodytimeOn;
+extern uint8_t decline;
+extern unsigned long bodyTimeOffCount;
+// переход на следующий шаг
+extern uint8_t stepNext;
+// подтверждение обмена в web
+extern uint8_t answer;
+extern uint8_t timeStabilizationReflux;
+extern uint8_t timeBoilTubeSetReflux;
+
+extern float EEPROM_float_read(int addr);
+extern void EEPROM_float_write(int addr, float val);
 
 #endif

@@ -1,6 +1,6 @@
 //   Система автоматики винокура. 
 //   Проект центра открытого проектирования у Счастливчика https://LuckyCenter.ru
-//   Версия 2.0 Release Candidate 9
+//   Версия 2.0 Release Candidate 10
 
 #include "device_view.h"
 #include "pid_config.h"
@@ -16,8 +16,6 @@
 #include "mashing_mode.h"
 #include "pid_config.h"
 #include "brewing_mode.h"
-
-//uint8_t powOld = 200;
 
 void loop() {
   HTTP.handleClient();
@@ -35,10 +33,6 @@ void loop() {
   sensorLoop();
   displayLoop();
   logfileLoop();
-  yield();
 
-  /*if (power.heaterPower != powOld) {
-	  powOld = power.heaterPower;
-	  servoAngleSet(4, powOld);
-  }*/
+  yield();
 }

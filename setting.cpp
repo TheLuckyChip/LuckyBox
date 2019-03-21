@@ -13,7 +13,7 @@ ESP8266WebServer HTTP;
 // PID
 PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
 
-String curVersion = "2.0RC9";
+String curVersion = "2.0RC10";
 // Определяем переменные wifi
 String _ssid;      // Для хранения SSID
 String _password;  // Для хранения пароля сети
@@ -67,15 +67,17 @@ float temperatureAlcoholBoil = 0;
 float temperatureCubeAlcohol;
 unsigned long timePauseOff = millis();			// интервал времени для применения определенных параметров или ожидания в алгоритмах
 unsigned long timeAllertInterval = millis();	// интервал времени для звукового сигнала
-unsigned long sensorTimeRead = millis();		// Интервал чтения датчиков
+uint8_t counterStartStop = 0;					// Счетчик срабатываний Старт/Стоп
+uint8_t sensorNumberRead = 0;					// № датчика температуры для текущего опроса
 unsigned long adcTimeRead = millis();			// Интервал опроста АЦП
-unsigned long touchTimeRead = millis();			// Интервал опроста тачскрина
+unsigned long timeSec = millis();				// Секундный интервал
 bool settingAlarm = false;						// Пересечение границы уставки
 bool headValve;									// Состояние клапана отбора
 unsigned long headValveOn;						// контроль времени клапана отбора в открытом состоянии
 unsigned long headValveOff;						// контроль времени клапана отбора в закрытом состоянии
 byte touchArea = 0;								// Область нажатия
 byte touchScreen = 0;							// На каком экране контролируем нажатие
+byte touchScreenDV = 0;							// Нажатие на клапана для перерисовки
 int modeWiFi;
 uint8_t DefCubOut = 9;
 int16_t touch_x = 0;
@@ -98,3 +100,26 @@ bool CH1 = false;
 bool CH2 = false;
 bool CH3 = false;
 bool CH4 = false;
+unsigned long timeSetHighVoltage;
+uint8_t timeStabilizationReflux = 20;
+uint8_t timeBoilTubeSetReflux = 5;
+
+uint8_t headTimeCycle = 10;
+float headtimeOn = 3.5;
+uint8_t bodyTimeCycle = 12;
+float bodytimeOn = 8.5;
+uint8_t decline = 10;
+unsigned long bodyTimeOffCount;
+uint8_t stepNext = 0;
+uint8_t answer = 0;
+
+float EEPROM_float_read(int addr) {
+	byte x[4];
+	for (byte i = 0; i < 4; i++) x[i] = EEPROM.read(i + addr);
+	float *y = (float *)&x;
+	return y[0];
+}
+void EEPROM_float_write(int addr, float val) {
+	byte *x = (byte *)&val;
+	for (byte i = 0; i < 4; i++) EEPROM.write(i + addr, x[i]);
+}

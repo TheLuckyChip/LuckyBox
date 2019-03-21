@@ -338,7 +338,7 @@ void tftOutText(int temp_min, int temp_max) {
 				else if (processMode.step < 4) tft.print(utf8rus(" Стаб."));
 				else if (processMode.step < 6) tft.print(utf8rus("Головы"));
 				else if (processMode.step < 7) tft.print(utf8rus("  Тело"));
-				else tft.print(utf8rus("Стоп  "));
+				else tft.print(utf8rus("  Стоп"));
 			}
 			else tft.print(utf8rus(" Отбор"));
 			// время шага
@@ -735,18 +735,21 @@ void tftStopLoop() {
 
 void getTouchArea() {
 	if (touchArea == 1) {
+		//touchStart = true;
 		commandWriteSD = "TouchSend: Старт";
 		commandSD_en = true;
 		processMode.allow = 1;
 		processMode.step = 0;
 	}
 	else if (touchArea == 2) {
+		//touchStart = true;
 		commandWriteSD = "TouchSend: Старт";
 		commandSD_en = true;
 		processMode.allow = 2;
 		processMode.step = 0;
 	}
 	else if (touchArea == 3) {
+		//touchStart = true;
 		commandWriteSD = "TouchSend: Старт";
 		commandSD_en = true;
 		processMode.allow = 3;
@@ -770,10 +773,6 @@ void tftMenuLoop() {
 		csOff(PWM_CH2);
 		csOff(PWM_CH3);
 		csOff(PWM_CH4);
-		csOff(PWM_CH5);
-		csOff(PWM_CH6);
-		csOff(PWM_CH7);
-		csOff(PWM_CH8);
 	}
 #if defined TFT_Display
 	// processMode.num = 0 вывод экрана, processMode.num = 1 ждем нажатия

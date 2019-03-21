@@ -4,17 +4,6 @@
 
 #include "mashing_mode.h"
 
-void EEPROM_float_write_mash(int addr, float val) {
-	byte *x = (byte *)&val;
-	for (byte i = 0; i < 4; i++) EEPROM.write(i + addr, x[i]);
-}
-float EEPROM_float_read_mash(int addr) {
-	byte x[4];
-	for (byte i = 0; i < 4; i++) x[i] = EEPROM.read(i + addr);
-	float *y = (float *)&x;
-	return y[0];
-}
-
 void loadEepromMashing() {
 	int i;
 	// Считаем что раньше сохраняли
@@ -196,7 +185,6 @@ void handleMashingSensorSetSave() {
 void mashingLoop() {
 	// поиск выбранного датчика и начальная инициализация
 	if (processMode.step == 0) {
-		loadEepromMashing();
 		if (temperatureSensor[0].member == 1) numSenseMashBrew = 0;
 		else if (temperatureSensor[1].member == 1) numSenseMashBrew = 1;
 		else if (temperatureSensor[2].member == 1) numSenseMashBrew = 2;
