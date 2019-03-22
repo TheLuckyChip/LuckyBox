@@ -2012,7 +2012,7 @@ $(function () {
 				}
 			});
 		}
-		let visible_reflux_out_3 = (refluxProcess["number"] === 3 ? "" : " hidden");
+		let visible_reflux_out_3 = "";//(refluxProcess["number"] === 3 ? "" : " hidden");
 		if (!$.fn.objIsEmpty(refluxProcess["sensors"], false)) {
 			let tpl_delta_thead =
 				'<div class="row-xs clearfix">' +
@@ -2253,14 +2253,14 @@ $(function () {
 	$(document).on('change', '#reflux_algorithm_select', function () {
 		let algorithm_val = Number($(this).find(":selected").val());
 		refluxProcess["number"] = algorithm_val;
-		if($("#reflux_out_3").length > 0) {
+		/*if($("#reflux_out_3").length > 0) {
 			console.log("reflux_out_3", algorithm_val);
 			if (algorithm_val === 3) {
 				$("#reflux_out_3").removeClass("hidden");
 			}else{
 				$("#reflux_out_3").addClass("hidden");
 			}
-		}
+		}*/
 	});
 
 	function launchReflux(){
@@ -2713,10 +2713,11 @@ $(function () {
 							}
 						});
 						if (!$.fn.objIsEmpty(mashingProcess["sensors"], false)) {
-							mashingProcess["sensors"]["pause1"] = {"time":20,"name":"Внесение солода","temperature":45,"stop":0};
-							mashingProcess["sensors"]["pause2"] = {"time":20,"name":"Белковая пауза","temperature":55,"stop":0};
-							mashingProcess["sensors"]["pause3"] = {"time":120,"name":"Осахаривание","temperature":65,"stop":0};
-							mashingProcess["sensors"]["pause4"] = {"time":10,"name":"Мэш аут","temperature":72,"stop":0};
+							mashingProcess["sensors"]["pause1"] = {"name":"Кислотная пауза","time":20,"temperature":40,"stop":0};
+							mashingProcess["sensors"]["pause2"] = {"name":"Белковая пауза","time":20,"temperature":55,"stop":0};
+							mashingProcess["sensors"]["pause3"] = {"name":"Осахаривание","time":30,"temperature":63,"stop":0};
+							mashingProcess["sensors"]["pause4"] = {"name":"Осахаривание","time":60,"temperature":67,"stop":0};
+							mashingProcess["sensors"]["pause5"] = {"name":"Мэш аут","time":10,"temperature":78,"stop":0};
 
 						}
 						$(this).closest(".modal").modal("hide");
@@ -2754,7 +2755,8 @@ $(function () {
 			"pause1": {"name": "", "time": 0, "temperature": 0, "stop": 0},
 			"pause2": {"name": "", "time": 0, "temperature": 0, "stop": 0},
 			"pause3": {"name": "", "time": 0, "temperature": 0, "stop": 0},
-			"pause4": {"name": "", "time": 0, "temperature": 0, "stop": 0}
+			"pause4": {"name": "", "time": 0, "temperature": 0, "stop": 0},
+			"pause5": {"name": "", "time": 0, "temperature": 0, "stop": 0}
 		};
 		let mashingTemplate = '';
 		let tpl_pause_body = '';
@@ -2936,7 +2938,8 @@ $(function () {
 				"pause1": {"time": 0, "temperature": 0, "stop": 0},
 				"pause2": {"time": 0, "temperature": 0, "stop": 0},
 				"pause3": {"time": 0, "temperature": 0, "stop": 0},
-				"pause4": {"time": 0, "temperature": 0, "stop": 0}
+				"pause4": {"time": 0, "temperature": 0, "stop": 0},
+				"pause5": {"time": 0, "temperature": 0, "stop": 0}
 				//,"power": 0
 			};
 			mashingSendData["process"]["allow"] = (mashingProcess["start"] ? 3 : 0);

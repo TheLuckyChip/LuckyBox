@@ -12,10 +12,11 @@
 	{"p1":{"value":760.00,"color":0,"member":0}}
 ],
     "mashing":[
-    {"pause1":{"time":20,"name":"Внесение солода","temperature":45,"stop":0,"step":0}},
-    {"pause2":{"time":30,"name":"Белковая пауза","temperature":55,"stop":0,"step":0}},
-    {"pause3":{"time":120,"name":"Осахаривание","temperature":65,"stop":0,"step":0}},
-    {"pause4":{"time":10,"name":"Мэш аут","temperature":72,"stop":0,"step":0}}
+    {"pause1":{"name":"Кислотная пауза","time":20,"temperature":40,"stop":0,"step":0}},
+    {"pause2":{"name":"Белковая пауза","time":20,"temperature":55,"stop":0,"step":0}},
+    {"pause3":{"name":"Мальтозная пауза","time":30,"temperature":63,"stop":0,"step":0}},
+    {"pause4":{"name":"Осахаривание","time":60,"temperature":67,"stop":0,"step":0}},
+    {"pause5":{"name":"Мэш аут","time":10,"temperature":78,"stop":0,"step":0}}
 ],
    "brewing":[
    {"pause1":{"time":60,"name":"Кислотная пауза","temperature":40,"stop":0,"member":0,"step":0}},
