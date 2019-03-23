@@ -14,6 +14,7 @@ ESP8266WebServer HTTP;
 PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
 
 String curVersion = "2.0RC10";
+uint16_t versionForWeb = 2010;
 // Определяем переменные wifi
 String _ssid;      // Для хранения SSID
 String _password;  // Для хранения пароля сети
@@ -46,7 +47,7 @@ struct BMP_Str pressureSensor;
 struct OUT_Pwm pwmOut[PWM_Cnt];
 struct IN_Adc adcIn[ADC_Cnt];
 struct PR_Type processMode;
-struct PR_Mashing processMashing[4];
+struct PR_Mashing processMashing[5];
 struct PR_Power power;
 
 uint8_t StateDsReset;

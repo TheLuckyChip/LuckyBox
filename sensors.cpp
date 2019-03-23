@@ -415,14 +415,16 @@ void handleProcessSensorOut() {
 	dataForWeb += ",\"member\":" + String(pressureSensor.member) + "}}],";
 	// mashing
 	dataForWeb += "\"mashing\":[";
-	dataForWeb += "{\"pause1\":{\"time\":" + String(processMashing[0].time) + ",\"name\":\"Внесение солода\",\"temperature\":";
+	dataForWeb += "{\"pause1\":{\"time\":" + String(processMashing[0].time) + ",\"name\":\"Кислотная пауза\",\"temperature\":";
 	dataForWeb += String(processMashing[0].temperature) + ",\"stop\":" + String(processMashing[0].stop) + ",\"step\":" + String(processMashing[0].step) + "}},";
 	dataForWeb += "{\"pause2\":{\"time\":" + String(processMashing[1].time) + ",\"name\":\"Белковая пауза\",\"temperature\":";
 	dataForWeb += String(processMashing[1].temperature) + ",\"stop\":" + String(processMashing[1].stop) + ",\"step\":" + String(processMashing[1].step) + "}},";
-	dataForWeb += "{\"pause3\":{\"time\":" + String(processMashing[2].time) + ",\"name\":\"Осахаривание\",\"temperature\":";
+	dataForWeb += "{\"pause3\":{\"time\":" + String(processMashing[2].time) + ",\"name\":\"Мальтозная пауза\",\"temperature\":";
 	dataForWeb += String(processMashing[2].temperature) + ",\"stop\":" + String(processMashing[2].stop) + ",\"step\":" + String(processMashing[2].step) + "}},";
-	dataForWeb += "{\"pause4\":{\"time\":" + String(processMashing[3].time) + ",\"name\":\"Мэш аут\",\"temperature\":";
-	dataForWeb += String(processMashing[3].temperature) + ",\"stop\":" + String(processMashing[3].stop) + ",\"step\":" + String(processMashing[3].step) + "}}],";
+	dataForWeb += "{\"pause4\":{\"time\":" + String(processMashing[3].time) + ",\"name\":\"Осахаривание\",\"temperature\":";
+	dataForWeb += String(processMashing[3].temperature) + ",\"stop\":" + String(processMashing[3].stop) + ",\"step\":" + String(processMashing[3].step) + "}},";
+	dataForWeb += "{\"pause5\":{\"time\":" + String(processMashing[4].time) + ",\"name\":\"Мэш аут\",\"temperature\":";
+	dataForWeb += String(processMashing[4].temperature) + ",\"stop\":" + String(processMashing[4].stop) + ",\"step\":" + String(processMashing[4].step) + "}}],";
 	// brewing
 	// ...
 	// devices
@@ -445,9 +447,9 @@ void handleProcessSensorOut() {
 	dataForWeb += "}}],\"pid\":[{\"Kp\":{\"userSetValue\":" + String(Kp) + "}},";
 	dataForWeb += "{\"Ki\":{\"userSetValue\":" + String(Ki) + "}},";
 	dataForWeb += "{\"Kd\":{\"userSetValue\":" + String(Kd) + "}},";
-	dataForWeb += "{\"t1\":{\"userSetValue\":" + String(setTempForPID) + "}}],";
+	dataForWeb += "{\"t1\":{\"userSetValue\":" + String(setTempForPID) + "}}]";
 	// power & other
-	dataForWeb += "\"power\":" + String(power.heaterPower) + ",\"powerHigh\":" + String(power.inPowerHigh) + ",\"powerLower\":" + String(power.inPowerLow) + ",\"temperatureAlcoholBoil\":" + String(temperatureAlcoholBoil);
+	dataForWeb += ",\"version\":" + String(versionForWeb) + ",\"power\":" + String(power.heaterPower) + ",\"powerHigh\":" + String(power.inPowerHigh) + ",\"powerLower\":" + String(power.inPowerLow) + ",\"temperatureAlcoholBoil\":" + String(temperatureAlcoholBoil);
 	dataForWeb += ",\"temperatureStartPressure\":" + String(settingColumnShow) + ",\"cubeAlcohol\":" + String(cubeAlcohol) + ",\"sound\":" + String(settingAlarm) + ",\"answer\":" + String(answer) + "}";
 
 	HTTP.send(200, "text/json", dataForWeb);

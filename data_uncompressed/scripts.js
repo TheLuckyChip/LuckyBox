@@ -2012,6 +2012,7 @@ $(function () {
 				}
 			});
 		}
+		let flagout = false;
 		if (!$.fn.objIsEmpty(refluxProcess["sensors"], false)) {
 			let tpl_delta_thead =
 				'<div class="row-xs clearfix">' +
@@ -2027,10 +2028,7 @@ $(function () {
 				'</div>';
 			let tpl_cutoff_body = '';
 			let tpl_all_body = '';
-			let head_devices = '<div class="row-xs clearfix">' +
-				'<div class="col-xs-4 col-xs-offset-0 col-sm-3 col-sm-offset-3 text-center text-middle text-primary text-nowrap">Период сек.</div>' +
-				'<div class="col-xs-4 col-xs-offset-3_ col-sm-3 col-sm-offset-1_ text-center text-middle text-primary text-nowrap">Открыт %</div>'+
-				'<div class="col-xs-4 col-xs-offset-1_ col-sm-3 col-sm-offset-0_ text-center text-middle text-primary text-nowrap">%&#8595;</div></div>';
+
 			tpl_stab = '<div class="row row-striped">' +
 				'<div class="pt-10 clearfix">' +
 				'<div class="col-xs-12 col-sm-4 text-center-xs text-middle text-strong">Время стабилизации колонны</div>' +
@@ -2046,7 +2044,6 @@ $(function () {
 			sensorsRefluxSend["stab"] = refluxProcess["stab"];
 			sensorsRefluxSend["point"] = refluxProcess["point"];
 
-			let flagout1 = false;
 			$.each(refluxProcess["sensors"], function (i, e) {
 				let sensor_key = i;
 				if (e.hasOwnProperty("name") && sensorsRefluxSend[sensor_key].hasOwnProperty("name")) {
@@ -2107,13 +2104,14 @@ $(function () {
 				if (re_out.test(sensor_key) && Number(e["member"]) !== 0) {
 					sensorsRefluxSend[sensor_key]["member"] = 1;
 					//console.log(sensor_key);
-					if(sensor_key === "out1") {
-						flagout1 = true;
+					/*if(sensor_key === "out1") {
+						flagout = true;
 						let val_head_cycle = (globalSensorsJson.hasOwnProperty("valwe") ? globalSensorsJson["valwe"][0]["head"]["timeCycle"] : 5);
 						let tpl_head_cycle = returnTplHtml([{id: "reflux_head_cycle", value: val_head_cycle, min: '5', max: '30', step: '1'}], deltaTempl);
 						let val_head_time = (globalSensorsJson.hasOwnProperty("valwe") ? globalSensorsJson["valwe"][0]["head"]["timeOn"] : 1);
 						let tpl_head_time = returnTplHtml([{id: "reflux_head_time", value: val_head_time, min: '1', max: '100', step: '0.5'}], deltaTempl);
-						tpl_devices_body += '<div class="row row-striped">' +
+						tpl_devices_body += '<div id="reflux_out_3" class="row' + visible_reflux_out_3 +'"><div class="col-xs-12">' +
+							'<div class="row row-striped">' +
 							head_devices +
 							'<div class="pt-10 pb-10 clearfix">' +
 							'<div class="col-xs-12 col-sm-3 text-middle text-center-xs text-strong">Клапан отбора голов</div>' +
@@ -2142,14 +2140,16 @@ $(function () {
 							'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_decline + '</div>' +
 							//'<div class="col-xs-2 col-sm-1 text-center text-middle"><label class="checkbox-inline">' +
 							//'<input class="noSwipe" id="reflux_body_decline"' + checked_body_decline + ' type="checkbox" value="Y"></label></div>' +
+							'</div></div>'+
 							'</div></div>';
 					}else if(sensor_key === "out2"){
-						if(!flagout1) {
+						if(!flagout) {
 							let val_head_cycle = (globalSensorsJson.hasOwnProperty("valwe") ? globalSensorsJson["valwe"][0]["head"]["timeCycle"] : 5);
 							let tpl_head_cycle = returnTplHtml([{id: "reflux_head_cycle", value: val_head_cycle, min: '5', max: '30', step: '1'}], deltaTempl);
 							let val_head_time = (globalSensorsJson.hasOwnProperty("valwe") ? globalSensorsJson["valwe"][0]["head"]["timeOn"] : 1);
 							let tpl_head_time = returnTplHtml([{id: "reflux_head_time", value: val_head_time, min: '1', max: '100', step: '0.5'}], deltaTempl);
-							tpl_devices_body += '<div class="row row-striped">' +
+							tpl_devices_body += '<div id="reflux_out_3" class="row' + visible_reflux_out_3 +'"><div class="col-xs-12">' +
+								'<div class="row row-striped">' +
 								head_devices +
 								'<div class="pt-10 pb-10 clearfix">' +
 								'<div class="col-xs-12 col-sm-3 text-middle text-center-xs text-strong">Клапан отбора голов</div>' +
@@ -2178,8 +2178,11 @@ $(function () {
 								'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_decline + '</div>' +
 								//'<div class="col-xs-2 col-sm-1 text-center text-middle"><label class="checkbox-inline">' +
 								//'<input class="noSwipe" id="reflux_body_decline"' + checked_body_decline + ' type="checkbox" value="Y"></label></div>' +
+								'</div></div>'+
 								'</div></div>';
-						}
+						}*/
+					if(sensor_key === "out1" || sensor_key === "out2") {
+						flagout = true;
 					}else {
 						tpl_devices_body += '<div class="row row-striped">' +
 							'<div class="pt-10 pb-10 clearfix">' +
@@ -2216,6 +2219,45 @@ $(function () {
 				'<div id="reflux_step" class="col-xs-12 col-md-6 text-center-xs text-middle text-strong hidden"></div>' +
 				'<div id="reflux_time" class="col-xs-12 col-md-6 text-center-xs text-middle text-strong hidden"></div>' +
 				'</div>';
+			let head_devices = '<div class="row-xs clearfix">' +
+				'<div class="col-xs-4 col-xs-offset-0 col-sm-3 col-sm-offset-3 text-center text-middle text-primary text-nowrap">Период сек.</div>' +
+				'<div class="col-xs-4 col-sm-3 text-center text-middle text-primary text-nowrap">Открыт %</div>'+
+				'<div id="reflux_devices_out_header" class="col-xs-4 col-sm-3 text-center text-middle text-primary text-nowrap">%&#8595;</div></div>';
+			let tpl_devices_out_body = '';
+			if(flagout){
+				let visible_reflux_out = ((refluxProcess["number"] === 3 || refluxProcess["number"] === 1) ? "" : " hidden");
+				let val_head_cycle = (globalSensorsJson.hasOwnProperty("valwe") ? globalSensorsJson["valwe"][0]["head"]["timeCycle"] : 5);
+				let tpl_head_cycle = returnTplHtml([{id: "reflux_head_cycle", value: val_head_cycle, min: '5', max: '30', step: '1'}], deltaTempl);
+				let val_head_time = (globalSensorsJson.hasOwnProperty("valwe") ? globalSensorsJson["valwe"][0]["head"]["timeOn"] : 1);
+				let tpl_head_time = returnTplHtml([{id: "reflux_head_time", value: val_head_time, min: '1', max: '100', step: '0.5'}], deltaTempl);
+				tpl_devices_out_body += '<div id="reflux_devices_out" class="row' + visible_reflux_out +'"><div class="col-xs-12">' +
+					'<div id="reflux_devices_head" class="row row-striped">' +
+					head_devices +
+					'<div class="pt-10 pb-10 clearfix">' +
+					'<div class="col-xs-12 col-sm-3 text-middle text-center-xs text-strong">Клапан отбора голов</div>' +
+					'<div class="col-xs-4 col-xs-offset-1_ col-sm-3 col-sm-offset-0_">' + tpl_head_cycle + '</div>' +
+					'<div class="col-xs-4 col-xs-offset-1_ col-sm-3 col-sm-offset-1_">' + tpl_head_time + '</div>' +
+					'</div></div>';
+
+				let val_body_cycle = (globalSensorsJson.hasOwnProperty("valwe") ? globalSensorsJson["valwe"][1]["body"]["timeCycle"] : 5);
+				let tpl_body_cycle = returnTplHtml([{id: "reflux_body_cycle", value: val_body_cycle, min: '5', max: '30', step: '1'}], deltaTempl);
+				let val_body_time = (globalSensorsJson.hasOwnProperty("valwe") ? globalSensorsJson["valwe"][1]["body"]["timeOn"] : 0);
+				let tpl_body_time = returnTplHtml([{id: "reflux_body_time", value: val_body_time, min: '0', max: '100', step: '0.5'}], deltaTempl);
+				let val_body_decline = (globalSensorsJson.hasOwnProperty("valwe") ? globalSensorsJson["valwe"][1]["body"]["decline"] : 0);
+				let tpl_body_decline = returnTplHtml([{id: "reflux_body_decline", value: val_body_decline, min: '0', max: '30', step: '1'}], deltaTempl);
+
+				tpl_devices_out_body += '<div id="reflux_devices_body" class="row row-striped">' +
+					'<div class="pt-10 pb-10 clearfix">' +
+					'<div class="col-xs-12 col-sm-3 pxs-10 text-middle text-center-xs text-strong">Клапан отбора тела</div>' +
+					'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_cycle + '</div>' +
+					'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_time + '</div>' +
+					'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_decline + '</div>' +
+					'</div></div>'+
+					'</div></div>';
+
+				tpl_devices_body = tpl_devices_out_body + tpl_devices_body;
+			}
+
 			refluxTemplate = timeStepTemplate +
 				returnTplHtml([{id_value: "reflux_power_value", id_set: "reflux_power_set"}], powerTempl) +
 				returnTplHtml([{id_lower_set: "reflux_power_lower_set"}], powerLowerTempl) +
@@ -2246,7 +2288,23 @@ $(function () {
 		}
 	};
 	$(document).on('change', '#reflux_algorithm_select', function () {
-		refluxProcess["number"] = $(this).find(":selected").val();
+		let algorithm_val = Number($(this).find(":selected").val());
+		refluxProcess["number"] = algorithm_val;
+		if($("#reflux_devices_out").length > 0) {
+			console.log("reflux_devices_out", algorithm_val);
+			if (algorithm_val === 3 || algorithm_val === 1) {
+				$("#reflux_devices_out").removeClass("hidden");
+			}else{
+				$("#reflux_devices_out").addClass("hidden");
+			}
+			if (algorithm_val === 1) {
+				$("#reflux_devices_body").addClass("hidden");
+				$("#reflux_devices_out_header").addClass("hidden");
+			}else{
+				$("#reflux_devices_body").removeClass("hidden");
+				$("#reflux_devices_out_header").removeClass("hidden");
+			}
+		}
 	});
 
 	function launchReflux(){
@@ -2699,10 +2757,11 @@ $(function () {
 							}
 						});
 						if (!$.fn.objIsEmpty(mashingProcess["sensors"], false)) {
-							mashingProcess["sensors"]["pause1"] = {"time":20,"name":"Внесение солода","temperature":45,"stop":0};
-							mashingProcess["sensors"]["pause2"] = {"time":20,"name":"Белковая пауза","temperature":55,"stop":0};
-							mashingProcess["sensors"]["pause3"] = {"time":120,"name":"Осахаривание","temperature":65,"stop":0};
-							mashingProcess["sensors"]["pause4"] = {"time":10,"name":"Мэш аут","temperature":72,"stop":0};
+							mashingProcess["sensors"]["pause1"] = {"name":"Кислотная пауза","time":20,"temperature":40,"stop":0};
+							mashingProcess["sensors"]["pause2"] = {"name":"Белковая пауза","time":20,"temperature":55,"stop":0};
+							mashingProcess["sensors"]["pause3"] = {"name":"Осахаривание","time":30,"temperature":63,"stop":0};
+							mashingProcess["sensors"]["pause4"] = {"name":"Осахаривание","time":60,"temperature":67,"stop":0};
+							mashingProcess["sensors"]["pause5"] = {"name":"Мэш аут","time":10,"temperature":78,"stop":0};
 
 						}
 						$(this).closest(".modal").modal("hide");
@@ -2740,7 +2799,8 @@ $(function () {
 			"pause1": {"name": "", "time": 0, "temperature": 0, "stop": 0},
 			"pause2": {"name": "", "time": 0, "temperature": 0, "stop": 0},
 			"pause3": {"name": "", "time": 0, "temperature": 0, "stop": 0},
-			"pause4": {"name": "", "time": 0, "temperature": 0, "stop": 0}
+			"pause4": {"name": "", "time": 0, "temperature": 0, "stop": 0},
+			"pause5": {"name": "", "time": 0, "temperature": 0, "stop": 0}
 		};
 		let mashingTemplate = '';
 		let tpl_pause_body = '';
@@ -2922,7 +2982,8 @@ $(function () {
 				"pause1": {"time": 0, "temperature": 0, "stop": 0},
 				"pause2": {"time": 0, "temperature": 0, "stop": 0},
 				"pause3": {"time": 0, "temperature": 0, "stop": 0},
-				"pause4": {"time": 0, "temperature": 0, "stop": 0}
+				"pause4": {"time": 0, "temperature": 0, "stop": 0},
+				"pause5": {"time": 0, "temperature": 0, "stop": 0}
 				//,"power": 0
 			};
 			mashingSendData["process"]["allow"] = (mashingProcess["start"] ? 3 : 0);

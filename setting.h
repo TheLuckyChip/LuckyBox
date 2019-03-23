@@ -96,7 +96,7 @@ extern struct BMP_Str pressureSensor;
 extern struct OUT_Pwm pwmOut[PWM_Cnt];
 extern struct IN_Adc adcIn[ADC_Cnt];
 extern struct PR_Type processMode;
-extern struct PR_Mashing processMashing[4];
+extern struct PR_Mashing processMashing[5];
 extern struct PR_Power power;
 
 extern Ticker tickerSet;
@@ -115,6 +115,7 @@ extern PID myPID;
 //extern fs::File fsUploadFile;
 
 extern String curVersion;
+extern uint16_t versionForWeb;
 // Определяем переменные wifi
 extern String _ssid;
 extern String _password;

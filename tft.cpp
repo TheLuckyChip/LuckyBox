@@ -539,6 +539,11 @@ void tftOutText(int temp_min, int temp_max) {
 			if ((processMashing[3].time * 60) >= processMode.timeStep) timeOutTFT = (processMashing[3].time * 60) - processMode.timeStep;
 			else timeOutTFT = 0;
 		}
+		else if (processMashing[4].step == 1) {
+			tempOutTFT = processMashing[4].temperature;
+			if ((processMashing[4].time * 60) >= processMode.timeStep) timeOutTFT = (processMashing[4].time * 60) - processMode.timeStep;
+			else timeOutTFT = 0;
+		}
 
 		// время
 		tft.setTextSize(2);

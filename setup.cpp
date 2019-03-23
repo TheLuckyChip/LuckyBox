@@ -313,10 +313,11 @@ void setup()
   setKp = Kp;
   setKi = Ki;
   setKd = Kd;
-  processMashing[0].time = 20; processMashing[0].temperature = 45;
-  processMashing[1].time = 30; processMashing[1].temperature = 55;
-  processMashing[2].time = 120; processMashing[2].temperature = 65;
-  processMashing[3].time = 10; processMashing[3].temperature = 72;
+  processMashing[0].time = 20; processMashing[0].temperature = 40;
+  processMashing[1].time = 20; processMashing[1].temperature = 55;
+  processMashing[2].time = 30; processMashing[2].temperature = 63;
+  processMashing[3].time = 60; processMashing[3].temperature = 67;
+  processMashing[4].time = 10; processMashing[4].temperature = 78;
 
   Serial.println("Setup Done!");
 
