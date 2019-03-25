@@ -478,20 +478,34 @@ void handleProcessModeIn() {
 			arg = "t" + String(n + 1);
 			tmpAllertValue = HTTP.arg(arg + "[allertValue]").toFloat();
 			
-			if (tmpAllertValue > 10) temperatureSensor[i].allertValue = tmpAllertValue;
-			else if (tmpAllertValue > 0 && tmpAllertValue != temperatureSensor[i].allertValueIn) {
-				if (settingBoilTube != tmpAllertValue && temperatureSensor[i].num == 2) {
-					settingBoilTube = tmpAllertValue;
-					settingColumn = temperatureSensor[i].data;
-					pressureSensor.dataStart = pressureSensor.data;
+			if (temperatureSensor[i].num != 2) {
+				if (tmpAllertValue > 10) temperatureSensor[i].allertValue = tmpAllertValue;
+				else temperatureSensor[i].allertValue = 0;
+			}
+			else {
+				if (tmpAllertValue > 0 && tmpAllertValue != temperatureSensor[i].allertValueIn) {
+					//settingBoilTube = tmpAllertValue;
+					//settingColumn = temperatureSensor[i].data;
+					//pressureSensor.dataStart = pressureSensor.data;
+					reSetTemperatureStartPressure = true;
+
+					commandWriteSD = "WebSend: Смена уставки";
+					commandSD_en = true;
+
+					//settingColumnSet = true;
 				}
+				else if (tmpAllertValue == 0 && tmpAllertValue != temperatureSensor[i].allertValueIn) {
+					commandWriteSD = "WebSend: Отмена уставки";
+					commandSD_en = true;
+				}
+				/*else {
+					temperatureSensor[i].allertValue = 0;
+					//settingBoilTube = 0;
+					//settingColumnSet = true;
+				}*/
 			}
-			else if (tmpAllertValue == 0 && temperatureSensor[i].delta != 0) {
-				temperatureSensor[i].allertValue = 0;
-				settingBoilTube = 0;
-			}
-			else temperatureSensor[i].allertValue = 0;
 			temperatureSensor[i].allertValueIn = tmpAllertValue;
+
 			// Запишем значение введенных отсечек или уставок в EEPROM
 			if (processMode.allow == 1) {
 				allertReadTmp = EEPROM_float_read(1303 + i * 7);

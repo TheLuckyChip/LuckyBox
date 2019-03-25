@@ -60,6 +60,8 @@ uint16_t graphOutInterval = Display_out_temp;	// Инетрал времени �
 uint16_t scaleCount;
 byte tempBigOut;
 byte tempBigOutOld;
+bool reSetTemperatureStartPressure;
+//bool settingColumnSet;
 float settingBoilTube;
 float settingColumn = 101;         // Температура срабатывания оповещения от датчика в царге
 float temperatureStartPressure = 78;   //Температура кипения спирта при запуске отслеживания ректификации
@@ -96,6 +98,7 @@ unsigned long stepStartTime;
 unsigned long wifiTimeInterval;
 String nameProcessStep = " ";
 String commandWriteSD;
+bool startWriteSD = false;
 bool commandSD_en = false;
 bool CH1 = false;
 bool CH2 = false;
@@ -114,6 +117,11 @@ unsigned long bodyTimeOffCount;
 uint8_t stepNext = 0;
 uint8_t answer = 0;
 
+bool errA;
+bool errT;
+unsigned long timePauseErrA;
+unsigned long timePauseErrT;
+
 float EEPROM_float_read(int addr) {
 	byte x[4];
 	for (byte i = 0; i < 4; i++) x[i] = EEPROM.read(i + addr);
@@ -123,4 +131,14 @@ float EEPROM_float_read(int addr) {
 void EEPROM_float_write(int addr, float val) {
 	byte *x = (byte *)&val;
 	for (byte i = 0; i < 4; i++) EEPROM.write(i + addr, x[i]);
+}
+void stopErr() {
+	csOff(PWM_CH6);								// выключить дополнительный ТЭН на разгон
+	power.heaterStatus = 0;						// выключили ТЭН
+	power.heaterPower = 0;						// установили мощность на ТЭН 0 %
+	timeAllertInterval = millis() + 10000;		// установим счетчик времени для зв.сигнала
+	processMode.timeStep = 0;
+	timePauseOff = 60000 * 2 + millis();
+	if (processMode.allow == 1) processMode.step = 4;
+	else if (processMode.allow == 2) processMode.step = 7;
 }

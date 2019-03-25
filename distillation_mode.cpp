@@ -202,12 +202,45 @@ void distillationLoop() {
 	}
 	else power.heaterPower = 0;
 
-	//if (power.heaterPower != power.inPowerHigh && processMode.step < 4) power.heaterPower = power.inPowerHigh;
-	//else if (processMode.step >= 4) power.heaterPower = 0;
+	if (processMode.number > 0) {
+		// датчики безопасности в каналах АЦП
+		errA = false;
+		if (adcIn[0].member == 1 && adcIn[0].allert == true) { settingAlarm = true; errA = true; }
+		else if (adcIn[1].member == 1 && adcIn[1].allert == true) { settingAlarm = true; errA = true; }
+		else if (adcIn[2].member == 1 && adcIn[2].allert == true) settingAlarm = true;
+		else if (adcIn[3].member == 1 && adcIn[3].allert == true) settingAlarm = true;
+		else if (timeAllertInterval < millis()) settingAlarm = false;
+		if (!errA) timePauseErrA = millis() + 10000; // 10 секунд
+		else if (timePauseErrA <= millis()) { stopErr(); nameProcessStep = "Стоп по аварии ADC"; }
+
+		// датчики безопасности по температурным датчикам кроме Т куба и Т царги
+		errT = false;
+		if (temperatureSensor[DS_Out].cutoff == 1 && temperatureSensor[DS_Out].member == 1 && temperatureSensor[DS_Out].allertValue > 0 && temperatureSensor[DS_Out].data >= temperatureSensor[DS_Out].allertValue) {
+			errT = true;
+		}
+		else if (temperatureSensor[DS_Def].cutoff == 1 && temperatureSensor[DS_Def].member == 1 && temperatureSensor[DS_Def].allertValue > 0 && temperatureSensor[DS_Def].data >= temperatureSensor[DS_Def].allertValue) {
+			errT = true;
+		}
+		else if (temperatureSensor[DS_Res1].cutoff == 1 && temperatureSensor[DS_Res1].member == 1 && temperatureSensor[DS_Res1].allertValue > 0 && temperatureSensor[DS_Res1].data >= temperatureSensor[DS_Res1].allertValue) {
+			errT = true;
+		}
+		else if (temperatureSensor[DS_Res2].cutoff == 1 && temperatureSensor[DS_Res2].member == 1 && temperatureSensor[DS_Res2].allertValue > 0 && temperatureSensor[DS_Res2].data >= temperatureSensor[DS_Res2].allertValue) {
+			errT = true;
+		}
+		else if (temperatureSensor[DS_Res3].cutoff == 1 && temperatureSensor[DS_Res3].member == 1 && temperatureSensor[DS_Res3].allertValue > 0 && temperatureSensor[DS_Res3].data >= temperatureSensor[DS_Res3].allertValue) {
+			errT = true;
+		}
+		else if (temperatureSensor[DS_Res4].cutoff == 1 && temperatureSensor[DS_Res4].member == 1 && temperatureSensor[DS_Res4].allertValue > 0 && temperatureSensor[DS_Res4].data >= temperatureSensor[DS_Res4].allertValue) {
+			errT = true;
+		}
+		if (!errT) timePauseErrT = millis() + 10000; // 10 секунд
+		else if (timePauseErrT <= millis()) { stopErr(); nameProcessStep = "Стоп по аварии T"; }
+	}
 
 	switch (processMode.step) {
 		// пришли при старте дистилляции
 		case 0: {
+			startWriteSD = true;
 			loadEepromDistillation();
 			EEPROM.begin(2048);
 			power.inPowerHigh = EEPROM.read(1397);
@@ -222,17 +255,17 @@ void distillationLoop() {
 #if defined TFT_Display
 			csOn(TFT_CS);
 			graphOutInterval = Display_out_temp;
-			//tft.fillScreen(ILI9341_BLACK);
 			tftStartForGraph();
 			displayTimeInterval = millis() + 1000;
 			DefCubOut = Display_out_temp;
 			csOff(TFT_CS);
 #endif
 			tempBigOut = 1;
-			csOn(PWM_CH1);							// открыть клапан отбора
-			power.heaterStatus = 1;					// включили нагрев
-			csOn(PWM_CH6);							// включить дополнительный ТЭН на разгон
-			power.heaterPower = power.inPowerHigh;	// установили мощность на ТЭН
+			if (pwmOut[0].member == 1) csOn(PWM_CH1);		// открыть клапан отбора
+			else if (pwmOut[1].member == 1) csOn(PWM_CH2);	// открыть клапан отбора
+			power.heaterStatus = 1;							// включили нагрев
+			csOn(PWM_CH6);									// включить дополнительный ТЭН на разгон
+			power.heaterPower = power.inPowerHigh;			// установили мощность на ТЭН
 			processMode.timeStep = 0;
 			nameProcessStep = "Нагрев куба";
 			processMode.timeStart = time(nullptr);
@@ -282,6 +315,7 @@ void distillationLoop() {
 			// ждем 30 сек.
 			if ((millis() - timePauseOff) >= 30000) {
 				csOff(PWM_CH1);		// закрыли клапан отбора
+				csOff(PWM_CH2);		// закрыли клапан отбора
 				csOff(PWM_CH3);		// закрыли клапан подачи воды
 				temperatureSensor[DS_Cube].allert = false;	// сигнализация для WEB
 				settingAlarm = false;	// выключили звуковой сигнал

@@ -3,7 +3,6 @@
 File myFile;
 
 String fileName, fileData;
-bool startWrite = false;
 byte second, minute, hour, day, month, year;
 
 void sdInit() {
@@ -77,11 +76,9 @@ void sdWriteHeader() {
 		case 0: fileData = "Алгоритм: ручной режим, только сигнализация"; break;
 		case 1: fileData = "Алгоритм: Прима - головы по жидкости, тело по пару"; break;
 		case 2: fileData = "Алгоритм: РК с отбором по пару"; break;
-		case 3: fileData = "Алгоритм: РК с отбором по жидкости 1 клапан (головы - шим, тело - уставка)"; break;
-		case 4: fileData = "Алгоритм: РК с отбором по жидкости 2 клапана (головы - шим, тело - уставка)"; break;
-		case 5: fileData = "Алгоритм: РК с отбором по жидкости 2 клапана (головы - отрыт, тело - уставка)"; break;
-		case 6: fileData = "Алгоритм: БК регулировка отбора охлаждением"; break;
-		case 7: fileData = "Алгоритм: БК регулировка отбора мощностью"; break;
+		case 3: fileData = "Алгоритм: РК с отбором по жидкости"; break;
+		case 4: fileData = "Алгоритм: БК регулировка отбора охлаждением"; break;
+		case 5: fileData = "Алгоритм: БК регулировка отбора мощностью"; break;
 		}
 		myFile.println(fileData);
 	}
@@ -90,13 +87,14 @@ void sdWriteHeader() {
 }
 
 void sdWriteLog() {
-	fileData = String(nameProcessStep) + " ";// +String(processMode.timeStep) + "сек. ";
-	if (hour < 10) fileData += "0" + String(hour) + ":";
-	else fileData += String(hour) + ":";
+
+	if (hour < 10) fileData = "0" + String(hour) + ":";
+	else fileData = String(hour) + ":";
 	if (minute < 10) fileData += "0" + String(minute) + ":";
 	else fileData += String(minute) + ":";
-	if (second < 10) fileData += "0" + String(second) + "\t";
-	else fileData += String(second) + "\t";
+	if (second < 10) fileData += "0" + String(second) + " ";
+	else fileData += String(second) + " ";
+	fileData += String(nameProcessStep) + "\t";
 
 	for (int i = 0; i < 8; i++) {
 		if (temperatureSensor[i].member != 0) fileData += String(temperatureSensor[i].name) + " = " + String(temperatureSensor[i].data) + "\t";
@@ -130,8 +128,8 @@ void logfileLoop() {
 			csOff(TFT_CS);
 
 			epoch_to_date_time();
-			if (startWrite == false) {
-				startWrite = true;
+			if (startWriteSD == true) {
+				startWriteSD = false;
 				sdWriteHeader();
 			}
 			sdWriteLog();
@@ -149,6 +147,5 @@ void logfileLoop() {
 			myFile.close();
 			csOff(SD_CS);
 		}
-		else startWrite = false;
 	}
 }

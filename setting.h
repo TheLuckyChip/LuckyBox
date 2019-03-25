@@ -9,7 +9,7 @@
 #endif
 
 #include "user_config.h"
-
+#include "pwm_out.h"
 #include <Ticker.h>
 #include <Adafruit_PWMServoDriver.h>
 #include <ESP8266WebServer.h>
@@ -150,6 +150,8 @@ extern uint16_t graphOutInterval;
 extern uint16_t scaleCount;
 extern byte tempBigOut;
 extern byte tempBigOutOld;
+extern bool reSetTemperatureStartPressure;
+//extern bool settingColumnSet;
 extern float settingBoilTube;
 extern float settingColumn;
 extern float temperatureStartPressure;
@@ -186,6 +188,7 @@ extern unsigned long stepStartTime;
 extern unsigned long wifiTimeInterval;
 extern String nameProcessStep;
 extern String commandWriteSD;
+extern bool startWriteSD;
 extern bool commandSD_en;
 extern bool CH1;
 extern bool CH2;
@@ -207,8 +210,14 @@ extern uint8_t stepNext;
 extern uint8_t answer;
 extern uint8_t timeStabilizationReflux;
 extern uint8_t timeBoilTubeSetReflux;
+// Для датчиков безопасности
+extern bool errA;
+extern bool errT;
+extern unsigned long timePauseErrA;
+extern unsigned long timePauseErrT;
 
 extern float EEPROM_float_read(int addr);
 extern void EEPROM_float_write(int addr, float val);
+extern void stopErr();
 
 #endif

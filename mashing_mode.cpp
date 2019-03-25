@@ -212,6 +212,7 @@ void mashingLoop() {
 	switch (processMode.step) {
 		// пришли при старте затирания
 		case 0: {
+			startWriteSD = true;
 			// подготовка данных для вывода на TFT
 #if defined TFT_Display
 			csOn(TFT_CS);
