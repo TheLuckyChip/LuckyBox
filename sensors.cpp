@@ -436,7 +436,9 @@ void handleProcessSensorOut() {
 	// импульсный режим на клапана
 	dataForWeb += "}}],\"valwe\":[";
 	dataForWeb += "{\"head\":{\"timeCycle\":" + String(headTimeCycle) + ",\"timeOn\":" + String(headtimeOn) + "}},";
-	dataForWeb += "{\"body\":{\"timeCycle\":" + String(bodyTimeCycle) + ",\"timeOn\":" + String(bodytimeOn) + ",\"decline\":" + String(decline);// +",\"Tmp1\":" + String(timeStabilizationReflux) + ",\"Tmp2\":" + String(timeBoilTubeSetReflux);
+	dataForWeb += "{\"headSteam\":{\"percent\":" + String(headSteamPercent) + "}},";
+	dataForWeb += "{\"body\":{\"timeCycle\":" + String(bodyTimeCycle) + ",\"timeOn\":" + String(bodytimeOn) + ",\"decline\":" + String(decline) + "}},";
+	dataForWeb += "{\"bodyPrima\":{\"percentStart\":" + String(bodyPrimaPercentStart) + ",\"percentStop\":" + String(bodyPrimaPercentStop) + ",\"decline\":" + String(bodyPrimaDecline);
 	// АЦП
 	dataForWeb += "}}],\"safety\":[";
 	for (i = 0; i < ADC_Cnt; i++) {
@@ -484,25 +486,14 @@ void handleProcessModeIn() {
 			}
 			else {
 				if (tmpAllertValue > 0 && tmpAllertValue != temperatureSensor[i].allertValueIn) {
-					//settingBoilTube = tmpAllertValue;
-					//settingColumn = temperatureSensor[i].data;
-					//pressureSensor.dataStart = pressureSensor.data;
 					reSetTemperatureStartPressure = true;
-
 					commandWriteSD = "WebSend: Смена уставки";
 					commandSD_en = true;
-
-					//settingColumnSet = true;
 				}
 				else if (tmpAllertValue == 0 && tmpAllertValue != temperatureSensor[i].allertValueIn) {
 					commandWriteSD = "WebSend: Отмена уставки";
 					commandSD_en = true;
 				}
-				/*else {
-					temperatureSensor[i].allertValue = 0;
-					//settingBoilTube = 0;
-					//settingColumnSet = true;
-				}*/
 			}
 			temperatureSensor[i].allertValueIn = tmpAllertValue;
 
@@ -569,12 +560,19 @@ void handleProcessModeIn() {
 			EEPROM.write(1499, processMode.number);
 			allertSave = true;
 		}
-		// запись в EEPROM параметров для клапанов
+		// параметры для клапанов и шарового крана
 		headTimeCycle = HTTP.arg("head[timeCycle]").toInt();
 		headtimeOn = HTTP.arg("head[timeOn]").toFloat();
 		bodyTimeCycle = HTTP.arg("body[timeCycle]").toInt();
 		bodytimeOn = HTTP.arg("body[timeOn]").toFloat();
 		decline = HTTP.arg("body[decline]").toInt();
+
+		headSteamPercent = HTTP.arg("headSteam[percent]").toInt();
+		bodyPrimaPercentStart = HTTP.arg("bodyPrima[percentStart]").toInt();
+		bodyPrimaPercentStop = HTTP.arg("bodyPrima[percentStop]").toInt();
+		bodyPrimaDecline = HTTP.arg("bodyPrima[decline]").toInt();
+
+		// запись в EEPROM параметров для клапанов и шарового крана
 		if (headTimeCycle != EEPROM.read(1477)) {
 			EEPROM.write(1477, headTimeCycle);
 			allertSave = true;
@@ -593,6 +591,23 @@ void handleProcessModeIn() {
 		}
 		if (decline != EEPROM.read(1487)) {
 			EEPROM.write(1487, decline);
+			allertSave = true;
+		}
+
+		if (headSteamPercent != EEPROM.read(1490)) {
+			EEPROM.write(1490, headSteamPercent);
+			allertSave = true;
+		}
+		if (bodyPrimaPercentStart != EEPROM.read(1491)) {
+			EEPROM.write(1491, bodyPrimaPercentStart);
+			allertSave = true;
+		}
+		if (bodyPrimaPercentStop != EEPROM.read(1492)) {
+			EEPROM.write(1492, bodyPrimaPercentStop);
+			allertSave = true;
+		}
+		if (bodyPrimaDecline != EEPROM.read(1493)) {
+			EEPROM.write(1493, bodyPrimaDecline);
 			allertSave = true;
 		}
 	}

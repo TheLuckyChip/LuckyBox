@@ -2222,38 +2222,137 @@ $(function () {
 			let head_devices = '<div class="row-xs clearfix">' +
 				'<div class="col-xs-4 col-xs-offset-0 col-sm-3 col-sm-offset-3 text-center text-middle text-primary text-nowrap">Период сек.</div>' +
 				'<div class="col-xs-4 col-sm-3 text-center text-middle text-primary text-nowrap">Открыт %</div>'+
-				'<div id="reflux_devices_out_header" class="col-xs-4 col-sm-3 text-center text-middle text-primary text-nowrap">%&#8595;</div></div>';
+				'<div id="reflux_devices_out_header_" class="col-xs-4 col-sm-3 text-center text-middle text-primary text-nowrap">%&#8595;</div></div>';
+			let head_devices_steam = '<div class="row-xs clearfix">' +
+				'<div class="col-xs-4 col-xs-offset-0 col-sm-3 col-sm-offset-3 text-center text-middle text-primary text-nowrap"></div>' +
+				'<div class="col-xs-4 col-sm-3 text-center text-middle text-primary text-nowrap">Открыт %</div>'+
+				'<div id="reflux_devices_out_header_" class="col-xs-4 col-sm-3 text-center text-middle text-primary text-nowrap"></div></div>';
+			let body_devices = '<div class="row-xs clearfix">' +
+				'<div class="col-xs-4 col-xs-offset-0 col-sm-3 col-sm-offset-3 text-center text-middle text-primary text-nowrap">Открыт %</div>' +
+				'<div class="col-xs-4 col-sm-3 text-center text-middle text-primary text-nowrap">Закрыт %</div>'+
+				'<div id="reflux_devices_out_header_" class="col-xs-4 col-sm-3 text-center text-middle text-primary text-nowrap">%&#8595;</div></div>';
 			let tpl_devices_out_body = '';
 			if(flagout){
-				let visible_reflux_out = ((refluxProcess["number"] === 3 || refluxProcess["number"] === 1) ? "" : " hidden");
-				let val_head_cycle = (globalSensorsJson.hasOwnProperty("valwe") ? globalSensorsJson["valwe"][0]["head"]["timeCycle"] : 5);
-				let tpl_head_cycle = returnTplHtml([{id: "reflux_head_cycle", value: val_head_cycle, min: '5', max: '30', step: '1'}], deltaTempl);
-				let val_head_time = (globalSensorsJson.hasOwnProperty("valwe") ? globalSensorsJson["valwe"][0]["head"]["timeOn"] : 1);
-				let tpl_head_time = returnTplHtml([{id: "reflux_head_time", value: val_head_time, min: '1', max: '100', step: '0.5'}], deltaTempl);
-				tpl_devices_out_body += '<div id="reflux_devices_out" class="row' + visible_reflux_out +'"><div class="col-xs-12">' +
-					'<div id="reflux_devices_head" class="row row-striped">' +
+				let valwe_head = {};
+				let valwe_headSteam = {};
+				let valwe_body = {};
+				let valwe_bodyPrima = {};
+				if(globalSensorsJson.hasOwnProperty("valwe")){
+					$.each(globalSensorsJson["valwe"], function (i, e) {
+						// console.log(i,e);
+						let valwe_key = Object.keys(e).shift();
+						switch(valwe_key){
+							case "head":
+								valwe_head = e;
+								break;
+							case "headSteam":
+								valwe_headSteam = e;
+								break;
+							case "body":
+								valwe_body = e;
+								break;
+							case "bodyPrima":
+								valwe_bodyPrima = e;
+								break;
+						}
+					})
+				}
+
+
+				let visible_reflux_out = ((refluxProcess["number"] === 1 || refluxProcess["number"] === 2 || refluxProcess["number"] === 3) ? "" : " hidden");
+				//головы жижа
+				let val_head_cycle_rk = (valwe_head.hasOwnProperty("head") ? valwe_head["head"]["timeCycle"] : 5);
+				let tpl_head_cycle_rk = returnTplHtml([{id: "reflux_head_cycle_rk", value: val_head_cycle_rk, min: '5', max: '30', step: '1'}], deltaTempl);
+				let val_head_time_rk = (valwe_head.hasOwnProperty("head") ? valwe_head["head"]["timeOn"] : 1);
+				let tpl_head_time_rk = returnTplHtml([{id: "reflux_head_time_rk", value: val_head_time_rk, min: '1', max: '100', step: '0.5'}], deltaTempl);
+				//головы пар
+				let val_head_steam = (valwe_headSteam.hasOwnProperty("headSteam") ? valwe_headSteam["headSteam"]["percent"] : 0);
+				let tpl_head_steam = returnTplHtml([{id: "reflux_head_steam", value: val_head_steam, min: '0', max: '100', step: '1'}], deltaTempl);
+				//головы прима (как у жижи, те же данные)
+				let val_head_cycle_prima = (valwe_head.hasOwnProperty("head") ? valwe_head["head"]["timeCycle"] : 5);
+				let tpl_head_cycle_prima = returnTplHtml([{id: "reflux_head_cycle_prima", value: val_head_cycle_prima, min: '5', max: '30', step: '1'}], deltaTempl);
+				let val_head_time_prima = (valwe_head.hasOwnProperty("head") ? valwe_head["head"]["timeOn"] : 1);
+				let tpl_head_time_prima = returnTplHtml([{id: "reflux_head_time_prima", value: val_head_time_prima, min: '1', max: '100', step: '0.5'}], deltaTempl);
+
+				tpl_devices_out_body += '<div id="reflux_devices_out" class="row' + visible_reflux_out +'">' +
+					'<div class="col-xs-12">';
+				//тпл головы жижа
+				tpl_devices_out_body +=
+					'<div id="reflux_devices_head_rk" class="row row-striped">' +
 					head_devices +
 					'<div class="pt-10 pb-10 clearfix">' +
 					'<div class="col-xs-12 col-sm-3 text-middle text-center-xs text-strong">Клапан отбора голов</div>' +
-					'<div class="col-xs-4 col-xs-offset-1_ col-sm-3 col-sm-offset-0_">' + tpl_head_cycle + '</div>' +
-					'<div class="col-xs-4 col-xs-offset-1_ col-sm-3 col-sm-offset-1_">' + tpl_head_time + '</div>' +
+					'<div class="col-xs-4 col-sm-3">' + tpl_head_cycle_rk + '</div>' +
+					'<div class="col-xs-4 col-sm-3">' + tpl_head_time_rk + '</div>' +
+					'</div></div>';
+				//тпл головы пар
+				tpl_devices_out_body +=
+					'<div id="reflux_devices_head_steam" class="row row-striped">' +
+					head_devices_steam +
+					'<div class="pt-10 pb-10 clearfix">' +
+					'<div class="col-xs-12 col-sm-3 text-middle text-center-xs text-strong">Клапан отбора голов</div>' +
+					'<div class="col-xs-4 col-sm-3"></div>' +
+					'<div class="col-xs-4 col-sm-3">' + tpl_head_steam + '</div>' +
+					'</div></div>';
+				//тпл головы жижа
+				tpl_devices_out_body +=
+					'<div id="reflux_devices_head_prima" class="row row-striped">' +
+					head_devices +
+					'<div class="pt-10 pb-10 clearfix">' +
+					'<div class="col-xs-12 col-sm-3 text-middle text-center-xs text-strong">Клапан отбора голов</div>' +
+					'<div class="col-xs-4 col-sm-3">' + tpl_head_cycle_prima + '</div>' +
+					'<div class="col-xs-4 col-sm-3">' + tpl_head_time_prima + '</div>' +
 					'</div></div>';
 
-				let val_body_cycle = (globalSensorsJson.hasOwnProperty("valwe") ? globalSensorsJson["valwe"][1]["body"]["timeCycle"] : 5);
-				let tpl_body_cycle = returnTplHtml([{id: "reflux_body_cycle", value: val_body_cycle, min: '5', max: '30', step: '1'}], deltaTempl);
-				let val_body_time = (globalSensorsJson.hasOwnProperty("valwe") ? globalSensorsJson["valwe"][1]["body"]["timeOn"] : 0);
-				let tpl_body_time = returnTplHtml([{id: "reflux_body_time", value: val_body_time, min: '0', max: '100', step: '0.5'}], deltaTempl);
-				let val_body_decline = (globalSensorsJson.hasOwnProperty("valwe") ? globalSensorsJson["valwe"][1]["body"]["decline"] : 0);
-				let tpl_body_decline = returnTplHtml([{id: "reflux_body_decline", value: val_body_decline, min: '0', max: '30', step: '1'}], deltaTempl);
-
-				tpl_devices_out_body += '<div id="reflux_devices_body" class="row row-striped">' +
+				//тело жижа
+				let val_body_cycle_rk = (valwe_body.hasOwnProperty("body") ? valwe_body["body"]["timeCycle"] : 5);
+				let tpl_body_cycle_rk = returnTplHtml([{id: "reflux_body_cycle_rk", value: val_body_cycle_rk, min: '5', max: '30', step: '1'}], deltaTempl);
+				let val_body_time_rk = (valwe_body.hasOwnProperty("body") ? valwe_body["body"]["timeOn"] : 0);
+				let tpl_body_time_rk = returnTplHtml([{id: "reflux_body_time_rk", value: val_body_time_rk, min: '0', max: '100', step: '0.5'}], deltaTempl);
+				let val_body_decline_rk = (valwe_body.hasOwnProperty("body") ? valwe_body["body"]["decline"] : 0);
+				let tpl_body_decline_rk = returnTplHtml([{id: "reflux_body_decline_rk", value: val_body_decline_rk, min: '0', max: '30', step: '1'}], deltaTempl);
+				//тело пар (как у примы, те же данные)
+				let val_body_start_steam = (valwe_bodyPrima.hasOwnProperty("bodyPrima") ? valwe_bodyPrima["bodyPrima"]["percentStart"] : 0);
+				let tpl_body_start_steam = returnTplHtml([{id: "reflux_body_start_steam", value: val_body_start_steam, min: '0', max: '100', step: '1'}], deltaTempl);
+				let val_body_stop_steam = (valwe_bodyPrima.hasOwnProperty("bodyPrima") ? valwe_bodyPrima["bodyPrima"]["percentStart"] : 0);
+				let tpl_body_stop_steam = returnTplHtml([{id: "reflux_body_stop_steam", value: val_body_stop_steam, min: '0', max: '100', step: '1'}], deltaTempl);
+				let val_body_decline_steam = (valwe_bodyPrima.hasOwnProperty("bodyPrima") ? valwe_bodyPrima["bodyPrima"]["decline"] : 0);
+				let tpl_body_decline_steam = returnTplHtml([{id: "reflux_body_decline_steam", value: val_body_decline_steam, min: '0', max: '30', step: '1'}], deltaTempl);
+				//тело прима
+				let val_body_start_prima = (valwe_bodyPrima.hasOwnProperty("bodyPrima") ? valwe_bodyPrima["bodyPrima"]["percentStart"] : 0);
+				let tpl_body_start_prima = returnTplHtml([{id: "reflux_body_start_prima", value: val_body_start_prima, min: '0', max: '100', step: '1'}], deltaTempl);
+				let val_body_stop_prima = (valwe_bodyPrima.hasOwnProperty("bodyPrima") ? valwe_bodyPrima["bodyPrima"]["percentStart"] : 0);
+				let tpl_body_stop_prima = returnTplHtml([{id: "reflux_body_stop_prima", value: val_body_stop_prima, min: '0', max: '100', step: '1'}], deltaTempl);
+				let val_body_decline_prima = (valwe_bodyPrima.hasOwnProperty("bodyPrima") ? valwe_bodyPrima["bodyPrima"]["decline"] : 0);
+				let tpl_body_decline_prima = returnTplHtml([{id: "reflux_body_decline_prima", value: val_body_decline_prima, min: '0', max: '30', step: '1'}], deltaTempl);
+				//тпл тело жижа
+				tpl_devices_out_body += '<div id="reflux_devices_body_rk" class="row row-striped">' +
 					'<div class="pt-10 pb-10 clearfix">' +
 					'<div class="col-xs-12 col-sm-3 pxs-10 text-middle text-center-xs text-strong">Клапан отбора тела</div>' +
-					'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_cycle + '</div>' +
-					'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_time + '</div>' +
-					'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_decline + '</div>' +
-					'</div></div>'+
+					'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_cycle_rk + '</div>' +
+					'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_time_rk + '</div>' +
+					'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_decline_rk + '</div>' +
 					'</div></div>';
+				//тпл тело пар
+				tpl_devices_out_body += '<div id="reflux_devices_body_steam" class="row row-striped">' +
+					body_devices +
+					'<div class="pt-10 pb-10 clearfix">' +
+					'<div class="col-xs-12 col-sm-3 pxs-10 text-middle text-center-xs text-strong">Клапан отбора тела</div>' +
+					'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_start_steam + '</div>' +
+					'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_stop_steam + '</div>' +
+					'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_decline_steam + '</div>' +
+					'</div></div>';
+				//тпл тело прима
+				tpl_devices_out_body += '<div id="reflux_devices_body_prima" class="row row-striped">' +
+					body_devices +
+					'<div class="pt-10 pb-10 clearfix">' +
+					'<div class="col-xs-12 col-sm-3 pxs-10 text-middle text-center-xs text-strong">Клапан отбора тела</div>' +
+					'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_start_prima + '</div>' +
+					'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_stop_prima + '</div>' +
+					'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_decline_prima + '</div>' +
+					'</div></div>';
+
+				tpl_devices_out_body += '</div></div>';
 
 				tpl_devices_body = tpl_devices_out_body + tpl_devices_body;
 			}
@@ -2292,17 +2391,35 @@ $(function () {
 		refluxProcess["number"] = algorithm_val;
 		if($("#reflux_devices_out").length > 0) {
 			console.log("reflux_devices_out", algorithm_val);
-			if (algorithm_val === 3 || algorithm_val === 1) {
+			if (algorithm_val === 1 || algorithm_val === 2 || algorithm_val === 3) {
 				$("#reflux_devices_out").removeClass("hidden");
 			}else{
 				$("#reflux_devices_out").addClass("hidden");
 			}
 			if (algorithm_val === 1) {
-				$("#reflux_devices_body").addClass("hidden");
-				$("#reflux_devices_out_header").addClass("hidden");
-			}else{
-				$("#reflux_devices_body").removeClass("hidden");
-				$("#reflux_devices_out_header").removeClass("hidden");
+				$("#reflux_devices_head_rk").addClass("hidden");
+				$("#reflux_devices_body_rk").addClass("hidden");
+				$("#reflux_devices_head_steam").addClass("hidden");
+				$("#reflux_devices_body_steam").addClass("hidden");
+				$("#reflux_devices_head_prima").removeClass("hidden");
+				$("#reflux_devices_body_prima").removeClass("hidden");
+				// $("#reflux_devices_out_header").addClass("hidden");
+			}else if (algorithm_val === 2){
+				$("#reflux_devices_head_rk").addClass("hidden");
+				$("#reflux_devices_body_rk").addClass("hidden");
+				$("#reflux_devices_head_steam").removeClass("hidden");
+				$("#reflux_devices_body_steam").removeClass("hidden");
+				$("#reflux_devices_head_prima").addClass("hidden");
+				$("#reflux_devices_body_prima").addClass("hidden");
+				// $("#reflux_devices_out_header").removeClass("hidden");
+			}else if (algorithm_val === 3){
+				$("#reflux_devices_head_rk").removeClass("hidden");
+				$("#reflux_devices_body_rk").removeClass("hidden");
+				$("#reflux_devices_head_steam").addClass("hidden");
+				$("#reflux_devices_body_steam").addClass("hidden");
+				$("#reflux_devices_head_prima").addClass("hidden");
+				$("#reflux_devices_body_prima").addClass("hidden");
+				// $("#reflux_devices_out_header").removeClass("hidden");
 			}
 		}
 	});
@@ -2433,7 +2550,9 @@ $(function () {
 				"t7": {"allertValue": 0},
 				"t8": {"allertValue": 0},
 				"head":{"timeCycle": 0,"timeOn": 0},
+				"headSteam":{"percent":0},
 				"body":{"timeCycle": 0,"timeOn": 0,"decline": 0},
+				"bodyPrima":{"percentStart":0,"percentStop":0,"decline":0},
 				"powerHigh": 0,
 				"powerLower": 0,
 				"stepNext": 0
@@ -2468,45 +2587,152 @@ $(function () {
 					refluxSendData[sensor_key]["allertValue"] = e["allertValue"] = reflux_cutoff.val();
 				}
 			});
-			let reflux_head_cycle = $("#reflux_head_cycle");
-			let reflux_head_time = $("#reflux_head_time");
-			let reflux_body_cycle = $("#reflux_body_cycle");
-			let reflux_body_time = $("#reflux_body_time");
-			let reflux_body_decline = $("#reflux_body_decline");
-			if (reflux_head_cycle.length) {
-				let val_reflux_head_cycle = Number(reflux_head_cycle.val());
-				if (Number(globalSensorsJson["valwe"][0]["head"]["timeCycle"]) !== val_reflux_head_cycle) {
-					flagSendProcess = true;
+			//клапана
+			let valwe_head = {};
+			let valwe_headSteam = {};
+			let valwe_body = {};
+			let valwe_bodyPrima = {};
+			if(globalSensorsJson.hasOwnProperty("valwe")) {
+				$.each(globalSensorsJson["valwe"], function (i, e) {
+					// console.log(i, e);
+					let valwe_key = Object.keys(e).shift();
+					switch (valwe_key) {
+						case "head":
+							valwe_head = e;
+							break;
+						case "headSteam":
+							valwe_headSteam = e;
+							break;
+						case "body":
+							valwe_body = e;
+							break;
+						case "bodyPrima":
+							valwe_bodyPrima = e;
+							break;
+					}
+				});
+
+				//прима
+				if (Number(refluxSendData["process"]["number"]) === 1) {
+					let reflux_head_cycle_prima = $("#reflux_head_cycle_prima");
+					let reflux_head_time_prima = $("#reflux_head_time_prima");
+					let reflux_body_start_prima = $("#reflux_body_start_prima");
+					let reflux_body_stop_prima = $("#reflux_body_stop_prima");
+					let reflux_body_decline_prima = $("#reflux_body_decline_prima");
+					if (reflux_head_cycle_prima.length) {
+						let val_reflux_head_cycle_prima = Number(reflux_head_cycle_prima.val());
+						if (Number(valwe_head["head"]["timeCycle"]) !== val_reflux_head_cycle_prima) {
+							flagSendProcess = true;
+						}
+						refluxSendData["head"]["timeCycle"] = val_reflux_head_cycle_prima;
+					}
+					if (reflux_head_time_prima.length) {
+						let val_reflux_head_time_prima = Number(reflux_head_time_prima.val());
+						if (Number(valwe_head["head"]["timeOn"]) !== val_reflux_head_time_prima) {
+							flagSendProcess = true;
+						}
+						refluxSendData["head"]["timeOn"] = val_reflux_head_time_prima;
+					}
+					if (reflux_body_start_prima.length) {
+						let val_reflux_body_start_prima = Number(reflux_body_start_prima.val());
+						if (Number(valwe_bodyPrima["bodyPrima"]["percentStart"]) !== val_reflux_body_start_prima) {
+							flagSendProcess = true;
+						}
+						refluxSendData["bodyPrima"]["percentStart"] = val_reflux_body_start_prima;
+					}
+					if (reflux_body_stop_prima.length) {
+						let val_reflux_body_stop_prima = Number(reflux_body_stop_prima.val());
+						if (Number(valwe_bodyPrima["bodyPrima"]["percentStop"]) !== val_reflux_body_stop_prima) {
+							flagSendProcess = true;
+						}
+						refluxSendData["bodyPrima"]["percentStop"] = val_reflux_body_stop_prima;
+					}
+					if (reflux_body_decline_prima.length) {
+						let val_reflux_body_decline_prima = Number(reflux_body_decline_prima.val());
+						if (Number(refluxSendData["bodyPrima"]["decline"]) !== val_reflux_body_decline_prima) {
+							flagSendProcess = true;
+						}
+						refluxSendData["bodyPrima"]["decline"] = val_reflux_body_decline_prima;
+					}
 				}
-				refluxSendData["head"]["timeCycle"] = val_reflux_head_cycle;
-			}
-			if (reflux_head_time.length) {
-				let val_reflux_head_time = Number(reflux_head_time.val());
-				if (Number(globalSensorsJson["valwe"][0]["head"]["timeOn"]) !== val_reflux_head_time) {
-					flagSendProcess = true;
+				//пар
+				if (Number(refluxSendData["process"]["number"]) === 2) {
+					let reflux_head_steam = $("#reflux_head_steam");
+					let reflux_body_start_steam = $("#reflux_body_start_steam");
+					let reflux_body_stop_steam = $("#reflux_body_stop_steam");
+					let reflux_body_decline_steam = $("#reflux_body_decline_steam");
+					if (reflux_head_steam.length) {
+						let val_reflux_head_steam = Number(reflux_head_steam.val());
+						if (Number(valwe_headSteam["headSteam"]["percent"]) !== val_reflux_head_steam) {
+							flagSendProcess = true;
+						}
+						refluxSendData["headSteam"]["percent"] = val_reflux_head_steam;
+					}
+					if (reflux_body_start_steam.length) {
+						let val_reflux_body_start_steam = Number(reflux_body_start_steam.val());
+						if (Number(valwe_bodyPrima["bodyPrima"]["percentStart"]) !== val_reflux_body_start_steam) {
+							flagSendProcess = true;
+						}
+						refluxSendData["bodyPrima"]["percentStart"] = val_reflux_body_start_steam;
+					}
+					if (reflux_body_stop_steam.length) {
+						let val_reflux_body_stop_steam = Number(reflux_body_stop_steam.val());
+						if (Number(valwe_bodyPrima["bodyPrima"]["percentStop"]) !== val_reflux_body_stop_steam) {
+							flagSendProcess = true;
+						}
+						refluxSendData["bodyPrima"]["percentStop"] = val_reflux_body_stop_steam;
+					}
+					if (reflux_body_decline_steam.length) {
+						let val_reflux_body_decline_steam = Number(reflux_body_decline_steam.val());
+						if (Number(refluxSendData["bodyPrima"]["decline"]) !== val_reflux_body_decline_steam) {
+							flagSendProcess = true;
+						}
+						refluxSendData["bodyPrima"]["decline"] = val_reflux_body_decline_steam;
+					}
 				}
-				refluxSendData["head"]["timeOn"] = val_reflux_head_time;
-			}
-			if (reflux_body_cycle.length) {
-				let val_reflux_body_cycle = Number(reflux_body_cycle.val());
-				if (Number(globalSensorsJson["valwe"][1]["body"]["timeCycle"]) !== val_reflux_body_cycle) {
-					flagSendProcess = true;
+				//жижа
+				if (Number(refluxSendData["process"]["number"]) === 3) {
+					let reflux_head_cycle_rk = $("#reflux_head_cycle_rk");
+					let reflux_head_time_rk = $("#reflux_head_time_rk");
+					let reflux_body_cycle_rk = $("#reflux_body_cycle_rk");
+					let reflux_body_time_rk = $("#reflux_body_time_rk");
+					let reflux_body_decline_rk = $("#reflux_body_decline_rk");
+					if (reflux_head_cycle_rk.length) {
+						let val_reflux_head_cycle_rk = Number(reflux_head_cycle_rk.val());
+						if (Number(valwe_head["head"]["timeCycle"]) !== val_reflux_head_cycle_rk) {
+							flagSendProcess = true;
+						}
+						refluxSendData["head"]["timeCycle"] = val_reflux_head_cycle_rk;
+					}
+					if (reflux_head_time_rk.length) {
+						let val_reflux_head_time_rk = Number(reflux_head_time_rk.val());
+						if (Number(valwe_head["head"]["timeOn"]) !== val_reflux_head_time_rk) {
+							flagSendProcess = true;
+						}
+						refluxSendData["head"]["timeOn"] = val_reflux_head_time_rk;
+					}
+					if (reflux_body_cycle_rk.length) {
+						let val_reflux_body_cycle_rk = Number(reflux_body_cycle_rk.val());
+						if (Number(valwe_body["body"]["timeCycle"]) !== val_reflux_body_cycle_rk) {
+							flagSendProcess = true;
+						}
+						refluxSendData["body"]["timeCycle"] = val_reflux_body_cycle_rk;
+					}
+					if (reflux_body_time_rk.length) {
+						let val_reflux_body_time_rk = Number(reflux_body_time_rk.val());
+						if (Number(valwe_body["body"]["timeOn"]) !== val_reflux_body_time_rk) {
+							flagSendProcess = true;
+						}
+						refluxSendData["body"]["timeOn"] = val_reflux_body_time_rk;
+					}
+					if (reflux_body_decline_rk.length) {
+						let val_reflux_body_decline_rk = Number(reflux_body_decline_rk.val());
+						if (Number(valwe_body["body"]["decline"]) !== val_reflux_body_decline_rk) {
+							flagSendProcess = true;
+						}
+						refluxSendData["body"]["decline"] = val_reflux_body_decline_rk;
+					}
 				}
-				refluxSendData["body"]["timeCycle"] = val_reflux_body_cycle;
-			}
-			if (reflux_body_time.length) {
-				let val_reflux_body_time = Number(reflux_body_time.val());
-				if (Number(globalSensorsJson["valwe"][1]["body"]["timeOn"]) !== val_reflux_body_time) {
-					flagSendProcess = true;
-				}
-				refluxSendData["body"]["timeOn"] = val_reflux_body_time;
-			}
-			if (reflux_body_decline.length) {
-				let val_reflux_body_decline = Number(reflux_body_decline.val());
-				if (Number(globalSensorsJson["valwe"][1]["body"]["decline"]) !== val_reflux_body_decline) {
-					flagSendProcess = true;
-				}
-				refluxSendData["body"]["decline"] = val_reflux_body_decline;
 			}
 			if(stepRefluxNext){
 				flagSendProcess = true;

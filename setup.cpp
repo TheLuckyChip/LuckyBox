@@ -34,6 +34,8 @@ void setup()
 	pwm = Adafruit_PWMServoDriver();
 	pwm.begin();
 	pwm.setPWMFreq(1000);
+	// Закрыли отбор по пару
+	setPWM(PWM_CH5, 0, 10);
 	csOff(TFT_RES_PRG);
 	csOff(SIREN_OUT);
 	csOff(SD_CS);
@@ -53,7 +55,7 @@ void setup()
 	csOff(PWM_CH2);
 	csOff(PWM_CH3);
 	csOff(PWM_CH4);
-	csOff(PWM_CH5);
+	//csOff(PWM_CH5);
 	csOff(PWM_CH6);
 	csOff(PWM_CH7);
 	//csOn(PWM_CH8);

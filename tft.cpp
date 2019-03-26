@@ -720,10 +720,10 @@ void tftStopLoop() {
 		}
 		else if (touchArea == 22) { // Да - останавливаем процесс и выходим в меню
 			if (processMode.allow == 6) {
-				CH1 = false; csOff(PWM_CH1);
-				CH2 = false; csOff(PWM_CH2);
-				CH3 = false; csOff(PWM_CH3);
-				CH4 = false; csOff(PWM_CH4);
+				CH1 = false;
+				CH2 = false;
+				CH3 = false;
+				CH4 = false;
 			}
 			if (processMode.allow < 4) {
 				commandWriteSD = "TouchSend: Стоп";
@@ -733,6 +733,13 @@ void tftStopLoop() {
 			processMode.allow = 0;
 			touchArea = 0;
 			touchScreen = 0;
+			// Закрыли отбор по пару
+			//setPWM(PWM_CH5, 0, 10);
+			//settingAlarm = false;
+			//csOff(PWM_CH1);
+			//csOff(PWM_CH2);
+			//csOff(PWM_CH3);
+			//csOff(PWM_CH4);
 		}
 		yield();
 	}
@@ -779,6 +786,8 @@ void tftMenuLoop() {
 		csOff(PWM_CH3);
 		csOff(PWM_CH4);
 		csOff(PWM_CH6);		// выключить дополнительный ТЭН на разгон
+		// Закрыли отбор по пару
+		setPWM(PWM_CH5, 0, 10);
 	}
 #if defined TFT_Display
 	// processMode.num = 0 вывод экрана, processMode.num = 1 ждем нажатия

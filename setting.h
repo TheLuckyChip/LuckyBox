@@ -111,8 +111,7 @@ extern ESP8266WebServer HTTP;
 
 extern PID myPID;
 
-// Для файловой системы
-//extern fs::File fsUploadFile;
+extern uint16_t percentCorrectSquare[];
 
 extern String curVersion;
 extern uint16_t versionForWeb;
@@ -204,6 +203,11 @@ extern uint8_t bodyTimeCycle;
 extern float bodytimeOn;
 extern uint8_t decline;
 extern unsigned long bodyTimeOffCount;
+// для управления шаровым краном
+extern uint8_t headSteamPercent;        // % открытия шарового крана на отборе голов по пару
+extern uint8_t bodyPrimaPercentStart;	// % открытия шарового крана в начале отбора тела
+extern uint8_t bodyPrimaPercentStop;	// % открытия шарового крана в конце отбора тела
+extern uint8_t bodyPrimaDecline;		// % уменьшения открытия шарового крана по старт/стопу
 // переход на следующий шаг
 extern uint8_t stepNext;
 // подтверждение обмена в web
@@ -211,6 +215,7 @@ extern uint8_t answer;
 extern uint8_t timeStabilizationReflux;
 extern uint8_t timeBoilTubeSetReflux;
 // Для датчиков безопасности
+extern uint8_t numCrashStop;
 extern bool errA;
 extern bool errT;
 extern unsigned long timePauseErrA;
@@ -218,6 +223,7 @@ extern unsigned long timePauseErrT;
 
 extern float EEPROM_float_read(int addr);
 extern void EEPROM_float_write(int addr, float val);
-extern void stopErr();
+extern void stop_Err();
+void check_Err();
 
 #endif

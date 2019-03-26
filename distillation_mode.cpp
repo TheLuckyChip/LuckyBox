@@ -203,38 +203,26 @@ void distillationLoop() {
 	else power.heaterPower = 0;
 
 	if (processMode.number > 0) {
-		// датчики безопасности в каналах АЦП
-		errA = false;
-		if (adcIn[0].member == 1 && adcIn[0].allert == true) { settingAlarm = true; errA = true; }
-		else if (adcIn[1].member == 1 && adcIn[1].allert == true) { settingAlarm = true; errA = true; }
-		else if (adcIn[2].member == 1 && adcIn[2].allert == true) settingAlarm = true;
-		else if (adcIn[3].member == 1 && adcIn[3].allert == true) settingAlarm = true;
-		else if (timeAllertInterval < millis()) settingAlarm = false;
-		if (!errA) timePauseErrA = millis() + 10000; // 10 секунд
-		else if (timePauseErrA <= millis()) { stopErr(); nameProcessStep = "Стоп по аварии ADC"; }
+		// Пищалка для WEB и самой автоматики
+		if (timeAllertInterval > millis()) settingAlarm = true;
+		else settingAlarm = false;
 
-		// датчики безопасности по температурным датчикам кроме Т куба и Т царги
-		errT = false;
-		if (temperatureSensor[DS_Out].cutoff == 1 && temperatureSensor[DS_Out].member == 1 && temperatureSensor[DS_Out].allertValue > 0 && temperatureSensor[DS_Out].data >= temperatureSensor[DS_Out].allertValue) {
-			errT = true;
+		// Проверка датчиков безопасности
+		if (processMode.step != 7 && !errA && !errT) check_Err();
+		if (timePauseErrA <= millis()) {
+			errA = false; check_Err();
+			if (errA) {
+				stop_Err();
+				nameProcessStep = "Стоп по аварии ADC > " + String(adcIn[numCrashStop].name);
+			}
 		}
-		else if (temperatureSensor[DS_Def].cutoff == 1 && temperatureSensor[DS_Def].member == 1 && temperatureSensor[DS_Def].allertValue > 0 && temperatureSensor[DS_Def].data >= temperatureSensor[DS_Def].allertValue) {
-			errT = true;
+		if (timePauseErrT <= millis()) {
+			errT = false; check_Err();
+			if (errT) {
+				stop_Err();
+				nameProcessStep = "Стоп по аварии T > " + String(temperatureSensor[numCrashStop].name);
+			}
 		}
-		else if (temperatureSensor[DS_Res1].cutoff == 1 && temperatureSensor[DS_Res1].member == 1 && temperatureSensor[DS_Res1].allertValue > 0 && temperatureSensor[DS_Res1].data >= temperatureSensor[DS_Res1].allertValue) {
-			errT = true;
-		}
-		else if (temperatureSensor[DS_Res2].cutoff == 1 && temperatureSensor[DS_Res2].member == 1 && temperatureSensor[DS_Res2].allertValue > 0 && temperatureSensor[DS_Res2].data >= temperatureSensor[DS_Res2].allertValue) {
-			errT = true;
-		}
-		else if (temperatureSensor[DS_Res3].cutoff == 1 && temperatureSensor[DS_Res3].member == 1 && temperatureSensor[DS_Res3].allertValue > 0 && temperatureSensor[DS_Res3].data >= temperatureSensor[DS_Res3].allertValue) {
-			errT = true;
-		}
-		else if (temperatureSensor[DS_Res4].cutoff == 1 && temperatureSensor[DS_Res4].member == 1 && temperatureSensor[DS_Res4].allertValue > 0 && temperatureSensor[DS_Res4].data >= temperatureSensor[DS_Res4].allertValue) {
-			errT = true;
-		}
-		if (!errT) timePauseErrT = millis() + 10000; // 10 секунд
-		else if (timePauseErrT <= millis()) { stopErr(); nameProcessStep = "Стоп по аварии T"; }
 	}
 
 	switch (processMode.step) {
@@ -262,7 +250,7 @@ void distillationLoop() {
 #endif
 			tempBigOut = 1;
 			if (pwmOut[0].member == 1) csOn(PWM_CH1);		// открыть клапан отбора
-			else if (pwmOut[1].member == 1) csOn(PWM_CH2);	// открыть клапан отбора
+			if (pwmOut[1].member == 1) csOn(PWM_CH2);		// открыть клапан отбора
 			power.heaterStatus = 1;							// включили нагрев
 			csOn(PWM_CH6);									// включить дополнительный ТЭН на разгон
 			power.heaterPower = power.inPowerHigh;			// установили мощность на ТЭН
@@ -301,14 +289,15 @@ void distillationLoop() {
 				power.heaterPower = 0;						// установили мощность 0%
 				timePauseOff = millis();					// обнулим счетчик времени для зв.сигнала
 				temperatureSensor[DS_Cube].allert = true;	// сигнализация для WEB
+				timeAllertInterval = millis() + 10000;		// установим счетчик времени для зв.сигнала
 				settingAlarm = true;						// подали звуковой сигнал
 				processMode.timeStep = 0;
 				nameProcessStep = "Процесс закончен";
 				processMode.step = 4;						// перешли на следующий шаг алгоритма
 			}
 			// если сработал датчик уровня жидкости подаем звуковой сигнал
-			else if (adcIn[0].allert == true) settingAlarm = true;	// подали звуковой сигнал
-			else settingAlarm = false;								// выключили звуковой сигнал
+			//else if (adcIn[0].allert == true) settingAlarm = true;	// подали звуковой сигнал
+			//else settingAlarm = false;								// выключили звуковой сигнал
 			break;
 		}
 		case 4: {
