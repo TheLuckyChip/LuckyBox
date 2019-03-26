@@ -2223,6 +2223,10 @@ $(function () {
 				'<div class="col-xs-4 col-xs-offset-0 col-sm-3 col-sm-offset-3 text-center text-middle text-primary text-nowrap">Период сек.</div>' +
 				'<div class="col-xs-4 col-sm-3 text-center text-middle text-primary text-nowrap">Открыт %</div>'+
 				'<div id="reflux_devices_out_header_" class="col-xs-4 col-sm-3 text-center text-middle text-primary text-nowrap">%&#8595;</div></div>';
+			let head_devices_prima = '<div class="row-xs clearfix">' +
+				'<div class="col-xs-4 col-xs-offset-0 col-sm-3 col-sm-offset-3 text-center text-middle text-primary text-nowrap">Период сек.</div>' +
+				'<div class="col-xs-4 col-sm-3 text-center text-middle text-primary text-nowrap">Открыт %</div>'+
+				'<div id="reflux_devices_out_header_" class="col-xs-4 col-sm-3 text-center text-middle text-primary text-nowrap"></div></div>';
 			let head_devices_steam = '<div class="row-xs clearfix">' +
 				'<div class="col-xs-4 col-xs-offset-0 col-sm-3 col-sm-offset-3 text-center text-middle text-primary text-nowrap"></div>' +
 				'<div class="col-xs-4 col-sm-3 text-center text-middle text-primary text-nowrap">Открыт %</div>'+
@@ -2290,14 +2294,14 @@ $(function () {
 					'<div id="reflux_devices_head_steam" class="row row-striped">' +
 					head_devices_steam +
 					'<div class="pt-10 pb-10 clearfix">' +
-					'<div class="col-xs-12 col-sm-3 text-middle text-center-xs text-strong">Клапан отбора голов</div>' +
+					'<div class="col-xs-12 col-sm-3 text-middle text-center-xs text-strong">Кран отбора голов</div>' +
 					'<div class="col-xs-4 col-sm-3"></div>' +
 					'<div class="col-xs-4 col-sm-3">' + tpl_head_steam + '</div>' +
 					'</div></div>';
-				//тпл головы жижа
+				//тпл головы прима
 				tpl_devices_out_body +=
 					'<div id="reflux_devices_head_prima" class="row row-striped">' +
-					head_devices +
+					head_devices_prima +
 					'<div class="pt-10 pb-10 clearfix">' +
 					'<div class="col-xs-12 col-sm-3 text-middle text-center-xs text-strong">Клапан отбора голов</div>' +
 					'<div class="col-xs-4 col-sm-3">' + tpl_head_cycle_prima + '</div>' +
@@ -2314,14 +2318,14 @@ $(function () {
 				//тело пар (как у примы, те же данные)
 				let val_body_start_steam = (valwe_bodyPrima.hasOwnProperty("bodyPrima") ? valwe_bodyPrima["bodyPrima"]["percentStart"] : 0);
 				let tpl_body_start_steam = returnTplHtml([{id: "reflux_body_start_steam", value: val_body_start_steam, min: '0', max: '100', step: '1'}], deltaTempl);
-				let val_body_stop_steam = (valwe_bodyPrima.hasOwnProperty("bodyPrima") ? valwe_bodyPrima["bodyPrima"]["percentStart"] : 0);
+				let val_body_stop_steam = (valwe_bodyPrima.hasOwnProperty("bodyPrima") ? valwe_bodyPrima["bodyPrima"]["percentStop"] : 0);
 				let tpl_body_stop_steam = returnTplHtml([{id: "reflux_body_stop_steam", value: val_body_stop_steam, min: '0', max: '100', step: '1'}], deltaTempl);
 				let val_body_decline_steam = (valwe_bodyPrima.hasOwnProperty("bodyPrima") ? valwe_bodyPrima["bodyPrima"]["decline"] : 0);
 				let tpl_body_decline_steam = returnTplHtml([{id: "reflux_body_decline_steam", value: val_body_decline_steam, min: '0', max: '30', step: '1'}], deltaTempl);
 				//тело прима
 				let val_body_start_prima = (valwe_bodyPrima.hasOwnProperty("bodyPrima") ? valwe_bodyPrima["bodyPrima"]["percentStart"] : 0);
 				let tpl_body_start_prima = returnTplHtml([{id: "reflux_body_start_prima", value: val_body_start_prima, min: '0', max: '100', step: '1'}], deltaTempl);
-				let val_body_stop_prima = (valwe_bodyPrima.hasOwnProperty("bodyPrima") ? valwe_bodyPrima["bodyPrima"]["percentStart"] : 0);
+				let val_body_stop_prima = (valwe_bodyPrima.hasOwnProperty("bodyPrima") ? valwe_bodyPrima["bodyPrima"]["percentStop"] : 0);
 				let tpl_body_stop_prima = returnTplHtml([{id: "reflux_body_stop_prima", value: val_body_stop_prima, min: '0', max: '100', step: '1'}], deltaTempl);
 				let val_body_decline_prima = (valwe_bodyPrima.hasOwnProperty("bodyPrima") ? valwe_bodyPrima["bodyPrima"]["decline"] : 0);
 				let tpl_body_decline_prima = returnTplHtml([{id: "reflux_body_decline_prima", value: val_body_decline_prima, min: '0', max: '30', step: '1'}], deltaTempl);
@@ -2337,7 +2341,7 @@ $(function () {
 				tpl_devices_out_body += '<div id="reflux_devices_body_steam" class="row row-striped">' +
 					body_devices +
 					'<div class="pt-10 pb-10 clearfix">' +
-					'<div class="col-xs-12 col-sm-3 pxs-10 text-middle text-center-xs text-strong">Клапан отбора тела</div>' +
+					'<div class="col-xs-12 col-sm-3 pxs-10 text-middle text-center-xs text-strong">Кран отбора тела</div>' +
 					'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_start_steam + '</div>' +
 					'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_stop_steam + '</div>' +
 					'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_decline_steam + '</div>' +
@@ -2346,7 +2350,7 @@ $(function () {
 				tpl_devices_out_body += '<div id="reflux_devices_body_prima" class="row row-striped">' +
 					body_devices +
 					'<div class="pt-10 pb-10 clearfix">' +
-					'<div class="col-xs-12 col-sm-3 pxs-10 text-middle text-center-xs text-strong">Клапан отбора тела</div>' +
+					'<div class="col-xs-12 col-sm-3 pxs-10 text-middle text-center-xs text-strong">Кран отбора тела</div>' +
 					'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_start_prima + '</div>' +
 					'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_stop_prima + '</div>' +
 					'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_decline_prima + '</div>' +
