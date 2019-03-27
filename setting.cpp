@@ -13,8 +13,8 @@ ESP8266WebServer HTTP;
 // PID
 PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
 
-String curVersion = "2.0RC10";
-uint16_t versionForWeb = 2010;
+String curVersion = "2.0RC11";
+uint16_t versionForWeb = 2011;
 // Определяем переменные wifi
 String _ssid;      // Для хранения SSID
 String _password;  // Для хранения пароля сети
@@ -33,6 +33,8 @@ int timezone;                 // часовой пояс GTM
 byte DS_Count;
 int temp_min;
 int temp_max;
+unsigned long timeSecDsRead;
+byte byteDsRead = 0;
 byte DS_Cube = 10;
 byte DS_Tube = 10;
 byte DS_Out = 10;

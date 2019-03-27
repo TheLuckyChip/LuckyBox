@@ -132,6 +132,8 @@ extern uint8_t StateDsReset;
 extern byte DS_Count;
 extern int temp_min;
 extern int temp_max;
+extern unsigned long timeSecDsRead;
+extern byte byteDsRead;
 extern byte DS_Cube;
 extern byte DS_Tube;
 extern byte DS_Out;
