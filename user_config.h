@@ -21,7 +21,7 @@
 #define		AN2				2
 #define		AN3				3
 #define		thresholdAN0	2000
-#define		thresholdAN1	20000
+#define		thresholdAN1	8000
 #define		thresholdAN2	2000
 #define		thresholdAN3	2000
 // Используем TFT дисплей или нет
@@ -40,15 +40,15 @@
 #define		BUZ_VOL		13
 #define		BUZ_OUT		14
 #define		SIREN_OUT	1       // Активная пищалка с внутренним генератором
-#define		PWM_CH1		11	// Клапан на головы
-#define		PWM_CH2		10	// Клапан на тело
+#define		PWM_CH1		11      // Клапан на головы
+#define		PWM_CH2		10      // Клапан на тело
 #define		PWM_CH3		9       // Клапан на воду
 #define		PWM_CH4		8       // Клапан в ПБ
 #define		PWM_CH5		2       // Управление 0 - 10 вольт
 #define		PWM_CH6		3       // Дополнительная группа на дополнительные ТЭНы
 #define		PWM_CH7		4       // ШИМ для х.з. пока чего
-#define		PWM_CH8		5	// ШИМ для формирования напряжения + 15 вольт
-#define		PWM_CH9		6	// Импульс повышающего напряжения на клапана
+#define		PWM_CH8		5       // ШИМ для формирования напряжения + 15 вольт
+#define		PWM_CH9		6       // Импульс повышающего напряжения на клапана
 // Если клапан нормально закрыты ставим false
 // Если клапан нормально открытый ставим true
 #define		PWM_CH1_Invert	false
@@ -64,7 +64,7 @@
 // Периодичность вывода температурного графика в секундах на экран
 #define		Display_out_temp	15
 // Периодичность записи лог.файла на SD
-#define		SD_out_temp	5
+#define		SD_out_temp	10
 // Периодичность переподключения к потерянной точке доступа (роутеру) в секундах
 #define		setRestartWiFi		60
 // Какой используем датчик давления

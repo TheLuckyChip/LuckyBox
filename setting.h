@@ -9,7 +9,7 @@
 #endif
 
 #include "user_config.h"
-
+#include "pwm_out.h"
 #include <Ticker.h>
 #include <Adafruit_PWMServoDriver.h>
 #include <ESP8266WebServer.h>
@@ -96,7 +96,7 @@ extern struct BMP_Str pressureSensor;
 extern struct OUT_Pwm pwmOut[PWM_Cnt];
 extern struct IN_Adc adcIn[ADC_Cnt];
 extern struct PR_Type processMode;
-extern struct PR_Mashing processMashing[4];
+extern struct PR_Mashing processMashing[5];
 extern struct PR_Power power;
 
 extern Ticker tickerSet;
@@ -111,10 +111,10 @@ extern ESP8266WebServer HTTP;
 
 extern PID myPID;
 
-// Для файловой системы
-//extern fs::File fsUploadFile;
+extern uint16_t percentCorrectSquare[];
 
 extern String curVersion;
+extern uint16_t versionForWeb;
 // Определяем переменные wifi
 extern String _ssid;
 extern String _password;
@@ -132,6 +132,8 @@ extern uint8_t StateDsReset;
 extern byte DS_Count;
 extern int temp_min;
 extern int temp_max;
+extern unsigned long timeSecDsRead;
+extern byte byteDsRead;
 extern byte DS_Cube;
 extern byte DS_Tube;
 extern byte DS_Out;
@@ -149,6 +151,8 @@ extern uint16_t graphOutInterval;
 extern uint16_t scaleCount;
 extern byte tempBigOut;
 extern byte tempBigOutOld;
+extern bool reSetTemperatureStartPressure;
+//extern bool settingColumnSet;
 extern float settingBoilTube;
 extern float settingColumn;
 extern float temperatureStartPressure;
@@ -185,6 +189,7 @@ extern unsigned long stepStartTime;
 extern unsigned long wifiTimeInterval;
 extern String nameProcessStep;
 extern String commandWriteSD;
+extern bool startWriteSD;
 extern bool commandSD_en;
 extern bool CH1;
 extern bool CH2;
@@ -200,14 +205,27 @@ extern uint8_t bodyTimeCycle;
 extern float bodytimeOn;
 extern uint8_t decline;
 extern unsigned long bodyTimeOffCount;
+// для управления шаровым краном
+extern uint8_t headSteamPercent;        // % открытия шарового крана на отборе голов по пару
+extern uint8_t bodyPrimaPercentStart;	// % открытия шарового крана в начале отбора тела
+extern uint8_t bodyPrimaPercentStop;	// % открытия шарового крана в конце отбора тела
+extern uint8_t bodyPrimaDecline;		// % уменьшения открытия шарового крана по старт/стопу
 // переход на следующий шаг
 extern uint8_t stepNext;
 // подтверждение обмена в web
 extern uint8_t answer;
 extern uint8_t timeStabilizationReflux;
 extern uint8_t timeBoilTubeSetReflux;
+// Для датчиков безопасности
+extern uint8_t numCrashStop;
+extern bool errA;
+extern bool errT;
+extern unsigned long timePauseErrA;
+extern unsigned long timePauseErrT;
 
 extern float EEPROM_float_read(int addr);
 extern void EEPROM_float_write(int addr, float val);
+extern void stop_Err();
+void check_Err();
 
 #endif

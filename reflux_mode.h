@@ -13,15 +13,10 @@
 #include <time.h>
 #include "tft.h"
 #include "pwm_out.h"
+//#include "sd_card.h"
 #include <EEPROM.h>
 
 extern void loadEepromReflux();
-extern float settingColumn;
-extern float temperatureStartPressure;
-extern float settingColumnShow;
-extern float temperatureAlcoholBoil;
-
-//extern void loadEepromReflux();
 extern void initReflux();
 extern void handleRefluxSensorTpl();
 extern void handleRefluxSensorSetLoad();
