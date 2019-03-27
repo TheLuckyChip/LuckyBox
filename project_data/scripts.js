@@ -2232,8 +2232,8 @@ $(function () {
 				'<div class="col-xs-4 col-sm-3 text-center text-middle text-primary text-nowrap">Открыт %</div>'+
 				'<div id="reflux_devices_out_header_" class="col-xs-4 col-sm-3 text-center text-middle text-primary text-nowrap"></div></div>';
 			let body_devices = '<div class="row-xs clearfix">' +
-				'<div class="col-xs-4 col-xs-offset-0 col-sm-3 col-sm-offset-3 text-center text-middle text-primary text-nowrap">Открыт %</div>' +
-				'<div class="col-xs-4 col-sm-3 text-center text-middle text-primary text-nowrap">Закрыт %</div>'+
+				'<div class="col-xs-4 col-xs-offset-0 col-sm-3 col-sm-offset-3 text-center text-middle text-primary text-nowrap">В начале %</div>' +
+				'<div class="col-xs-4 col-sm-3 text-center text-middle text-primary text-nowrap">В конце %</div>'+
 				'<div id="reflux_devices_out_header_" class="col-xs-4 col-sm-3 text-center text-middle text-primary text-nowrap">%&#8595;</div></div>';
 			let tpl_devices_out_body = '';
 			if(flagout){
