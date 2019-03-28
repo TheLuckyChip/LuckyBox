@@ -3747,6 +3747,7 @@ $(function () {
 	let stopTime = 30;
 	let openModalError = false;
 	let countError = 0;
+	let secondInterval = 1000;
 	function getIntervalSensors() {
 		$.ajax({
 			url: ajax_url_debug + 'SensorsOut',
@@ -3755,6 +3756,7 @@ $(function () {
 			dataType: 'json',
 			success: function (msg) {
 				//clearInterval(sensorsIntervalId);
+				startInterval();
 				countError = 0;
 				//console.log('Sensors',msg);
 				globalSensorsJson = msg;
@@ -3767,6 +3769,7 @@ $(function () {
 			},
 			error: function (err, exception) {
 				countError ++;
+				startInterval();
 				if(countError > 10) {
 					globalSensorsJson = {};
 					if (!openModalError) {
@@ -3804,11 +3807,19 @@ $(function () {
 		//if(tmpTime<100 && refluxProcess["start"] === true)
 		//tmpTime ++;
 	}
+
 	function startInterval(){
-		sensorsIntervalId = setInterval(getIntervalSensors, 1000);
+		sensorsIntervalId = setTimeout(
+			function() {
+				getIntervalSensors()
+			},
+			secondInterval
+		);
+		// sensorsIntervalId = setInterval(getIntervalSensors, secondInterval);
 	}
 	function stopInterval(){
-		clearInterval(sensorsIntervalId);
+		clearTimeout(sensorsIntervalId);
+		// clearInterval(sensorsIntervalId);
 	}
 
 	//clearInterval(sensorsIntervalId);
