@@ -518,6 +518,7 @@ void rfluxLoopMode_2() {
 				setPWM(PWM_CH5, 0, bodyPrimaPercentSet);
 				///////////////////////////////////
 				processMode.timeStep = 0;
+				bodyTimeOffCount = 0;
 				bodyValveSet = true;
 				nameProcessStep = "Отбор тела";
 			}
@@ -582,7 +583,8 @@ void rfluxLoopMode_2() {
 
 			if (bodyValveSet == true && processMode.step != 7) {
 				bodyTimeOffCount = processMode.timeStep;			// сбрасываем таймер остановки процесса
-				nameProcessStep = "Отбор тела";
+				if (counterStartStop == 0) nameProcessStep = "Отбор тела";
+				else nameProcessStep = "Отбор тела, старт/стопов - " + String(counterStartStop);
 			}
 			else {
 				nameProcessStep = "Отбор тела, " + String(counterStartStop) + "-й стоп";
@@ -687,6 +689,7 @@ void rfluxLoopMode_3() {
 				setPWM(PWM_CH5, 0, bodyPrimaPercentSet);
 				///////////////////////////////////
 				processMode.timeStep = 0;
+				bodyTimeOffCount = 0;
 				bodyValveSet = true;
 				nameProcessStep = "Отбор тела";
 			}
@@ -752,7 +755,8 @@ void rfluxLoopMode_3() {
 
 			if (bodyValveSet == true && processMode.step != 7) {
 				bodyTimeOffCount = processMode.timeStep;			// сбрасываем таймер остановки процесса
-				nameProcessStep = "Отбор тела";
+				if (counterStartStop == 0) nameProcessStep = "Отбор тела";
+				else nameProcessStep = "Отбор тела, старт/стопов - " + String(counterStartStop);
 			}
 			else {
 				nameProcessStep = "Отбор тела, " + String(counterStartStop) + "-й стоп";
@@ -914,7 +918,8 @@ void rfluxLoopMode_4() {
 				if (typeRefOfValwe == 1) valveSet(PWM_CH1);
 				else if (typeRefOfValwe == 2 || typeRefOfValwe == 3) valveSet(PWM_CH2);
 				bodyTimeOffCount = processMode.timeStep;			// сбрасываем таймер остановки процесса
-				nameProcessStep = "Отбор тела";
+				if (counterStartStop == 0) nameProcessStep = "Отбор тела";
+				else nameProcessStep = "Отбор тела, старт/стопов - " + String(counterStartStop);
 			}
 			else {
 				nameProcessStep = "Отбор тела, " + String(counterStartStop) + "-й стоп";
@@ -1013,6 +1018,8 @@ void rfluxLoopMode_5() {
 				if (pwmOut[3].member == 1) csOff(PWM_CH4);		// закрыли клапан слива ПБ
 				csOff(PWM_CH2);		// закрыли клапан доп. подачи воды
 				processMode.timeStep = 0;
+				bodyTimeOffCount = 0;
+				bodyValveSet = true;
 				nameProcessStep = "Отбор тела";
 				stepNext = 0;
 			}
@@ -1034,16 +1041,25 @@ void rfluxLoopMode_5() {
 				else timePauseOff = 60000 * 2 + millis();
 				processMode.step = 7;						// перешли на следующий шаг алгоритма
 				stepNext = 0;
+				break;
 			}
 			else if (temperatureSensor[DS_Tube].allertValue > 0 && temperatureSensor[DS_Tube].data >= temperatureSensor[DS_Tube].allertValue) {
 				// если первый стоп пищим 10 сек.
 				if (counterStartStop == 0) timeAllertInterval = millis() + 10000;			// установим счетчик времени для зв.сигнала
-				if (bodyValveSet) counterStartStop++;
+				if (bodyValveSet) {
+					counterStartStop++;
+					nameProcessStep = "Отбор тела, " + String(counterStartStop) + "-й стоп";
+					bodyValveSet = false;
+				}
 				csOn(PWM_CH2);								// открыли клапан доп. подачи воды
 			}
 
 			if (temperatureSensor[DS_Tube].data <= temperatureSensor[DS_Tube].allertValue - settingBoilTube) {
 				csOff(PWM_CH2);	// закрыли клапан доп. подачи воды
+				if (counterStartStop == 0) nameProcessStep = "Отбор тела";
+				else nameProcessStep = "Отбор тела, старт/стопов - " + String(counterStartStop);
+				bodyValveSet = true;
+				bodyTimeOffCount = processMode.timeStep;			// сбрасываем таймер остановки процесса
 			}
 
 			break;
@@ -1165,7 +1181,7 @@ void refluxLoop() {
 		}
 	}
 
-	if (processMode.number == 3 && processMode.step == 6) {
+	if (processMode.number > 0 && processMode.number < 4 && processMode.step == 6) {
 		// завершение отбора по времени закрытого состояния клапана на отборе тела
 		if (counterStartStop > 0 && processMode.timeStep >= (timeStabilizationReflux * 60 + bodyTimeOffCount)) {
 			stop_Err();
