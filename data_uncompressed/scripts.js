@@ -3780,7 +3780,9 @@ $(function () {
 								class: "btn btn-success hidden",
 								click: function () {
 									$(this).closest(".modal").modal("hide");
+									stopInterval();
 									startInterval();
+									openModalError = false;
 									// sensorsIntervalId = setInterval(getIntervalSensors, 1000);
 								}
 							});
