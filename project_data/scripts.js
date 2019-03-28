@@ -749,7 +749,7 @@ $(function () {
 	//Флаг отправки данных процесса в МК
 	//let flagSendProcess = false;
 	//Интервал запуска процесса
-	let sensorsProcessId = false;
+	let sensorsProcessId = 0;
 	//регекспы для датчиков
 	const re_p = new RegExp(/p1/);
 	const re_t = new RegExp(/^t/);
