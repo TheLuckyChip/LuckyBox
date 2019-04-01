@@ -296,8 +296,8 @@ void distillationLoop() {
 				processMode.step = 4;						// перешли на следующий шаг алгоритма
 			}
 			// если сработал датчик уровня жидкости подаем звуковой сигнал
-			//else if (adcIn[0].allert == true) settingAlarm = true;	// подали звуковой сигнал
-			//else settingAlarm = false;								// выключили звуковой сигнал
+			else if (adcIn[0].allert == true) settingAlarm = true;	// подали звуковой сигнал
+			else settingAlarm = false;								// выключили звуковой сигнал
 			break;
 		}
 		case 4: {

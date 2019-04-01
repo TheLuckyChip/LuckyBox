@@ -578,13 +578,26 @@ void rfluxLoopMode_2() {
 			if (temperatureSensor[DS_Tube].data <= temperatureSensor[DS_Tube].allertValue - settingBoilTube) {
 				bodyValveSet = true;							// признак, что надо открыть клапан отбора
 				if (adcIn[0].member == 1 && adcIn[0].allert == true) setPWM(PWM_CH5, 0, 10); // емкость полная
-				else setPWM(PWM_CH5, 0, bodyPrimaPercentSet);
+				/*else {
+					// расчет на сколько надо после старт/стопа открыть шаровый кран
+					bodyPrimaPercent = bodyPrimaPercentStart - (bodyPrimaDecline * counterStartStop);
+					if (bodyPrimaPercent < bodyPrimaPercentStop) bodyPrimaPercent = bodyPrimaPercentStop;
+					bodyPrimaPercentSet = percentCalc(bodyPrimaPercent);
+					setPWM(PWM_CH5, 0, bodyPrimaPercentSet);
+				}*/
 			}
 
 			if (bodyValveSet == true && processMode.step != 7) {
 				bodyTimeOffCount = processMode.timeStep;			// сбрасываем таймер остановки процесса
 				if (counterStartStop == 0) nameProcessStep = "Отбор тела";
 				else nameProcessStep = "Отбор тела, старт/стопов - " + String(counterStartStop);
+
+
+				// расчет на сколько надо после старт/стопа открыть шаровый кран
+				bodyPrimaPercent = bodyPrimaPercentStart - (bodyPrimaDecline * counterStartStop);
+				if (bodyPrimaPercent < bodyPrimaPercentStop) bodyPrimaPercent = bodyPrimaPercentStop;
+				bodyPrimaPercentSet = percentCalc(bodyPrimaPercent);
+				setPWM(PWM_CH5, 0, bodyPrimaPercentSet);
 			}
 			else {
 				nameProcessStep = "Отбор тела, " + String(counterStartStop) + "-й стоп";

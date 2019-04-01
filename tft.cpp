@@ -788,6 +788,12 @@ void tftMenuLoop() {
 		csOff(PWM_CH6);		// выключить дополнительный ТЭН на разгон
 		// Закрыли отбор по пару
 		setPWM(PWM_CH5, 0, 10);
+		// Для затирания
+		processMashing[0].step = 0;
+		processMashing[1].step = 0;
+		processMashing[2].step = 0;
+		processMashing[3].step = 0;
+		processMashing[4].step = 0;
 	}
 #if defined TFT_Display
 	// processMode.num = 0 вывод экрана, processMode.num = 1 ждем нажатия
