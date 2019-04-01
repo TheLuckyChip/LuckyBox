@@ -340,7 +340,11 @@ void tftOutText(int temp_min, int temp_max) {
 				else if (processMode.step < 7) tft.print(utf8rus("  Тело"));
 				else tft.print(utf8rus("  Стоп"));
 			}
-			else tft.print(utf8rus(" Отбор"));
+			// ручной режим ректификации
+			else {
+				if (processMode.step < 2) tft.print(utf8rus("Нагрев"));
+				else tft.print(utf8rus(" Отбор"));
+			}
 			// время шага
 			tft.setCursor(42, 20);
 			if (processMode.timeStep < 36000) tft.print(" ");
