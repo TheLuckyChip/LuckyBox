@@ -366,9 +366,6 @@ uint16_t percentCalc(uint8_t data) {
 
 // ручной режим
 void rfluxLoopMode_1() {
-	bool allerEn = false;
-
-
 	switch (processMode.step) {
 // пришли при старте ректификации
 		case 0: {
