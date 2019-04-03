@@ -161,27 +161,27 @@ void check_Err() {
 	// датчики безопасности в каналах АЦП
 	if (pwmOut[3].member == 0 && adcIn[0].member == 1 && adcIn[0].allert == true) settingAlarm = true;
 	else if (adcIn[1].member == 1 && adcIn[1].allert == true) { settingAlarm = true; errA = true; numCrashStop = 1; }
-	else if (adcIn[2].member == 1 && adcIn[2].allert == true) settingAlarm = true;
-	else if (adcIn[3].member == 1 && adcIn[3].allert == true) settingAlarm = true;
+	else if (adcIn[2].member == 1 && adcIn[2].allert == true) { settingAlarm = true; errA = true; numCrashStop = 2; }
+	else if (adcIn[3].member == 1 && adcIn[3].allert == true) { settingAlarm = true; errA = true; numCrashStop = 3; }
 	if (!errA) timePauseErrA = millis() + 10000;		// 10 секунд пауза до защиты
 	// датчики безопасности по температурным датчикам кроме Т куба и Т царги
 	if (temperatureSensor[DS_Out].cutoff == 1 && temperatureSensor[DS_Out].member == 1 && temperatureSensor[DS_Out].allertValue > 0 && temperatureSensor[DS_Out].data >= temperatureSensor[DS_Out].allertValue) {
-		errT = true; numCrashStop = DS_Out;
+		settingAlarm = true; errT = true; numCrashStop = DS_Out;
 	}
 	else if (temperatureSensor[DS_Def].cutoff == 1 && temperatureSensor[DS_Def].member == 1 && temperatureSensor[DS_Def].allertValue > 0 && temperatureSensor[DS_Def].data >= temperatureSensor[DS_Def].allertValue) {
-		errT = true; numCrashStop = DS_Def;
+		settingAlarm = true; errT = true; numCrashStop = DS_Def;
 	}
 	else if (temperatureSensor[DS_Res1].cutoff == 1 && temperatureSensor[DS_Res1].member == 1 && temperatureSensor[DS_Res1].allertValue > 0 && temperatureSensor[DS_Res1].data >= temperatureSensor[DS_Res1].allertValue) {
-		errT = true; numCrashStop = DS_Res1;
+		settingAlarm = true; errT = true; numCrashStop = DS_Res1;
 	}
 	else if (temperatureSensor[DS_Res2].cutoff == 1 && temperatureSensor[DS_Res2].member == 1 && temperatureSensor[DS_Res2].allertValue > 0 && temperatureSensor[DS_Res2].data >= temperatureSensor[DS_Res2].allertValue) {
-		errT = true; numCrashStop = DS_Res2;
+		settingAlarm = true; errT = true; numCrashStop = DS_Res2;
 	}
 	else if (temperatureSensor[DS_Res3].cutoff == 1 && temperatureSensor[DS_Res3].member == 1 && temperatureSensor[DS_Res3].allertValue > 0 && temperatureSensor[DS_Res3].data >= temperatureSensor[DS_Res3].allertValue) {
-		errT = true; numCrashStop = DS_Res3;
+		settingAlarm = true; errT = true; numCrashStop = DS_Res3;
 	}
 	else if (temperatureSensor[DS_Res4].cutoff == 1 && temperatureSensor[DS_Res4].member == 1 && temperatureSensor[DS_Res4].allertValue > 0 && temperatureSensor[DS_Res4].data >= temperatureSensor[DS_Res4].allertValue) {
-		errT = true; numCrashStop = DS_Res4;
+		settingAlarm = true; errT = true; numCrashStop = DS_Res4;
 	}
 	if (!errT) timePauseErrT = millis() + 10000;		// 10 секунд пауза до защиты
 }
