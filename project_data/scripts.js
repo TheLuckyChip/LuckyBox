@@ -732,6 +732,19 @@ $(function () {
 		$input.val(count);
 		//$input.change();
 	});
+	$(document).on("change",".number-group input.input-number",function () {
+		let $input = $(this);
+		let val = Number($input.val());
+		let min = Number($input.attr("min"));
+		let max = Number($input.attr("max"));
+		if(val < min){
+			$input.val(parseFloat(min));
+		}else if(val > max){
+			$input.val(parseFloat(max));
+		}else{
+			$input.val(parseFloat(val));
+		}
+	});
 
 	//поиск нужного значения в датчиках
 	function getSensorValue(key) {
