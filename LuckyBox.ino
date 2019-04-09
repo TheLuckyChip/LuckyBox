@@ -28,8 +28,11 @@ void loop() {
 	//case 5: brewingLoop(); break;
 	case 6: deviceViewLoop(); break;
   }
-  adcLoop();
-  heaterLoop();
+  
+  if (processMode.allow < 3 || processMode.allow > 5) {
+	  adcLoop();
+	  heaterLoop();
+  }
   sensorLoop();
   displayLoop();
   logfileLoop();

@@ -548,12 +548,17 @@ void tftOutText(int temp_min, int temp_max) {
 			if ((processMashing[4].time * 60) >= processMode.timeStep) timeOutTFT = (processMashing[4].time * 60) - processMode.timeStep;
 			else timeOutTFT = 0;
 		}
+		else if (processMashing[5].step == 1) {
+			tempOutTFT = processMashing[5].temperature;
+			if ((processMashing[5].time * 60) >= processMode.timeStep) timeOutTFT = (processMashing[5].time * 60) - processMode.timeStep;
+			else timeOutTFT = 0;
+		}
 
 		// время
 		tft.setTextSize(2);
 		tft.setCursor(0, 47);
 		tft.setTextColor(ILI9341_LIGHTGREY, ILI9341_BLACK);
-		if (processMode.step < 9) {
+		if (processMode.step < 11) {
 			if (timeOutTFT == 0) tft.print(utf8rus(" Пауза    "));
 			else if (processMode.timeStep <= 1) tft.printf("> %.1f min. = ", timeOutTFT / 60);
 			else tft.printf(" %.1f min. = ", timeOutTFT / 60);

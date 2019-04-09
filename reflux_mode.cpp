@@ -425,6 +425,8 @@ void rfluxLoopMode_1() {
 				temperatureSensor[DS_Tube].allert = true;	// сигнализация для WEB
 				settingAlarm = true;
 			}
+			// контроль датчика уровня
+			else if (adcIn[0].allert == true && settingAlarm == false) settingAlarm = true;
 			else {
 				temperatureSensor[DS_Tube].allert = false;
 				settingAlarm = false;
@@ -453,9 +455,7 @@ void rfluxLoopMode_1() {
 			}
 
 
-			// контроль датчика уровня
-			if (adcIn[0].allert == true && settingAlarm == false) settingAlarm = true;
-			else settingAlarm = false;
+			
 
 
 

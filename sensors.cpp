@@ -528,15 +528,6 @@ void handleProcessModeIn() {
 #endif
 		}
 	}
-	//if (processMode.allow == 0 || processMode.allow == 3 || processMode.allow == 4) {
-	if (processMode.allow == 3) {
-		for (i = 0; i < 4; i++) {
-			arg = "pause" + String(i + 1);
-			processMashing[i].time = HTTP.arg(arg + "[time]").toInt();
-			processMashing[i].temperature = HTTP.arg(arg + "[temperature]").toFloat();
-			processMashing[i].stop = HTTP.arg(arg + "[stop]").toInt();
-		}
-	}
 
 	if (processMode.allow == 1) {
 		// запись в EEPROM параметров мощности для дистилляции
@@ -622,19 +613,17 @@ void handleProcessModeIn() {
 			}
 		}
 	}
+	else if (processMode.allow == 3) {
+		for (i = 0; i < 5; i++) {
+			arg = "pause" + String(i + 1);
+			processMashing[i].time = HTTP.arg(arg + "[time]").toInt();
+			processMashing[i].temperature = HTTP.arg(arg + "[temperature]").toFloat();
+			processMashing[i].stop = HTTP.arg(arg + "[stop]").toInt();
+		}
+	}
 
 	stepNext = HTTP.arg("stepNext").toInt();
 	answer = HTTP.arg("answer").toInt();
-
-	/*if (headTimeCycle < 5) headTimeCycle = 5;
-	else if (headTimeCycle > 30) headTimeCycle = 30;
-	if (headtimeOn < 1) headtimeOn = 1;
-	else if (headtimeOn > 100) headtimeOn = 100;
-	if (bodyTimeCycle < 5) bodyTimeCycle = 5;
-	else if (bodyTimeCycle > 30) bodyTimeCycle = 30;
-	if (bodytimeOn < 0) bodytimeOn = 0;
-	else if (bodytimeOn > 100) bodytimeOn = 100;
-	if (decline > 30) decline = 10;*/
 
 	// для записи лога на SD
 	if (processModeOld != processMode.allow && processMode.allow < 4) {

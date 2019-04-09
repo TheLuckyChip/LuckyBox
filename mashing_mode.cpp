@@ -187,38 +187,31 @@ void handleMashingSensorSetSave() {
 }
 
 void mashingLoop() {
-	// поиск выбранного датчика и начальная инициализация
-	if (processMode.step == 0) {
-		// если при выборе нет приоритета берем первый из выбранных
-		if (temperatureSensor[DS_Cube].member == 1) numSenseMashBrew = DS_Cube;
-		else if (temperatureSensor[DS_Tube].member == 1) numSenseMashBrew = DS_Tube;
-		else if (temperatureSensor[DS_Out].member == 1) numSenseMashBrew = DS_Out;
-		else if (temperatureSensor[DS_Def].member == 1) numSenseMashBrew = DS_Def;
-		else if (temperatureSensor[DS_Res1].member == 1) numSenseMashBrew = DS_Res1;
-		else if (temperatureSensor[DS_Res2].member == 1) numSenseMashBrew = DS_Res2;
-		else if (temperatureSensor[DS_Res3].member == 1) numSenseMashBrew = DS_Res3;
-		else if (temperatureSensor[DS_Res4].member == 1) numSenseMashBrew = DS_Res4;
-		// если есть приоритет
-		if (temperatureSensor[DS_Cube].priority == 1) numSenseMashBrew = DS_Cube;
-		else if (temperatureSensor[DS_Tube].priority == 1) numSenseMashBrew = DS_Tube;
-		else if (temperatureSensor[DS_Out].priority == 1) numSenseMashBrew = DS_Out;
-		else if (temperatureSensor[DS_Def].priority == 1) numSenseMashBrew = DS_Def;
-		else if (temperatureSensor[DS_Res1].priority == 1) numSenseMashBrew = DS_Res1;
-		else if (temperatureSensor[DS_Res2].priority == 1) numSenseMashBrew = DS_Res2;
-		else if (temperatureSensor[DS_Res3].priority == 1) numSenseMashBrew = DS_Res3;
-		else if (temperatureSensor[DS_Res4].priority == 1) numSenseMashBrew = DS_Res4;
-	}
 	// запомним текущую температуру для PID регулировки
-	Input = temperatureSensor[numSenseMashBrew].data;
+	Input = temperatureSensor[numSenseMashBrew].data + 0.5; // + 0.5 - чтобы отсчет времени пошел уже на подходе Т
 
 	switch (processMode.step) {
 		// пришли при старте затирания
 		case 0: {
-			//processMashing[0].step = 0;
-			//processMashing[1].step = 0;
-			//processMashing[2].step = 0;
-			//processMashing[3].step = 0;
-			//processMashing[4].step = 0;
+			loadEepromMashing();
+			// если при выборе нет приоритета берем первый из выбранных
+			if (temperatureSensor[DS_Cube].member == 1) numSenseMashBrew = DS_Cube;
+			else if (temperatureSensor[DS_Tube].member == 1) numSenseMashBrew = DS_Tube;
+			else if (temperatureSensor[DS_Out].member == 1) numSenseMashBrew = DS_Out;
+			else if (temperatureSensor[DS_Def].member == 1) numSenseMashBrew = DS_Def;
+			else if (temperatureSensor[DS_Res1].member == 1) numSenseMashBrew = DS_Res1;
+			else if (temperatureSensor[DS_Res2].member == 1) numSenseMashBrew = DS_Res2;
+			else if (temperatureSensor[DS_Res3].member == 1) numSenseMashBrew = DS_Res3;
+			else if (temperatureSensor[DS_Res4].member == 1) numSenseMashBrew = DS_Res4;
+			// если есть приоритет
+			if (temperatureSensor[DS_Cube].priority == 1) numSenseMashBrew = DS_Cube;
+			else if (temperatureSensor[DS_Tube].priority == 1) numSenseMashBrew = DS_Tube;
+			else if (temperatureSensor[DS_Out].priority == 1) numSenseMashBrew = DS_Out;
+			else if (temperatureSensor[DS_Def].priority == 1) numSenseMashBrew = DS_Def;
+			else if (temperatureSensor[DS_Res1].priority == 1) numSenseMashBrew = DS_Res1;
+			else if (temperatureSensor[DS_Res2].priority == 1) numSenseMashBrew = DS_Res2;
+			else if (temperatureSensor[DS_Res3].priority == 1) numSenseMashBrew = DS_Res3;
+			else if (temperatureSensor[DS_Res4].priority == 1) numSenseMashBrew = DS_Res4;
 			startWriteSD = true;
 			// подготовка данных для вывода на TFT
 #if defined TFT_Display
