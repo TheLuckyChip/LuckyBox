@@ -449,8 +449,8 @@ void mashingLoop() {
 		}
 	}
 
-	temperatureSensor[6].allertValue = Input;
-	temperatureSensor[7].allertValue = Setpoint;
+	//temperatureSensor[6].allertValue = Input;
+	//temperatureSensor[7].allertValue = Setpoint;
 
 	if (timeMashingPause < millis()) {
 
