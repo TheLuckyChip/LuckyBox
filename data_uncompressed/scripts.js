@@ -749,7 +749,7 @@ $(function () {
 	//Флаг отправки данных процесса в МК
 	//let flagSendProcess = false;
 	//Интервал запуска процесса
-	let sensorsProcessId = false;
+	let sensorsProcessId = 0;
 	//регекспы для датчиков
 	const re_p = new RegExp(/p1/);
 	const re_t = new RegExp(/^t/);
@@ -2271,7 +2271,7 @@ $(function () {
 				let tpl_head_time_rk = returnTplHtml([{id: "reflux_head_time_rk", value: val_head_time_rk, min: '1', max: '100', step: '0.5'}], deltaTempl);
 				//головы пар
 				let val_head_steam = (valwe_headSteam.hasOwnProperty("headSteam") ? valwe_headSteam["headSteam"]["percent"] : 0);
-				let tpl_head_steam = returnTplHtml([{id: "reflux_head_steam", value: val_head_steam, min: '0', max: '100', step: '1'}], deltaTempl);
+				let tpl_head_steam = returnTplHtml([{id: "reflux_head_steam", value: val_head_steam, min: '0', max: '100', step: '0.5'}], deltaTempl);
 				//головы прима (как у жижи, те же данные)
 				let val_head_cycle_prima = (valwe_head.hasOwnProperty("head") ? valwe_head["head"]["timeCycle"] : 5);
 				let tpl_head_cycle_prima = returnTplHtml([{id: "reflux_head_cycle_prima", value: val_head_cycle_prima, min: '5', max: '30', step: '1'}], deltaTempl);
@@ -2317,16 +2317,16 @@ $(function () {
 				let tpl_body_decline_rk = returnTplHtml([{id: "reflux_body_decline_rk", value: val_body_decline_rk, min: '0', max: '30', step: '1'}], deltaTempl);
 				//тело пар (как у примы, те же данные)
 				let val_body_start_steam = (valwe_bodyPrima.hasOwnProperty("bodyPrima") ? valwe_bodyPrima["bodyPrima"]["percentStart"] : 0);
-				let tpl_body_start_steam = returnTplHtml([{id: "reflux_body_start_steam", value: val_body_start_steam, min: '0', max: '100', step: '1'}], deltaTempl);
+				let tpl_body_start_steam = returnTplHtml([{id: "reflux_body_start_steam", value: val_body_start_steam, min: '0', max: '100', step: '0.5'}], deltaTempl);
 				let val_body_stop_steam = (valwe_bodyPrima.hasOwnProperty("bodyPrima") ? valwe_bodyPrima["bodyPrima"]["percentStop"] : 0);
-				let tpl_body_stop_steam = returnTplHtml([{id: "reflux_body_stop_steam", value: val_body_stop_steam, min: '0', max: '100', step: '1'}], deltaTempl);
+				let tpl_body_stop_steam = returnTplHtml([{id: "reflux_body_stop_steam", value: val_body_stop_steam, min: '0', max: '100', step: '0.5'}], deltaTempl);
 				let val_body_decline_steam = (valwe_bodyPrima.hasOwnProperty("bodyPrima") ? valwe_bodyPrima["bodyPrima"]["decline"] : 0);
 				let tpl_body_decline_steam = returnTplHtml([{id: "reflux_body_decline_steam", value: val_body_decline_steam, min: '0', max: '30', step: '1'}], deltaTempl);
 				//тело прима
 				let val_body_start_prima = (valwe_bodyPrima.hasOwnProperty("bodyPrima") ? valwe_bodyPrima["bodyPrima"]["percentStart"] : 0);
-				let tpl_body_start_prima = returnTplHtml([{id: "reflux_body_start_prima", value: val_body_start_prima, min: '0', max: '100', step: '1'}], deltaTempl);
+				let tpl_body_start_prima = returnTplHtml([{id: "reflux_body_start_prima", value: val_body_start_prima, min: '0', max: '100', step: '0.5'}], deltaTempl);
 				let val_body_stop_prima = (valwe_bodyPrima.hasOwnProperty("bodyPrima") ? valwe_bodyPrima["bodyPrima"]["percentStop"] : 0);
-				let tpl_body_stop_prima = returnTplHtml([{id: "reflux_body_stop_prima", value: val_body_stop_prima, min: '0', max: '100', step: '1'}], deltaTempl);
+				let tpl_body_stop_prima = returnTplHtml([{id: "reflux_body_stop_prima", value: val_body_stop_prima, min: '0', max: '100', step: '0.5'}], deltaTempl);
 				let val_body_decline_prima = (valwe_bodyPrima.hasOwnProperty("bodyPrima") ? valwe_bodyPrima["bodyPrima"]["decline"] : 0);
 				let tpl_body_decline_prima = returnTplHtml([{id: "reflux_body_decline_prima", value: val_body_decline_prima, min: '0', max: '30', step: '1'}], deltaTempl);
 				//тпл тело жижа
@@ -3747,6 +3747,7 @@ $(function () {
 	let stopTime = 30;
 	let openModalError = false;
 	let countError = 0;
+	let secondInterval = 1000;
 	function getIntervalSensors() {
 		$.ajax({
 			url: ajax_url_debug + 'SensorsOut',
@@ -3755,6 +3756,7 @@ $(function () {
 			dataType: 'json',
 			success: function (msg) {
 				//clearInterval(sensorsIntervalId);
+				startInterval();
 				countError = 0;
 				//console.log('Sensors',msg);
 				globalSensorsJson = msg;
@@ -3767,6 +3769,7 @@ $(function () {
 			},
 			error: function (err, exception) {
 				countError ++;
+				startInterval();
 				if(countError > 10) {
 					globalSensorsJson = {};
 					if (!openModalError) {
@@ -3780,7 +3783,9 @@ $(function () {
 								class: "btn btn-success hidden",
 								click: function () {
 									$(this).closest(".modal").modal("hide");
+									stopInterval();
 									startInterval();
+									openModalError = false;
 									// sensorsIntervalId = setInterval(getIntervalSensors, 1000);
 								}
 							});
@@ -3802,11 +3807,19 @@ $(function () {
 		//if(tmpTime<100 && refluxProcess["start"] === true)
 		//tmpTime ++;
 	}
+
 	function startInterval(){
-		sensorsIntervalId = setInterval(getIntervalSensors, 1000);
+		sensorsIntervalId = setTimeout(
+			function() {
+				getIntervalSensors()
+			},
+			secondInterval
+		);
+		// sensorsIntervalId = setInterval(getIntervalSensors, secondInterval);
 	}
 	function stopInterval(){
-		clearInterval(sensorsIntervalId);
+		clearTimeout(sensorsIntervalId);
+		// clearInterval(sensorsIntervalId);
 	}
 
 	//clearInterval(sensorsIntervalId);

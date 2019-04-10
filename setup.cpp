@@ -320,6 +320,7 @@ void setup()
   processMashing[2].time = 30; processMashing[2].temperature = 63;
   processMashing[3].time = 60; processMashing[3].temperature = 67;
   processMashing[4].time = 10; processMashing[4].temperature = 78;
+  numSenseMashBrew = DS_Cube;
 
   Serial.println("Setup Done!");
 
