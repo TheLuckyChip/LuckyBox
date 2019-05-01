@@ -13,8 +13,8 @@ ESP8266WebServer HTTP;
 // PID
 PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
 
-String curVersion = "2.0RC12";
-uint16_t versionForWeb = 2012;
+String curVersion = "2.0RC13";
+uint16_t versionForWeb = 2013;
 // Определяем переменные wifi
 String _ssid;      // Для хранения SSID
 String _password;  // Для хранения пароля сети
@@ -105,7 +105,8 @@ String nameProcessStep = " ";
 String commandWriteSD;
 bool startWriteSD = false;
 bool commandSD_en = false;
-bool CH1 = false;
+bool CH_all = false;		// для режима удержания
+bool CH1 = false;			// для отрисовки в настройках
 bool CH2 = false;
 bool CH3 = false;
 bool CH4 = false;
@@ -134,6 +135,8 @@ bool errT;
 unsigned long timePauseErrA;
 unsigned long timePauseErrT;
 
+uint8_t powerSendOld;
+
 float EEPROM_float_read(int addr) {
 	byte x[4];
 	for (byte i = 0; i < 4; i++) x[i] = EEPROM.read(i + addr);
@@ -159,7 +162,7 @@ void stop_Err() {
 }
 void check_Err() {
 	// датчики безопасности в каналах АЦП
-	if (pwmOut[3].member == 0 && adcIn[0].member == 1 && adcIn[0].allert == true) settingAlarm = true;
+	if ((pwmOut[3].member == 0 || processMode.allow == 1) && adcIn[0].member == 1 && adcIn[0].allert == true) settingAlarm = true;
 	else if (adcIn[1].member == 1 && adcIn[1].allert == true) { settingAlarm = true; errA = true; numCrashStop = 1; }
 	else if (adcIn[2].member == 1 && adcIn[2].allert == true) { settingAlarm = true; errA = true; numCrashStop = 2; }
 	else if (adcIn[3].member == 1 && adcIn[3].allert == true) { settingAlarm = true; errA = true; numCrashStop = 3; }

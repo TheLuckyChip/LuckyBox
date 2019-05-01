@@ -202,13 +202,19 @@ void distillationLoop() {
 	}
 	else power.heaterPower = 0;
 
-	if (processMode.number > 0) {
+	// Выключение повышенного напряжения на клапана
+	/*if (timeSetHighVoltage < millis()) {
+		if (pwmOut[8].invert == false) pwm.setPWM(PWM_CH9, 4096, 0);
+		else pwm.setPWM(PWM_CH9, 0, 4096);
+	}*/
+
+
 		// Пищалка для WEB и самой автоматики
 		if (timeAllertInterval > millis()) settingAlarm = true;
 		else settingAlarm = false;
 
 		// Проверка датчиков безопасности
-		if (processMode.step != 7 && !errA && !errT) check_Err();
+		if (processMode.step != 4 && !errA && !errT) check_Err();
 		if (timePauseErrA <= millis()) {
 			errA = false; check_Err();
 			if (errA) {
@@ -223,7 +229,7 @@ void distillationLoop() {
 				nameProcessStep = "Стоп по аварии T > " + String(temperatureSensor[numCrashStop].name);
 			}
 		}
-	}
+
 
 	switch (processMode.step) {
 		// пришли при старте дистилляции
@@ -262,12 +268,11 @@ void distillationLoop() {
 		}
 		case 1: {
 			// ждем нагрев куба до 80 градусов
-			if (temperatureSensor[DS_Cube].data >= 80.0) {
+			if (temperatureSensor[DS_Cube].data >= 30.0) {
 				csOn(PWM_CH3);			// включаем клапан подачи воды
 				csOff(PWM_CH6);			// выключить дополнительный ТЭН на разгон
 				power.heaterPower = power.inPowerLow;	// установили мощность на ТЭН
-				settingAlarm = true;	// подаем звуковой сигнал
-				timePauseOff = millis();// обнулим счетчик времени для зв.сигнала
+				timeAllertInterval = millis() + 10000;	// счетчик времени для зв.сигнала
 				processMode.timeStep = 0;
 				nameProcessStep = "Отбор СС";
 				processMode.step = 2;	// перешли на следующий шаг алгоритма
@@ -276,10 +281,10 @@ void distillationLoop() {
 		}
 		case 2: {
 			// проверяем время (10 сек.) чтобы выключить пищалку
-			if (adcIn[0].allert != true && (millis() - timePauseOff) >= 10000) {
-				settingAlarm = false;	// выключили звуковой сигнал
+			//if (processMode.timeStep >= 10) {
+			//	settingAlarm = false;	// выключили звуковой сигнал
 				processMode.step = 3;	// перешли на следующий шаг алгоритма
-			}
+			//}
 			break;
 		}
 		case 3: {
@@ -287,22 +292,17 @@ void distillationLoop() {
 			if (temperatureSensor[DS_Cube].data >= settingTank || (temperatureSensor[DS_Cube].data >= temperatureSensor[DS_Cube].allertValue && temperatureSensor[DS_Cube].allertValue > 0)) {
 				power.heaterStatus = 0;						// выключили ТЭН
 				power.heaterPower = 0;						// установили мощность 0%
-				timePauseOff = millis();					// обнулим счетчик времени для зв.сигнала
 				temperatureSensor[DS_Cube].allert = true;	// сигнализация для WEB
-				timeAllertInterval = millis() + 10000;		// установим счетчик времени для зв.сигнала
-				settingAlarm = true;						// подали звуковой сигнал
+				timeAllertInterval = millis() + 10000;	// счетчик времени для зв.сигнала						// подали звуковой сигнал
 				processMode.timeStep = 0;
 				nameProcessStep = "Процесс закончен";
 				processMode.step = 4;						// перешли на следующий шаг алгоритма
 			}
-			// если сработал датчик уровня жидкости подаем звуковой сигнал
-			else if (adcIn[0].allert == true) settingAlarm = true;	// подали звуковой сигнал
-			else settingAlarm = false;								// выключили звуковой сигнал
 			break;
 		}
 		case 4: {
 			// ждем 30 сек.
-			if ((millis() - timePauseOff) >= 30000) {
+			if (processMode.timeStep >= 30) {
 				csOff(PWM_CH1);		// закрыли клапан отбора
 				csOff(PWM_CH2);		// закрыли клапан отбора
 				csOff(PWM_CH3);		// закрыли клапан подачи воды

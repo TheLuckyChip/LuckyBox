@@ -13,6 +13,7 @@ void setup()
 	delay(200);
 
 	Serial.begin(115200);
+	//Serial.begin(9600);
 	Serial.println("");
 	Serial.println("");
 	Serial.println("Start Setup");

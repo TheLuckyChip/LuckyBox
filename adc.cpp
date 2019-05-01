@@ -60,10 +60,18 @@ void adcLoop() {
 		}
 		else power.heaterPowerCorr = 0;
 
-		//Serial.print("Power = "); Serial.println(power.heaterPowerCorr);
-		//Serial.print("min = "); Serial.println(minVoltage);
-		//Serial.print("max = "); Serial.println(maxVoltage);
-		//Serial.print("ADC Delta = "); Serial.println(Voltage);	
+		// отправим мощность для ТЕНа на внешнее устройство
+		if (powerSendOld != power.heaterPower) {
+			uint8_t crc_send = power.heaterPower + 0x6D;
+			Serial.write(0x41);
+			Serial.write(0x54);
+			Serial.write(0x2B);
+			Serial.write(0x70);
+			Serial.write(0x3D);
+			Serial.write(power.heaterPower);
+			Serial.write(crc_send);
+			powerSendOld = power.heaterPower;
+		}
 	}
 }
 

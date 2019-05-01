@@ -1,6 +1,6 @@
 //   Система автоматики винокура. 
 //   Проект центра открытого проектирования у Счастливчика https://LuckyCenter.ru
-//   Версия 2.0 Release Candidate 10
+//   Версия 2.0 Release Candidate 13
 
 #include "device_view.h"
 #include "pid_config.h"
@@ -28,11 +28,33 @@ void loop() {
 	//case 5: brewingLoop(); break;
 	case 6: deviceViewLoop(); break;
   }
-  
+
   if (processMode.allow < 3 || processMode.allow > 5) {
 	  adcLoop();
 	  heaterLoop();
+	  // прием мощности по UART
+	  if (Serial.available() > 0) {
+		  uint8_t uartRead = Serial.read();
+		  if (processMode.allow == 1) {
+			  if (processMode.step < 2) power.inPowerHigh = uartRead;
+			  else if (processMode.step < 4) power.inPowerLow = uartRead;
+		  }
+		  else if (processMode.allow == 2) {
+			  if (processMode.step < 2) power.inPowerHigh = uartRead;
+			  else if (processMode.step < 7) power.inPowerLow = uartRead;
+		  }
+	  }
+	  // Выключение повышенного напряжения на клапана
+	  if (CH_all == true) {
+		  CH_all = false;
+
+		  if (timeSetHighVoltage < millis()) {
+			  if (pwmOut[8].invert == false) pwm.setPWM(PWM_CH9, 4096, 0);
+			  else pwm.setPWM(PWM_CH9, 0, 4096);
+		  }
+	  }
   }
+
   sensorLoop();
   displayLoop();
   logfileLoop();

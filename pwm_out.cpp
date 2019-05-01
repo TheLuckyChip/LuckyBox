@@ -47,6 +47,7 @@ void csOff(byte ch) {
 void csOn(byte ch) {
 	if (ch == PWM_CH1) {
 		// включаем доп. подачу напряжения
+		CH_all = true;
 		if (pwmOut[8].invert == false) pwm.setPWM(PWM_CH9, 0, 4096);
 		else pwm.setPWM(PWM_CH9, 4096, 0);
 		timeSetHighVoltage = millis() + 500;
@@ -57,6 +58,7 @@ void csOn(byte ch) {
 	}
 	else if (ch == PWM_CH2) {
 		// включаем доп. подачу напряжения
+		CH_all = true;
 		if (pwmOut[8].invert == false) pwm.setPWM(PWM_CH9, 0, 4096);
 		else pwm.setPWM(PWM_CH9, 4096, 0);
 		timeSetHighVoltage = millis() + 500;
@@ -67,6 +69,7 @@ void csOn(byte ch) {
 	}
 	else if (ch == PWM_CH3) {
 		// включаем доп. подачу напряжения
+		CH_all = true;
 		if (pwmOut[8].invert == false) pwm.setPWM(PWM_CH9, 0, 4096);
 		else pwm.setPWM(PWM_CH9, 4096, 0);
 		timeSetHighVoltage = millis() + 500;
@@ -77,6 +80,7 @@ void csOn(byte ch) {
 	}
 	else if (ch == PWM_CH4) {
 		// включаем доп. подачу напряжения
+		CH_all = true;
 		if (pwmOut[8].invert == false) pwm.setPWM(PWM_CH9, 0, 4096);
 		else pwm.setPWM(PWM_CH9, 4096, 0);
 		timeSetHighVoltage = millis() + 500;
@@ -107,7 +111,7 @@ void csOn(byte ch) {
 	}
 	else {
 		pwm.setPWM(ch, 0, 4096);
-		delay(2);
+		delay(3);
 	}
 }
 // задать скважность ШИМ

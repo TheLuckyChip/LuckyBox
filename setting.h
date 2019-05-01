@@ -191,6 +191,7 @@ extern String nameProcessStep;
 extern String commandWriteSD;
 extern bool startWriteSD;
 extern bool commandSD_en;
+extern bool CH_all;
 extern bool CH1;
 extern bool CH2;
 extern bool CH3;
@@ -222,6 +223,8 @@ extern bool errA;
 extern bool errT;
 extern unsigned long timePauseErrA;
 extern unsigned long timePauseErrT;
+
+extern uint8_t powerSendOld;
 
 extern float EEPROM_float_read(int addr);
 extern void EEPROM_float_write(int addr, float val);
