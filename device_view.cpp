@@ -244,10 +244,6 @@ void deviceViewLoop() {
 			}
 		}
 	}
-	// Выключение повышенного напряжения на клапана
-	/*if (timeSetHighVoltage < millis()) {
-		if (pwmOut[8].invert == false) pwm.setPWM(PWM_CH9, 4096, 0);
-		else pwm.setPWM(PWM_CH9, 0, 4096);
-	}*/
+
 	yield();
 }

@@ -14,8 +14,8 @@
 #include "tft.h"
 #include <time.h>
 #include <PID_v1.h>
+#include "misc.h"
 
-//extern void loadEepromMashing();
 extern void initMashing();
 extern void loadEepromMashing();
 extern void handleMashingSensorTpl();

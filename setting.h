@@ -226,9 +226,4 @@ extern unsigned long timePauseErrT;
 
 extern uint8_t powerSendOld;
 
-extern float EEPROM_float_read(int addr);
-extern void EEPROM_float_write(int addr, float val);
-extern void stop_Err();
-void check_Err();
-
 #endif

@@ -66,7 +66,10 @@
 // Периодичность записи лог.файла на SD
 #define		SD_out_temp	10
 // Периодичность переподключения к потерянной точке доступа (роутеру) в секундах
-#define		setRestartWiFi		60
+//#define		setRestartWiFi		60
+// Температура перехода на пониженную мощность
+#define		DistillationTransitionTemperature	80
+#define		RefluxTransitionTemperature			55
 // Какой используем датчик давления
 //#define		Pressure_BMP085
 #define		Pressure_BMP180

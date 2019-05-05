@@ -2,7 +2,7 @@
 
 #include "distillation_mode.h"
 
-float settingTank = 99.5;                   // температура отключени¤ нагрева куба при дистилл¤ции браги в спирт-сырец
+bool valveOnOff;
 
 void loadEepromDistillation() {
 	int i;
@@ -202,34 +202,26 @@ void distillationLoop() {
 	}
 	else power.heaterPower = 0;
 
-	// Выключение повышенного напряжения на клапана
-	/*if (timeSetHighVoltage < millis()) {
-		if (pwmOut[8].invert == false) pwm.setPWM(PWM_CH9, 4096, 0);
-		else pwm.setPWM(PWM_CH9, 0, 4096);
-	}*/
+	// Пищалка для WEB и самой автоматики
+	if (timeAllertInterval > millis()) settingAlarm = true;
+	else settingAlarm = false;
 
-
-		// Пищалка для WEB и самой автоматики
-		if (timeAllertInterval > millis()) settingAlarm = true;
-		else settingAlarm = false;
-
-		// Проверка датчиков безопасности
-		if (processMode.step != 4 && !errA && !errT) check_Err();
-		if (timePauseErrA <= millis()) {
-			errA = false; check_Err();
-			if (errA) {
-				stop_Err();
-				nameProcessStep = "Стоп по аварии ADC > " + String(adcIn[numCrashStop].name);
-			}
+	// Проверка датчиков безопасности
+	if (processMode.step != 4 && !errA && !errT) check_Err();
+	if (timePauseErrA <= millis()) {
+		errA = false; check_Err();
+		if (errA) {
+			stop_Err();
+			nameProcessStep = "Стоп по аварии ADC > " + String(adcIn[numCrashStop].name);
 		}
-		if (timePauseErrT <= millis()) {
-			errT = false; check_Err();
-			if (errT) {
-				stop_Err();
-				nameProcessStep = "Стоп по аварии T > " + String(temperatureSensor[numCrashStop].name);
-			}
+	}
+	if (timePauseErrT <= millis()) {
+		errT = false; check_Err();
+		if (errT) {
+			stop_Err();
+			nameProcessStep = "Стоп по аварии T > " + String(temperatureSensor[numCrashStop].name);
 		}
-
+	}
 
 	switch (processMode.step) {
 		// пришли при старте дистилляции
@@ -255,8 +247,8 @@ void distillationLoop() {
 			csOff(TFT_CS);
 #endif
 			tempBigOut = 1;
-			if (pwmOut[0].member == 1) csOn(PWM_CH1);		// открыть клапан отбора
-			if (pwmOut[1].member == 1) csOn(PWM_CH2);		// открыть клапан отбора
+			//if (pwmOut[0].member == 1) csOn(PWM_CH1);		// открыть клапан отбора
+			//if (pwmOut[1].member == 1) csOn(PWM_CH2);		// открыть клапан отбора
 			power.heaterStatus = 1;							// включили нагрев
 			csOn(PWM_CH6);									// включить дополнительный ТЭН на разгон
 			power.heaterPower = power.inPowerHigh;			// установили мощность на ТЭН
@@ -268,7 +260,7 @@ void distillationLoop() {
 		}
 		case 1: {
 			// ждем нагрев куба до 80 градусов
-			if (temperatureSensor[DS_Cube].data >= 30.0) {
+			if (temperatureSensor[DS_Cube].data >= DistillationTransitionTemperature) {
 				csOn(PWM_CH3);			// включаем клапан подачи воды
 				csOff(PWM_CH6);			// выключить дополнительный ТЭН на разгон
 				power.heaterPower = power.inPowerLow;	// установили мощность на ТЭН
@@ -280,16 +272,13 @@ void distillationLoop() {
 			break;
 		}
 		case 2: {
-			// проверяем время (10 сек.) чтобы выключить пищалку
-			//if (processMode.timeStep >= 10) {
-			//	settingAlarm = false;	// выключили звуковой сигнал
-				processMode.step = 3;	// перешли на следующий шаг алгоритма
-			//}
+			valveOnOff = true;
+			processMode.step = 3;	// перешли на следующий шаг алгоритма
 			break;
 		}
 		case 3: {
 			// ждем достижения заданных температур
-			if (temperatureSensor[DS_Cube].data >= settingTank || (temperatureSensor[DS_Cube].data >= temperatureSensor[DS_Cube].allertValue && temperatureSensor[DS_Cube].allertValue > 0)) {
+			if (temperatureSensor[DS_Cube].data >= temperatureSensor[DS_Cube].allertValue && temperatureSensor[DS_Cube].allertValue > 0) {
 				power.heaterStatus = 0;						// выключили ТЭН
 				power.heaterPower = 0;						// установили мощность 0%
 				temperatureSensor[DS_Cube].allert = true;	// сигнализация для WEB
@@ -298,21 +287,43 @@ void distillationLoop() {
 				nameProcessStep = "Процесс закончен";
 				processMode.step = 4;						// перешли на следующий шаг алгоритма
 			}
+			// если выбраны для процесса клапана отбора, закроем их при срабатывании датчика уровня
+			if (adcIn[0].member == 1 && adcIn[0].allert == true) {
+				valveOnOff = true;
+				if (pwmOut[0].member == 1) csOff(PWM_CH1);		// закрыть клапан отбора
+				if (pwmOut[1].member == 1) csOff(PWM_CH2);		// закрыть клапан отбора
+				//setPWM(PWM_CH5, 0, 10);							// закрыть шаровый кран
+			}
+			else if (valveOnOff == true) {
+				valveOnOff = false;
+				if (pwmOut[0].member == 1) csOn(PWM_CH1);		// открыть клапан отбора
+				if (pwmOut[1].member == 1) csOn(PWM_CH2);		// открыть клапан отбора
+				//setPWM(PWM_CH5, 0, 2000);						// открыть шаровый кран
+			}
 			break;
 		}
 		case 4: {
-			// ждем 30 сек.
-			if (processMode.timeStep >= 30) {
-				csOff(PWM_CH1);		// закрыли клапан отбора
-				csOff(PWM_CH2);		// закрыли клапан отбора
+			csOff(PWM_CH6);								// выключить дополнительный ТЭН на разгон
+			power.heaterStatus = 0;						// выключили ТЭН
+			power.heaterPower = 0;						// установили мощность 0%
+
+			// ждем 10 сек. до выключения сигнализации
+			if (processMode.timeStep >= 10 || adcIn[2].allert == true) {
+				csOff(PWM_CH1);				// закрыли клапан отбора
+				csOff(PWM_CH2);				// закрыли клапан отбора
+				//setPWM(PWM_CH5, 0, 10);		// закрыть шаровый кран
+				settingAlarm = false;		// выключили звуковой сигнал
+			}
+			// ждем 5 минут. до выключения клапанов
+			if (processMode.timeStep >= 300 || adcIn[2].allert == true) {
 				csOff(PWM_CH3);		// закрыли клапан подачи воды
 				temperatureSensor[DS_Cube].allert = false;	// сигнализация для WEB
-				settingAlarm = false;	// выключили звуковой сигнал
 				processMode.allow = 0;  // вышли из режима дистилляции
 				processMode.step = 0;	// обнулили шаг алгоритма
 				commandWriteSD = "Процесс завершен";
 				commandSD_en = true;
 			}
+
 			break;
 		}
 	}
