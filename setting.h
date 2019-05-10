@@ -224,6 +224,9 @@ extern bool errT;
 extern unsigned long timePauseErrA;
 extern unsigned long timePauseErrT;
 
+extern bool alertEnable;
+extern bool alertLevelEnable;
+
 extern uint8_t powerSendOld;
 
 #endif

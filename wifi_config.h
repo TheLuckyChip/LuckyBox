@@ -14,6 +14,5 @@
 #include <ESP8266WiFi.h>
 
 extern void initWifi();
-extern void reconnectWiFi();
 
 #endif

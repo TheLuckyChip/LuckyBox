@@ -19,13 +19,14 @@ void stop_Err() {
 	timePauseOff = 60000 * 2 + millis();
 	if (processMode.allow == 1) processMode.step = 4;			// дистилляция
 	else if (processMode.allow == 2) {							// ректификация
-		processMode.step = 7;
+		if (processMode.number == 0) processMode.step = 4;
+		else processMode.step = 7;
 		if (processMode.number == 1 || processMode.number == 2) setPWM(PWM_CH5, 0, 10); // Закрыли отбор по пару
 	}
 }
 void check_Err() {
 	// датчики безопасности в каналах АЦП
-	if ((pwmOut[3].member == 0 || processMode.allow == 1) && adcIn[0].member == 1 && adcIn[0].allert == true) settingAlarm = true;
+	if ((pwmOut[3].member == 0 || processMode.allow == 1) && adcIn[0].member == 1 && adcIn[0].allert == true && alertLevelEnable == true) settingAlarm = true;
 	else if (adcIn[1].member == 1 && adcIn[1].allert == true) { settingAlarm = true; errA = true; numCrashStop = 1; }
 	else if (adcIn[2].member == 1 && adcIn[2].allert == true) { settingAlarm = true; errA = true; numCrashStop = 2; }
 	else if (adcIn[3].member == 1 && adcIn[3].allert == true) { settingAlarm = true; errA = true; numCrashStop = 3; }
@@ -56,6 +57,8 @@ void check_Err() {
 void serialLoop() {
 	if (Serial.available() > 0) {
 		uint8_t uartRead = Serial.read();
+
+		/*
 		if (processMode.allow == 1) {
 			if (processMode.step < 2) power.inPowerHigh = uartRead;
 			else if (processMode.step < 4) power.inPowerLow = uartRead;
@@ -64,6 +67,7 @@ void serialLoop() {
 			if (processMode.step < 2) power.inPowerHigh = uartRead;
 			else if (processMode.step < 7) power.inPowerLow = uartRead;
 		}
+		*/
 	}
 }
 

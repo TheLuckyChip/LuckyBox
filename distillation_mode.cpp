@@ -204,7 +204,7 @@ void distillationLoop() {
 
 	// Пищалка для WEB и самой автоматики
 	if (timeAllertInterval > millis()) settingAlarm = true;
-	else settingAlarm = false;
+	else if (errA == false && errT == false && adcIn[0].allert == false) settingAlarm = false;
 
 	// Проверка датчиков безопасности
 	if (processMode.step != 4 && !errA && !errT) check_Err();
@@ -226,6 +226,8 @@ void distillationLoop() {
 	switch (processMode.step) {
 		// пришли при старте дистилляции
 		case 0: {
+			alertEnable = true;
+			alertLevelEnable = true;
 			startWriteSD = true;
 			loadEepromDistillation();
 			EEPROM.begin(2048);

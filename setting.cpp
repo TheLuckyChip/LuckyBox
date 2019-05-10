@@ -135,4 +135,7 @@ bool errT;
 unsigned long timePauseErrA;
 unsigned long timePauseErrT;
 
+bool alertEnable = true;
+bool alertLevelEnable = true;
+
 uint8_t powerSendOld;
