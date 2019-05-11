@@ -13,8 +13,8 @@
 #include <time.h>
 #include "tft.h"
 #include "pwm_out.h"
-//#include "sd_card.h"
 #include <EEPROM.h>
+#include "misc.h"
 
 extern void loadEepromReflux();
 extern void initReflux();

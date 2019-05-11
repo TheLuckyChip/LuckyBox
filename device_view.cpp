@@ -11,15 +11,22 @@ void deviceTempAdcOutScreen() {
 	tft.setCursor(223, 2);
 	tft.setTextColor(ILI9341_LIGHTGREY, ILI9341_BLACK);
 	tft.print(time_ntp);
-	tft.setCursor(236, 26);
+	tft.setCursor(236, 22); //tft.setCursor(236, 26);
 	tft.setTextColor(ILI9341_CYAN, ILI9341_BLACK); // голубой
 	tft.printf("%d mm", (int)pressureSensor.data);
-	tft.setCursor(242, 52);
+	tft.setCursor(242, 42); //tft.setCursor(242, 52);
 	tft.setTextColor(ILI9341_ORANGE, ILI9341_BLACK); // оранжевый
 	if (Voltage > 999) Voltage = 999; // чтобы не выйти за пределы индикации в настройках
 	tft.printf("%d V", Voltage);
+	// вывод версии
+	tft.setTextSize(1);
+	tft.setTextColor(ILI9341_LIGHTGREY, ILI9341_BLACK);
+	tft.setCursor(199, 66);
+	tft.print("    SN: ");
+	tft.print(addrMacMod);
 
 	// вывод температур
+	tft.setTextSize(2);
 	tft.setCursor(0, 2);
 	if (DS_Cube != 10 && temperatureSensor[DS_Cube].color != ILI9341_BLACK) tft.setTextColor(temperatureSensor[DS_Cube].color, ILI9341_BLACK);
 	else tft.setTextColor(ILI9341_DARKDARK, ILI9341_BLACK);
@@ -196,8 +203,9 @@ void deviceViewLoop() {
 						}
 						else if (touchArea == 62) {
 							touchArea = 0;
-							if (CH2 == false) { CH2 = true; csOn(PWM_CH2); color = ILI9341_GREEN; }
-							else { CH2 = false; csOff(PWM_CH2); color = ILI9341_LIGHTGREY; }
+							uint16_t tap = (uint16_t)((float)(TapCorrection * percentCorrectSquare[20]) / 5);
+							if (CH2 == false) { CH2 = true; csOn(PWM_CH2); setPWM(PWM_CH5, 0, tap); color = ILI9341_GREEN; }
+							else { CH2 = false; csOff(PWM_CH2); setPWM(PWM_CH5, 0, 10); color = ILI9341_LIGHTGREY; }
 							tft.drawRect(90, 150, 60, 60, color); tft.drawRect(91, 151, 58, 58, color);
 							tft.setTextColor(color, ILI9341_BLACK);
 							tft.setCursor(109, 162);
@@ -244,5 +252,6 @@ void deviceViewLoop() {
 			}
 		}
 	}
+
 	yield();
 }

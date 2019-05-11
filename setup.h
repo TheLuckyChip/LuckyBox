@@ -31,7 +31,8 @@
 #include "pwm_out.h"
 #include "heater.h"
 #include <EEPROM.h>
-#include <time.h> 
+#include <time.h>
+#include "misc.h" 
 
 // Заставка для TFT при старте
 const PROGMEM uint8_t imageDataStartScreen[24000] = {
