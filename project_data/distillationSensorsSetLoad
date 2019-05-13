@@ -18,5 +18,6 @@
   "in1":{"value":0,"name":"Датчик протечки","member":0},
   "in2":{"value":0,"name":"","member":0},
   "in3":{"value":0,"name":"","member":0},
-  "in4":{"value":0,"name":"","member":0}
+  "in4":{"value":0,"name":"","member":0},
+  "transitionTemperature": 70
 }

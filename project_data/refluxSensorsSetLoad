@@ -20,5 +20,7 @@
   "in3":{"value":0,"name":"","member":0},
   "in4":{"value":0,"name":"","member":0},
   "stab":0,
-  "point":0
+  "point":0,
+  "transitionTemperature": 40,
+  "tapCorrection": 90
 }
