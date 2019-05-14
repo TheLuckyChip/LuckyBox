@@ -996,6 +996,9 @@ $(function () {
 			// console.log("plot", key, t);
 			if (re_t.test(key)) {
 				let sensorData = getSensorValue(key);
+				if (globalSensorsJson["process"]["allow"] === 3 && key === "t2") {
+					sensorData["name"] = "В струе";
+				}
 				plotNew.addSeries({
 					name: sensorData["name"],
 					color: "#"+dec2hex(sensorData["color"]),
