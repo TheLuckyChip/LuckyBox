@@ -228,5 +228,13 @@ extern bool alertEnable;
 extern bool alertLevelEnable;
 
 extern uint8_t powerSendOld;
+extern uint8_t RX_BUF_IO[8];
+extern uint8_t RXio_cnt;
+extern uint8_t RX_Pause;
+
+extern uint8_t DistillationTransitionTemperature;
+extern uint8_t RefluxTransitionTemperature;
+extern uint8_t TapCorrectionWeb;
+extern float TapCorrection;
 
 #endif

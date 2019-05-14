@@ -532,11 +532,13 @@ void handleProcessModeIn() {
 	if (processMode.allow == 1) {
 		// запись в EEPROM параметров мощности для дистилляции
 		power.inPowerHigh = HTTP.arg("powerHigh").toInt();
+		if (power.inPowerHigh > 100) power.inPowerHigh = 100;
 		if (power.inPowerHigh != EEPROM.read(1397)) {
 			EEPROM.write(1397, power.inPowerHigh);
 			allertSave = true;
 		}
 		power.inPowerLow = HTTP.arg("powerLower").toInt();
+		if (power.inPowerLow > 100) power.inPowerLow = 100;
 		if (power.inPowerLow != EEPROM.read(1398)) {
 			EEPROM.write(1398, power.inPowerLow);
 			allertSave = true;
@@ -545,11 +547,13 @@ void handleProcessModeIn() {
 	else if (processMode.allow == 2) {
 		// запись в EEPROM параметров мощности для ректификации
 		power.inPowerHigh = HTTP.arg("powerHigh").toInt();
+		if (power.inPowerHigh > 100) power.inPowerHigh = 100;
 		if (power.inPowerHigh != EEPROM.read(1497)) {
 			EEPROM.write(1497, power.inPowerHigh);
 			allertSave = true;
 		}
 		power.inPowerLow = HTTP.arg("powerLower").toInt();
+		if (power.inPowerLow > 100) power.inPowerLow = 100;
 		if (power.inPowerLow != EEPROM.read(1498)) {
 			EEPROM.write(1498, power.inPowerLow);
 			allertSave = true;
@@ -561,7 +565,9 @@ void handleProcessModeIn() {
 		// параметры для клапанов и шарового крана + запись в EEPROM
 		if (processMode.number == 1 || processMode.number == 3) {					// головы = Прима и РК по жиже
 			headTimeCycle = HTTP.arg("head[timeCycle]").toInt();
+			if (headTimeCycle > 30) headTimeCycle = 30;
 			headtimeOn = HTTP.arg("head[timeOn]").toFloat();
+			if (headtimeOn > 100) headtimeOn = 100;
 			if (headTimeCycle != EEPROM.read(1477)) {
 				EEPROM.write(1477, headTimeCycle);
 				allertSave = true;
@@ -573,8 +579,11 @@ void handleProcessModeIn() {
 		}
 		if (processMode.number == 3) {												// тело = РК по жиже
 			bodyTimeCycle = HTTP.arg("body[timeCycle]").toInt();
+			if (headTimeCycle > 30) headTimeCycle = 30;
 			bodytimeOn = HTTP.arg("body[timeOn]").toFloat();
+			if (headtimeOn > 100) headtimeOn = 100;
 			decline = HTTP.arg("body[decline]").toInt();
+			if (decline > 30) decline = 30;
 			if (bodyTimeCycle != EEPROM.read(1482)) {
 				EEPROM.write(1482, bodyTimeCycle);
 				allertSave = true;
@@ -590,6 +599,7 @@ void handleProcessModeIn() {
 		}
 		if (processMode.number == 2) {												// головы = По пару
 			headSteamPercent = HTTP.arg("headSteam[percent]").toInt();
+			if (headSteamPercent > 100) headSteamPercent = 100;
 			if (headSteamPercent != EEPROM.read(1490)) {
 				EEPROM.write(1490, headSteamPercent);
 				allertSave = true;
@@ -597,8 +607,11 @@ void handleProcessModeIn() {
 		}
 		if (processMode.number == 1 || processMode.number == 2) {					// тело = Прима и По пару
 			bodyPrimaPercentStart = HTTP.arg("bodyPrima[percentStart]").toInt();
+			if (bodyPrimaPercentStart > 100) bodyPrimaPercentStart = 100;
 			bodyPrimaPercentStop = HTTP.arg("bodyPrima[percentStop]").toInt();
+			if (bodyPrimaPercentStop > 100) bodyPrimaPercentStop = 100;
 			bodyPrimaDecline = HTTP.arg("bodyPrima[decline]").toInt();
+			if (bodyPrimaDecline > 30) bodyPrimaDecline = 30;
 			if (bodyPrimaPercentStart != EEPROM.read(1491)) {
 				EEPROM.write(1491, bodyPrimaPercentStart);
 				allertSave = true;
@@ -682,6 +695,9 @@ void sensorLoop() {
 	}
 
 	if (millis() >= timeSec) {
+
+		if (RX_Pause > 4) RX_Pause = 0;
+		else if (RX_Pause != 0) RX_Pause++;
 
 		timeSec = millis() + 1000;
 		processMode.timeStep++;

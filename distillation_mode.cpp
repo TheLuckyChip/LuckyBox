@@ -31,6 +31,8 @@ void loadEepromDistillation() {
 			tpl2web.adcMember[i] = EEPROM.read(index);  index++;
 			if (processMode.allow == 1) adcIn[i].member = tpl2web.adcMember[i];
 		}
+		DistillationTransitionTemperature = EEPROM.read(index);
+		if (DistillationTransitionTemperature > 100) DistillationTransitionTemperature = 80;
 	}
 	else {
 		for (i = 0; i < 8; i++) {
@@ -53,6 +55,7 @@ void loadEepromDistillation() {
 			tpl2web.adcMember[i] = 0;
 			if (processMode.allow == 1) adcIn[i].member = 0;
 		}
+		DistillationTransitionTemperature = 80;
 	}
 	EEPROM.end();
 }
@@ -137,7 +140,8 @@ void handleDistillationSensorSetLoad() {
 	dataForWeb += "\"in1\":{\"value\":" + String(adcIn[0].data) + ",\"name\":\"" + String(adcIn[0].name) + "\",\"member\":" + String(adcIn[0].member) + "},";
 	dataForWeb += "\"in2\":{\"value\":" + String(adcIn[1].data) + ",\"name\":\"" + String(adcIn[1].name) + "\",\"member\":" + String(adcIn[0].member) + "},";
 	dataForWeb += "\"in3\":{\"value\":" + String(adcIn[2].data) + ",\"name\":\"" + String(adcIn[2].name) + "\",\"member\":" + String(adcIn[0].member) + "},";
-	dataForWeb += "\"in4\":{\"value\":" + String(adcIn[3].data) + ",\"name\":\"" + String(adcIn[3].name) + "\",\"member\":" + String(adcIn[0].member) + "}}";
+	dataForWeb += "\"in4\":{\"value\":" + String(adcIn[3].data) + ",\"name\":\"" + String(adcIn[3].name) + "\",\"member\":" + String(adcIn[0].member) + "},";
+	dataForWeb += "\"transitionTemperature\":" + String(DistillationTransitionTemperature) + "}";
 
 	HTTP.send(200, "text/json", dataForWeb);
 }
@@ -170,6 +174,7 @@ void handleDistillationSensorSetSave() {
 		arg = "in" + String(i + 1);
 		adcIn[i].member = HTTP.arg(arg + "[member]").toInt();
 	}
+	DistillationTransitionTemperature = HTTP.arg("transitionTemperature").toInt();
 
 	// сохраним в EEPROM
 	EEPROM.begin(2048);
@@ -187,6 +192,7 @@ void handleDistillationSensorSetSave() {
 	for (i = 0; i < 4; i++) {
 		EEPROM.write(index, adcIn[i].member);  index++;
 	}
+	EEPROM.write(index, DistillationTransitionTemperature);
 
 	EEPROM.end();
 	delay(200);
@@ -287,6 +293,7 @@ void distillationLoop() {
 				timeAllertInterval = millis() + 10000;	// счетчик времени для зв.сигнала						// подали звуковой сигнал
 				processMode.timeStep = 0;
 				nameProcessStep = "Процесс закончен";
+				settingAlarm = true;
 				processMode.step = 4;						// перешли на следующий шаг алгоритма
 			}
 			// если выбраны для процесса клапана отбора, закроем их при срабатывании датчика уровня

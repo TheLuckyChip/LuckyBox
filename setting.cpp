@@ -13,8 +13,8 @@ ESP8266WebServer HTTP;
 // PID
 PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
 
-String curVersion = "2.0RC13";
-uint16_t versionForWeb = 2013;
+String curVersion = "2.0RC14";
+uint16_t versionForWeb = 2014;
 // Определяем переменные wifi
 String _ssid;      // Для хранения SSID
 String _password;  // Для хранения пароля сети
@@ -139,3 +139,11 @@ bool alertEnable = true;
 bool alertLevelEnable = true;
 
 uint8_t powerSendOld;
+uint8_t RX_BUF_IO[8];
+uint8_t RXio_cnt;
+uint8_t RX_Pause = 0;
+
+uint8_t DistillationTransitionTemperature = 80;
+uint8_t RefluxTransitionTemperature = 55;
+uint8_t TapCorrectionWeb = 120;
+float TapCorrection = 1.20;

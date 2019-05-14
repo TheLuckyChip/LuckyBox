@@ -732,6 +732,19 @@ $(function () {
 		$input.val(count);
 		//$input.change();
 	});
+	$(document).on("change",".number-group input.input-number",function () {
+		let $input = $(this);
+		let val = Number($input.val());
+		let min = Number($input.attr("min"));
+		let max = Number($input.attr("max"));
+		if(val < min){
+			$input.val(parseFloat(min));
+		}else if(val > max){
+			$input.val(parseFloat(max));
+		}else{
+			$input.val(parseFloat(val));
+		}
+	});
 
 	//поиск нужного значения в датчиках
 	function getSensorValue(key) {
@@ -1240,7 +1253,13 @@ $(function () {
 		'</div></div>'
 	;
 	//Привязка датчиков к процессу дистилляции, и запуск
-	let distillationProcess = {"sensors": {}, "powerHigh": 0, "powerLower": 0, "start": false};
+	let distillationProcess = {
+		"sensors": {},
+		"powerHigh": 0,
+		"powerLower": 0,
+		"start": false,
+		"transitionTemperature": 0
+	};
 	$(document).on('click', '#distillation_add_sensor', function (e) {
 		e.preventDefault();
 		let _this = $(this);
@@ -1256,6 +1275,7 @@ $(function () {
 			let tpl_temperature = '';
 			let tpl_devices = '';
 			let tpl_safety = '';
+			let tpl_stab = '';
 			for (let key in sensors) {
 				if (sensors.hasOwnProperty(key)/* && key !== "p1"*/) {
 					let sensor_name = (sensors[key].hasOwnProperty("name") ? sensors[key]["name"] : "");
@@ -1297,6 +1317,13 @@ $(function () {
 								'</tr>';
 						}
 					}
+
+					if (key === "transitionTemperature") {
+						tpl_stab += '<tr>' +
+							'<td>Температура в кубе перехода на рабочую мощность</td>' +
+							'<td colspan="3" class="text-center">' + returnTplHtml([{id: "transitionTemperature", value: sensors[key], min: '60', max: '100', step: '1'}], deltaTempl) + '</td>' +
+							'</tr>';
+					}
 				}
 			}
 			if (tpl_temperature !== '') {
@@ -1307,6 +1334,9 @@ $(function () {
 			}
 			if (tpl_safety !== '') {
 				section += '<tr><td colspan="4" class="text-center text-strong">Датчики безопасности</td></tr>' + tpl_safety;
+			}
+			if (tpl_stab !== '') {
+				section += '<tr><td colspan="4" class="text-center text-strong">Настройки колонны</td></tr>' + tpl_stab;
 			}
 			section += '</table></section>';
 			$.fn.openModal('Выбор датчиков для дистилляции', section, "modal-md", false, {
@@ -1336,6 +1366,7 @@ $(function () {
 								}
 							}
 						});
+						distillationProcess["transitionTemperature"] = Number($("#transitionTemperature").val());
 						$(this).closest(".modal").modal("hide");
 						$.fn.pasteDistillationSensors(true);
 					}
@@ -1381,7 +1412,8 @@ $(function () {
 			"in1": {"name": "", "member": 0},
 			"in2": {"name": "", "member": 0},
 			"in3": {"name": "", "member": 0},
-			"in4": {"name": "", "member": 0}
+			"in4": {"name": "", "member": 0},
+			"transitionTemperature": 0
 		};
 		let distillationTemplate = '';
 		let tpl_devices_body = '';
@@ -1414,6 +1446,7 @@ $(function () {
 				'</div>';
 			let tpl_cutoff_body = '';
 			let tpl_all_body = '';
+			sensorsDistillationSend["transitionTemperature"] = distillationProcess["transitionTemperature"];
 			$.each(distillationProcess["sensors"], function (i, e) {
 				//console.log(i,e);
 				let sensor_key = i;
@@ -1809,7 +1842,9 @@ $(function () {
 		"powerHigh": 0,
 		"powerLower": 0,
 		"number": 0,
-		"start": false
+		"start": false,
+		"transitionTemperature": 0,
+		"tapCorrection": 0
 	};//"devices":[],"safety":[],
 	$(document).on('click', '#reflux_add_sensor', function (e) {
 		e.preventDefault();
@@ -1884,6 +1919,18 @@ $(function () {
 							'<td colspan="3" class="text-center">' + returnTplHtml([{id: "point", value: sensors[key], min: '0', max: '60', step: '1'}], deltaTempl) + '</td>'+
 							'</tr>';
 					}
+					if(key === "transitionTemperature"){
+						tpl_stab += '<tr>'+
+							'<td>Температура в царге перехода на рабочую мощность</td>'+
+							'<td colspan="3" class="text-center">' + returnTplHtml([{id: "transitionTemperature", value: sensors[key], min: '30', max: '100', step: '1'}], deltaTempl) + '</td>'+
+							'</tr>';
+					}
+					if(key === "tapCorrection"){
+						tpl_stab += '<tr>'+
+							'<td>Коррекция угла открытия шарового крана</td>'+
+							'<td colspan="3" class="text-center">' + returnTplHtml([{id: "tapCorrection", value: sensors[key], min: '82', max: '170', step: '1'}], deltaTempl) + '</td>'+
+							'</tr>';
+					}
 				}
 			}
 			if (tpl_temperature !== '') {
@@ -1929,6 +1976,8 @@ $(function () {
 						});
 						refluxProcess["stab"] = Number($("#stab").val());
 						refluxProcess["point"] = Number($("#point").val());
+						refluxProcess["transitionTemperature"] = Number($("#transitionTemperature").val());
+						refluxProcess["tapCorrection"] = Number($("#tapCorrection").val());
 						$(this).closest(".modal").modal("hide");
 						$.fn.pasteRefluxSensors(true);
 					}
@@ -1984,7 +2033,9 @@ $(function () {
 			"in3": {"name": "", "member": 0},
 			"in4": {"name": "", "member": 0},
 			"stab": 0,
-			"point": 0
+			"point": 0,
+			"transitionTemperature": 0,
+			"tapCorrection": 0
 		};
 		let refluxTemplate = '';
 		let tpl_devices_body = '';
@@ -2043,6 +2094,8 @@ $(function () {
 
 			sensorsRefluxSend["stab"] = refluxProcess["stab"];
 			sensorsRefluxSend["point"] = refluxProcess["point"];
+			sensorsRefluxSend["transitionTemperature"] = refluxProcess["transitionTemperature"];
+			sensorsRefluxSend["tapCorrection"] = refluxProcess["tapCorrection"];
 
 			$.each(refluxProcess["sensors"], function (i, e) {
 				let sensor_key = i;

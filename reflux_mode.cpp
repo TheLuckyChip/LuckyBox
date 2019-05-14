@@ -53,7 +53,7 @@ void loadEepromReflux() {
 		decline = EEPROM.read(index); index++;
 		if (decline > 30) decline = 10;
 
-		timeStabilizationReflux = EEPROM.read(index); index++;
+		timeStabilizationReflux = EEPROM.read(index); index++;					// 1488
 		if (timeStabilizationReflux > 120) timeStabilizationReflux = 20;
 		timeBoilTubeSetReflux = EEPROM.read(index); index++;
 		if (timeBoilTubeSetReflux > 60) timeBoilTubeSetReflux = 10;
@@ -64,8 +64,14 @@ void loadEepromReflux() {
 		if (bodyPrimaPercentStart > 100) bodyPrimaPercentStart = 100;
 		bodyPrimaPercentStop = EEPROM.read(index); index++;
 		if (bodyPrimaPercentStop > 100) bodyPrimaPercentStop = 40;
-		bodyPrimaDecline = EEPROM.read(index);
+		bodyPrimaDecline = EEPROM.read(index); index++;
 		if (bodyPrimaDecline > 30) bodyPrimaDecline = 15;
+
+		RefluxTransitionTemperature = EEPROM.read(index); index++;
+		if (RefluxTransitionTemperature > 100) RefluxTransitionTemperature = 55;
+		TapCorrectionWeb = EEPROM.read(index);
+		if (TapCorrectionWeb > 170) TapCorrectionWeb = 120;
+		TapCorrection = (float)TapCorrectionWeb / 100;
 
 		power.inPowerHigh = EEPROM.read(1497);
 		if (power.inPowerHigh > 100) power.inPowerHigh = 100;
@@ -109,6 +115,11 @@ void loadEepromReflux() {
 		bodyPrimaDecline = 15;
 		timeStabilizationReflux = 20;
 		timeBoilTubeSetReflux = 10;
+		
+		RefluxTransitionTemperature = 55;
+		TapCorrectionWeb = 120;
+		TapCorrection = 1.20;
+		
 		power.inPowerHigh = 100;
 		power.inPowerLow = 65;
 		processMode.number = 0;
@@ -225,7 +236,8 @@ void handleRefluxSensorSetLoad() {
 	dataForWeb += "\"in2\":{\"value\":" + String(adcIn[1].data) + ",\"name\":\"" + String(adcIn[1].name) + "\",\"member\":" + String(adcIn[0].member) + "},";
 	dataForWeb += "\"in3\":{\"value\":" + String(adcIn[2].data) + ",\"name\":\"" + String(adcIn[2].name) + "\",\"member\":" + String(adcIn[0].member) + "},";
 	dataForWeb += "\"in4\":{\"value\":" + String(adcIn[3].data) + ",\"name\":\"" + String(adcIn[3].name) + "\",\"member\":" + String(adcIn[0].member) + "},";
-	dataForWeb += "\"stab\":" + String(timeStabilizationReflux) + ",\"point\":" + String(timeBoilTubeSetReflux) + "}";
+	dataForWeb += "\"stab\":" + String(timeStabilizationReflux) + ",\"point\":" + String(timeBoilTubeSetReflux) + ",";
+	dataForWeb += "\"transitionTemperature\":" + String(RefluxTransitionTemperature) + ",\"tapCorrection\":" + String(TapCorrectionWeb) + "}";
 	HTTP.send(200, "text/json", dataForWeb);
 }
 // Прием выбранных датчиков
@@ -268,6 +280,9 @@ void handleRefluxSensorSetSave() {
 	}
 	timeStabilizationReflux = HTTP.arg("stab").toInt();
 	timeBoilTubeSetReflux = HTTP.arg("point").toInt();
+	RefluxTransitionTemperature = HTTP.arg("transitionTemperature").toInt();
+	TapCorrectionWeb = HTTP.arg("tapCorrection").toInt();
+	TapCorrection = (float)TapCorrectionWeb / 100;
 	HTTP.send(200, "text/json", "{\"result\":\"ok\"}");
 
 	// сохраним в EEPROM
@@ -291,6 +306,9 @@ void handleRefluxSensorSetSave() {
 	index = 1488;
 	EEPROM.write(index, timeStabilizationReflux); index++;
 	EEPROM.write(index, timeBoilTubeSetReflux);
+	index = 1494;
+	EEPROM.write(index, RefluxTransitionTemperature); index++;
+	EEPROM.write(index, TapCorrectionWeb);
 	
 	EEPROM.end();
 	delay(200);
@@ -470,6 +488,7 @@ void rfluxLoopMode_1() {
 				processMode.timeStep = 0;
 				stepNext = 0;
 				nameProcessStep = "Процесс закончен";
+				settingAlarm = true;
 				processMode.step = 4;
 			}
 
@@ -602,6 +621,7 @@ void rfluxLoopMode_2() {
 				// Закрыли отбор по пару
 				setPWM(PWM_CH5, 0, 10);
 				nameProcessStep = "Процесс закончен";
+				settingAlarm = true;
 				processMode.step = 7;						// перешли на следующий шаг алгоритма
 			}
 
@@ -631,6 +651,7 @@ void rfluxLoopMode_2() {
 					// Закрыли отбор по пару
 					setPWM(PWM_CH5, 0, 10);
 					nameProcessStep = "Процесс закончен";
+					settingAlarm = true;
 					timePauseOff = 60000 * 20 + millis();
 					processMode.step = 7;						// перешли на следующий шаг алгоритма
 				}
@@ -814,6 +835,7 @@ void rfluxLoopMode_3() {
 				// Закрыли отбор по пару
 				setPWM(PWM_CH5, 0, 10);
 				nameProcessStep = "Процесс закончен";
+				settingAlarm = true;
 				processMode.step = 7;						// перешли на следующий шаг алгоритма
 			}
 
@@ -842,6 +864,7 @@ void rfluxLoopMode_3() {
 					// Закрыли отбор по пару
 					setPWM(PWM_CH5, 0, 10);
 					nameProcessStep = "Процесс закончен";
+					settingAlarm = true;
 					timePauseOff = 60000 * 20 + millis();
 					processMode.step = 7;						// перешли на следующий шаг алгоритма
 				}
@@ -1011,6 +1034,7 @@ void rfluxLoopMode_4() {
 				else timePauseOff = 60000 * 2 + millis();
 				processMode.timeStep = 0;
 				nameProcessStep = "Процесс закончен";
+				settingAlarm = true;
 				processMode.step = 7;						// перешли на следующий шаг алгоритма
 				stepNext = 0;
 			}
@@ -1031,6 +1055,7 @@ void rfluxLoopMode_4() {
 					csOn(PWM_CH4);								// включаем клапан слива ПБ
 					processMode.timeStep = 0;
 					nameProcessStep = "Процесс закончен";
+					settingAlarm = true;
 					timePauseOff = 60000 * 20 + millis();
 					processMode.step = 7;						// перешли на следующий шаг алгоритма
 				}
