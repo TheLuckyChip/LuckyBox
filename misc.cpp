@@ -55,19 +55,29 @@ void check_Err() {
 
 // прием мощности по UART
 void serialLoop() {
-	if (Serial.available() > 0) {
-		uint8_t uartRead = Serial.read();
+	while (Serial.available()) {
 
-		/*
-		if (processMode.allow == 1) {
-			if (processMode.step < 2) power.inPowerHigh = uartRead;
-			else if (processMode.step < 4) power.inPowerLow = uartRead;
+		RX_BUF_IO[RXio_cnt] = Serial.read();
+		RXio_cnt++;
+
+		if (RXio_cnt == 1 && RX_BUF_IO[0] != 0x41) RXio_cnt = 0;
+		else if (RXio_cnt == 7) {
+			uint8_t crc_calc = RX_BUF_IO[0] + RX_BUF_IO[1] + RX_BUF_IO[2] + RX_BUF_IO[3] + RX_BUF_IO[4] + RX_BUF_IO[5];
+			if (RX_BUF_IO[1] == 0x54 && RX_BUF_IO[2] == 0x2B && RX_BUF_IO[3] == 0x50 && RX_BUF_IO[4] == 0x3D && RX_BUF_IO[6] == crc_calc) {
+				RXio_cnt = 0;
+				if (processMode.allow == 1 && RX_BUF_IO[5] <= 100) {
+					if (processMode.step < 2) power.inPowerHigh = RX_BUF_IO[5];
+					else if (processMode.step < 4) power.inPowerLow = RX_BUF_IO[5];
+				}
+				else if (processMode.allow == 2 && RX_BUF_IO[5] <= 100) {
+					if (processMode.step < 2) power.inPowerHigh = RX_BUF_IO[5];
+					else if (processMode.step < 7) power.inPowerLow = RX_BUF_IO[5];
+				}
+			}
 		}
-		else if (processMode.allow == 2) {
-			if (processMode.step < 2) power.inPowerHigh = uartRead;
-			else if (processMode.step < 7) power.inPowerLow = uartRead;
-		}
-		*/
+
+		if (RXio_cnt > 7) RXio_cnt = 0;
+		RX_Pause = 1;
 	}
 }
 

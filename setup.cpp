@@ -10,14 +10,6 @@ void setup()
 	power.inPowerHigh = 100;
 	power.inPowerLow = 65;
 
-	delay(200);
-
-	Serial.begin(115200);
-	//Serial.begin(9600);
-	Serial.println("");
-	Serial.println("");
-	Serial.println("Start Setup");
-
 	String addrMac = WiFi.softAPmacAddress();
 	addrMacMod = "            ";
 	addrMacMod[0] = addrMac[0];	addrMacMod[1] = addrMac[1];
@@ -67,6 +59,11 @@ void setup()
 	delay(10);
 	csOff(TFT_RES_PRG);
 	delay(2);
+
+	Serial.begin(115200);
+	Serial.println("");
+	Serial.println("");
+	Serial.println("Start Setup");
 
 	EEPROM.begin(2048);
 	StateDsReset = EEPROM.read(0);
@@ -166,6 +163,7 @@ void setup()
 #endif
 
 	csOff(TFT_CS);
+
 	// инициализация SD карты
 	sdInit();
 	csOn(TFT_CS);

@@ -61,13 +61,13 @@ void adcLoop() {
 		else power.heaterPowerCorr = 0;
 
 		// отправим мощность для ТЕНа на внешнее устройство
-		if (powerSendOld != power.heaterPower) {
+		if (powerSendOld != power.heaterPower && RX_Pause == 0) {
 			uint8_t crc_send = power.heaterPower + 0x6D;
-			Serial.write(0x41);
-			Serial.write(0x54);
-			Serial.write(0x2B);
-			Serial.write(0x70);
-			Serial.write(0x3D);
+			Serial.write(0x41);		// A
+			Serial.write(0x54);		// T
+			Serial.write(0x2B);		// +
+			Serial.write(0x70);		// p
+			Serial.write(0x3D);		// =
 			Serial.write(power.heaterPower);
 			Serial.write(crc_send);
 			powerSendOld = power.heaterPower;
