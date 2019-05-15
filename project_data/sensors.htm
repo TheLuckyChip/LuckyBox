@@ -412,28 +412,6 @@
 			</div>
 			</div>
 			</div>
-			<div class="row">
-			<div class="col-xs-12 text-center pt-10">
-				<strong>Схема подключения датчиков и устройств к коммерческой версии LuckyBox</strong>
-			</div>
-			</div>
-			<div class="row">
-				<div class="col-xs-12 text-center pt-10 pb-10">
-					<a href="#" class="pop">
-						<img src="connectors.jpg" style="width: 400px; height: 585px;">
-					</a>
-				</div>
-				<div class="modal fade" id="imagemodal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-					<div class="modal-dialog" data-dismiss="modal">
-						<div class="modal-content"  >
-							<div class="modal-body">
-								<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Закрыть</span></button>
-								<img src="" class="imagepreview" style="width: 100%;" >
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
 		</div>
 	</div>
 </div>
@@ -446,12 +424,5 @@ $(function() {
 		//console.log(color,id);
 		$("#svg_sensor_color_"+id).css('fill',color);
 	};
-	$(function() {
-		$('.pop').on('click', function(e) {
-			e.preventDefault();
-			$('.imagepreview').attr('src', $(this).find('img').attr('src'));
-			$('#imagemodal').modal('show');
-		});
-	});
 });
 </script>
