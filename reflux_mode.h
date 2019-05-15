@@ -14,13 +14,9 @@
 #include "tft.h"
 #include "pwm_out.h"
 #include <EEPROM.h>
+#include "misc.h"
 
-extern float settingColumn;
-extern float temperatureStartPressure;
-extern float settingColumnShow;
-extern float temperatureAlcoholBoil;
-
-//extern void loadEepromReflux();
+extern void loadEepromReflux();
 extern void initReflux();
 extern void handleRefluxSensorTpl();
 extern void handleRefluxSensorSetLoad();

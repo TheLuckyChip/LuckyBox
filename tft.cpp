@@ -203,7 +203,13 @@ void tftStartForGraph() {
 	if (processMode.allow == 1) drawScreen4bitMonoBitmap(0, 10, 32, 32, imageProcessDistillation);
 	else if (processMode.allow == 2) drawScreen4bitMonoBitmap(0, 10, 32, 32, imageProcessRectification);
 	else if (processMode.allow == 3) drawScreen4bitMonoBitmap(0, 10, 32, 32, imageProcessMashing);
-	else if (processMode.allow == 4) tft.print("PID set");
+	else if (processMode.allow == 4) {
+		tft.setTextSize(1);
+		tft.print(utf8rus("Настройка"));
+		tft.setTextSize(2);
+		tft.setCursor(0, 16);
+		tft.print("PID");
+	}
 
 	if (DS_Cube == 10) dallas_graph[0].color = ILI9341_DARKDARK;
 	else if (temperatureSensor[DS_Cube].color == 0) dallas_graph[0].color = 0xFC4C; // розовый
@@ -338,9 +344,13 @@ void tftOutText(int temp_min, int temp_max) {
 				else if (processMode.step < 4) tft.print(utf8rus(" Стаб."));
 				else if (processMode.step < 6) tft.print(utf8rus("Головы"));
 				else if (processMode.step < 7) tft.print(utf8rus("  Тело"));
-				else tft.print(utf8rus("Стоп  "));
+				else tft.print(utf8rus("  Стоп"));
 			}
-			else tft.print(utf8rus(" Отбор"));
+			// ручной режим ректификации
+			else {
+				if (processMode.step < 2) tft.print(utf8rus("Нагрев"));
+				else tft.print(utf8rus(" Отбор"));
+			}
 			// время шага
 			tft.setCursor(42, 20);
 			if (processMode.timeStep < 36000) tft.print(" ");
@@ -539,12 +549,22 @@ void tftOutText(int temp_min, int temp_max) {
 			if ((processMashing[3].time * 60) >= processMode.timeStep) timeOutTFT = (processMashing[3].time * 60) - processMode.timeStep;
 			else timeOutTFT = 0;
 		}
+		else if (processMashing[4].step == 1) {
+			tempOutTFT = processMashing[4].temperature;
+			if ((processMashing[4].time * 60) >= processMode.timeStep) timeOutTFT = (processMashing[4].time * 60) - processMode.timeStep;
+			else timeOutTFT = 0;
+		}
+		else if (processMashing[5].step == 1) {
+			tempOutTFT = processMashing[5].temperature;
+			if ((processMashing[5].time * 60) >= processMode.timeStep) timeOutTFT = (processMashing[5].time * 60) - processMode.timeStep;
+			else timeOutTFT = 0;
+		}
 
 		// время
 		tft.setTextSize(2);
 		tft.setCursor(0, 47);
 		tft.setTextColor(ILI9341_LIGHTGREY, ILI9341_BLACK);
-		if (processMode.step < 9) {
+		if (processMode.step < 11) {
 			if (timeOutTFT == 0) tft.print(utf8rus(" Пауза    "));
 			else if (processMode.timeStep <= 1) tft.printf("> %.1f min. = ", timeOutTFT / 60);
 			else tft.printf(" %.1f min. = ", timeOutTFT / 60);
@@ -715,10 +735,10 @@ void tftStopLoop() {
 		}
 		else if (touchArea == 22) { // Да - останавливаем процесс и выходим в меню
 			if (processMode.allow == 6) {
-				CH1 = false; csOff(PWM_CH1);
-				CH2 = false; csOff(PWM_CH2);
-				CH3 = false; csOff(PWM_CH3);
-				CH4 = false; csOff(PWM_CH4);
+				CH1 = false;
+				CH2 = false;
+				CH3 = false;
+				CH4 = false;
 			}
 			if (processMode.allow < 4) {
 				commandWriteSD = "TouchSend: Стоп";
@@ -728,6 +748,13 @@ void tftStopLoop() {
 			processMode.allow = 0;
 			touchArea = 0;
 			touchScreen = 0;
+			// Закрыли отбор по пару
+			//setPWM(PWM_CH5, 0, 10);
+			//settingAlarm = false;
+			//csOff(PWM_CH1);
+			//csOff(PWM_CH2);
+			//csOff(PWM_CH3);
+			//csOff(PWM_CH4);
 		}
 		yield();
 	}
@@ -735,18 +762,21 @@ void tftStopLoop() {
 
 void getTouchArea() {
 	if (touchArea == 1) {
+		//touchStart = true;
 		commandWriteSD = "TouchSend: Старт";
 		commandSD_en = true;
 		processMode.allow = 1;
 		processMode.step = 0;
 	}
 	else if (touchArea == 2) {
+		//touchStart = true;
 		commandWriteSD = "TouchSend: Старт";
 		commandSD_en = true;
 		processMode.allow = 2;
 		processMode.step = 0;
 	}
 	else if (touchArea == 3) {
+		//touchStart = true;
 		commandWriteSD = "TouchSend: Старт";
 		commandSD_en = true;
 		processMode.allow = 3;
@@ -770,10 +800,15 @@ void tftMenuLoop() {
 		csOff(PWM_CH2);
 		csOff(PWM_CH3);
 		csOff(PWM_CH4);
-		csOff(PWM_CH5);
-		csOff(PWM_CH6);
-		csOff(PWM_CH7);
-		csOff(PWM_CH8);
+		csOff(PWM_CH6);		// выключить дополнительный ТЭН на разгон
+		// Закрыли отбор по пару
+		setPWM(PWM_CH5, 0, 10);
+		// Для затирания
+		processMashing[0].step = 0;
+		processMashing[1].step = 0;
+		processMashing[2].step = 0;
+		processMashing[3].step = 0;
+		processMashing[4].step = 0;
 	}
 #if defined TFT_Display
 	// processMode.num = 0 вывод экрана, processMode.num = 1 ждем нажатия

@@ -11,12 +11,11 @@
 #include "setting.h"
 #include "user_config.h"
 #include <time.h>
-//#include "time_config.h"
 #include "pwm_out.h"
 #include "tft.h"
 #include <EEPROM.h>
+#include "misc.h"
 
-//extern void loadEepromDistillation();
 extern void initDistillation();
 extern void handleDistillationTpl();
 extern void handleDistillationSensorSetLoad();

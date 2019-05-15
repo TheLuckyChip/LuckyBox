@@ -9,10 +9,11 @@
 #endif
 
 #include "user_config.h"
-
+#include "pwm_out.h"
 #include <Ticker.h>
 #include <Adafruit_PWMServoDriver.h>
 #include <ESP8266WebServer.h>
+#include <EEPROM.h>
 #include <PID_v1.h>
 
 struct TPL_Str
@@ -31,6 +32,7 @@ struct DS_Str
 	byte		addr[8];		// серийный номер датчика
 	byte		num;			// порядковый номер датчика
 	bool		member;			// участвует в выводе или нет
+	byte		timeErr;		// секунды ошибочного опроса (не совпала CRC)
 	float		data;			// значение температуры
 	float		dataT[4];		// значение температуры для усреднения и исключения глюков опроса
 	uint16_t	color;			// цвет для графика
@@ -94,7 +96,7 @@ extern struct BMP_Str pressureSensor;
 extern struct OUT_Pwm pwmOut[PWM_Cnt];
 extern struct IN_Adc adcIn[ADC_Cnt];
 extern struct PR_Type processMode;
-extern struct PR_Mashing processMashing[4];
+extern struct PR_Mashing processMashing[5];
 extern struct PR_Power power;
 
 extern Ticker tickerSet;
@@ -109,10 +111,10 @@ extern ESP8266WebServer HTTP;
 
 extern PID myPID;
 
-// Для файловой системы
-//extern fs::File fsUploadFile;
+extern uint16_t percentCorrectSquare[];
 
 extern String curVersion;
+extern uint16_t versionForWeb;
 // Определяем переменные wifi
 extern String _ssid;
 extern String _password;
@@ -126,9 +128,12 @@ extern bool tftInvert;
 extern String jsonConfig;
 extern int port;
 extern int timezone;
+extern uint8_t StateDsReset;
 extern byte DS_Count;
 extern int temp_min;
 extern int temp_max;
+extern unsigned long timeSecDsRead;
+extern byte byteDsRead;
 extern byte DS_Cube;
 extern byte DS_Tube;
 extern byte DS_Out;
@@ -146,21 +151,24 @@ extern uint16_t graphOutInterval;
 extern uint16_t scaleCount;
 extern byte tempBigOut;
 extern byte tempBigOutOld;
+extern bool reSetTemperatureStartPressure;
+//extern bool settingColumnSet;
 extern float settingBoilTube;
 extern float settingColumn;
 extern float temperatureStartPressure;
 extern float settingColumnShow;
 extern float temperatureAlcoholBoil;
 extern float temperatureCubeAlcohol;
-extern unsigned long sensorTimeRead;
-extern unsigned long touchTimeRead;
+extern uint8_t counterStartStop;
+extern uint8_t sensorNumberRead;
+extern unsigned long timeSec;
 extern bool settingAlarm;
 extern bool headValve;
 extern unsigned long headValveOn;
 extern unsigned long headValveOff;
 extern byte touchArea;
 extern byte touchScreen;
-//extern uint8_t State;
+extern byte touchScreenDV;
 extern boolean outHeater;
 extern uint16_t Voltage;
 extern uint16_t servoOld;
@@ -181,10 +189,52 @@ extern unsigned long stepStartTime;
 extern unsigned long wifiTimeInterval;
 extern String nameProcessStep;
 extern String commandWriteSD;
+extern bool startWriteSD;
 extern bool commandSD_en;
+extern bool CH_all;
 extern bool CH1;
 extern bool CH2;
 extern bool CH3;
 extern bool CH4;
+extern unsigned long timeSetHighVoltage;
+
+// для импульсного режима руления клапанам
+// для web
+extern uint8_t headTimeCycle;
+extern float headtimeOn;
+extern uint8_t bodyTimeCycle;
+extern float bodytimeOn;
+extern uint8_t decline;
+extern unsigned long bodyTimeOffCount;
+// для управления шаровым краном
+extern uint8_t headSteamPercent;        // % открытия шарового крана на отборе голов по пару
+extern uint8_t bodyPrimaPercentStart;	// % открытия шарового крана в начале отбора тела
+extern uint8_t bodyPrimaPercentStop;	// % открытия шарового крана в конце отбора тела
+extern uint8_t bodyPrimaDecline;		// % уменьшения открытия шарового крана по старт/стопу
+// переход на следующий шаг
+extern uint8_t stepNext;
+// подтверждение обмена в web
+extern uint8_t answer;
+extern uint8_t timeStabilizationReflux;
+extern uint8_t timeBoilTubeSetReflux;
+// Для датчиков безопасности
+extern uint8_t numCrashStop;
+extern bool errA;
+extern bool errT;
+extern unsigned long timePauseErrA;
+extern unsigned long timePauseErrT;
+
+extern bool alertEnable;
+extern bool alertLevelEnable;
+
+extern uint8_t powerSendOld;
+extern uint8_t RX_BUF_IO[8];
+extern uint8_t RXio_cnt;
+extern uint8_t RX_Pause;
+
+extern uint8_t DistillationTransitionTemperature;
+extern uint8_t RefluxTransitionTemperature;
+extern uint8_t TapCorrectionWeb;
+extern float TapCorrection;
 
 #endif

@@ -51,20 +51,27 @@ void adcLoop() {
 		float deltaPercent = 100 - (Voltage / 2.3);
 
 		// вычислим коррекцию для ТЭНа
-		if (power.heaterPower > 0) {
-			//if (outHeater == HIGH) {
+		if (power.heaterPower == 100) power.heaterPowerCorr = 100;
+		else if (power.heaterPower > 0) {
 			deltaPercent /= (100 / power.heaterPower);
 			if ((power.heaterPower + deltaPercent) <= 100 && (power.heaterPower + deltaPercent) >= 0) power.heaterPowerCorr = uint8_t(power.heaterPower + deltaPercent);
 			else if ((power.heaterPower + deltaPercent) > 100) power.heaterPowerCorr = 100;
 			else if ((power.heaterPower + deltaPercent) < 0) power.heaterPowerCorr = 0;
-			//}
 		}
 		else power.heaterPowerCorr = 0;
 
-		//Serial.print("Power = "); Serial.println(power.heaterPowerCorr);
-		//Serial.print("min = "); Serial.println(minVoltage);
-		//Serial.print("max = "); Serial.println(maxVoltage);
-		//Serial.print("ADC Delta = "); Serial.println(Voltage);	
+		// отправим мощность для ТЕНа на внешнее устройство
+		if (powerSendOld != power.heaterPower && RX_Pause == 0) {
+			uint8_t crc_send = power.heaterPower + 0x6D;
+			Serial.write(0x41);		// A
+			Serial.write(0x54);		// T
+			Serial.write(0x2B);		// +
+			Serial.write(0x70);		// p
+			Serial.write(0x3D);		// =
+			Serial.write(power.heaterPower);
+			Serial.write(crc_send);
+			powerSendOld = power.heaterPower;
+		}
 	}
 }
 

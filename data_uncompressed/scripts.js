@@ -732,6 +732,19 @@ $(function () {
 		$input.val(count);
 		//$input.change();
 	});
+	$(document).on("change",".number-group input.input-number",function () {
+		let $input = $(this);
+		let val = Number($input.val());
+		let min = Number($input.attr("min"));
+		let max = Number($input.attr("max"));
+		if(val < min){
+			$input.val(parseFloat(min));
+		}else if(val > max){
+			$input.val(parseFloat(max));
+		}else{
+			$input.val(parseFloat(val));
+		}
+	});
 
 	//поиск нужного значения в датчиках
 	function getSensorValue(key) {
@@ -749,7 +762,7 @@ $(function () {
 	//Флаг отправки данных процесса в МК
 	//let flagSendProcess = false;
 	//Интервал запуска процесса
-	let sensorsProcessId = false;
+	let sensorsProcessId = 0;
 	//регекспы для датчиков
 	const re_p = new RegExp(/p1/);
 	const re_t = new RegExp(/^t/);
@@ -764,11 +777,14 @@ $(function () {
 		{"value":0,"text":"Ручной режим, только сигнализация"},
 		{"value":1,"text":"Прима отбор по пару (головная фракция по жидкости)"},
 		{"value":2,"text":"Отбор по пару"},
-		{"value":3,"text":"РК по жидкости 1 клапан (головы - импульсы, тело - дельта)"},
-		{"value":4,"text":"РК по жидкости 2 клапана (головы - импульсы, тело - дельта)"},
-		{"value":5,"text":"РК по жидкости 2 клапана (головы - открыт, тело - дельта)"},
-		{"value":6,"text":"Бражная колонна, регулировка отбора охлаждением"},
-		{"value":7,"text":"Бражная колонна, регулировка отбора мощностью"}
+		{"value":3,"text":"РК по жидкости"},
+		{"value":4,"text":"Бражная колонна, регулировка отбора охлаждением"},
+		{"value":5,"text":"Бражная колонна, регулировка отбора мощностью"}
+		// {"value":3,"text":"РК по жидкости 1 клапан (головы - импульсы, тело - дельта)"},
+		// {"value":4,"text":"РК по жидкости 2 клапана (головы - импульсы, тело - дельта)"},
+		// {"value":5,"text":"РК по жидкости 2 клапана (головы - открыт, тело - дельта)"},
+		// {"value":6,"text":"Бражная колонна, регулировка отбора охлаждением"},
+		// {"value":7,"text":"Бражная колонна, регулировка отбора мощностью"}
 	];
 	//Глобальный объект dtoReceiver служит для опроса МК.
 	let dtoReceiver = {
@@ -980,6 +996,9 @@ $(function () {
 			// console.log("plot", key, t);
 			if (re_t.test(key)) {
 				let sensorData = getSensorValue(key);
+				if (globalSensorsJson["process"]["allow"] === 3 && key === "t2") {
+					sensorData["name"] = "В струе";
+				}
 				plotNew.addSeries({
 					name: sensorData["name"],
 					color: "#"+dec2hex(sensorData["color"]),
@@ -1178,12 +1197,12 @@ $(function () {
 		'<div class="row row-striped">' +
 		'<div class="pt-10 clearfix">' +
 		'<div class="col-xs-12 col-sm-4 text-center-xs text-middle text-strong">Атмосферное давление</div>' +
-		'<div class="col-xs-5 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle text-strong"><span id="reflux_pressure"></span> <span class="hidden">мм рт.ст.</span></div>' +
+		'<div class="col-xs-12 col-sm-3 text-center text-middle text-strong"><span id="reflux_pressure"></span> <span class="hidden">мм рт.ст.</span></div>' +
 		'</div>' +
 		//'<div class="row row-striped">' +
 		'<div class="pb-10 clearfix">' +
 		'<div class="col-xs-12 col-sm-4 text-center-xs text-middle text-strong">t&#176 кипения спирта при данном давлении</div>' +
-		'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle text-strong"><span id="reflux_alco_boil"></span><span class="hidden">&#176С</span></div>' +
+		'<div class="col-xs-12 col-sm-3 text-center text-middle text-strong"><span id="reflux_alco_boil"></span><span class="hidden">&#176С</span></div>' +
 		'</div>' +
 		'</div>';
 	const deltaTempl =
@@ -1232,12 +1251,18 @@ $(function () {
 		returnTplHtml([{id: "${id_temperature}", value: "${value_temperature}", min: '0', max: '100', step: '1'}], deltaTempl) +
 		'</div>' +
 		'<div class="col-xs-2 col-xs-offset-0 col-sm-3 col-sm-offset-0 text-center text-middle">' +
-		'<label class="checkbox-inline"><input ${checked_stop} id="${id_stop}" type="checkbox" value="Y"></label>'+
+		'<label class="checkbox-inline"><input class="noSwipe" ${checked_stop} id="${id_stop}" type="checkbox" value="Y"></label>'+
 		'</div>' +
 		'</div></div>'
 	;
 	//Привязка датчиков к процессу дистилляции, и запуск
-	let distillationProcess = {"sensors": {}, "powerHigh": 0, "powerLower": 0, "start": false};
+	let distillationProcess = {
+		"sensors": {},
+		"powerHigh": 0,
+		"powerLower": 0,
+		"start": false,
+		"transitionTemperature": 0
+	};
 	$(document).on('click', '#distillation_add_sensor', function (e) {
 		e.preventDefault();
 		let _this = $(this);
@@ -1253,6 +1278,7 @@ $(function () {
 			let tpl_temperature = '';
 			let tpl_devices = '';
 			let tpl_safety = '';
+			let tpl_stab = '';
 			for (let key in sensors) {
 				if (sensors.hasOwnProperty(key)/* && key !== "p1"*/) {
 					let sensor_name = (sensors[key].hasOwnProperty("name") ? sensors[key]["name"] : "");
@@ -1294,6 +1320,13 @@ $(function () {
 								'</tr>';
 						}
 					}
+
+					if (key === "transitionTemperature") {
+						tpl_stab += '<tr>' +
+							'<td>Температура в кубе перехода на рабочую мощность</td>' +
+							'<td colspan="3" class="text-center">' + returnTplHtml([{id: "transitionTemperature", value: sensors[key], min: '60', max: '100', step: '1'}], deltaTempl) + '</td>' +
+							'</tr>';
+					}
 				}
 			}
 			if (tpl_temperature !== '') {
@@ -1304,6 +1337,9 @@ $(function () {
 			}
 			if (tpl_safety !== '') {
 				section += '<tr><td colspan="4" class="text-center text-strong">Датчики безопасности</td></tr>' + tpl_safety;
+			}
+			if (tpl_stab !== '') {
+				section += '<tr><td colspan="4" class="text-center text-strong">Настройки колонны</td></tr>' + tpl_stab;
 			}
 			section += '</table></section>';
 			$.fn.openModal('Выбор датчиков для дистилляции', section, "modal-md", false, {
@@ -1333,6 +1369,7 @@ $(function () {
 								}
 							}
 						});
+						distillationProcess["transitionTemperature"] = Number($("#transitionTemperature").val());
 						$(this).closest(".modal").modal("hide");
 						$.fn.pasteDistillationSensors(true);
 					}
@@ -1378,7 +1415,8 @@ $(function () {
 			"in1": {"name": "", "member": 0},
 			"in2": {"name": "", "member": 0},
 			"in3": {"name": "", "member": 0},
-			"in4": {"name": "", "member": 0}
+			"in4": {"name": "", "member": 0},
+			"transitionTemperature": 0
 		};
 		let distillationTemplate = '';
 		let tpl_devices_body = '';
@@ -1411,6 +1449,7 @@ $(function () {
 				'</div>';
 			let tpl_cutoff_body = '';
 			let tpl_all_body = '';
+			sensorsDistillationSend["transitionTemperature"] = distillationProcess["transitionTemperature"];
 			$.each(distillationProcess["sensors"], function (i, e) {
 				//console.log(i,e);
 				let sensor_key = i;
@@ -1430,9 +1469,10 @@ $(function () {
 							'<div class="row row-striped">' + tpl_cutoff_thead +
 							'<div id="distillation_alert_bg_' + sensor_key + '" class="pt-10 pb-10 clearfix">' +
 							'<div id="distillation_alert_text_' + sensor_key + '" class="col-xs-12 col-sm-4 text-middle text-center-xs text-strong">t&#176' + e["name"] + '</div>' +
-							'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle text-strong"><span id="distillation_' + sensor_key + '"></span><span class="hidden">&#176С</span></div>' +
+							'<div class="col-xs-4 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle text-strong"><span id="distillation_' + sensor_key + '"></span><span' +
+							' class="hidden">&#176С</span></div>' +
 							//'<div class="col-xs-3 col-sm-3"></div>' +
-							'<div class="col-xs-4 col-xs-offset-3 col-sm-3 col-sm-offset-2">' + tpl_cutoff +
+							'<div class="col-xs-4 col-xs-offset-1 col-sm-3 col-sm-offset-2">' + tpl_cutoff +
 							'</div>' +
 							'</div>' +
 							'</div>';
@@ -1443,9 +1483,10 @@ $(function () {
 						tpl_all_body += '<div class="row row-striped">' +
 							'<div class="pt-10 pb-10 clearfix">' +
 							'<div class="col-xs-12 col-sm-4 text-center-xs text-strong">t&#176' + e["name"] + '</div>' +
-							'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle text-strong"><span id="distillation_' + sensor_key + '"></span><span class="hidden">&#176С</span></div>' +
+							'<div class="col-xs-4 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle text-strong"><span id="distillation_' + sensor_key + '"></span><span' +
+							' class="hidden">&#176С</span></div>' +
 							'<div class="col-xs-3 col-sm-3"></div>' +
-							'<div class="col-xs-4 col-sm-3"></div>' +
+							'<div class="col-xs-3 col-sm-3"></div>' +
 							'</div>' +
 							'</div>';
 					}
@@ -1510,13 +1551,17 @@ $(function () {
 	};
 
 	function launchDistillation(){
+		distillationProcess["start"] = flagSendProcess = true;
 		$('#distillation_start').prop("disabled", true);
 		$('#distillation_add_sensor').prop("disabled", true);
 		$('#distillation_stop').prop("disabled", false);
-		distillationProcess["start"] = flagSendProcess = true;
-		localStorage.setObj('oldStartProcess', 1);
 		clearInterval(sensorsProcessId);
-		setDistillation();
+		stopInterval();
+		localStorage.setObj('oldStartProcess', 1);
+		// setDistillation();
+		setTimeout(function () {
+			setDistillation();
+		}, 1000);
 	}
 	$(document).on('start-event','#distillation_start', function(e) {
 		console.log("start-event-Distillation");
@@ -1573,7 +1618,8 @@ $(function () {
 		$("#distillation_process").find("div.bg-danger").removeClass("bg-danger");
 		$("#distillation_process").find("div.text-danger").removeClass("text-danger");
 		clearInterval(sensorsProcessId);
-		clearInterval(sensorsIntervalId);
+		// clearInterval(sensorsIntervalId);
+		stopInterval();
 		flagSendProcess = true;
 		globalSensorsJson["process"]["allow"] = 0;
 		distillationProcess["start"] = false;
@@ -1632,7 +1678,8 @@ $(function () {
 			if (flagSendProcess) {
 				flagSendProcess = false;
 				clearInterval(sensorsProcessId);
-				clearInterval(sensorsIntervalId);
+				// clearInterval(sensorsIntervalId);
+				stopInterval();
 				sendRequest("SensorsIn", distillationSendData, "json", startDistillation, false, $("#error_distillation"), false);
 			}
 		}
@@ -1652,8 +1699,10 @@ $(function () {
 		console.log("startDistillation");
 		setTimeout(function () {
 			clearInterval(sensorsProcessId);
-			clearInterval(sensorsIntervalId);
-			sensorsIntervalId = setInterval(getIntervalSensors, 1000);
+			// clearInterval(sensorsIntervalId);
+			stopInterval();
+			startInterval();
+			// sensorsIntervalId = setInterval(getIntervalSensors, 1000);
 			if(distillationProcess["start"] === true) {
 				sensorsProcessId = setInterval(getDistillation, 2000);
 			}
@@ -1661,6 +1710,7 @@ $(function () {
 	}
 
 	function getDistillation() {
+		console.log(flagSendProcess,"getDistillation");
 		//let sek= parseInt(+new Date()/1000);
 		//console.log(flagSendProcess,"getDistillation"+sek);
 		if (!$.fn.objIsEmpty(globalSensorsJson, false)) {
@@ -1788,7 +1838,17 @@ $(function () {
 	}
 
 	//Привязка датчиков к процессу ректификации, и запуск
-	let refluxProcess = {"sensors": {}, "powerHigh": 0, "powerLower": 0, "number": 0, "start": false};//"devices":[],"safety":[],
+	let refluxProcess = {
+		"sensors": {},
+		"stab": 0,
+		"point": 0,
+		"powerHigh": 0,
+		"powerLower": 0,
+		"number": 0,
+		"start": false,
+		"transitionTemperature": 0,
+		"tapCorrection": 0
+	};//"devices":[],"safety":[],
 	$(document).on('click', '#reflux_add_sensor', function (e) {
 		e.preventDefault();
 		let _this = $(this);
@@ -1804,6 +1864,7 @@ $(function () {
 			let tpl_temperature = '';
 			let tpl_devices = '';
 			let tpl_safety = '';
+			let tpl_stab = '';
 			for (let key in sensors) {
 				if (sensors.hasOwnProperty(key)) {
 					let sensor_name = (sensors[key].hasOwnProperty("name") ? sensors[key]["name"] : "");
@@ -1849,6 +1910,30 @@ $(function () {
 								'</tr>';
 						}
 					}
+					if(key === "stab"){
+						tpl_stab += '<tr>'+
+							'<td>Время стабилизации колонны</td>'+
+							'<td colspan="3" class="text-center">' + returnTplHtml([{id: "stab", value: sensors[key], min: '0', max: '120', step: '1'}], deltaTempl) + '</td>'+
+							'</tr>';
+					}
+					if(key === "point"){
+						tpl_stab += '<tr>'+
+							'<td>Время до применения уставки</td>'+
+							'<td colspan="3" class="text-center">' + returnTplHtml([{id: "point", value: sensors[key], min: '0', max: '60', step: '1'}], deltaTempl) + '</td>'+
+							'</tr>';
+					}
+					if(key === "transitionTemperature"){
+						tpl_stab += '<tr>'+
+							'<td>Температура в царге перехода на рабочую мощность</td>'+
+							'<td colspan="3" class="text-center">' + returnTplHtml([{id: "transitionTemperature", value: sensors[key], min: '30', max: '100', step: '1'}], deltaTempl) + '</td>'+
+							'</tr>';
+					}
+					if(key === "tapCorrection"){
+						tpl_stab += '<tr>'+
+							'<td>Коррекция угла открытия шарового крана</td>'+
+							'<td colspan="3" class="text-center">' + returnTplHtml([{id: "tapCorrection", value: sensors[key], min: '82', max: '170', step: '1'}], deltaTempl) + '</td>'+
+							'</tr>';
+					}
 				}
 			}
 			if (tpl_temperature !== '') {
@@ -1859,6 +1944,9 @@ $(function () {
 			}
 			if (tpl_safety !== '') {
 				section += '<tr><td colspan="4" class="text-center text-strong">Датчики безопасности</td></tr>' + tpl_safety;
+			}
+			if (tpl_stab !== '') {
+				section += '<tr><td colspan="4" class="text-center text-strong">Настройки колонны</td></tr>' + tpl_stab;
 			}
 			section += '</table></section>';
 			$.fn.openModal('Выбор датчиков для ректификации', section, "modal-md", false, {
@@ -1889,6 +1977,10 @@ $(function () {
 								}
 							}
 						});
+						refluxProcess["stab"] = Number($("#stab").val());
+						refluxProcess["point"] = Number($("#point").val());
+						refluxProcess["transitionTemperature"] = Number($("#transitionTemperature").val());
+						refluxProcess["tapCorrection"] = Number($("#tapCorrection").val());
 						$(this).closest(".modal").modal("hide");
 						$.fn.pasteRefluxSensors(true);
 					}
@@ -1942,11 +2034,16 @@ $(function () {
 			"in1": {"name": "", "member": 0},
 			"in2": {"name": "", "member": 0},
 			"in3": {"name": "", "member": 0},
-			"in4": {"name": "", "member": 0}
+			"in4": {"name": "", "member": 0},
+			"stab": 0,
+			"point": 0,
+			"transitionTemperature": 0,
+			"tapCorrection": 0
 		};
 		let refluxTemplate = '';
 		let tpl_devices_body = '';
 		let tpl_safety_body = '';
+		let tpl_stab = '';
 		if (!sensors_select && $.fn.objIsEmpty(refluxProcess["sensors"], false)) {
 			$.ajax({
 				url: ajax_url_debug + 'refluxSensorsGetTpl',
@@ -1955,6 +2052,8 @@ $(function () {
 				dataType: 'json',
 				success: function (msg) {
 					refluxProcess["sensors"] = msg;
+					refluxProcess["stab"] = Number(msg["stab"]);
+					refluxProcess["point"] = Number(msg["point"]);
 					refluxProcess["number"] = Number(msg["number"]);
 					refluxProcess["powerHigh"] = Number(msg["powerHigh"]);
 					refluxProcess["powerLower"] = Number(msg["powerLower"]);
@@ -1967,6 +2066,7 @@ $(function () {
 				}
 			});
 		}
+		let flagout = false;
 		if (!$.fn.objIsEmpty(refluxProcess["sensors"], false)) {
 			let tpl_delta_thead =
 				'<div class="row-xs clearfix">' +
@@ -1982,6 +2082,24 @@ $(function () {
 				'</div>';
 			let tpl_cutoff_body = '';
 			let tpl_all_body = '';
+
+			tpl_stab = '<div class="row row-striped">' +
+				'<div class="pt-10 clearfix">' +
+				'<div class="col-xs-12 col-sm-4 text-center-xs text-middle text-strong">Время стабилизации колонны</div>' +
+				'<div class="col-xs-12 col-sm-3 text-center text-middle text-strong"><span id="reflux_stab"></span>' +
+				refluxProcess["stab"] +
+				' <span>мин.</span></div></div>' +
+				'<div class="pt-10 clearfix">' +
+				'<div class="col-xs-12 col-sm-4 text-center-xs text-middle text-strong">Время до применения уставки</div>' +
+				'<div class="col-xs-12 col-sm-3 text-center text-middle text-strong pb-10"><span id="reflux_point"></span>'+
+				refluxProcess["point"] +
+				' <span>мин.</span></div></div></div>';
+
+			sensorsRefluxSend["stab"] = refluxProcess["stab"];
+			sensorsRefluxSend["point"] = refluxProcess["point"];
+			sensorsRefluxSend["transitionTemperature"] = refluxProcess["transitionTemperature"];
+			sensorsRefluxSend["tapCorrection"] = refluxProcess["tapCorrection"];
+
 			$.each(refluxProcess["sensors"], function (i, e) {
 				let sensor_key = i;
 				if (e.hasOwnProperty("name") && sensorsRefluxSend[sensor_key].hasOwnProperty("name")) {
@@ -2000,9 +2118,10 @@ $(function () {
 							'<div class="row row-striped">' + tpl_delta_thead +
 							'<div id="reflux_alert_bg_' + sensor_key + '" class="pt-10 pb-10 clearfix">' +
 							'<div id="reflux_alert_text_' + sensor_key + '" class="col-xs-12 col-sm-4 text-middle text-center-xs text-strong">t&#176' + e["name"] + '</div>' +
-							'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle text-strong"><span id="reflux_' + sensor_key + '"></span><span class="hidden">&#176С</span></div>' +
+							'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle text-strong text-nowrap">' +
+							'<span id="reflux_' + sensor_key + '"></span><span class="hidden">&#176С</span></div>' +
 							'<div class="col-xs-4 col-sm-3">' + tpl_delta + '</div>' +
-							'<div class="col-xs-4 col-xs-offset-0 col-sm-2 col-sm-offset-0 text-center text-middle text-strong">' + tpl_delta_result +
+							'<div class="col-xs-4 col-xs-offset-0 col-sm-2 col-sm-offset-0 text-center text-middle text-strong text-nowrap">' + tpl_delta_result +
 							'</div>' +
 							'</div>' +
 							'</div>';
@@ -2017,9 +2136,10 @@ $(function () {
 							'<div class="row row-striped">' + tpl_cutoff_thead +
 							'<div id="reflux_alert_bg_' + sensor_key + '" class="pt-10 pb-10 clearfix">' +
 							'<div id="reflux_alert_text_' + sensor_key + '" class="col-xs-12 col-sm-4 text-middle text-center-xs text-strong">t&#176' + e["name"] + '</div>' +
-							'<div class="col-xs-3 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle text-strong"><span id="reflux_' + sensor_key + '"></span><span class="hidden">&#176С</span></div>' +
+							'<div class="col-xs-4 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-middle text-strong"><span id="reflux_' + sensor_key + '"></span><span' +
+							' class="hidden">&#176С</span></div>' +
 							//'<div class="col-xs-3 col-sm-3"></div>' +
-							'<div class="col-xs-4 col-xs-offset-3 col-sm-3 col-sm-offset-2">' + tpl_cutoff +
+							'<div class="col-xs-4 col-xs-offset-1 col-sm-3 col-sm-offset-2">' + tpl_cutoff +
 							'</div>' +
 							'</div>' +
 							'</div>';
@@ -2039,12 +2159,94 @@ $(function () {
 				}
 				if (re_out.test(sensor_key) && Number(e["member"]) !== 0) {
 					sensorsRefluxSend[sensor_key]["member"] = 1;
-					tpl_devices_body += '<div class="row row-striped">' +
-						'<div class="pt-10 pb-10 clearfix">' +
-						'<div class="col-xs-12 col-sm-4 text-center-xs text-middle text-strong">' + e["name"] + '</div>' +
-						'<div class="col-xs-5 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-strong">' +
-						'<span id="reflux_' + sensor_key + '" class="box-green hidden"><span class="glyphicon">✔</span></span></div>' +
-						'</div></div>';
+					//console.log(sensor_key);
+					/*if(sensor_key === "out1") {
+						flagout = true;
+						let val_head_cycle = (globalSensorsJson.hasOwnProperty("valwe") ? globalSensorsJson["valwe"][0]["head"]["timeCycle"] : 5);
+						let tpl_head_cycle = returnTplHtml([{id: "reflux_head_cycle", value: val_head_cycle, min: '5', max: '30', step: '1'}], deltaTempl);
+						let val_head_time = (globalSensorsJson.hasOwnProperty("valwe") ? globalSensorsJson["valwe"][0]["head"]["timeOn"] : 1);
+						let tpl_head_time = returnTplHtml([{id: "reflux_head_time", value: val_head_time, min: '1', max: '100', step: '0.5'}], deltaTempl);
+						tpl_devices_body += '<div id="reflux_out_3" class="row' + visible_reflux_out_3 +'"><div class="col-xs-12">' +
+							'<div class="row row-striped">' +
+							head_devices +
+							'<div class="pt-10 pb-10 clearfix">' +
+							'<div class="col-xs-12 col-sm-3 text-middle text-center-xs text-strong">Клапан отбора голов</div>' +
+							//'<div class="col-xs-6 col-sm-2 text-center-xs text-middle text-strong pb-10">Период</div>' +
+							'<div class="col-xs-4 col-xs-offset-1_ col-sm-3 col-sm-offset-0_">' + tpl_head_cycle + '</div>' +
+							//'<div class="col-xs-6 col-sm-2 text-center-xs text-middle text-strong text-nowrap">Откр.%</div>' +
+							'<div class="col-xs-4 col-xs-offset-1_ col-sm-3 col-sm-offset-1_">' + tpl_head_time + '</div>' +
+							'</div></div>';
+
+						let val_body_cycle = (globalSensorsJson.hasOwnProperty("valwe") ? globalSensorsJson["valwe"][1]["body"]["timeCycle"] : 5);
+						let tpl_body_cycle = returnTplHtml([{id: "reflux_body_cycle", value: val_body_cycle, min: '5', max: '30', step: '1'}], deltaTempl);
+						let val_body_time = (globalSensorsJson.hasOwnProperty("valwe") ? globalSensorsJson["valwe"][1]["body"]["timeOn"] : 0);
+						let tpl_body_time = returnTplHtml([{id: "reflux_body_time", value: val_body_time, min: '0', max: '100', step: '0.5'}], deltaTempl);
+						let val_body_decline = (globalSensorsJson.hasOwnProperty("valwe") ? globalSensorsJson["valwe"][1]["body"]["decline"] : 0);
+						let tpl_body_decline = returnTplHtml([{id: "reflux_body_decline", value: val_body_decline, min: '0', max: '30', step: '1'}], deltaTempl);
+							//(Number(globalSensorsJson["valwe"][1]["body"]["decline"]) > 0 ? " checked" : "");
+						//if(flagout1){ head_devices = '';}
+						tpl_devices_body += '<div class="row row-striped">' +
+							//head_devices +
+							'<div class="pt-10 pb-10 clearfix">' +
+							'<div class="col-xs-12 col-sm-3 pxs-10 text-middle text-center-xs text-strong">Клапан отбора тела</div>' +
+							//'<div class="col-xs-6 col-sm-2 text-center-xs text-middle text-strong pb-10">Период</div>' +
+							'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_cycle + '</div>' +
+							//'<div class="col-xs-4 col-sm-2 text-center-xs text-middle text-strong text-nowrap">Откр.%</div>' +
+							'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_time + '</div>' +
+							'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_decline + '</div>' +
+							//'<div class="col-xs-2 col-sm-1 text-center text-middle"><label class="checkbox-inline">' +
+							//'<input class="noSwipe" id="reflux_body_decline"' + checked_body_decline + ' type="checkbox" value="Y"></label></div>' +
+							'</div></div>'+
+							'</div></div>';
+					}else if(sensor_key === "out2"){
+						if(!flagout) {
+							let val_head_cycle = (globalSensorsJson.hasOwnProperty("valwe") ? globalSensorsJson["valwe"][0]["head"]["timeCycle"] : 5);
+							let tpl_head_cycle = returnTplHtml([{id: "reflux_head_cycle", value: val_head_cycle, min: '5', max: '30', step: '1'}], deltaTempl);
+							let val_head_time = (globalSensorsJson.hasOwnProperty("valwe") ? globalSensorsJson["valwe"][0]["head"]["timeOn"] : 1);
+							let tpl_head_time = returnTplHtml([{id: "reflux_head_time", value: val_head_time, min: '1', max: '100', step: '0.5'}], deltaTempl);
+							tpl_devices_body += '<div id="reflux_out_3" class="row' + visible_reflux_out_3 +'"><div class="col-xs-12">' +
+								'<div class="row row-striped">' +
+								head_devices +
+								'<div class="pt-10 pb-10 clearfix">' +
+								'<div class="col-xs-12 col-sm-3 text-middle text-center-xs text-strong">Клапан отбора голов</div>' +
+								//'<div class="col-xs-6 col-sm-2 text-center-xs text-middle text-strong pb-10">Период</div>' +
+								'<div class="col-xs-4 col-xs-offset-1_ col-sm-3 col-sm-offset-0_">' + tpl_head_cycle + '</div>' +
+								//'<div class="col-xs-6 col-sm-2 text-center-xs text-middle text-strong text-nowrap">Откр.%</div>' +
+								'<div class="col-xs-4 col-xs-offset-1_ col-sm-3 col-sm-offset-1_">' + tpl_head_time + '</div>' +
+								'</div></div>';
+
+							let val_body_cycle = (globalSensorsJson.hasOwnProperty("valwe") ? globalSensorsJson["valwe"][1]["body"]["timeCycle"] : 5);
+							let tpl_body_cycle = returnTplHtml([{id: "reflux_body_cycle", value: val_body_cycle, min: '5', max: '30', step: '1'}], deltaTempl);
+							let val_body_time = (globalSensorsJson.hasOwnProperty("valwe") ? globalSensorsJson["valwe"][1]["body"]["timeOn"] : 1);
+							let tpl_body_time = returnTplHtml([{id: "reflux_body_time", value: val_body_time, min: '0', max: '100', step: '0.5'}], deltaTempl);
+							let val_body_decline = (globalSensorsJson.hasOwnProperty("valwe") ? globalSensorsJson["valwe"][1]["body"]["decline"] : 0);
+							let tpl_body_decline = returnTplHtml([{id: "reflux_body_decline", value: val_body_decline, min: '0', max: '30', step: '1'}], deltaTempl);
+							//(Number(globalSensorsJson["valwe"][1]["body"]["decline"]) > 0 ? " checked" : "");
+							//if(flagout1){ head_devices = '';}
+							tpl_devices_body += '<div class="row row-striped">' +
+								//head_devices +
+								'<div class="pt-10 pb-10 clearfix">' +
+								'<div class="col-xs-12 col-sm-3 pxs-10 text-middle text-center-xs text-strong">Клапан отбора тела</div>' +
+								//'<div class="col-xs-6 col-sm-2 text-center-xs text-middle text-strong pb-10">Период</div>' +
+								'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_cycle + '</div>' +
+								//'<div class="col-xs-4 col-sm-2 text-center-xs text-middle text-strong text-nowrap">Откр.%</div>' +
+								'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_time + '</div>' +
+								'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_decline + '</div>' +
+								//'<div class="col-xs-2 col-sm-1 text-center text-middle"><label class="checkbox-inline">' +
+								//'<input class="noSwipe" id="reflux_body_decline"' + checked_body_decline + ' type="checkbox" value="Y"></label></div>' +
+								'</div></div>'+
+								'</div></div>';
+						}*/
+					if(sensor_key === "out1" || sensor_key === "out2") {
+						flagout = true;
+					}else {
+						tpl_devices_body += '<div class="row row-striped">' +
+							'<div class="pt-10 pb-10 clearfix">' +
+							'<div class="col-xs-12 col-sm-4 text-center-xs text-middle text-strong">' + e["name"] + '</div>' +
+							'<div class="col-xs-5 col-xs-offset-1 col-sm-3 col-sm-offset-0 text-center text-strong">' +
+							'<span id="reflux_' + sensor_key + '" class="box-green hidden"><span class="glyphicon">✔</span></span></div>' +
+							'</div></div>';
+					}
 				}
 				if (re_in.test(sensor_key) && Number(e["member"]) !== 0) {
 					sensorsRefluxSend[sensor_key]["member"] = 1;
@@ -2073,10 +2275,152 @@ $(function () {
 				'<div id="reflux_step" class="col-xs-12 col-md-6 text-center-xs text-middle text-strong hidden"></div>' +
 				'<div id="reflux_time" class="col-xs-12 col-md-6 text-center-xs text-middle text-strong hidden"></div>' +
 				'</div>';
+			let head_devices = '<div class="row-xs clearfix">' +
+				'<div class="col-xs-4 col-xs-offset-0 col-sm-3 col-sm-offset-3 text-center text-middle text-primary text-nowrap">Период сек.</div>' +
+				'<div class="col-xs-4 col-sm-3 text-center text-middle text-primary text-nowrap">Открыт %</div>'+
+				'<div id="reflux_devices_out_header_" class="col-xs-4 col-sm-3 text-center text-middle text-primary text-nowrap">%&#8595;</div></div>';
+			let head_devices_prima = '<div class="row-xs clearfix">' +
+				'<div class="col-xs-4 col-xs-offset-0 col-sm-3 col-sm-offset-3 text-center text-middle text-primary text-nowrap">Период сек.</div>' +
+				'<div class="col-xs-4 col-sm-3 text-center text-middle text-primary text-nowrap">Открыт %</div>'+
+				'<div id="reflux_devices_out_header_" class="col-xs-4 col-sm-3 text-center text-middle text-primary text-nowrap"></div></div>';
+			let head_devices_steam = '<div class="row-xs clearfix">' +
+				'<div class="col-xs-4 col-xs-offset-0 col-sm-3 col-sm-offset-3 text-center text-middle text-primary text-nowrap"></div>' +
+				'<div class="col-xs-4 col-sm-3 text-center text-middle text-primary text-nowrap">Открыт %</div>'+
+				'<div id="reflux_devices_out_header_" class="col-xs-4 col-sm-3 text-center text-middle text-primary text-nowrap"></div></div>';
+			let body_devices = '<div class="row-xs clearfix">' +
+				'<div class="col-xs-4 col-xs-offset-0 col-sm-3 col-sm-offset-3 text-center text-middle text-primary text-nowrap">В начале %</div>' +
+				'<div class="col-xs-4 col-sm-3 text-center text-middle text-primary text-nowrap">В конце %</div>'+
+				'<div id="reflux_devices_out_header_" class="col-xs-4 col-sm-3 text-center text-middle text-primary text-nowrap">%&#8595;</div></div>';
+			let tpl_devices_out_body = '';
+			if(flagout){
+				let valwe_head = {};
+				let valwe_headSteam = {};
+				let valwe_body = {};
+				let valwe_bodyPrima = {};
+				if(globalSensorsJson.hasOwnProperty("valwe")){
+					$.each(globalSensorsJson["valwe"], function (i, e) {
+						// console.log(i,e);
+						let valwe_key = Object.keys(e).shift();
+						switch(valwe_key){
+							case "head":
+								valwe_head = e;
+								break;
+							case "headSteam":
+								valwe_headSteam = e;
+								break;
+							case "body":
+								valwe_body = e;
+								break;
+							case "bodyPrima":
+								valwe_bodyPrima = e;
+								break;
+						}
+					})
+				}
+
+
+				let visible_reflux_out = ((refluxProcess["number"] === 1 || refluxProcess["number"] === 2 || refluxProcess["number"] === 3) ? "" : " hidden");
+				//головы жижа
+				let val_head_cycle_rk = (valwe_head.hasOwnProperty("head") ? valwe_head["head"]["timeCycle"] : 5);
+				let tpl_head_cycle_rk = returnTplHtml([{id: "reflux_head_cycle_rk", value: val_head_cycle_rk, min: '5', max: '30', step: '1'}], deltaTempl);
+				let val_head_time_rk = (valwe_head.hasOwnProperty("head") ? valwe_head["head"]["timeOn"] : 1);
+				let tpl_head_time_rk = returnTplHtml([{id: "reflux_head_time_rk", value: val_head_time_rk, min: '1', max: '100', step: '0.5'}], deltaTempl);
+				//головы пар
+				let val_head_steam = (valwe_headSteam.hasOwnProperty("headSteam") ? valwe_headSteam["headSteam"]["percent"] : 0);
+				let tpl_head_steam = returnTplHtml([{id: "reflux_head_steam", value: val_head_steam, min: '0', max: '100', step: '0.5'}], deltaTempl);
+				//головы прима (как у жижи, те же данные)
+				let val_head_cycle_prima = (valwe_head.hasOwnProperty("head") ? valwe_head["head"]["timeCycle"] : 5);
+				let tpl_head_cycle_prima = returnTplHtml([{id: "reflux_head_cycle_prima", value: val_head_cycle_prima, min: '5', max: '30', step: '1'}], deltaTempl);
+				let val_head_time_prima = (valwe_head.hasOwnProperty("head") ? valwe_head["head"]["timeOn"] : 1);
+				let tpl_head_time_prima = returnTplHtml([{id: "reflux_head_time_prima", value: val_head_time_prima, min: '1', max: '100', step: '0.5'}], deltaTempl);
+
+				tpl_devices_out_body += '<div id="reflux_devices_out" class="row' + visible_reflux_out +'">' +
+					'<div class="col-xs-12">';
+				//тпл головы жижа
+				tpl_devices_out_body +=
+					'<div id="reflux_devices_head_rk" class="row row-striped">' +
+					head_devices +
+					'<div class="pt-10 pb-10 clearfix">' +
+					'<div class="col-xs-12 col-sm-3 text-middle text-center-xs text-strong">Клапан отбора голов</div>' +
+					'<div class="col-xs-4 col-sm-3">' + tpl_head_cycle_rk + '</div>' +
+					'<div class="col-xs-4 col-sm-3">' + tpl_head_time_rk + '</div>' +
+					'</div></div>';
+				//тпл головы пар
+				tpl_devices_out_body +=
+					'<div id="reflux_devices_head_steam" class="row row-striped">' +
+					head_devices_steam +
+					'<div class="pt-10 pb-10 clearfix">' +
+					'<div class="col-xs-12 col-sm-3 text-middle text-center-xs text-strong">Кран отбора голов</div>' +
+					'<div class="col-xs-4 col-sm-3"></div>' +
+					'<div class="col-xs-4 col-sm-3">' + tpl_head_steam + '</div>' +
+					'</div></div>';
+				//тпл головы прима
+				tpl_devices_out_body +=
+					'<div id="reflux_devices_head_prima" class="row row-striped">' +
+					head_devices_prima +
+					'<div class="pt-10 pb-10 clearfix">' +
+					'<div class="col-xs-12 col-sm-3 text-middle text-center-xs text-strong">Клапан отбора голов</div>' +
+					'<div class="col-xs-4 col-sm-3">' + tpl_head_cycle_prima + '</div>' +
+					'<div class="col-xs-4 col-sm-3">' + tpl_head_time_prima + '</div>' +
+					'</div></div>';
+
+				//тело жижа
+				let val_body_cycle_rk = (valwe_body.hasOwnProperty("body") ? valwe_body["body"]["timeCycle"] : 5);
+				let tpl_body_cycle_rk = returnTplHtml([{id: "reflux_body_cycle_rk", value: val_body_cycle_rk, min: '5', max: '30', step: '1'}], deltaTempl);
+				let val_body_time_rk = (valwe_body.hasOwnProperty("body") ? valwe_body["body"]["timeOn"] : 0);
+				let tpl_body_time_rk = returnTplHtml([{id: "reflux_body_time_rk", value: val_body_time_rk, min: '0', max: '100', step: '0.5'}], deltaTempl);
+				let val_body_decline_rk = (valwe_body.hasOwnProperty("body") ? valwe_body["body"]["decline"] : 0);
+				let tpl_body_decline_rk = returnTplHtml([{id: "reflux_body_decline_rk", value: val_body_decline_rk, min: '0', max: '30', step: '1'}], deltaTempl);
+				//тело пар (как у примы, те же данные)
+				let val_body_start_steam = (valwe_bodyPrima.hasOwnProperty("bodyPrima") ? valwe_bodyPrima["bodyPrima"]["percentStart"] : 0);
+				let tpl_body_start_steam = returnTplHtml([{id: "reflux_body_start_steam", value: val_body_start_steam, min: '0', max: '100', step: '0.5'}], deltaTempl);
+				let val_body_stop_steam = (valwe_bodyPrima.hasOwnProperty("bodyPrima") ? valwe_bodyPrima["bodyPrima"]["percentStop"] : 0);
+				let tpl_body_stop_steam = returnTplHtml([{id: "reflux_body_stop_steam", value: val_body_stop_steam, min: '0', max: '100', step: '0.5'}], deltaTempl);
+				let val_body_decline_steam = (valwe_bodyPrima.hasOwnProperty("bodyPrima") ? valwe_bodyPrima["bodyPrima"]["decline"] : 0);
+				let tpl_body_decline_steam = returnTplHtml([{id: "reflux_body_decline_steam", value: val_body_decline_steam, min: '0', max: '30', step: '1'}], deltaTempl);
+				//тело прима
+				let val_body_start_prima = (valwe_bodyPrima.hasOwnProperty("bodyPrima") ? valwe_bodyPrima["bodyPrima"]["percentStart"] : 0);
+				let tpl_body_start_prima = returnTplHtml([{id: "reflux_body_start_prima", value: val_body_start_prima, min: '0', max: '100', step: '0.5'}], deltaTempl);
+				let val_body_stop_prima = (valwe_bodyPrima.hasOwnProperty("bodyPrima") ? valwe_bodyPrima["bodyPrima"]["percentStop"] : 0);
+				let tpl_body_stop_prima = returnTplHtml([{id: "reflux_body_stop_prima", value: val_body_stop_prima, min: '0', max: '100', step: '0.5'}], deltaTempl);
+				let val_body_decline_prima = (valwe_bodyPrima.hasOwnProperty("bodyPrima") ? valwe_bodyPrima["bodyPrima"]["decline"] : 0);
+				let tpl_body_decline_prima = returnTplHtml([{id: "reflux_body_decline_prima", value: val_body_decline_prima, min: '0', max: '30', step: '1'}], deltaTempl);
+				//тпл тело жижа
+				tpl_devices_out_body += '<div id="reflux_devices_body_rk" class="row row-striped">' +
+					'<div class="pt-10 pb-10 clearfix">' +
+					'<div class="col-xs-12 col-sm-3 pxs-10 text-middle text-center-xs text-strong">Клапан отбора тела</div>' +
+					'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_cycle_rk + '</div>' +
+					'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_time_rk + '</div>' +
+					'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_decline_rk + '</div>' +
+					'</div></div>';
+				//тпл тело пар
+				tpl_devices_out_body += '<div id="reflux_devices_body_steam" class="row row-striped">' +
+					body_devices +
+					'<div class="pt-10 pb-10 clearfix">' +
+					'<div class="col-xs-12 col-sm-3 pxs-10 text-middle text-center-xs text-strong">Кран отбора тела</div>' +
+					'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_start_steam + '</div>' +
+					'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_stop_steam + '</div>' +
+					'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_decline_steam + '</div>' +
+					'</div></div>';
+				//тпл тело прима
+				tpl_devices_out_body += '<div id="reflux_devices_body_prima" class="row row-striped">' +
+					body_devices +
+					'<div class="pt-10 pb-10 clearfix">' +
+					'<div class="col-xs-12 col-sm-3 pxs-10 text-middle text-center-xs text-strong">Кран отбора тела</div>' +
+					'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_start_prima + '</div>' +
+					'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_stop_prima + '</div>' +
+					'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_decline_prima + '</div>' +
+					'</div></div>';
+
+				tpl_devices_out_body += '</div></div>';
+
+				tpl_devices_body = tpl_devices_out_body + tpl_devices_body;
+			}
+
 			refluxTemplate = timeStepTemplate +
 				returnTplHtml([{id_value: "reflux_power_value", id_set: "reflux_power_set"}], powerTempl) +
 				returnTplHtml([{id_lower_set: "reflux_power_lower_set"}], powerLowerTempl) +
-				refluxTemplate + pressureTemplate + tpl_devices_body + tpl_safety_body;
+				tpl_stab + refluxTemplate + pressureTemplate + tpl_devices_body + tpl_safety_body;
 
 			$("#reflux_start_group_button").removeClass("hidden");
 		} else {
@@ -2098,23 +2442,62 @@ $(function () {
 		} else {
 			$('#reflux_add_sensor').prop("disabled", false);
 			$('#reflux_stop').prop("disabled", true);
+			$('#reflux_next').prop("disabled", true);
 			$('#reflux_algorithm_select').prop("disabled", false);
 		}
 	};
 	$(document).on('change', '#reflux_algorithm_select', function () {
-		refluxProcess["number"] = $(this).find(":selected").val();
+		let algorithm_val = Number($(this).find(":selected").val());
+		refluxProcess["number"] = algorithm_val;
+		if($("#reflux_devices_out").length > 0) {
+			console.log("reflux_devices_out", algorithm_val);
+			if (algorithm_val === 1 || algorithm_val === 2 || algorithm_val === 3) {
+				$("#reflux_devices_out").removeClass("hidden");
+			}else{
+				$("#reflux_devices_out").addClass("hidden");
+			}
+			if (algorithm_val === 1) {
+				$("#reflux_devices_head_rk").addClass("hidden");
+				$("#reflux_devices_body_rk").addClass("hidden");
+				$("#reflux_devices_head_steam").addClass("hidden");
+				$("#reflux_devices_body_steam").addClass("hidden");
+				$("#reflux_devices_head_prima").removeClass("hidden");
+				$("#reflux_devices_body_prima").removeClass("hidden");
+				// $("#reflux_devices_out_header").addClass("hidden");
+			}else if (algorithm_val === 2){
+				$("#reflux_devices_head_rk").addClass("hidden");
+				$("#reflux_devices_body_rk").addClass("hidden");
+				$("#reflux_devices_head_steam").removeClass("hidden");
+				$("#reflux_devices_body_steam").removeClass("hidden");
+				$("#reflux_devices_head_prima").addClass("hidden");
+				$("#reflux_devices_body_prima").addClass("hidden");
+				// $("#reflux_devices_out_header").removeClass("hidden");
+			}else if (algorithm_val === 3){
+				$("#reflux_devices_head_rk").removeClass("hidden");
+				$("#reflux_devices_body_rk").removeClass("hidden");
+				$("#reflux_devices_head_steam").addClass("hidden");
+				$("#reflux_devices_body_steam").addClass("hidden");
+				$("#reflux_devices_head_prima").addClass("hidden");
+				$("#reflux_devices_body_prima").addClass("hidden");
+				// $("#reflux_devices_out_header").removeClass("hidden");
+			}
+		}
 	});
 
 	function launchReflux(){
+		refluxProcess["start"] = flagSendProcess = true;
 		$('#reflux_start').prop("disabled", true);
 		$('#reflux_add_sensor').prop("disabled", true);
 		$('#reflux_stop').prop("disabled", false);
+		$('#reflux_next').prop("disabled", false);
 		$("#reflux_algorithm_select option[value=" + refluxProcess["number"] + "]").prop('selected',true);
 		$('#reflux_algorithm_select').prop("disabled", true);
-		localStorage.setObj('oldStartProcess', 2);
-		refluxProcess["start"] = flagSendProcess = true;
 		clearInterval(sensorsProcessId);
-		setReflux();
+		stopInterval();
+		localStorage.setObj('oldStartProcess', 2);
+		setTimeout(function () {
+			setReflux();
+		}, 1000);
 	}
 	$(document).on('start-event','#reflux_start', function(e) {
 		console.log("start-event-Reflux");
@@ -2159,8 +2542,31 @@ $(function () {
 			}], {buttons: "replace"});
 
 	});
+	$(document).on('click', '#reflux_next', function () {
+		let step = globalSensorsJson["process"]["step"];
+		$.fn.openModal('', '<p class="text-center text-danger text-strong">Вы действительно хотите прервать «' + step+ '» и перейти на следующий шаг?</p>', "modal-sm", false, [{
+			text: "Да",
+			id: "return_restart",
+			class: "btn btn-primary btn-sm",
+			click: function () {
+				$(this).closest(".modal").modal("hide");
+				stepRefluxNext = true;
+				setReflux();
+			}
+		},
+			{
+				text: "Нет",
+				id: "return_tab",
+				class: "btn btn-danger btn-sm",
+				click: function () {
+					$(this).closest(".modal").modal("hide");
+				}
+			}], {buttons: "replace"});
+
+	});
 	function stopReflux(){
 		$('#reflux_stop').prop("disabled", true);
+		$('#reflux_next').prop("disabled", true);
 		$('#reflux_add_sensor').prop("disabled", false);
 		$('#reflux_start').prop("disabled", false);
 		$('#reflux_algorithm_select').prop("disabled", false);
@@ -2172,7 +2578,8 @@ $(function () {
 		$("#reflux_process").find("div.bg-danger").removeClass("bg-danger");
 		$("#reflux_process").find("div.text-danger").removeClass("text-danger");
 		clearInterval(sensorsProcessId);
-		clearInterval(sensorsIntervalId);
+		// clearInterval(sensorsIntervalId);
+		stopInterval();
 		flagSendProcess = true;
 		globalSensorsJson["process"]["allow"] = 0;
 		refluxProcess["start"] = false;
@@ -2184,8 +2591,9 @@ $(function () {
 	});
 
 	//Установка значений для ректификации
+	let stepRefluxNext = false;
 	function setReflux() {
-		console.log("setReflux");
+		console.log("setReflux", stepRefluxNext);
 		if ($.fn.objIsEmpty(refluxProcess["sensors"], false)){
 			setTimeout(function () {
 				setReflux();
@@ -2201,8 +2609,13 @@ $(function () {
 				"t6": {"allertValue": 0},
 				"t7": {"allertValue": 0},
 				"t8": {"allertValue": 0},
+				"head":{"timeCycle": 0,"timeOn": 0},
+				"headSteam":{"percent":0},
+				"body":{"timeCycle": 0,"timeOn": 0,"decline": 0},
+				"bodyPrima":{"percentStart":0,"percentStop":0,"decline":0},
 				"powerHigh": 0,
-				"powerLower": 0
+				"powerLower": 0,
+				"stepNext": 0
 			};
 			let power_set = $("#reflux_power_set");
 			let power_lower_set = $("#reflux_power_lower_set");
@@ -2234,10 +2647,164 @@ $(function () {
 					refluxSendData[sensor_key]["allertValue"] = e["allertValue"] = reflux_cutoff.val();
 				}
 			});
+			//клапана
+			let valwe_head = {};
+			let valwe_headSteam = {};
+			let valwe_body = {};
+			let valwe_bodyPrima = {};
+			if(globalSensorsJson.hasOwnProperty("valwe")) {
+				$.each(globalSensorsJson["valwe"], function (i, e) {
+					// console.log(i, e);
+					let valwe_key = Object.keys(e).shift();
+					switch (valwe_key) {
+						case "head":
+							valwe_head = e;
+							break;
+						case "headSteam":
+							valwe_headSteam = e;
+							break;
+						case "body":
+							valwe_body = e;
+							break;
+						case "bodyPrima":
+							valwe_bodyPrima = e;
+							break;
+					}
+				});
+
+				//прима
+				if (Number(refluxSendData["process"]["number"]) === 1) {
+					let reflux_head_cycle_prima = $("#reflux_head_cycle_prima");
+					let reflux_head_time_prima = $("#reflux_head_time_prima");
+					let reflux_body_start_prima = $("#reflux_body_start_prima");
+					let reflux_body_stop_prima = $("#reflux_body_stop_prima");
+					let reflux_body_decline_prima = $("#reflux_body_decline_prima");
+					if (reflux_head_cycle_prima.length) {
+						let val_reflux_head_cycle_prima = Number(reflux_head_cycle_prima.val());
+						if (Number(valwe_head["head"]["timeCycle"]) !== val_reflux_head_cycle_prima) {
+							flagSendProcess = true;
+						}
+						refluxSendData["head"]["timeCycle"] = val_reflux_head_cycle_prima;
+					}
+					if (reflux_head_time_prima.length) {
+						let val_reflux_head_time_prima = Number(reflux_head_time_prima.val());
+						if (Number(valwe_head["head"]["timeOn"]) !== val_reflux_head_time_prima) {
+							flagSendProcess = true;
+						}
+						refluxSendData["head"]["timeOn"] = val_reflux_head_time_prima;
+					}
+					if (reflux_body_start_prima.length) {
+						let val_reflux_body_start_prima = Number(reflux_body_start_prima.val());
+						if (Number(valwe_bodyPrima["bodyPrima"]["percentStart"]) !== val_reflux_body_start_prima) {
+							flagSendProcess = true;
+						}
+						refluxSendData["bodyPrima"]["percentStart"] = val_reflux_body_start_prima;
+					}
+					if (reflux_body_stop_prima.length) {
+						let val_reflux_body_stop_prima = Number(reflux_body_stop_prima.val());
+						if (Number(valwe_bodyPrima["bodyPrima"]["percentStop"]) !== val_reflux_body_stop_prima) {
+							flagSendProcess = true;
+						}
+						refluxSendData["bodyPrima"]["percentStop"] = val_reflux_body_stop_prima;
+					}
+					if (reflux_body_decline_prima.length) {
+						let val_reflux_body_decline_prima = Number(reflux_body_decline_prima.val());
+						if (Number(refluxSendData["bodyPrima"]["decline"]) !== val_reflux_body_decline_prima) {
+							flagSendProcess = true;
+						}
+						refluxSendData["bodyPrima"]["decline"] = val_reflux_body_decline_prima;
+					}
+				}
+				//пар
+				if (Number(refluxSendData["process"]["number"]) === 2) {
+					let reflux_head_steam = $("#reflux_head_steam");
+					let reflux_body_start_steam = $("#reflux_body_start_steam");
+					let reflux_body_stop_steam = $("#reflux_body_stop_steam");
+					let reflux_body_decline_steam = $("#reflux_body_decline_steam");
+					if (reflux_head_steam.length) {
+						let val_reflux_head_steam = Number(reflux_head_steam.val());
+						if (Number(valwe_headSteam["headSteam"]["percent"]) !== val_reflux_head_steam) {
+							flagSendProcess = true;
+						}
+						refluxSendData["headSteam"]["percent"] = val_reflux_head_steam;
+					}
+					if (reflux_body_start_steam.length) {
+						let val_reflux_body_start_steam = Number(reflux_body_start_steam.val());
+						if (Number(valwe_bodyPrima["bodyPrima"]["percentStart"]) !== val_reflux_body_start_steam) {
+							flagSendProcess = true;
+						}
+						refluxSendData["bodyPrima"]["percentStart"] = val_reflux_body_start_steam;
+					}
+					if (reflux_body_stop_steam.length) {
+						let val_reflux_body_stop_steam = Number(reflux_body_stop_steam.val());
+						if (Number(valwe_bodyPrima["bodyPrima"]["percentStop"]) !== val_reflux_body_stop_steam) {
+							flagSendProcess = true;
+						}
+						refluxSendData["bodyPrima"]["percentStop"] = val_reflux_body_stop_steam;
+					}
+					if (reflux_body_decline_steam.length) {
+						let val_reflux_body_decline_steam = Number(reflux_body_decline_steam.val());
+						if (Number(refluxSendData["bodyPrima"]["decline"]) !== val_reflux_body_decline_steam) {
+							flagSendProcess = true;
+						}
+						refluxSendData["bodyPrima"]["decline"] = val_reflux_body_decline_steam;
+					}
+				}
+				//жижа
+				if (Number(refluxSendData["process"]["number"]) === 3) {
+					let reflux_head_cycle_rk = $("#reflux_head_cycle_rk");
+					let reflux_head_time_rk = $("#reflux_head_time_rk");
+					let reflux_body_cycle_rk = $("#reflux_body_cycle_rk");
+					let reflux_body_time_rk = $("#reflux_body_time_rk");
+					let reflux_body_decline_rk = $("#reflux_body_decline_rk");
+					if (reflux_head_cycle_rk.length) {
+						let val_reflux_head_cycle_rk = Number(reflux_head_cycle_rk.val());
+						if (Number(valwe_head["head"]["timeCycle"]) !== val_reflux_head_cycle_rk) {
+							flagSendProcess = true;
+						}
+						refluxSendData["head"]["timeCycle"] = val_reflux_head_cycle_rk;
+					}
+					if (reflux_head_time_rk.length) {
+						let val_reflux_head_time_rk = Number(reflux_head_time_rk.val());
+						if (Number(valwe_head["head"]["timeOn"]) !== val_reflux_head_time_rk) {
+							flagSendProcess = true;
+						}
+						refluxSendData["head"]["timeOn"] = val_reflux_head_time_rk;
+					}
+					if (reflux_body_cycle_rk.length) {
+						let val_reflux_body_cycle_rk = Number(reflux_body_cycle_rk.val());
+						if (Number(valwe_body["body"]["timeCycle"]) !== val_reflux_body_cycle_rk) {
+							flagSendProcess = true;
+						}
+						refluxSendData["body"]["timeCycle"] = val_reflux_body_cycle_rk;
+					}
+					if (reflux_body_time_rk.length) {
+						let val_reflux_body_time_rk = Number(reflux_body_time_rk.val());
+						if (Number(valwe_body["body"]["timeOn"]) !== val_reflux_body_time_rk) {
+							flagSendProcess = true;
+						}
+						refluxSendData["body"]["timeOn"] = val_reflux_body_time_rk;
+					}
+					if (reflux_body_decline_rk.length) {
+						let val_reflux_body_decline_rk = Number(reflux_body_decline_rk.val());
+						if (Number(valwe_body["body"]["decline"]) !== val_reflux_body_decline_rk) {
+							flagSendProcess = true;
+						}
+						refluxSendData["body"]["decline"] = val_reflux_body_decline_rk;
+					}
+				}
+			}
+			if(stepRefluxNext){
+				flagSendProcess = true;
+				refluxSendData["stepNext"] = 1;
+				stepRefluxNext = false;
+			}
+
 			if (flagSendProcess) {
 				flagSendProcess = false;
 				clearInterval(sensorsProcessId);
-				clearInterval(sensorsIntervalId);
+				// clearInterval(sensorsIntervalId);
+				stopInterval();
 				sendRequest("SensorsIn", refluxSendData, "json", startReflux, false, $("#error_reflux"), false);
 			}
 		}
@@ -2257,8 +2824,10 @@ $(function () {
 		console.log("startReflux");
 		setTimeout(function () {
 			clearInterval(sensorsProcessId);
-			clearInterval(sensorsIntervalId);
-			sensorsIntervalId = setInterval(getIntervalSensors, 1000);
+			// clearInterval(sensorsIntervalId);
+			stopInterval();
+			startInterval();
+			// sensorsIntervalId = setInterval(getIntervalSensors, 1000);
 			if(refluxProcess["start"] === true) {
 				sensorsProcessId = setInterval(getReflux, 2000);
 			}
@@ -2469,15 +3038,16 @@ $(function () {
 									if(key === "t2"){
 										name = "Датчик в струе";
 									}
-									mashingProcess["sensors"][key] = {"name": name, "priority": priority, "color": color,"member":1};
+									mashingProcess["sensors"][key] = {"name": name, "priority": (priority ? 1 : 0), "color": color,"member":1};
 								}
 							}
 						});
 						if (!$.fn.objIsEmpty(mashingProcess["sensors"], false)) {
-							mashingProcess["sensors"]["pause1"] = {"time":20,"name":"Внесение солода","temperature":45,"stop":0};
-							mashingProcess["sensors"]["pause2"] = {"time":20,"name":"Белковая пауза","temperature":55,"stop":0};
-							mashingProcess["sensors"]["pause3"] = {"time":120,"name":"Осахаривание","temperature":65,"stop":0};
-							mashingProcess["sensors"]["pause4"] = {"time":10,"name":"Мэш аут","temperature":72,"stop":0};
+							mashingProcess["sensors"]["pause1"] = {"name":"Кислотная пауза","time":20,"temperature":40,"stop":0};
+							mashingProcess["sensors"]["pause2"] = {"name":"Белковая пауза","time":20,"temperature":55,"stop":0};
+							mashingProcess["sensors"]["pause3"] = {"name":"Осахаривание","time":30,"temperature":63,"stop":0};
+							mashingProcess["sensors"]["pause4"] = {"name":"Осахаривание","time":60,"temperature":67,"stop":0};
+							mashingProcess["sensors"]["pause5"] = {"name":"Мэш аут","time":10,"temperature":78,"stop":0};
 
 						}
 						$(this).closest(".modal").modal("hide");
@@ -2515,7 +3085,8 @@ $(function () {
 			"pause1": {"name": "", "time": 0, "temperature": 0, "stop": 0},
 			"pause2": {"name": "", "time": 0, "temperature": 0, "stop": 0},
 			"pause3": {"name": "", "time": 0, "temperature": 0, "stop": 0},
-			"pause4": {"name": "", "time": 0, "temperature": 0, "stop": 0}
+			"pause4": {"name": "", "time": 0, "temperature": 0, "stop": 0},
+			"pause5": {"name": "", "time": 0, "temperature": 0, "stop": 0}
 		};
 		let mashingTemplate = '';
 		let tpl_pause_body = '';
@@ -2572,6 +3143,7 @@ $(function () {
 				if (re_t.test(sensor_key) && Number(e["member"]) !== 0) {
 					sensorsMashingSend[sensor_key]["color"] = e["color"];
 					sensorsMashingSend[sensor_key]["member"] = 1;
+					sensorsMashingSend[sensor_key]["priority"] = e["priority"];
 					tpl_all_body += '<div class="row row-striped">' +
 						'<div class="pt-10 pb-10 clearfix">' +
 						'<div class="col-xs-12 col-sm-4 text-center-xs text-strong" id="mashing_step_text_'+sensor_key+'">t&#176' + name_sensor + '</div>' +
@@ -2611,13 +3183,16 @@ $(function () {
 		}
 	};
 	function launchMashing(){
+		mashingProcess["start"] = flagSendProcess = true;
 		$('#mashing_start').prop("disabled", true);
 		$('#mashing_add_sensor').prop("disabled", true);
 		$('#mashing_stop').prop("disabled", false);
-		mashingProcess["start"] = flagSendProcess = true;
-		localStorage.setObj('oldStartProcess', 3);
 		clearInterval(sensorsProcessId);
-		setMashing();
+		stopInterval();
+		localStorage.setObj('oldStartProcess', 3);
+		setTimeout(function () {
+			setMashing();
+		}, 1000);
 	}
 	$(document).on('start-event','#mashing_start', function(e) {
 		console.log("start-event-Mashing");
@@ -2668,7 +3243,8 @@ $(function () {
 		$('#mashing_start').prop("disabled", false);
 		$("#svg_mashing_start").css('stroke', "#000000");
 		clearInterval(sensorsProcessId);
-		clearInterval(sensorsIntervalId);
+		// clearInterval(sensorsIntervalId);
+		stopInterval();
 		flagSendProcess = true;
 		globalSensorsJson["process"]["allow"] = 0;
 		mashingProcess["start"] = false;
@@ -2692,7 +3268,8 @@ $(function () {
 				"pause1": {"time": 0, "temperature": 0, "stop": 0},
 				"pause2": {"time": 0, "temperature": 0, "stop": 0},
 				"pause3": {"time": 0, "temperature": 0, "stop": 0},
-				"pause4": {"time": 0, "temperature": 0, "stop": 0}
+				"pause4": {"time": 0, "temperature": 0, "stop": 0},
+				"pause5": {"time": 0, "temperature": 0, "stop": 0}
 				//,"power": 0
 			};
 			mashingSendData["process"]["allow"] = (mashingProcess["start"] ? 3 : 0);
@@ -2725,7 +3302,8 @@ $(function () {
 			if (flagSendProcess) {
 				flagSendProcess = false;
 				clearInterval(sensorsProcessId);
-				clearInterval(sensorsIntervalId);
+				// clearInterval(sensorsIntervalId);
+				stopInterval();
 				sendRequest("SensorsIn", mashingSendData, "json", startMashing, false, $("#error_mashing"), false);
 
 			}
@@ -2747,8 +3325,10 @@ $(function () {
 		console.log("startMashing");
 		setTimeout(function () {
 			clearInterval(sensorsProcessId);
-			clearInterval(sensorsIntervalId);
-			sensorsIntervalId = setInterval(getIntervalSensors, 1000);
+			// clearInterval(sensorsIntervalId);
+			stopInterval();
+			startInterval();
+			// sensorsIntervalId = setInterval(getIntervalSensors, 1000);
 			if(mashingProcess["start"] === true) {
 				sensorsProcessId = setInterval(getMashing, 2000);
 			}
@@ -2848,13 +3428,16 @@ $(function () {
 	//настройка ПИД
 	let pidProcess = {"pid": {}, "start": false};
 	function launchPid(){
+		pidProcess["start"] = flagSendProcess = true;
 		$('#pid_start').prop("disabled", true);
 		$('#pid_stop').prop("disabled", false);
 		$('#set_pid').prop("disabled", true);
-		pidProcess["start"] = flagSendProcess = true;
-		localStorage.setObj('oldStartProcess', 4);
 		clearInterval(sensorsProcessId);
-		setPid();
+		stopInterval();
+		localStorage.setObj('oldStartProcess', 4);
+		setTimeout(function () {
+			setPid();
+		}, 1000);
 	}
 	$(document).on('start-event','#pid_start', function(e) {
 		console.log("start-event-Pid");
@@ -2982,7 +3565,8 @@ $(function () {
 			if (flagSendProcess) {
 				flagSendProcess = false;
 				clearInterval(sensorsProcessId);
-				clearInterval(sensorsIntervalId);
+				// clearInterval(sensorsIntervalId);
+				stopInterval();
 				sendRequest("pidMashingSet", pidSendData, "json", startPid, false, $("#error_pid"), false);
 			}
 		}
@@ -3003,8 +3587,10 @@ $(function () {
 		console.log("startPid");
 		setTimeout(function () {
 			clearInterval(sensorsProcessId);
-			clearInterval(sensorsIntervalId);
-			sensorsIntervalId = setInterval(getIntervalSensors, 1000);
+			// clearInterval(sensorsIntervalId);
+			stopInterval();
+			startInterval();
+			// sensorsIntervalId = setInterval(getIntervalSensors, 1000);
 			if(pidProcess["start"] === true) {
 				if (!$.fn.objIsEmpty(request, false)) {
 					$.each(request["settings"], function (j, q) {
@@ -3126,6 +3712,8 @@ $(function () {
 					$("#svg_distillation_ten_t").text(Number(globalSensorsJson["power"]).toFixed(0) + '%');
 				}
 
+				//console.log('fillSensorsData', sensor_key, sensor_value, $("#distillation_" + sensor_key).text());
+
 				//заполнение процесса ректификации
 				if (refluxProcess["start"] !== true) {
 					$("#reflux_" + sensor_key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
@@ -3214,6 +3802,8 @@ $(function () {
 	let tmpTime = 0;
 	let stopTime = 30;
 	let openModalError = false;
+	let countError = 0;
+	let secondInterval = 1000;
 	function getIntervalSensors() {
 		$.ajax({
 			url: ajax_url_debug + 'SensorsOut',
@@ -3221,6 +3811,9 @@ $(function () {
 			type: 'GET',
 			dataType: 'json',
 			success: function (msg) {
+				//clearInterval(sensorsIntervalId);
+				startInterval();
+				countError = 0;
 				//console.log('Sensors',msg);
 				globalSensorsJson = msg;
 				fillSensorsData();
@@ -3231,31 +3824,39 @@ $(function () {
 				openModalError = false;
 			},
 			error: function (err, exception) {
-				globalSensorsJson = {};
-				if(!openModalError) {
-					openModalError = true;
-					$.fn.openModal('',
-						'<p class="text-center text-danger text-strong">Ошибка загрузки данных датчиков, проверьте питание контроллера и обновите страницу</p>' +
-						'<p class="text-center text-strong" id="modal_time_out"></p>',
-						"modal-sm", false, {
-							text: "Запустить",
-							id: "return_interval",
-							class: "btn btn-success hidden",
-							click: function () {
-								$(this).closest(".modal").modal("hide");
-								sensorsIntervalId = setInterval(getIntervalSensors, 1000);
-							}
-						});
-				}
-				$("#modal_time_out").text('Запрос датчиков прекратится через ' + (stopTime - tmpTime) + ' сек.');
-				tmpTime++;
-				if(tmpTime > stopTime) {
-					$("#modal_time_out").text('Запрос датчиков остановлен');
-					$("#return_interval").removeClass("hidden");
-					clearInterval(sensorsIntervalId);
-					clearInterval(sensorsProcessId);
-					tmpTime = 0;
-					openModalError = false;
+				countError ++;
+				startInterval();
+				if(countError > 10) {
+					globalSensorsJson = {};
+					if (!openModalError) {
+						openModalError = true;
+						$.fn.openModal('',
+							'<p class="text-center text-danger text-strong">Ошибка загрузки данных датчиков, проверьте питание контроллера и обновите страницу</p>' +
+							'<p class="text-center text-strong" id="modal_time_out"></p>',
+							"modal-sm", false, {
+								text: "Запустить",
+								id: "return_interval",
+								class: "btn btn-success hidden",
+								click: function () {
+									$(this).closest(".modal").modal("hide");
+									stopInterval();
+									startInterval();
+									openModalError = false;
+									// sensorsIntervalId = setInterval(getIntervalSensors, 1000);
+								}
+							});
+					}
+					$("#modal_time_out").text('Запрос датчиков прекратится через ' + (stopTime - tmpTime) + ' сек.');
+					tmpTime++;
+					if (tmpTime > stopTime) {
+						$("#modal_time_out").text('Запрос датчиков остановлен');
+						$("#return_interval").removeClass("hidden");
+						// clearInterval(sensorsIntervalId);
+						stopInterval();
+						clearInterval(sensorsProcessId);
+						tmpTime = 0;
+						openModalError = false;
+					}
 				}
 			},
 		});
@@ -3263,8 +3864,30 @@ $(function () {
 		//tmpTime ++;
 	}
 
+	function startInterval(){
+		sensorsIntervalId = setTimeout(
+			function() {
+				getIntervalSensors()
+			},
+			secondInterval
+		);
+		// sensorsIntervalId = setInterval(getIntervalSensors, secondInterval);
+	}
+	function stopInterval(){
+		clearTimeout(sensorsIntervalId);
+		// clearInterval(sensorsIntervalId);
+	}
+
 	//clearInterval(sensorsIntervalId);
-	sensorsIntervalId = setInterval(getIntervalSensors, 1000);
+	$(document).ready(function () {
+		console.log('ready');
+		startInterval();
+		//setTimeout(getSettings, 2000);
+		// sensorsIntervalId = setInterval(getIntervalSensors, 1000);
+		/*setTimeout(function () {
+			startInterval();
+		}, 3000);*/
+	});
 
 ////////////////////////////////////////////////////////////////
 
@@ -3277,7 +3900,7 @@ $(function () {
 			type: 'GET',
 			dataType: 'json',
 			success: function (msg) {
-				console.log('Settings', msg);
+				// console.log('Settings', msg);
 				$("#settings_ssdp").val(msg["SSDP"]);
 				$("#settings_ssid").val(msg["ssid"]);
 				$("#version").text("v."+msg["version"]);
@@ -3312,18 +3935,12 @@ $(function () {
 		}
 	});
 
-	/*function timeUpdate(){
-		$("#modal_time_out").text((stopTime - tmpTime) + ' сек.');
-		tmpTime++;
-		if(tmpTime > stopTime) {
-			location.reload(true)
-		}
-	}*/
 	let modal_interval = 0;
 
 	$("form#firmware_update").submit(function (e) {
 		e.preventDefault();
-		clearInterval(sensorsIntervalId);
+		// clearInterval(sensorsIntervalId);
+		stopInterval();
 		let formData = new FormData();
 		formData.append('update', $('#file_update')[0].files[0]);
 		//console.log(formData,$('#file_update')[0].files[0]);
@@ -3355,13 +3972,13 @@ $(function () {
 				if(msg.hasOwnProperty('update') && msg['update'] === 'ok'){
 					setTimeout(function () {
 						clearInterval(modal_interval);
-						$("#modal_text_info").html('Файл обновления успешно загружен, контроллер будет перезагружен.<br><br>Страница будет автоматически обновлена, через 2 минуты').removeClass('text-danger').addClass('text-success');
+						$("#modal_text_info").html('Файл обновления успешно загружен, контроллер будет перезагружен.<br><br>Страница будет автоматически обновлена, через 1 минуту').removeClass('text-danger').addClass('text-success');
 						// console.log("success", msg);
 						tmpTime = 0;
 						modal_interval = setInterval(function () {
 							tmpTime++;
 							$("#modal_time_out").text((tmpTime) + ' сек.');
-							if(tmpTime >= 120) {
+							if(tmpTime >= 60) {
 							 	location.reload(true)
 							}
 						}, 1000)

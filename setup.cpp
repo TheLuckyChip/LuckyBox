@@ -10,13 +10,6 @@ void setup()
 	power.inPowerHigh = 100;
 	power.inPowerLow = 65;
 
-	delay(200);
-
-	Serial.begin(115200);
-	Serial.println("");
-	Serial.println("");
-	Serial.println("Start Setup");
-
 	String addrMac = WiFi.softAPmacAddress();
 	addrMacMod = "            ";
 	addrMacMod[0] = addrMac[0];	addrMacMod[1] = addrMac[1];
@@ -34,6 +27,8 @@ void setup()
 	pwm = Adafruit_PWMServoDriver();
 	pwm.begin();
 	pwm.setPWMFreq(1000);
+	// Закрыли отбор по пару
+	setPWM(PWM_CH5, 0, 10);
 	csOff(TFT_RES_PRG);
 	csOff(SIREN_OUT);
 	csOff(SD_CS);
@@ -53,18 +48,25 @@ void setup()
 	csOff(PWM_CH2);
 	csOff(PWM_CH3);
 	csOff(PWM_CH4);
-	csOff(PWM_CH5);
+	//csOff(PWM_CH5);
 	csOff(PWM_CH6);
 	csOff(PWM_CH7);
-	csOff(PWM_CH8);
+	//csOn(PWM_CH8);
 	csOff(PWM_CH9);
+	setPWM(PWM_CH8, 0, 2047);
 	delay(2);
 	csOn(TFT_RES_PRG);
 	delay(10);
 	csOff(TFT_RES_PRG);
 	delay(2);
 
+	Serial.begin(115200);
+	Serial.println("");
+	Serial.println("");
+	Serial.println("Start Setup");
+
 	EEPROM.begin(2048);
+	StateDsReset = EEPROM.read(0);
 	// 0 - датчики и устройства (1298 & 1299 переворот экрана и тачскрина)
 	// 1300 - сохраненные данные для процесса дистилляции
 	// 1400 - сохраненные данные для процесса ректификации (1497 HiPower, 1498 LoPower, 1499 № процесса по умолчанию)
@@ -73,7 +75,7 @@ void setup()
 	// 1700 - 1759 имя ssdp, 1760 - 1819 имя ssid, 1820 - 1879 имя ssidAP
 	// 1900 - 1931 пароль ssid, 1940 - 1971 пароль ssidAP, 1980 - часовой пояс
 	timezone = EEPROM.read(1980);
-	if (timezone > 23) timezone = 3;
+	if (timezone < -12 || timezone > 12) timezone = 3;
 	// Считаем инверсию экрана и тачскрина
 	uint8_t tft180 = EEPROM.read(1298);
 	uint8_t touch180 = EEPROM.read(1299);
@@ -161,6 +163,7 @@ void setup()
 #endif
 
 	csOff(TFT_CS);
+
 	// инициализация SD карты
 	sdInit();
 	csOn(TFT_CS);
@@ -256,18 +259,18 @@ void setup()
 
 	Serial.println("Step 16 - Variables Init");
 
-	dallRead();
+	dallRead(10);
 	delay(750);
-	dallRead();
+	dallRead(10);
 #if defined TFT_Display
 	// рисуем квадратики для индикации загрузки
 	scaleCount += 20;
 	if (scaleCount <= 282) tft.writeFillRect(scaleCount, 215, 15, 15, 0xFFFF);
 #endif
 	delay(750);
-	dallRead();
+	dallRead(10);
 	delay(750);
-	dallRead();
+	dallRead(10);
 #if defined TFT_Display
 	// рисуем квадратики для индикации загрузки
 	scaleCount += 20;
@@ -306,20 +309,17 @@ void setup()
   pinMode(intTouch, INPUT); // прерывание от тачскрина
   attachInterrupt(intTouch, touchscreenUpdateSet, FALLING);
 #endif
-
-  processMode.allow = 0; // Стоп
-  processMode.number = EEPROM.read(1499);// modeReflux;
-  EEPROM.end();
-  if (processMode.number > 7) processMode.number = 0;
-  processMode.step = 0;
+  loadEepromReflux();
   loadEepromPid();
   setKp = Kp;
   setKi = Ki;
   setKd = Kd;
-  processMashing[0].time = 20; processMashing[0].temperature = 45;
-  processMashing[1].time = 30; processMashing[1].temperature = 55;
-  processMashing[2].time = 120; processMashing[2].temperature = 65;
-  processMashing[3].time = 10; processMashing[3].temperature = 72;
+  processMashing[0].time = 20; processMashing[0].temperature = 40;
+  processMashing[1].time = 20; processMashing[1].temperature = 55;
+  processMashing[2].time = 30; processMashing[2].temperature = 63;
+  processMashing[3].time = 60; processMashing[3].temperature = 67;
+  processMashing[4].time = 10; processMashing[4].temperature = 78;
+  numSenseMashBrew = DS_Cube;
 
   Serial.println("Setup Done!");
 

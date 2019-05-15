@@ -17,5 +17,6 @@
 #include "touch_interrupt.h"
 
 extern void displayLoop();
+//extern void touchLoop();
 
 #endif

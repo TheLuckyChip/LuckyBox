@@ -4,16 +4,7 @@
 
 #include "mashing_mode.h"
 
-void EEPROM_float_write_mash(int addr, float val) {
-	byte *x = (byte *)&val;
-	for (byte i = 0; i < 4; i++) EEPROM.write(i + addr, x[i]);
-}
-float EEPROM_float_read_mash(int addr) {
-	byte x[4];
-	for (byte i = 0; i < 4; i++) x[i] = EEPROM.read(i + addr);
-	float *y = (float *)&x;
-	return y[0];
-}
+unsigned long timeMashingPause;
 
 void loadEepromMashing() {
 	int i;
@@ -26,19 +17,19 @@ void loadEepromMashing() {
 			tpl2web.dsMember[i] = EEPROM.read(index);  index++;
 			tpl2web.dsPriority[i] = EEPROM.read(index);  index++;
 			tpl2web.dsCutoff[i] = EEPROM.read(index);  index++;
-			if (processMode.allow == 3) {
+			//if (processMode.allow == 3) {
 				temperatureSensor[i].member = tpl2web.dsMember[i];
 				temperatureSensor[i].priority = tpl2web.dsPriority[i];
 				temperatureSensor[i].cutoff = tpl2web.dsCutoff[i];
-			}
+			//}
 		}
 		for (i = 0; i < 8; i++) {
 			tpl2web.pwmMember[i] = EEPROM.read(index);  index++;
-			if (processMode.allow == 3) pwmOut[i].member = tpl2web.pwmMember[i];
+			pwmOut[i].member = tpl2web.pwmMember[i]; //if (processMode.allow == 3) pwmOut[i].member = tpl2web.pwmMember[i];
 		}
 		for (i = 0; i < 4; i++) {
 			tpl2web.adcMember[i] = EEPROM.read(index);  index++;
-			if (processMode.allow == 3) adcIn[i].member = tpl2web.adcMember[i];
+			adcIn[i].member = tpl2web.adcMember[i]; //if (processMode.allow == 3) adcIn[i].member = tpl2web.adcMember[i];
 		}
 	}
 	else {
@@ -46,19 +37,19 @@ void loadEepromMashing() {
 			tpl2web.dsMember[i] = 0;
 			tpl2web.dsPriority[i] = 0;
 			tpl2web.dsCutoff[i] = 0;
-			if (processMode.allow == 3) {
+			//if (processMode.allow == 3) {
 				temperatureSensor[i].member = 0;
 				temperatureSensor[i].priority = 0;
 				temperatureSensor[i].cutoff = 0;
-			}
+			//}
 		}
 		for (i = 0; i < 8; i++) {
 			tpl2web.pwmMember[i] = 0;
-			if (processMode.allow == 3) pwmOut[i].member = 0;
+			pwmOut[i].member = 0; //if (processMode.allow == 3) pwmOut[i].member = 0;
 		}
 		for (i = 0; i < 4; i++) {
 			tpl2web.adcMember[i] = 0;
-			if (processMode.allow == 3) adcIn[i].member = 0;
+			adcIn[i].member = 0; //if (processMode.allow == 3) adcIn[i].member = 0;
 		}
 	}
 	/*
@@ -100,14 +91,16 @@ void handleMashingSensorTpl() {
 		}
 	}
 	// температурные паузы
-	dataForWeb += "\"pause1\":{\"name\":\"Внесение солода\",\"time\":" + String(processMashing[0].time);
+	dataForWeb += "\"pause1\":{\"name\":\"Кислотная пауза\",\"time\":" + String(processMashing[0].time);
 	dataForWeb += ",\"temperature\":" + String(processMashing[0].temperature) + ",\"stop\":" + String(processMashing[0].stop) + "},";
 	dataForWeb += "\"pause2\":{\"name\":\"Белковая пауза\",\"time\":" + String(processMashing[1].time);
 	dataForWeb += ",\"temperature\":" + String(processMashing[1].temperature) + ",\"stop\":" + String(processMashing[1].stop) + "},";
-	dataForWeb += "\"pause3\":{\"name\":\"Осахаривание\",\"time\":" + String(processMashing[2].time);
+	dataForWeb += "\"pause3\":{\"name\":\"Мальтозная пауза\",\"time\":" + String(processMashing[2].time);
 	dataForWeb += ",\"temperature\":" + String(processMashing[2].temperature) + ",\"stop\":" + String(processMashing[2].stop) + "},";
-	dataForWeb += "\"pause4\":{\"name\":\"Мэш аут\",\"time\":" + String(processMashing[3].time);
-	dataForWeb += ",\"temperature\":" + String(processMashing[3].temperature) + ",\"stop\":" + String(processMashing[3].stop) + "}}";
+	dataForWeb += "\"pause4\":{\"name\":\"Осахаривание\",\"time\":" + String(processMashing[3].time);
+	dataForWeb += ",\"temperature\":" + String(processMashing[3].temperature) + ",\"stop\":" + String(processMashing[3].stop) + "},";
+	dataForWeb += "\"pause5\":{\"name\":\"Мэш аут\",\"time\":" + String(processMashing[4].time);
+	dataForWeb += ",\"temperature\":" + String(processMashing[4].temperature) + ",\"stop\":" + String(processMashing[4].stop) + "}}";
 	HTTP.send(200, "text/json", dataForWeb);
 }
 // Отправка - Добавить датчики для процесса
@@ -170,7 +163,6 @@ void handleMashingSensorSetSave() {
 		arg = "in" + String(i + 1);
 		adcIn[i].member = HTTP.arg(arg + "[member]").toInt();
 	}
-	HTTP.send(200, "text/json", "{\"result\":\"ok\"}");
 
 	// сохраним в EEPROM
 	EEPROM.begin(2048);
@@ -187,31 +179,40 @@ void handleMashingSensorSetSave() {
 	for (i = 0; i < 4; i++) {
 		EEPROM.write(index, adcIn[i].member); index++;
 	}
-
-	EEPROM.commit();
-	delay(100);
+	
 	EEPROM.end();
+	delay(200);
+
+	HTTP.send(200, "text/json", "{\"result\":\"ok\"}");
 }
 
 void mashingLoop() {
-	// поиск выбранного датчика и начальная инициализация
-	if (processMode.step == 0) {
-		loadEepromMashing();
-		if (temperatureSensor[0].member == 1) numSenseMashBrew = 0;
-		else if (temperatureSensor[1].member == 1) numSenseMashBrew = 1;
-		else if (temperatureSensor[2].member == 1) numSenseMashBrew = 2;
-		else if (temperatureSensor[3].member == 1) numSenseMashBrew = 3;
-		else if (temperatureSensor[4].member == 1) numSenseMashBrew = 4;
-		else if (temperatureSensor[5].member == 1) numSenseMashBrew = 5;
-		else if (temperatureSensor[6].member == 1) numSenseMashBrew = 6;
-		else if (temperatureSensor[7].member == 1) numSenseMashBrew = 7;
-	}
 	// запомним текущую температуру для PID регулировки
-	Input = temperatureSensor[numSenseMashBrew].data;
+	Input = temperatureSensor[numSenseMashBrew].data + 0.5; // + 0.5 - чтобы отсчет времени пошел уже на подходе Т
 
 	switch (processMode.step) {
 		// пришли при старте затирания
 		case 0: {
+			loadEepromMashing();
+			// если при выборе нет приоритета берем первый из выбранных
+			if (temperatureSensor[DS_Cube].member == 1) numSenseMashBrew = DS_Cube;
+			else if (temperatureSensor[DS_Tube].member == 1) numSenseMashBrew = DS_Tube;
+			else if (temperatureSensor[DS_Out].member == 1) numSenseMashBrew = DS_Out;
+			else if (temperatureSensor[DS_Def].member == 1) numSenseMashBrew = DS_Def;
+			else if (temperatureSensor[DS_Res1].member == 1) numSenseMashBrew = DS_Res1;
+			else if (temperatureSensor[DS_Res2].member == 1) numSenseMashBrew = DS_Res2;
+			else if (temperatureSensor[DS_Res3].member == 1) numSenseMashBrew = DS_Res3;
+			else if (temperatureSensor[DS_Res4].member == 1) numSenseMashBrew = DS_Res4;
+			// если есть приоритет
+			if (temperatureSensor[DS_Cube].priority == 1) numSenseMashBrew = DS_Cube;
+			else if (temperatureSensor[DS_Tube].priority == 1) numSenseMashBrew = DS_Tube;
+			else if (temperatureSensor[DS_Out].priority == 1) numSenseMashBrew = DS_Out;
+			else if (temperatureSensor[DS_Def].priority == 1) numSenseMashBrew = DS_Def;
+			else if (temperatureSensor[DS_Res1].priority == 1) numSenseMashBrew = DS_Res1;
+			else if (temperatureSensor[DS_Res2].priority == 1) numSenseMashBrew = DS_Res2;
+			else if (temperatureSensor[DS_Res3].priority == 1) numSenseMashBrew = DS_Res3;
+			else if (temperatureSensor[DS_Res4].priority == 1) numSenseMashBrew = DS_Res4;
+			startWriteSD = true;
 			// подготовка данных для вывода на TFT
 #if defined TFT_Display
 			csOn(TFT_CS);
@@ -361,13 +362,12 @@ void mashingLoop() {
 			if (millis() >= timePauseOff) settingAlarm = false;	// выключили звуковой сигнал
 			Setpoint = processMashing[3].temperature;	// температура которую надо поддерживать PID алгоритму (4-й шаг)
 			if ((processMashing[3].time == 0 || processMashing[3].temperature == 0) && processMashing[3].stop == 0) { // если 4-й шаг надо пропустить
-				// нет последней паузы, окончание процесса
-				timePauseOff = millis() + 10000;		// счетчик времени для зв.сигнала
-				settingAlarm = true;			// включили звуковой сигнал
+				Setpoint = processMashing[4].temperature;	// температура которую надо поддерживать PID алгоритму (5-й шаг)
 				processMashing[3].step = 0;
-				processMode.timeStep = 0;
-				stepTime = millis();			// для расчетов в алгоритме PID
-				processMode.step = 9;			// перешли на следующий шаг алгоритма
+				processMashing[4].step = 1;					// для индикации обрабатываемой температурной паузы в WEB
+				windowStartTime = millis();					// для расчетов в алгоритме PID
+				nameProcessStep = "5-я пауза нагрев";
+				processMode.step = 9;			// пропускаем шаг
 			}
 			else if (Input >= Setpoint) {
 				stepTime = millis();			// для расчетов в алгоритме PID
@@ -384,10 +384,13 @@ void mashingLoop() {
 			if (millis() >= timePauseOff) settingAlarm = false;	// выключили звуковой сигнал
 			Setpoint = processMashing[3].temperature;	// температура которую надо поддерживать PID алгоритму (4-й шаг)
 			if (millis() >= 60000 * processMashing[3].time + stepTime && processMashing[3].stop == 0) {
-				settingAlarm = true;			// подаем звуковой сигнал
-				timePauseOff = millis() + 10000;		// счетчик времени для зв.сигнала
+				Setpoint = processMashing[4].temperature;	// температура которую надо поддерживать PID алгоритму (5-й шаг)
 				processMashing[3].step = 0;
-				Setpoint = 0;
+				processMashing[4].step = 1;					// для индикации обрабатываемой температурной паузы в WEB
+				windowStartTime = millis();					// для расчетов в алгоритме PID
+				settingAlarm = true;				// подаем звуковой сигнал
+				timePauseOff = millis() + 6000;		// счетчик времени для зв.сигнала
+				nameProcessStep = "5-я пауза нагрев";
 				processMode.step = 9;			// перешли на следующий шаг алгоритма
 			}
 			break;
@@ -395,7 +398,46 @@ void mashingLoop() {
 
 
 
+		// Нагрев до температуры 5-й паузы если она задана
 		case 9: {
+			if (millis() >= timePauseOff) settingAlarm = false;	// выключили звуковой сигнал
+			Setpoint = processMashing[4].temperature;	// температура которую надо поддерживать PID алгоритму (5-й шаг)
+			if ((processMashing[4].time == 0 || processMashing[4].temperature == 0) && processMashing[4].stop == 0) { // если 5-й шаг надо пропустить
+				// нет последней паузы, окончание процесса
+				timePauseOff = millis() + 10000;		// счетчик времени для зв.сигнала
+				settingAlarm = true;			// включили звуковой сигнал
+				processMashing[4].step = 0;
+				processMode.timeStep = 0;
+				stepTime = millis();			// для расчетов в алгоритме PID
+				processMode.step = 11;			// перешли на следующий шаг алгоритма
+			}
+			else if (Input >= Setpoint) {
+				stepTime = millis();			// для расчетов в алгоритме PID
+				settingAlarm = true;			// подаем звуковой сигнал
+				timePauseOff = millis() + 6000;		// счетчик времени для зв.сигнала
+				nameProcessStep = "5-я пауза стаб.";
+				processMode.step = 10;			// перешли на следующий шаг алгоритма
+			}
+			processMode.timeStep = 0;			// для расчета и вывода времени прошедшего с начала текущего шага
+			break;
+		}
+		// Ждем окончание 5-й паузы
+		case 10: {
+			if (millis() >= timePauseOff) settingAlarm = false;	// выключили звуковой сигнал
+			Setpoint = processMashing[4].temperature;	// температура которую надо поддерживать PID алгоритму (5-й шаг)
+			if (millis() >= 60000 * processMashing[4].time + stepTime && processMashing[4].stop == 0) {
+				settingAlarm = true;			// подаем звуковой сигнал
+				timePauseOff = millis() + 10000;		// счетчик времени для зв.сигнала
+				processMashing[4].step = 0;
+				Setpoint = 0;
+				processMode.step = 11;			// перешли на следующий шаг алгоритма
+			}
+			break;
+		}
+
+
+
+		case 11: {
 			if (millis() >= timePauseOff) {
 				settingAlarm = false;		// выключили звуковой сигнал
 				processMode.step = 0;
@@ -406,29 +448,43 @@ void mashingLoop() {
 			break;
 		}
 	}
-	// Если идет предварительный нагрев (до температуры поддержания Т стабилизации минус 4 градуса)
-	/*if (Input < Setpoint - 4) {
-		digitalWrite(heater, HIGH);
-		stepTime = millis();
-	}*/
-	// ПИД регулировка температуры
-	//else {
+
+	//temperatureSensor[6].allertValue = Input;
+	//temperatureSensor[7].allertValue = Setpoint;
+
+	if (timeMashingPause < millis()) {
+
 		myPID.Compute();											// расчет времени для PID регулировки
+
 		if (millis() > WindowSize + windowStartTime) {
 			windowStartTime += WindowSize;
 			if (windowStartTime > millis()) windowStartTime = 0;    // защита от переполнения
 		}
-		// включить или выключить ТЭН в зависимости от расчетов временного PID регулирования
-		if (Output < millis() - windowStartTime) {
-			digitalWrite(heater, LOW);
-			power.heaterPower = 0;
-		}
-		else {
+
+		// Если идет предварительный нагрев (до температуры поддержания Т стабилизации минус 4 градуса)
+		if (Input < Setpoint - 4) {
 			digitalWrite(heater, HIGH);
 			power.heaterPower = 100;
 		}
-	//}
-	delay(100);
+		else if (Input > Setpoint + 2) {
+			digitalWrite(heater, LOW);
+			power.heaterPower = 0;
+		}
+		// включить или выключить ТЭН в зависимости от расчетов временного PID регулирования
+		else {
+			if (Output < millis() - windowStartTime) {
+				digitalWrite(heater, LOW);
+				power.heaterPower = 0;
+			}
+			else {
+				digitalWrite(heater, HIGH);
+				power.heaterPower = 100;
+			}
+		}
+
+		timeMashingPause = millis() + 100;
+	}
+	//delay(100);
 
 	if (processMode.allow == 0) {
 		power.heaterPower = 0;
@@ -436,5 +492,10 @@ void mashingLoop() {
 		settingAlarm = false;			// выключили звуковой сигнал
 		digitalWrite(heater, LOW);		// Выключим ТЭН по окончанию процесса
 		processMode.timeStep = 0;		// для расчета и вывода времени прошедшего с начала текущего шага
+		processMashing[0].step = 0;
+		processMashing[1].step = 0;
+		processMashing[2].step = 0;
+		processMashing[3].step = 0;
+		processMashing[4].step = 0;
 	}
 }

@@ -5,6 +5,7 @@
 #include "pid_config.h"
 
 byte PIDsetSave;
+unsigned long timePidPause;
 
 void initPID()
 {
@@ -91,24 +92,36 @@ void handlePidSet() {
 	HTTP.send(200, "text/json", dataForWeb);
 
 	//Serial.println(PIDsetSave);
+	myPID.SetTunings(setKp, setKi, setKd);
+	Setpoint = setTempForPID;
 }
 
 void pidSetLoop() {
 	
 	switch (processMode.step) {
 		case 0: {
-			//Serial.println("Start");
 			loadEepromMashing();
-			//loadEepromPid();
+			loadEepromPid();
+			// если при выборе нет приоритета берем первый из выбранных
+			if (temperatureSensor[DS_Cube].member == 1) numSenseMashBrew = DS_Cube;
+			else if (temperatureSensor[DS_Tube].member == 1) numSenseMashBrew = DS_Tube;
+			else if (temperatureSensor[DS_Out].member == 1) numSenseMashBrew = DS_Out;
+			else if (temperatureSensor[DS_Def].member == 1) numSenseMashBrew = DS_Def;
+			else if (temperatureSensor[DS_Res1].member == 1) numSenseMashBrew = DS_Res1;
+			else if (temperatureSensor[DS_Res2].member == 1) numSenseMashBrew = DS_Res2;
+			else if (temperatureSensor[DS_Res3].member == 1) numSenseMashBrew = DS_Res3;
+			else if (temperatureSensor[DS_Res4].member == 1) numSenseMashBrew = DS_Res4;
+			// если есть приоритет
+			if (temperatureSensor[DS_Cube].priority == 1) numSenseMashBrew = DS_Cube;
+			else if (temperatureSensor[DS_Tube].priority == 1) numSenseMashBrew = DS_Tube;
+			else if (temperatureSensor[DS_Out].priority == 1) numSenseMashBrew = DS_Out;
+			else if (temperatureSensor[DS_Def].priority == 1) numSenseMashBrew = DS_Def;
+			else if (temperatureSensor[DS_Res1].priority == 1) numSenseMashBrew = DS_Res1;
+			else if (temperatureSensor[DS_Res2].priority == 1) numSenseMashBrew = DS_Res2;
+			else if (temperatureSensor[DS_Res3].priority == 1) numSenseMashBrew = DS_Res3;
+			else if (temperatureSensor[DS_Res4].priority == 1) numSenseMashBrew = DS_Res4;
+
 			processMode.timeStart = time(nullptr);
-			if (temperatureSensor[0].member == 1) numSenseMashBrew = 0;
-			else if (temperatureSensor[1].member == 1) numSenseMashBrew = 1;
-			else if (temperatureSensor[2].member == 1) numSenseMashBrew = 2;
-			else if (temperatureSensor[3].member == 1) numSenseMashBrew = 3;
-			else if (temperatureSensor[4].member == 1) numSenseMashBrew = 4;
-			else if (temperatureSensor[5].member == 1) numSenseMashBrew = 5;
-			else if (temperatureSensor[6].member == 1) numSenseMashBrew = 6;
-			else if (temperatureSensor[7].member == 1) numSenseMashBrew = 7;
 			// подготовка данных для вывода на TFT
 #if defined TFT_Display
 			csOn(TFT_CS);
@@ -119,18 +132,20 @@ void pidSetLoop() {
 			DefCubOut = Display_out_temp;
 			csOff(TFT_CS);
 #endif
+			tempBigOut = 1;
 			myPID.SetTunings(setKp, setKi, setKd);
 			myPID.SetOutputLimits(0, WindowSize);		// временной интервал реагирования для PID
 			myPID.SetMode(AUTOMATIC);
-			Setpoint = processMashing[0].temperature;
+			Setpoint = setTempForPID;
 			timePauseOff = millis();
 			processMode.step = 1;
 			break;
 		}
 		case 1: {
-			if (timePauseOff <= millis()) {
-				timePauseOff = millis() + 100;	// счетчик времени
-				Input = setTempForPID;
+			Input = temperatureSensor[numSenseMashBrew].data;
+
+
+			if (timePidPause < millis()) {
 
 				myPID.Compute();											// расчет времени для PID регулировки
 
@@ -138,16 +153,32 @@ void pidSetLoop() {
 					windowStartTime += WindowSize;
 					if (windowStartTime > millis()) windowStartTime = 0;    // защита от переполнения
 				}
-				// включить или выключить ТЭН в зависимости от расчетов временного PID регулирования
-				if (Output < millis() - windowStartTime) {
-					digitalWrite(heater, LOW);
-					power.heaterPower = 0;
-				}
-				else {
+
+				// Если идет предварительный нагрев (до температуры поддержания Т стабилизации минус 4 градуса)
+				if (Input < Setpoint - 4) {
 					digitalWrite(heater, HIGH);
 					power.heaterPower = 100;
 				}
+				else if (Input > Setpoint + 2) {
+					digitalWrite(heater, LOW);
+					power.heaterPower = 0;
+				}
+				// включить или выключить ТЭН в зависимости от расчетов временного PID регулирования
+				else {
+					if (Output < millis() - windowStartTime) {
+						digitalWrite(heater, LOW);
+						power.heaterPower = 0;
+					}
+					else {
+						digitalWrite(heater, HIGH);
+						power.heaterPower = 100;
+					}
+				}
+
+				timePidPause = millis() + 100;
 			}
+
+
 			break;
 		}
 	}
