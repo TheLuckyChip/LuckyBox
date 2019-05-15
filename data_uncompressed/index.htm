@@ -32,7 +32,7 @@
                             <a href="#" data-toggle="dropdown" class="dropdown-toggle">Помощь<strong class="caret"></strong></a>
                             <ul class="dropdown-menu">
                                 <li>
-                                    <a href="#">Подключение датчиков</a>
+                                    <a id="pop_sensors" href="#">Подключение датчиков</a>
                                 </li>
                                 <li>
                                     <a href="https://luckycenter.ru/mnogofunkcionalnaja-avtomatika-luckybox" target="_blank">Обновление прошивки</a>
@@ -207,6 +207,21 @@
         <p class="pull-right">www.LuckyCenter.ru</p>
     </div>
 </footer>
+<div class="modal fade" id="imagemodal" tabindex="-1" role="dialog" aria-labelledby="connectorsLabel" aria-hidden="true">
+    <div class="modal-dialog" data-dismiss="modal">
+        <div class="modal-content"  >
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Закрыть">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h5 class="modal-title text-center text-strong">Схема подключения датчиков и устройств к коммерческой версии LuckyBox</h5>
+            </div>
+            <div class="modal-body">
+                <img src="connectors.jpg" class="imagepreview" style="width: 100%;" >
+            </div>
+        </div>
+    </div>
+</div>
 <audio id="alert_audio" preload="none">
     <source src="beep.mp3" type='audio/mpeg; codecs="mp3"'>
     <source src="beep.ogg" type='audio/ogg; codecs="vorbis"'>
@@ -229,6 +244,15 @@
 <script src="scripts.js"></script>
 
 <script src="jscolor.js"></script>
+<script>
+    $(function() {
+        $('#pop_sensors').on('click', function(e) {
+            e.preventDefault();
+            // $('.imagepreview').attr('src', $(this).find('img').attr('src'));
+            $('#imagemodal').modal('show');
+        });
+    });
+</script>
 </body>
 </html>
 

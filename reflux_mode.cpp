@@ -130,7 +130,7 @@ void loadEepromReflux() {
 		if (temperatureSensor[i].cutoff == true) temperatureSensor[i].allertValue = temperatureSensor[i].allertValueIn;
 	}
 
-	processMode.timeStart = time(nullptr);
+	//if (processMode.step == 0) processMode.timeStart = time(nullptr);
 	graphOutInterval = Display_out_temp;
 	// определим тип процесса ректификации в зависимости от выбора клапанов
 	typeRefOfValwe = 0;
@@ -1293,6 +1293,7 @@ void refluxLoop() {
 		csOn(PWM_CH6);								// дополнительный разгон на ТЭНы
 		power.heaterPower = power.inPowerHigh;		// установили мощность на ТЭН 100 %
 		processMode.timeStep = 0;
+		processMode.timeStart = time(nullptr);
 		stepNext = 0;
 		countHaedEnd = 0;
 		beepEnd = false;

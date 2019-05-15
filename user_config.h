@@ -49,9 +49,6 @@
 #define		PWM_CH7		4       // ШИМ для х.з. пока чего
 #define		PWM_CH8		5       // ШИМ для формирования напряжения + 15 вольт
 #define		PWM_CH9		6       // Импульс повышающего напряжения на клапана
-// Коррекция напряжения на шаровом кране
-// диапазон от 0.82 до 1.70 (получим 100% открытие от 5 до 10 вольт)
-//#define		TapCorrection	1.20
 // Если клапан нормально закрыты ставим false
 // Если клапан нормально открытый ставим true
 #define		PWM_CH1_Invert	false
@@ -68,9 +65,6 @@
 #define		Display_out_temp	15
 // Периодичность записи лог.файла на SD
 #define		SD_out_temp	10
-// Температура перехода на пониженную мощность и открытия клапана подачи воды
-//#define		DistillationTransitionTemperature	85
-//#define		RefluxTransitionTemperature			55
 // Какой используем датчик давления
 //#define		Pressure_BMP085
 #define		Pressure_BMP180
