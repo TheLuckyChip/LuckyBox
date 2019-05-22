@@ -677,7 +677,8 @@ void rfluxLoopMode_2() {
 				setPWM(PWM_CH5, 0, bodyPrimaPercentSet);
 			}
 			else {
-				nameProcessStep = "Отбор тела, " + String(counterStartStop) + "-й стоп";
+				if (counterStartStop > 0) nameProcessStep = "Отбор тела, " + String(counterStartStop) + "-й стоп";
+				else nameProcessStep = "Отбор тела";
 				// Закрыли отбор по пару
 				setPWM(PWM_CH5, 0, 10);
 			}
@@ -857,7 +858,8 @@ void rfluxLoopMode_3() {
 				else nameProcessStep = "Отбор тела, старт/стопов - " + String(counterStartStop);
 			}
 			else {
-				nameProcessStep = "Отбор тела, " + String(counterStartStop) + "-й стоп";
+				if (counterStartStop > 0) nameProcessStep = "Отбор тела, " + String(counterStartStop) + "-й стоп";
+				else nameProcessStep = "Отбор тела";
 				// Закрыли отбор по пару
 				setPWM(PWM_CH5, 0, 10);
 			}
@@ -1035,7 +1037,8 @@ void rfluxLoopMode_4() {
 				else nameProcessStep = "Отбор тела, старт/стопов - " + String(counterStartStop);
 			}
 			else if (processMode.step != 7) {
-				nameProcessStep = "Отбор тела, " + String(counterStartStop) + "-й стоп";
+				if (counterStartStop > 0) nameProcessStep = "Отбор тела, " + String(counterStartStop) + "-й стоп";
+				else nameProcessStep = "Отбор тела";
 				csOff(PWM_CH1);
 				csOff(PWM_CH2);
 			}
