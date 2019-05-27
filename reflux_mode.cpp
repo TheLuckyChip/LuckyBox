@@ -1168,14 +1168,13 @@ void rfluxLoopMode_5() {
 				power.heaterStatus = 0;							// выключили ТЭН
 				power.heaterPower = 0;							// установили мощность на ТЭН 0 %
 				temperatureSensor[DS_Cube].allert = true;	// сигнализация для WEB
-				//temperatureSensor[DS_Cube].allert = false;	// сигнализация для WEB
 				processMode.timeStep = 0;
 				nameProcessStep = "Процесс закончен";
 				if (pwmOut[3].member == 1) {
-					timePauseOff = 60000 * 20 + millis();
+					//timePauseOff = 60000 * 20 + millis();
 					csOn(PWM_CH4);
 				}
-				else timePauseOff = 60000 * 2 + millis();
+				//else timePauseOff = 60000 * 2 + millis();
 				processMode.step = 7;						// перешли на следующий шаг алгоритма
 				stepNext = 0;
 				break;
@@ -1205,11 +1204,49 @@ void rfluxLoopMode_5() {
 		}
 // после завершения процесса ждем 120 сек. и выключаем клапана и пищалку
 		case 7: {
+			csOff(PWM_CH6);								// выключить дополнительный ТЭН на разгон
+			power.heaterStatus = 0;						// выключили ТЭН
+			power.heaterPower = 0;						// установили мощность 0%
+
+			// ждем 10 сек. до выключения сигнализации
+			if (processMode.timeStep >= 10 || adcIn[1].allert == true) {
+				csOff(PWM_CH1);				// закрыли клапан отбора
+				csOff(PWM_CH2);				// закрыли клапан отбора
+				settingAlarm = false;		// выключили звуковой сигнал
+				alertEnable = false;
+			}
+			// ждем 5 минут. до выключения клапанов
+			if (pwmOut[3].member == 0) {
+				if (processMode.timeStep >= 300 || adcIn[2].allert == true || stepNext == 1) {
+					csOff(PWM_CH3);		// закрыли клапан подачи воды
+					temperatureSensor[DS_Cube].allert = false;	// сигнализация для WEB
+					temperatureSensor[DS_Tube].allert = false;
+					processMode.allow = 0;  // вышли из режима дистилляции
+					processMode.step = 0;	// обнулили шаг алгоритма
+					commandWriteSD = "Процесс завершен";
+					commandSD_en = true;
+					stepNext = 0;
+				}
+			}
+			// или 20 мин.
+			else {
+				if (processMode.timeStep >= 1200 || adcIn[2].allert == true || stepNext == 1) {
+					if (pwmOut[3].member == 1) csOff(PWM_CH4);								// закрыли клапан слива ПБ
+					if (pwmOut[2].member == 1) csOff(PWM_CH3);								// закрыли клапан подачи воды
+					temperatureSensor[DS_Cube].allert = false;	// сигнализация для WEB
+					temperatureSensor[DS_Tube].allert = false;
+					processMode.allow = 0;						// вышли из режима ректификации
+					processMode.step = 0;						// обнулили шаг алгоритма
+					commandWriteSD = "Процесс завершен";
+					commandSD_en = true;
+					stepNext = 0;
+				}
+			}
+			break;
 
 
 
-
-			if (millis() >= timePauseOff || stepNext == 1) {
+			/*if (millis() >= timePauseOff || stepNext == 1) {
 				temperatureSensor[DS_Cube].allert = false;	// сигнализация для WEB
 				processMode.allow = 0;						// вышли из режима ректификации
 				processMode.step = 0;						// обнулили шаг алгоритма
@@ -1218,7 +1255,7 @@ void rfluxLoopMode_5() {
 				stepNext = 0;
 			}
 
-			break;
+			break;*/
 		}
 	}
 }
@@ -1310,7 +1347,8 @@ void refluxLoop() {
 		}
 
 		// разрешение или запрет сигнала на датчик уровня
-		if (adcIn[0].allert == true && processMode.step == 6 && processMode.timeStep > 20 && processMode.timeStep < 25) {
+		if ((processMode.number == 3 && typeRefOfValwe != 3) || processMode.number == 2 || processMode.number == 4) alertLevelEnable = true;
+		else if (adcIn[0].allert == true && processMode.step == 6 && processMode.timeStep > 20 && processMode.timeStep < 25) {
 			alertLevelEnable = false; // не пищим от датчика уровня
 			settingAlarm = false;
 		}

@@ -721,7 +721,6 @@ void tftStopLoop() {
 		touchScreen = 2;
 		timeOffMenu = millis() + 10000;
 	}
-	//Serial.println("menu");
 	else if (touchScreen == 2) {
 		// ждем нажатие
 		if (touchArea == 21 || timeOffMenu <= millis()) { // Нет - перерисовываем графики
@@ -748,20 +747,67 @@ void tftStopLoop() {
 			processMode.allow = 0;
 			touchArea = 0;
 			touchScreen = 0;
-			// Закрыли отбор по пару
-			//setPWM(PWM_CH5, 0, 10);
-			//settingAlarm = false;
-			//csOff(PWM_CH1);
-			//csOff(PWM_CH2);
-			//csOff(PWM_CH3);
-			//csOff(PWM_CH4);
 		}
+		//yield();
+	}
+}
+
+// Вывод менюшки на подтверждение старта процесса
+void tftStartLoop() {
+	uint8_t typePr = 0;
+	while (1) {
+		// вывод менюшки Да Нет
+		if (touchScreen == 0) {
+			csOn(TFT_CS);
+			fillScreenRect(25, 57, 270, 140, 0xFFF6);
+			tft.drawRect(27, 59, 266, 136, 0xFC00);
+			tft.drawRect(28, 60, 264, 134, 0xFC00);
+			fillScreenRect(45, 125, 100, 60, 0xFB6D);
+			tft.drawRect(45, 125, 100, 60, 0x0000);
+			fillScreenRect(175, 125, 100, 60, 0x67EC);
+			tft.drawRect(175, 125, 100, 60, 0x0000);
+
+			if (touchArea == 1) { typePr = 1; drawBitmapString(56, 68, &StartDist, ILI9341_RED, 0xFFF6); }
+			else if (touchArea == 2) { typePr = 2; drawBitmapString(50, 68, &StartRect, ILI9341_RED, 0xFFF6); }
+			else if (touchArea == 3) { typePr = 3; drawBitmapString(82, 68, &StartMash, ILI9341_RED, 0xFFF6); }
+			touchArea = 0;
+			drawBitmapString(60, 141, &Esc, ILI9341_BLACK, 0xFB6D);
+			drawBitmapString(196, 140, &Ok, ILI9341_BLACK, 0x67EC);
+
+			csOff(TFT_CS);
+			touchScreen = 3;
+			timeOffMenu = millis() + 10000;
+		}
+		else {
+			// ждем нажатие
+			if (touchArea == 21 || timeOffMenu <= millis()) { // Нет - перерисовываем экран меню
+				touchArea = 0;
+				touchScreen = 0;
+				processMode.step = 0;
+				//drawMenuScreen();
+				break;
+			}
+			else if (touchArea == 22) { // Да - запускаем процесс
+				commandWriteSD = "TouchSend: Старт";
+				commandSD_en = true;
+				processMode.step = 0;
+				processMode.allow = typePr;
+				touchArea = 0;
+				touchScreen = 0;
+				break;
+			}
+		}
+		displayLoop();
+		HTTP.handleClient();
 		yield();
 	}
 }
 
 void getTouchArea() {
-	if (touchArea == 1) {
+	if (touchArea > 0 && touchArea < 4) {
+		tftStartLoop();
+	}
+	/*if (touchArea == 1) {
 		//touchStart = true;
 		commandWriteSD = "TouchSend: Старт";
 		commandSD_en = true;
@@ -781,12 +827,12 @@ void getTouchArea() {
 		commandSD_en = true;
 		processMode.allow = 3;
 		processMode.step = 0;
-	}
+	}*/
 	else if (touchArea == 4) {
 		processMode.allow = 6;
 		processMode.step = 0;
+		touchArea = 0;
 	}
-	touchArea = 0;
 }
 
 void tftMenuLoop() {
