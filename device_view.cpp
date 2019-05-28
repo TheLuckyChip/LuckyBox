@@ -84,25 +84,26 @@ void deviceTempAdcOutScreen() {
 	else tft.print("T8:--.-");
 
 	// вывод датчиков безопасности
-	if (adcIn[0].allert == true) color = ILI9341_RED;
+	settingAlarm = false;
+	if (adcIn[0].allert == true) { color = ILI9341_RED; settingAlarm = true; }
 	else color = ILI9341_LIGHTGREY;
 	tft.setTextColor(color, ILI9341_BLACK);
 	tft.drawCircle(39, 110, 22, color); tft.drawCircle(39, 110, 23, color); tft.drawCircle(39, 110, 21, color);
 	tft.setCursor(29, 103);
 	tft.print("A0");
-	if (adcIn[1].allert == true) color = ILI9341_RED;
+	if (adcIn[1].allert == true) { color = ILI9341_RED; settingAlarm = true; }
 	else color = ILI9341_LIGHTGREY;
 	tft.setTextColor(color, ILI9341_BLACK);
 	tft.drawCircle(119, 110, 22, color); tft.drawCircle(119, 110, 23, color); tft.drawCircle(119, 110, 21, color);
 	tft.setCursor(110, 103);
 	tft.print("A1");
-	if (adcIn[2].allert == true) color = ILI9341_RED;
+	if (adcIn[2].allert == true) { color = ILI9341_RED; settingAlarm = true; }
 	else color = ILI9341_LIGHTGREY;
 	tft.setTextColor(color, ILI9341_BLACK);
 	tft.drawCircle(199, 110, 22, color); tft.drawCircle(199, 110, 23, color); tft.drawCircle(199, 110, 21, color);
 	tft.setCursor(189, 103);
 	tft.print("A2");
-	if (adcIn[3].allert == true) color = ILI9341_RED;
+	if (adcIn[3].allert == true) { color = ILI9341_RED; settingAlarm = true; }
 	else color = ILI9341_LIGHTGREY;
 	tft.setTextColor(color, ILI9341_BLACK);
 	tft.drawCircle(279, 110, 22, color); tft.drawCircle(279, 110, 23, color); tft.drawCircle(279, 110, 21, color);
