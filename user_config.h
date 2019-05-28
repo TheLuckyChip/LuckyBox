@@ -3,6 +3,8 @@
 
 // ТЭН
 #define		heater			16
+// Если PWM_CH6 включен весь процесс ректификации или дистилляции - убрать комментарий следующей строки
+//#define		Sign_of_Work
 // GPIO для I2C
 #define		pSDA			4
 #define		pSCL			5

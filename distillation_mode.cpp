@@ -270,7 +270,9 @@ void distillationLoop() {
 			// ждем нагрев куба до 80 градусов
 			if (temperatureSensor[DS_Cube].data >= DistillationTransitionTemperature) {
 				csOn(PWM_CH3);			// включаем клапан подачи воды
-				csOff(PWM_CH6);			// выключить дополнительный ТЭН на разгон
+#ifndef Sign_of_Work
+				csOff(PWM_CH6);							// выключить дополнительный ТЭН на разгон
+#endif
 				power.heaterPower = power.inPowerLow;	// установили мощность на ТЭН
 				timeAllertInterval = millis() + 10000;	// счетчик времени для зв.сигнала
 				processMode.timeStep = 0;

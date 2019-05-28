@@ -81,8 +81,13 @@ void setup()
 	uint8_t touch180 = EEPROM.read(1299);
 	if (tft180 > 1 || tft180 == 0) tftInvert = false;
 	else tftInvert = true;
-	if (touch180 > 1 || touch180 == 0) touchInvert = false;
-	else touchInvert = true;
+	//if (touch180 > 1 || touch180 == 0) touchInvert = false;
+	if (touch180 == 0) touchInvert = false;
+	else if (touch180 == 1) touchInvert = true;
+	else {
+		touchInvert = true;
+		EEPROM.write(1299, 1);
+	}
 
 #if defined TFT_Display
 	csOn(TFT_CS);
