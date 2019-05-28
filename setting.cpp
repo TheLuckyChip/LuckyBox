@@ -14,7 +14,7 @@ ESP8266WebServer HTTP;
 PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
 
 String curVersion = "2.0RC15";
-uint16_t versionForWeb = 2014;
+uint16_t versionForWeb = 2015;
 // Определяем переменные wifi
 String _ssid;      // Для хранения SSID
 String _password;  // Для хранения пароля сети

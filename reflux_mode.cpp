@@ -421,7 +421,9 @@ void rfluxLoopMode_1() {
 			// контроль температуры в тубе для перехода на отбор
 			if (temperatureSensor[DS_Tube].data >= RefluxTransitionTemperature || stepNext == 1) {
 				if (pwmOut[2].member == 1) csOn(PWM_CH3);	// включаем клапан подачи воды
-				csOff(PWM_CH6);								// выключить дополнительный ТЭН на разгон
+#ifndef Sign_of_Work
+				csOff(PWM_CH6);							// выключить дополнительный ТЭН на разгон
+#endif
 				power.heaterPower = power.inPowerLow;		// установили мощность на ТЭН 65 %
 				timeAllertInterval = millis() + 10000;		// установим счетчик времени для зв.сигнала 10 сек
 				settingAlarm = true;
@@ -541,7 +543,9 @@ void rfluxLoopMode_2() {
 		case 1: {
 			if (temperatureSensor[DS_Tube].data >= RefluxTransitionTemperature || stepNext == 1) {
 				if (pwmOut[2].member == 1) csOn(PWM_CH3);	// включаем клапан подачи воды
-				csOff(PWM_CH6);								// выключить дополнительный ТЭН на разгон
+#ifndef Sign_of_Work
+				csOff(PWM_CH6);							// выключить дополнительный ТЭН на разгон
+#endif
 				power.heaterPower = power.inPowerLow;		// установили мощность на ТЭН 65 %
 				timeAllertInterval = millis() + 10000;		// установим счетчик времени для зв.сигнала 10 сек.
 				processMode.timeStep = 0;
@@ -728,7 +732,9 @@ void rfluxLoopMode_3() {
 		case 1: {
 			if (temperatureSensor[DS_Tube].data >= RefluxTransitionTemperature || stepNext == 1) {
 				if (pwmOut[2].member == 1) csOn(PWM_CH3);	// включаем клапан подачи воды
-				csOff(PWM_CH6);								// выключить дополнительный ТЭН на разгон
+#ifndef Sign_of_Work
+				csOff(PWM_CH6);							// выключить дополнительный ТЭН на разгон
+#endif
 				power.heaterPower = power.inPowerLow;		// установили мощность на ТЭН 65 %
 				timeAllertInterval = millis() + 10000;		// установим счетчик времени для зв.сигнала 10 сек.
 				processMode.timeStep = 0;
@@ -914,7 +920,9 @@ void rfluxLoopMode_4() {
 		case 1: {
 			if (temperatureSensor[DS_Tube].data >= RefluxTransitionTemperature || stepNext == 1) {
 				if (pwmOut[2].member == 1) csOn(PWM_CH3);	// включаем клапан подачи воды
-				csOff(PWM_CH6);								// выключить дополнительный ТЭН на разгон
+#ifndef Sign_of_Work
+				csOff(PWM_CH6);							// выключить дополнительный ТЭН на разгон
+#endif
 				power.heaterPower = power.inPowerLow;		// установили мощность на ТЭН 65 %
 				timeAllertInterval = millis() + 10000;		// установим счетчик времени для зв.сигнала 10 сек.
 				processMode.timeStep = 0;
@@ -1102,7 +1110,9 @@ void rfluxLoopMode_5() {
 			if (temperatureSensor[DS_Tube].data >= RefluxTransitionTemperature || stepNext == 1) {
 				csOn(PWM_CH3);
 				csOn(PWM_CH2);				// включаем клапан доп. подачи воды
-				csOff(PWM_CH6);								// выключить дополнительный ТЭН на разгон
+#ifndef Sign_of_Work
+				csOff(PWM_CH6);							// выключить дополнительный ТЭН на разгон
+#endif
 				power.heaterPower = power.inPowerLow;		// установили мощность на ТЭН 65 %
 				timeAllertInterval = millis() + 10000;		// установим счетчик времени для зв.сигнала 10 сек.
 				processMode.timeStep = 0;

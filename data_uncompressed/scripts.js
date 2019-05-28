@@ -1551,6 +1551,8 @@ $(function () {
 	};
 
 	function launchDistillation(){
+		curProcess = 1;
+		countProcess = 0;
 		distillationProcess["start"] = flagSendProcess = true;
 		$('#distillation_start').prop("disabled", true);
 		$('#distillation_add_sensor').prop("disabled", true);
@@ -1622,6 +1624,8 @@ $(function () {
 		stopInterval();
 		flagSendProcess = true;
 		globalSensorsJson["process"]["allow"] = 0;
+		curProcess = 0;
+		countProcess = 0;
 		distillationProcess["start"] = false;
 		setDistillation();
 	}
@@ -2485,6 +2489,8 @@ $(function () {
 	});
 
 	function launchReflux(){
+		curProcess = 2;
+		countProcess = 0;
 		refluxProcess["start"] = flagSendProcess = true;
 		$('#reflux_start').prop("disabled", true);
 		$('#reflux_add_sensor').prop("disabled", true);
@@ -2582,6 +2588,8 @@ $(function () {
 		stopInterval();
 		flagSendProcess = true;
 		globalSensorsJson["process"]["allow"] = 0;
+		curProcess = 0;
+		countProcess = 0;
 		refluxProcess["start"] = false;
 		setReflux();
 	}
@@ -3183,6 +3191,8 @@ $(function () {
 		}
 	};
 	function launchMashing(){
+		curProcess = 3;
+		countProcess = 0;
 		mashingProcess["start"] = flagSendProcess = true;
 		$('#mashing_start').prop("disabled", true);
 		$('#mashing_add_sensor').prop("disabled", true);
@@ -3247,6 +3257,8 @@ $(function () {
 		stopInterval();
 		flagSendProcess = true;
 		globalSensorsJson["process"]["allow"] = 0;
+		curProcess = 0;
+		countProcess = 0;
 		mashingProcess["start"] = false;
 		setMashing();
 	}
@@ -3428,6 +3440,8 @@ $(function () {
 	//настройка ПИД
 	let pidProcess = {"pid": {}, "start": false};
 	function launchPid(){
+		curProcess = 4;
+		countProcess = 0;
 		pidProcess["start"] = flagSendProcess = true;
 		$('#pid_start').prop("disabled", true);
 		$('#pid_stop').prop("disabled", false);
@@ -3489,6 +3503,8 @@ $(function () {
 		clearInterval(sensorsProcessId);
 		flagSendProcess = true;
 		globalSensorsJson["process"]["allow"] = 0;
+		curProcess = 0;
+		countProcess = 0;
 		pidProcess["start"] = false;
 		setPid();
 	}
@@ -3800,10 +3816,27 @@ $(function () {
 	}
 	//запрос постоянно всех датчиков
 	let tmpTime = 0;
-	let stopTime = 30;
+	let stopTime = 10;
 	let openModalError = false;
 	let countError = 0;
 	let secondInterval = 1000;
+	let curProcess = 0;
+	let countProcess = 0;
+	let countIntervalError = 0;
+	function countTimeError(){
+		$("#modal_time_out").text('Запрос датчиков прекратится через ' + (stopTime - tmpTime) + ' сек.');
+		tmpTime++;
+		if (tmpTime > stopTime) {
+			$("#modal_time_out").text('Запрос датчиков остановлен');
+			$("#return_interval").removeClass("hidden");
+			// clearInterval(sensorsIntervalId);
+			stopInterval();
+			clearInterval(sensorsProcessId);
+			tmpTime = 0;
+			openModalError = false;
+			clearInterval(countIntervalError);
+		}
+	}
 	function getIntervalSensors() {
 		$.ajax({
 			url: ajax_url_debug + 'SensorsOut',
@@ -3815,7 +3848,18 @@ $(function () {
 				startInterval();
 				countError = 0;
 				//console.log('Sensors',msg);
+				countProcess++;
 				globalSensorsJson = msg;
+				if(countProcess > 2 && curProcess !== globalSensorsJson["process"]["allow"]){
+					curProcess = globalSensorsJson["process"]["allow"];
+					console.log('curProcess',curProcess);
+				}
+				console.log('countProcess',countProcess);
+
+				if(countProcess > 2){
+					countProcess = 0;
+				}
+				globalSensorsJson["process"]["allow"] = curProcess;
 				fillSensorsData();
 				tmpTime = 0;
 				if(openModalError){
@@ -3845,8 +3889,9 @@ $(function () {
 									// sensorsIntervalId = setInterval(getIntervalSensors, 1000);
 								}
 							});
+						countIntervalError = setInterval(countTimeError, secondInterval)
 					}
-					$("#modal_time_out").text('Запрос датчиков прекратится через ' + (stopTime - tmpTime) + ' сек.');
+					/*$("#modal_time_out").text('Запрос датчиков прекратится через ' + (stopTime - tmpTime) + ' сек.');
 					tmpTime++;
 					if (tmpTime > stopTime) {
 						$("#modal_time_out").text('Запрос датчиков остановлен');
@@ -3856,7 +3901,7 @@ $(function () {
 						clearInterval(sensorsProcessId);
 						tmpTime = 0;
 						openModalError = false;
-					}
+					}*/
 				}
 			},
 		});
