@@ -387,15 +387,15 @@ uint16_t percentCalc(uint8_t data) {
 void rfluxLoopMode_1() {
 	if (processMode.step < 4) {
 		// контроль датчиков безопасности
-		if (!errA && !errT) check_Err();
-		if (timePauseErrA <= millis()) {
+		if (processMode.step != 4 && !errA && !errT) check_Err();
+		if (processMode.step != 4 && timePauseErrA <= millis()) {
 			errA = false; check_Err();
 			if (errA) {
 				stop_Err();
 				nameProcessStep = "Стоп по аварии ADC > " + String(adcIn[numCrashStop].name);
 			}
 		}
-		if (timePauseErrT <= millis()) {
+		if (processMode.step != 4 && timePauseErrT <= millis()) {
 			errT = false; check_Err();
 			if (errT) {
 				stop_Err();
@@ -661,29 +661,45 @@ void rfluxLoopMode_2() {
 				}
 			}
 
+			// расчет на сколько надо после старт/стопа открыть шаровый кран
+			bodyPrimaPercent = bodyPrimaPercentStart - (bodyPrimaDecline * counterStartStop);
+
 			// без ПБ рулим по уставке
 			if (temperatureSensor[DS_Tube].data <= temperatureSensor[DS_Tube].allertValue - settingBoilTube) {
 				temperatureSensor[DS_Tube].allert = false;
 				bodyValveSet = true;							// признак, что надо открыть клапан отбора
-				if (adcIn[0].member == 1 && adcIn[0].allert == true) setPWM(PWM_CH5, 0, 10); // емкость полная
 			}
+
+			if (adcIn[0].member == 1 && adcIn[0].allert == true) {
+				setPWM(PWM_CH5, 0, 10); // емкость полная
+				bodyValveSet = false;
+			}
+			else if (temperatureSensor[DS_Tube].data < temperatureSensor[DS_Tube].allertValue) bodyValveSet = true;
 
 			if (bodyValveSet == true && processMode.step != 7) {
 				bodyTimeOffCount = processMode.timeStep;			// сбрасываем таймер остановки процесса
 				if (counterStartStop == 0) nameProcessStep = "Отбор тела";
 				else nameProcessStep = "Отбор тела, старт/стопов - " + String(counterStartStop);
-
-
-				// расчет на сколько надо после старт/стопа открыть шаровый кран
-				bodyPrimaPercent = bodyPrimaPercentStart - (bodyPrimaDecline * counterStartStop);
-				if (bodyPrimaPercent < bodyPrimaPercentStop) bodyPrimaPercent = bodyPrimaPercentStop;
-				bodyPrimaPercentSet = percentCalc(bodyPrimaPercent);
+				bodyPrimaPercentSet = percentCalc(bodyPrimaPercent);	// Открываем шаровый кран
 				setPWM(PWM_CH5, 0, bodyPrimaPercentSet);
 			}
 			else {
-				nameProcessStep = "Отбор тела, " + String(counterStartStop) + "-й стоп";
-				// Закрыли отбор по пару
-				setPWM(PWM_CH5, 0, 10);
+				if (bodyPrimaPercent <= bodyPrimaPercentStop) {
+					setPWM(PWM_CH5, 0, 10);							// Закрыли отбор по пару
+					power.heaterStatus = 0;						// выключили ТЭН
+					power.heaterPower = 0;						// установили мощность на ТЭН 0 %
+					timePauseOff = millis() + 120000;			// время на отключение
+					timeAllertInterval = millis() + 10000;		// время для зв. сигнала
+					processMode.timeStep = 0;
+					stepNext = 0;
+					nameProcessStep = "Процесс закончен";
+					settingAlarm = true;
+					processMode.step = 7;						// перешли на следующий шаг алгоритма
+				}
+				else {
+					nameProcessStep = "Отбор тела, " + String(counterStartStop) + "-й стоп";
+					setPWM(PWM_CH5, 0, 10);							// Закрыли отбор по пару
+				}
 			}
 			break;
 		}
@@ -706,10 +722,29 @@ void rfluxLoopMode_2() {
 				csOff(PWM_CH3);		// закрыли клапан подачи воды
 				temperatureSensor[DS_Cube].allert = false;	// сигнализация для WEB
 				temperatureSensor[DS_Tube].allert = false;
-				processMode.allow = 0;  // вышли из режима дистилляции
-				processMode.step = 0;	// обнулили шаг алгоритма
 				commandWriteSD = "Процесс завершен";
 				commandSD_en = true;
+#if defined TFT_Display
+				// выводим информацию по окончанию процесса
+				if (stopInfoOutScreen == true) {
+					outStopInfo();
+					stopInfoOutScreen = false;
+				}
+				else if (touch_in == true && stopInfoOutScreen == false) {
+					processMode.allow = 0;  // вышли из режима дистилляции
+					processMode.step = 0;	// обнулили шаг алгоритма
+					stopInfoOutScreen = true;
+					touchScreen = 0;
+					touchArea = 0;
+					touch_in = false;
+					initBuzzer(50);
+					delay(500);
+					attachInterrupt(intTouch, touchscreenUpdateSet, FALLING);
+				}
+#else
+				processMode.allow = 0;  // вышли из режима дистилляции
+				processMode.step = 0;	// обнулили шаг алгоритма
+#endif
 			}
 			break;
 		}
@@ -819,18 +854,12 @@ void rfluxLoopMode_3() {
 			}
 
 			// контроль Т в царге
-
 			else if (temperatureSensor[DS_Tube].allertValue > 0 && temperatureSensor[DS_Tube].data >= temperatureSensor[DS_Tube].allertValue) {
 				temperatureSensor[DS_Tube].allert = true;	// сигнализация для WEB
 				// если первый стоп пищим 10 сек.
 				if (counterStartStop == 0) timeAllertInterval = millis() + 10000;			// установим счетчик времени для зв.сигнала
 				if (bodyValveSet) counterStartStop++;
 				bodyValveSet = false;
-
-				// расчет на сколько надо после старт/стопа открыть шаровый кран
-				bodyPrimaPercent = bodyPrimaPercentStart - (bodyPrimaDecline * counterStartStop);
-				if (bodyPrimaPercent < bodyPrimaPercentStop) bodyPrimaPercent = bodyPrimaPercentStop;
-				bodyPrimaPercentSet = percentCalc(bodyPrimaPercent);
 
 				// если есть польский буфер, работаем до первого стопа
 				if (pwmOut[3].member == 1) {
@@ -849,26 +878,46 @@ void rfluxLoopMode_3() {
 				}
 			}
 
+			// расчет на сколько надо после старт/стопа открыть шаровый кран
+			bodyPrimaPercent = bodyPrimaPercentStart - (bodyPrimaDecline * counterStartStop);
+
 			// без ПБ рулим по уставке
 			if (temperatureSensor[DS_Tube].data <= temperatureSensor[DS_Tube].allertValue - settingBoilTube) {
 				temperatureSensor[DS_Tube].allert = false;
 				bodyValveSet = true;							// признак, что надо открыть клапан отбора
-				if (adcIn[0].member == 1 && adcIn[0].allert == true) setPWM(PWM_CH5, 0, 10); // если емкость полная
-				else setPWM(PWM_CH5, 0, bodyPrimaPercentSet);
 			}
+
+			if (adcIn[0].member == 1 && adcIn[0].allert == true) {
+				setPWM(PWM_CH5, 0, 10); // емкость полная
+				bodyValveSet = false;
+			}
+			else if (temperatureSensor[DS_Tube].data < temperatureSensor[DS_Tube].allertValue) bodyValveSet = true;
 
 			if (bodyValveSet == true && processMode.step != 7) {
 				bodyTimeOffCount = processMode.timeStep;			// сбрасываем таймер остановки процесса
 				if (counterStartStop == 0) nameProcessStep = "Отбор тела";
 				else nameProcessStep = "Отбор тела, старт/стопов - " + String(counterStartStop);
+				bodyPrimaPercentSet = percentCalc(bodyPrimaPercent);	// Открываем шаровый кран
+				setPWM(PWM_CH5, 0, bodyPrimaPercentSet);
 			}
 			else {
-				nameProcessStep = "Отбор тела, " + String(counterStartStop) + "-й стоп";
-				// Закрыли отбор по пару
-				setPWM(PWM_CH5, 0, 10);
+				if (bodyPrimaPercent <= bodyPrimaPercentStop) {
+					setPWM(PWM_CH5, 0, 10);							// Закрыли отбор по пару
+					power.heaterStatus = 0;						// выключили ТЭН
+					power.heaterPower = 0;						// установили мощность на ТЭН 0 %
+					timePauseOff = millis() + 120000;			// время на отключение
+					timeAllertInterval = millis() + 10000;		// время для зв. сигнала
+					processMode.timeStep = 0;
+					stepNext = 0;
+					nameProcessStep = "Процесс закончен";
+					settingAlarm = true;
+					processMode.step = 7;						// перешли на следующий шаг алгоритма
+				}
+				else {
+					nameProcessStep = "Отбор тела, " + String(counterStartStop) + "-й стоп";
+					setPWM(PWM_CH5, 0, 10);							// Закрыли отбор по пару
+				}
 			}
-
-			///////////////////////////////////
 			break;
 		}
 				// после завершения процесса ждем 120 сек. и выключаем клапана и пищалку
@@ -890,10 +939,29 @@ void rfluxLoopMode_3() {
 				csOff(PWM_CH3);		// закрыли клапан подачи воды
 				temperatureSensor[DS_Cube].allert = false;	// сигнализация для WEB
 				temperatureSensor[DS_Tube].allert = false;
-				processMode.allow = 0;  // вышли из режима дистилляции
-				processMode.step = 0;	// обнулили шаг алгоритма
 				commandWriteSD = "Процесс завершен";
 				commandSD_en = true;
+#if defined TFT_Display
+				// выводим информацию по окончанию процесса
+				if (stopInfoOutScreen == true) {
+					outStopInfo();
+					stopInfoOutScreen = false;
+				}
+				else if (touch_in == true && stopInfoOutScreen == false) {
+					processMode.allow = 0;  // вышли из режима дистилляции
+					processMode.step = 0;	// обнулили шаг алгоритма
+					stopInfoOutScreen = true;
+					touchScreen = 0;
+					touchArea = 0;
+					touch_in = false;
+					initBuzzer(50);
+					delay(500);
+					attachInterrupt(intTouch, touchscreenUpdateSet, FALLING);
+				}
+#else
+				processMode.allow = 0;  // вышли из режима дистилляции
+				processMode.step = 0;	// обнулили шаг алгоритма
+#endif
 			}
 			break;
 		}
@@ -1065,11 +1133,30 @@ void rfluxLoopMode_4() {
 					csOff(PWM_CH3);		// закрыли клапан подачи воды
 					temperatureSensor[DS_Cube].allert = false;	// сигнализация для WEB
 					temperatureSensor[DS_Tube].allert = false;
-					processMode.allow = 0;  // вышли из режима дистилляции
-					processMode.step = 0;	// обнулили шаг алгоритма
 					commandWriteSD = "Процесс завершен";
 					commandSD_en = true;
 					stepNext = 0;
+#if defined TFT_Display
+					// выводим информацию по окончанию процесса
+					if (stopInfoOutScreen == true) {
+						outStopInfo();
+						stopInfoOutScreen = false;
+					}
+					else if (touch_in == true && stopInfoOutScreen == false) {
+						processMode.allow = 0;  // вышли из режима дистилляции
+						processMode.step = 0;	// обнулили шаг алгоритма
+						stopInfoOutScreen = true;
+						touchScreen = 0;
+						touchArea = 0;
+						touch_in = false;
+						initBuzzer(50);
+						delay(500);
+						attachInterrupt(intTouch, touchscreenUpdateSet, FALLING);
+					}
+#else
+					processMode.allow = 0;  // вышли из режима дистилляции
+					processMode.step = 0;	// обнулили шаг алгоритма
+#endif
 				}
 			}
 			// или 20 мин.
@@ -1079,11 +1166,30 @@ void rfluxLoopMode_4() {
 					if (pwmOut[2].member == 1) csOff(PWM_CH3);								// закрыли клапан подачи воды
 					temperatureSensor[DS_Cube].allert = false;	// сигнализация для WEB
 					temperatureSensor[DS_Tube].allert = false;
-					processMode.allow = 0;						// вышли из режима ректификации
-					processMode.step = 0;						// обнулили шаг алгоритма
 					commandWriteSD = "Процесс завершен";
 					commandSD_en = true;
 					stepNext = 0;
+#if defined TFT_Display
+					// выводим информацию по окончанию процесса
+					if (stopInfoOutScreen == true) {
+						outStopInfo();
+						stopInfoOutScreen = false;
+					}
+					else if (touch_in == true && stopInfoOutScreen == false) {
+						processMode.allow = 0;  // вышли из режима дистилляции
+						processMode.step = 0;	// обнулили шаг алгоритма
+						stopInfoOutScreen = true;
+						touchScreen = 0;
+						touchArea = 0;
+						touch_in = false;
+						initBuzzer(50);
+						delay(500);
+						attachInterrupt(intTouch, touchscreenUpdateSet, FALLING);
+					}
+#else
+					processMode.allow = 0;  // вышли из режима дистилляции
+					processMode.step = 0;	// обнулили шаг алгоритма
+#endif
 				}
 			}
 			break;
@@ -1231,11 +1337,30 @@ void rfluxLoopMode_5() {
 					csOff(PWM_CH3);		// закрыли клапан подачи воды
 					temperatureSensor[DS_Cube].allert = false;	// сигнализация для WEB
 					temperatureSensor[DS_Tube].allert = false;
-					processMode.allow = 0;  // вышли из режима дистилляции
-					processMode.step = 0;	// обнулили шаг алгоритма
 					commandWriteSD = "Процесс завершен";
 					commandSD_en = true;
 					stepNext = 0;
+#if defined TFT_Display
+					// выводим информацию по окончанию процесса
+					if (stopInfoOutScreen == true) {
+						outStopInfo();
+						stopInfoOutScreen = false;
+					}
+					else if (touch_in == true && stopInfoOutScreen == false) {
+						processMode.allow = 0;  // вышли из режима дистилляции
+						processMode.step = 0;	// обнулили шаг алгоритма
+						stopInfoOutScreen = true;
+						touchScreen = 0;
+						touchArea = 0;
+						touch_in = false;
+						initBuzzer(50);
+						delay(500);
+						attachInterrupt(intTouch, touchscreenUpdateSet, FALLING);
+					}
+#else
+					processMode.allow = 0;  // вышли из режима дистилляции
+					processMode.step = 0;	// обнулили шаг алгоритма
+#endif
 				}
 			}
 			// или 20 мин.
@@ -1245,27 +1370,33 @@ void rfluxLoopMode_5() {
 					if (pwmOut[2].member == 1) csOff(PWM_CH3);								// закрыли клапан подачи воды
 					temperatureSensor[DS_Cube].allert = false;	// сигнализация для WEB
 					temperatureSensor[DS_Tube].allert = false;
-					processMode.allow = 0;						// вышли из режима ректификации
-					processMode.step = 0;						// обнулили шаг алгоритма
 					commandWriteSD = "Процесс завершен";
 					commandSD_en = true;
 					stepNext = 0;
+#if defined TFT_Display
+					// выводим информацию по окончанию процесса
+					if (stopInfoOutScreen == true) {
+						outStopInfo();
+						stopInfoOutScreen = false;
+					}
+					else if (touch_in == true && stopInfoOutScreen == false) {
+						processMode.allow = 0;  // вышли из режима дистилляции
+						processMode.step = 0;	// обнулили шаг алгоритма
+						stopInfoOutScreen = true;
+						touchScreen = 0;
+						touchArea = 0;
+						touch_in = false;
+						initBuzzer(50);
+						delay(500);
+						attachInterrupt(intTouch, touchscreenUpdateSet, FALLING);
+					}
+#else
+					processMode.allow = 0;  // вышли из режима дистилляции
+					processMode.step = 0;	// обнулили шаг алгоритма
+#endif
 				}
 			}
 			break;
-
-
-
-			/*if (millis() >= timePauseOff || stepNext == 1) {
-				temperatureSensor[DS_Cube].allert = false;	// сигнализация для WEB
-				processMode.allow = 0;						// вышли из режима ректификации
-				processMode.step = 0;						// обнулили шаг алгоритма
-				commandWriteSD = "Процесс завершен";
-				commandSD_en = true;
-				stepNext = 0;
-			}
-
-			break;*/
 		}
 	}
 }
@@ -1304,6 +1435,7 @@ void refluxLoop() {
 		power.heaterPower = power.inPowerHigh;		// установили мощность на ТЭН 100 %
 		processMode.timeStep = 0;
 		processMode.timeStart = time(nullptr);
+		stopInfoOutScreen = true;
 		stepNext = 0;
 		countHaedEnd = 0;
 		beepEnd = false;
@@ -1370,14 +1502,14 @@ void refluxLoop() {
 
 		// Проверка датчиков безопасности
 		if (processMode.step != 7 && !errA && !errT) check_Err();
-		if (timePauseErrA <= millis()) {
+		if (processMode.step != 7 && timePauseErrA <= millis()) {
 			errA = false; check_Err();
 			if (errA) {
 				stop_Err();
 				nameProcessStep = "Стоп по аварии ADC > " + String(adcIn[numCrashStop].name);
 			}
 		}
-		if (timePauseErrT <= millis()) {
+		if (processMode.step != 7 && timePauseErrT <= millis()) {
 			errT = false; check_Err();
 			if (errT) {
 				stop_Err();

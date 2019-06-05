@@ -214,14 +214,14 @@ void distillationLoop() {
 
 	// Проверка датчиков безопасности
 	if (processMode.step != 4 && !errA && !errT) check_Err();
-	if (timePauseErrA <= millis()) {
+	if (processMode.step != 4 && timePauseErrA <= millis()) {
 		errA = false; check_Err();
 		if (errA) {
 			stop_Err();
 			nameProcessStep = "Стоп по аварии ADC > " + String(adcIn[numCrashStop].name);
 		}
 	}
-	if (timePauseErrT <= millis()) {
+	if (processMode.step != 4 && timePauseErrT <= millis()) {
 		errT = false; check_Err();
 		if (errT) {
 			stop_Err();
@@ -232,6 +232,7 @@ void distillationLoop() {
 	switch (processMode.step) {
 		// пришли при старте дистилляции
 		case 0: {
+			stopInfoOutScreen = true;
 			alertEnable = true;
 			alertLevelEnable = true;
 			startWriteSD = true;
@@ -329,10 +330,29 @@ void distillationLoop() {
 			if (processMode.timeStep >= 300 || adcIn[2].allert == true) {
 				csOff(PWM_CH3);		// закрыли клапан подачи воды
 				temperatureSensor[DS_Cube].allert = false;	// сигнализация для WEB
-				processMode.allow = 0;  // вышли из режима дистилляции
-				processMode.step = 0;	// обнулили шаг алгоритма
 				commandWriteSD = "Процесс завершен";
 				commandSD_en = true;
+#if defined TFT_Display
+				// выводим информацию по окончанию процесса
+				if (stopInfoOutScreen == true) {
+					outStopInfo();
+					stopInfoOutScreen = false;
+				}
+				else if (touch_in == true && stopInfoOutScreen == false) {
+					processMode.allow = 0;  // вышли из режима дистилляции
+					processMode.step = 0;	// обнулили шаг алгоритма
+					stopInfoOutScreen = true;
+					touchScreen = 0;
+					touchArea = 0;
+					touch_in = false;
+					initBuzzer(50);
+					delay(500);
+					attachInterrupt(intTouch, touchscreenUpdateSet, FALLING);
+				}
+#else
+				processMode.allow = 0;  // вышли из режима дистилляции
+				processMode.step = 0;	// обнулили шаг алгоритма
+#endif
 			}
 
 			break;
