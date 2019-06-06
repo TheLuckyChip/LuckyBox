@@ -193,6 +193,7 @@ void mashingLoop() {
 	switch (processMode.step) {
 		// пришли при старте затирания
 		case 0: {
+			endWriteSD = false;
 			loadEepromMashing();
 			// если при выборе нет приоритета берем первый из выбранных
 			if (temperatureSensor[DS_Cube].member == 1) numSenseMashBrew = DS_Cube;

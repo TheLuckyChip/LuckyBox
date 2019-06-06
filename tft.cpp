@@ -901,9 +901,19 @@ void outStopInfo() {
 		}
 	}
 	else {
-		tft.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
 		tft.setCursor(10, y);
-		tft.print(utf8rus("Штатно по алгоритму."));
+		if (processMode.allow == 1) {
+			if (timeStopDistLevelErr == 0) {
+				tft.setTextColor(ILI9341_RED, ILI9341_BLACK);
+				tft.print(utf8rus("Переполнена емкость."));
+				tft.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
+			}
+			else {
+				tft.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
+				tft.print(utf8rus("Штатно по алгоритму."));
+			}
+		}
+		else tft.print(utf8rus("Штатно по алгоритму."));
 	}
 	if (processMode.allow == 2) {
 		tft.setCursor(10, 165);

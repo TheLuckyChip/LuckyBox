@@ -99,11 +99,11 @@ double setKp, setKi, setKd;
 float setTempForPID = 65;
 int WindowSize = 250;
 unsigned long windowStartTime, stepTime;
-//unsigned long stepStartTime;
-//unsigned long wifiTimeInterval;
+unsigned long timeStopDistLevelErr;
 String nameProcessStep = " ";
 String commandWriteSD;
 bool startWriteSD = false;
+bool endWriteSD = false;
 bool commandSD_en = false;
 bool CH_all = false;		// для режима удержания
 bool CH1 = false;			// для отрисовки в настройках

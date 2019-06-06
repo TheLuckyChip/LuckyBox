@@ -232,6 +232,7 @@ void distillationLoop() {
 	switch (processMode.step) {
 		// пришли при старте дистилляции
 		case 0: {
+			endWriteSD = false;
 			stopInfoOutScreen = true;
 			alertEnable = true;
 			alertLevelEnable = true;
@@ -256,8 +257,6 @@ void distillationLoop() {
 			csOff(TFT_CS);
 #endif
 			tempBigOut = 1;
-			//if (pwmOut[0].member == 1) csOn(PWM_CH1);		// открыть клапан отбора
-			//if (pwmOut[1].member == 1) csOn(PWM_CH2);		// открыть клапан отбора
 			power.heaterStatus = 1;							// включили нагрев
 			csOn(PWM_CH6);									// включить дополнительный ТЭН на разгон
 			power.heaterPower = power.inPowerHigh;			// установили мощность на ТЭН
@@ -280,11 +279,13 @@ void distillationLoop() {
 				nameProcessStep = "Отбор СС";
 				processMode.step = 2;	// перешли на следующий шаг алгоритма
 			}
+			timeStopDistLevelErr = millis(); // время сработавшего датчика уровня
 			break;
 		}
 		case 2: {
 			valveOnOff = true;
 			processMode.step = 3;	// перешли на следующий шаг алгоритма
+			timeStopDistLevelErr = millis(); // время сработавшего датчика уровня
 			break;
 		}
 		case 3: {
@@ -304,14 +305,27 @@ void distillationLoop() {
 				valveOnOff = true;
 				if (pwmOut[0].member == 1) csOff(PWM_CH1);		// закрыть клапан отбора
 				if (pwmOut[1].member == 1) csOff(PWM_CH2);		// закрыть клапан отбора
-				//setPWM(PWM_CH5, 0, 10);							// закрыть шаровый кран
 			}
 			else if (valveOnOff == true) {
 				valveOnOff = false;
 				if (pwmOut[0].member == 1) csOn(PWM_CH1);		// открыть клапан отбора
 				if (pwmOut[1].member == 1) csOn(PWM_CH2);		// открыть клапан отбора
-				//setPWM(PWM_CH5, 0, 2000);						// открыть шаровый кран
 			}
+			else if (valveOnOff == false) timeStopDistLevelErr = millis();
+
+			if (millis() >= timeStopDistLevelErr + 120000) {
+				power.heaterStatus = 0;						// выключили ТЭН
+				power.heaterPower = 0;						// установили мощность 0%
+				timeAllertInterval = millis() + 10000;	// счетчик времени для зв.сигнала						// подали звуковой сигнал
+				processMode.timeStep = 0;
+				nameProcessStep = "Процесс закончен, емкость полная";
+				commandWriteSD = "Переполнение емкости";
+				commandSD_en = true;
+				settingAlarm = true;
+				processMode.step = 4;						// перешли на следующий шаг алгоритма
+				timeStopDistLevelErr = 0; // время сработавшего датчика уровня
+			}
+
 			break;
 		}
 		case 4: {
@@ -319,39 +333,42 @@ void distillationLoop() {
 			power.heaterStatus = 0;						// выключили ТЭН
 			power.heaterPower = 0;						// установили мощность 0%
 
+#if defined TFT_Display
+				// выводим информацию по окончанию процесса
+			if (stopInfoOutScreen == true) {
+				outStopInfo();
+				stopInfoOutScreen = false;
+			}
+			else if (touch_in == true && stopInfoOutScreen == false) {
+				processMode.allow = 0;  // вышли из режима дистилляции
+				processMode.step = 0;	// обнулили шаг алгоритма
+				commandWriteSD = "Процесс завершен";
+				commandSD_en = true;
+				stopInfoOutScreen = true;
+				touchScreen = 0;
+				touchArea = 0;
+				touch_in = false;
+				initBuzzer(50);
+				delay(500);
+				attachInterrupt(intTouch, touchscreenUpdateSet, FALLING);
+			}
+#endif
+
 			// ждем 10 сек. до выключения сигнализации
 			if (processMode.timeStep >= 10 || adcIn[2].allert == true) {
 				csOff(PWM_CH1);				// закрыли клапан отбора
 				csOff(PWM_CH2);				// закрыли клапан отбора
-				//setPWM(PWM_CH5, 0, 10);		// закрыть шаровый кран
 				settingAlarm = false;		// выключили звуковой сигнал
 			}
 			// ждем 5 минут. до выключения клапанов
 			if (processMode.timeStep >= 300 || adcIn[2].allert == true) {
 				csOff(PWM_CH3);		// закрыли клапан подачи воды
 				temperatureSensor[DS_Cube].allert = false;	// сигнализация для WEB
-				commandWriteSD = "Процесс завершен";
-				commandSD_en = true;
-#if defined TFT_Display
-				// выводим информацию по окончанию процесса
-				if (stopInfoOutScreen == true) {
-					outStopInfo();
-					stopInfoOutScreen = false;
-				}
-				else if (touch_in == true && stopInfoOutScreen == false) {
-					processMode.allow = 0;  // вышли из режима дистилляции
-					processMode.step = 0;	// обнулили шаг алгоритма
-					stopInfoOutScreen = true;
-					touchScreen = 0;
-					touchArea = 0;
-					touch_in = false;
-					initBuzzer(50);
-					delay(500);
-					attachInterrupt(intTouch, touchscreenUpdateSet, FALLING);
-				}
-#else
+#ifndef TFT_Display
 				processMode.allow = 0;  // вышли из режима дистилляции
 				processMode.step = 0;	// обнулили шаг алгоритма
+				commandWriteSD = "Процесс завершен";
+				commandSD_en = true;
 #endif
 			}
 
