@@ -185,11 +185,11 @@ extern double setKp, setKi, setKd;
 extern float setTempForPID;
 extern int WindowSize;
 extern unsigned long windowStartTime, stepTime;
-extern unsigned long stepStartTime;
-extern unsigned long wifiTimeInterval;
+extern unsigned long timeStopDistLevelErr;
 extern String nameProcessStep;
 extern String commandWriteSD;
 extern bool startWriteSD;
+extern bool endWriteSD;
 extern bool commandSD_en;
 extern bool CH_all;
 extern bool CH1;
@@ -217,6 +217,8 @@ extern uint8_t stepNext;
 extern uint8_t answer;
 extern uint8_t timeStabilizationReflux;
 extern uint8_t timeBoilTubeSetReflux;
+
+extern bool stopInfoOutScreen;
 // Для датчиков безопасности
 extern uint8_t numCrashStop;
 extern bool errA;

@@ -119,7 +119,7 @@ void sdWriteLog() {
 }
 
 void logfileLoop() {
-	if (sdTimeWriteInterval <= millis()) {
+	if (sdTimeWriteInterval <= millis() && endWriteSD == false) {
 		sdTimeWriteInterval = SD_out_temp * 1000 + millis();
 		if (processMode.allow > 0 && processMode.allow < 4 && sdStatus == true) {
 
@@ -146,6 +146,36 @@ void logfileLoop() {
 			commandSD_en = false;
 			myFile.close();
 			csOff(SD_CS);
+		}
+		// окончание записи на SD карту при дистилляции
+		if (processMode.allow == 1) {
+			if (endWriteSD == false && processMode.step == 4) {
+				endWriteSD = true;
+				csOn(SD_CS);
+				myFile = SD.open(fileName, FILE_WRITE);
+				myFile.println();
+				myFile.close();
+				csOff(SD_CS);
+			}
+		}
+		// окончание записи на SD карту при ректификации
+		else if (processMode.allow == 2) {
+			if (endWriteSD == false && processMode.step == 4 && processMode.number == 0) {
+				endWriteSD = true;
+				csOn(SD_CS);
+				myFile = SD.open(fileName, FILE_WRITE);
+				myFile.println();
+				myFile.close();
+				csOff(SD_CS);
+			}
+			else if (endWriteSD == false && processMode.step == 7) {
+				endWriteSD = true;
+				csOn(SD_CS);
+				myFile = SD.open(fileName, FILE_WRITE);
+				myFile.println();
+				myFile.close();
+				csOff(SD_CS);
+			}
 		}
 	}
 }
