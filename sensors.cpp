@@ -640,7 +640,11 @@ void handleProcessModeIn() {
 
 	// для записи лога на SD
 	if (processModeOld != processMode.allow && processMode.allow < 4) {
-		if (processMode.allow == 0) commandWriteSD = "WebSend: Стоп";
+		if (processMode.allow == 0) {
+			commandWriteSD = "WebSend: Стоп";
+			stopInfoOutScreen = true;
+			touchScreen = 0;
+		}
 		else commandWriteSD = "WebSend: Старт";
 		commandSD_en = true;
 	}

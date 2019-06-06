@@ -708,7 +708,7 @@ void drawMenuScreen() {
 // Вывод менюшки на подтверждение остановки процесса
 void tftStopLoop() {
 	// вывод менюшки Да Нет
-	if (touchScreen == 1) {
+	if (touchScreen == 1 && stopInfoOutScreen == true) {
 		csOn(TFT_CS);
 		fillScreenRect(25, 65, 270, 140, 0xFFF6);
 		tft.drawRect(27, 67, 266, 136, 0xFC00);
@@ -726,7 +726,7 @@ void tftStopLoop() {
 		touchScreen = 2;
 		timeOffMenu = millis() + 10000;
 	}
-	else if (touchScreen == 2) {
+	else if (touchScreen == 2 && stopInfoOutScreen == true) {
 		// ждем нажатие
 		if (touchArea == 21 || timeOffMenu <= millis()) { // Нет - перерисовываем графики
 			graphOutInterval = Display_out_temp;
@@ -847,4 +847,86 @@ void tftMenuLoop() {
 		case 1: getTouchArea(); break;
 	}
 #endif
+}
+
+void outStopInfo() {
+	uint16_t y = 85;
+	csOn(TFT_CS);
+	touchScreen = 1;
+	fillScreenRect(0, 65, 319, 160, ILI9341_BLACK);
+	tft.drawLine(0, 67, 319, 67, ILI9341_WHITE);
+	tft.drawLine(0, 68, 319, 68, ILI9341_WHITE);
+	tft.drawLine(0, 214, 319, 214, ILI9341_WHITE);
+	tft.drawLine(0, 215, 319, 215, ILI9341_WHITE);
+	tft.setTextSize(2);
+	tft.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
+	tft.setCursor(10, y);
+	if (processMode.allow == 1) {
+		tft.print(utf8rus("Дистилляция завершена."));
+	}
+	else if (processMode.allow == 2) {
+		tft.print(utf8rus("Ректификация завершена."));
+	}
+	y += 20;
+	if (errA == true) {
+		tft.setCursor(10, y);
+		tft.setTextColor(ILI9341_RED, ILI9341_BLACK);
+		tft.print(utf8rus("Авария по датчикам:"));
+		y += 20;
+		tft.setCursor(10, y);
+		tft.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
+		switch (numCrashStop) {
+		case 0: tft.print(utf8rus(adcIn[0].name)); break;
+		case 1: tft.print(utf8rus(adcIn[1].name)); break;
+		case 2: tft.print(utf8rus(adcIn[2].name)); break;
+		case 3: tft.print(utf8rus(adcIn[3].name)); break;
+		}
+	}
+	else if (errT == true) {
+		tft.setCursor(10, y);
+		tft.setTextColor(ILI9341_RED, ILI9341_BLACK);
+		tft.print(utf8rus("Стоп по температуре:"));
+		y += 20;
+		tft.setCursor(10, y);
+		tft.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
+		switch (numCrashStop) {
+		case 0: tft.print(utf8rus(temperatureSensor[0].name)); break;
+		case 1: tft.print(utf8rus(temperatureSensor[1].name)); break;
+		case 2: tft.print(utf8rus(temperatureSensor[2].name)); break;
+		case 3: tft.print(utf8rus(temperatureSensor[3].name)); break;
+		case 4: tft.print(utf8rus(temperatureSensor[4].name)); break;
+		case 5: tft.print(utf8rus(temperatureSensor[5].name)); break;
+		case 6: tft.print(utf8rus(temperatureSensor[6].name)); break;
+		case 7: tft.print(utf8rus(temperatureSensor[7].name)); break;
+		}
+	}
+	else {
+		tft.setCursor(10, y);
+		if (processMode.allow == 1) {
+			if (timeStopDistLevelErr == 0) {
+				tft.setTextColor(ILI9341_RED, ILI9341_BLACK);
+				tft.print(utf8rus("Переполнена емкость."));
+				tft.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
+			}
+			else {
+				tft.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
+				tft.print(utf8rus("Штатно по алгоритму."));
+			}
+		}
+		else tft.print(utf8rus("Штатно по алгоритму."));
+	}
+	if (processMode.allow == 2) {
+		tft.setCursor(10, 165);
+		tft.print(utf8rus("Старт/Стопов = "));
+		tft.print(counterStartStop);
+	}
+	unsigned long t = time(nullptr) - processMode.timeStart;
+	tft.setCursor(10, 185);
+	tft.print(utf8rus("Продолжительность = "));
+	tft.print(t / 3600);
+	if (((t / 60) % 60) >= 10) tft.print(":");
+	else tft.print(":0");
+	tft.print((t / 60) % 60);
+
+	csOff(TFT_CS);
 }

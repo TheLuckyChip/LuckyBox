@@ -13,8 +13,8 @@ ESP8266WebServer HTTP;
 // PID
 PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
 
-String curVersion = "2.0RC15";
-uint16_t versionForWeb = 2015;
+String curVersion = "2.0RC16";
+uint16_t versionForWeb = 2016;
 // Определяем переменные wifi
 String _ssid;      // Для хранения SSID
 String _password;  // Для хранения пароля сети
@@ -99,11 +99,11 @@ double setKp, setKi, setKd;
 float setTempForPID = 65;
 int WindowSize = 250;
 unsigned long windowStartTime, stepTime;
-unsigned long stepStartTime;
-unsigned long wifiTimeInterval;
+unsigned long timeStopDistLevelErr;
 String nameProcessStep = " ";
 String commandWriteSD;
 bool startWriteSD = false;
+bool endWriteSD = false;
 bool commandSD_en = false;
 bool CH_all = false;		// для режима удержания
 bool CH1 = false;			// для отрисовки в настройках
@@ -129,6 +129,7 @@ uint8_t bodyPrimaDecline = 10;			// % уменьшения открытия ша
 uint8_t stepNext = 0;
 uint8_t answer = 0;
 
+bool stopInfoOutScreen = true;
 uint8_t numCrashStop;
 bool errA;
 bool errT;

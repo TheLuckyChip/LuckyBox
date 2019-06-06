@@ -15,6 +15,7 @@
 #include "pwm_out.h"
 #include <EEPROM.h>
 #include "misc.h"
+#include "touch_interrupt.h"
 
 extern void loadEepromReflux();
 extern void initReflux();
