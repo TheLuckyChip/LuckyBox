@@ -700,7 +700,7 @@ void rfluxLoopMode_2() {
 				setPWM(PWM_CH5, 0, 10); // емкость полная
 				bodyValveSet = false;
 			}
-			else if (temperatureSensor[DS_Tube].data < temperatureSensor[DS_Tube].allertValue) bodyValveSet = true;
+			else if (counterStartStop == 0) bodyValveSet = true;
 
 			if (bodyValveSet == true && processMode.step != 7) {
 				bodyTimeOffCount = processMode.timeStep;			// сбрасываем таймер остановки процесса
@@ -922,7 +922,7 @@ void rfluxLoopMode_3() {
 				setPWM(PWM_CH5, 0, 10); // емкость полная
 				bodyValveSet = false;
 			}
-			else if (temperatureSensor[DS_Tube].data < temperatureSensor[DS_Tube].allertValue) bodyValveSet = true;
+			else if (counterStartStop == 0) bodyValveSet = true;
 
 			if (bodyValveSet == true && processMode.step != 7) {
 				bodyTimeOffCount = processMode.timeStep;			// сбрасываем таймер остановки процесса
@@ -1524,7 +1524,8 @@ void refluxLoop() {
 
 		// выключение звука
 		if (alertEnable == false || (errA == false && errT == false && (adcIn[0].allert == false || alertLevelEnable == false)
-			&& temperatureSensor[DS_Tube].allert == false && timeAllertInterval <= millis())) settingAlarm = false;
+			//&& temperatureSensor[DS_Tube].allert == false 
+			&& timeAllertInterval <= millis())) settingAlarm = false;
 
 	}
 
