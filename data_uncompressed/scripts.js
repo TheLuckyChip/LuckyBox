@@ -4151,4 +4151,13 @@ $(function () {
 			"touchpad_rotate": touchpad_rotate
 		}, "text", false, _this, $("#error_settings"), false);
 	});
+	//Громкость
+	$("#settings_set_volume").on("click", function (e) {
+		e.preventDefault();
+		let _this = $(this);
+		let sound_volume = $("#settings_volume").val();
+		sendRequest("volume", {
+			"value": sound_volume
+		}, "text", false, _this, $("#error_settings"), false);
+	});
 });
