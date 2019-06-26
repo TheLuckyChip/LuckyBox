@@ -73,9 +73,12 @@ void setup()
 	// 1500 - сохраненные данные для процесса затирания
 	// 1600 - сохраненные данные PID установок
 	// 1700 - 1759 имя ssdp, 1760 - 1819 имя ssid, 1820 - 1879 имя ssidAP
-	// 1900 - 1931 пароль ssid, 1940 - 1971 пароль ssidAP, 1980 - часовой пояс
+	// 1900 - 1931 пароль ssid, 1940 - 1971 пароль ssidAP, 1980 - часовой пояс, 1981 громкость пищалки
 	timezone = EEPROM.read(1980);
 	if (timezone < -12 || timezone > 12) timezone = 3;
+	BuzzerVolumeLevel = EEPROM.read(1981);
+	if (BuzzerVolumeLevel > 100) BuzzerVolumeLevel = 4000;
+	else BuzzerVolumeLevel *= 40;
 	// Считаем инверсию экрана и тачскрина
 	uint8_t tft180 = EEPROM.read(1298);
 	uint8_t touch180 = EEPROM.read(1299);

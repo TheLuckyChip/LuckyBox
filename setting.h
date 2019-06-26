@@ -228,6 +228,7 @@ extern unsigned long timePauseErrT;
 
 extern bool alertEnable;
 extern bool alertLevelEnable;
+extern uint16_t BuzzerVolumeLevel;
 
 extern uint8_t powerSendOld;
 extern uint8_t RX_BUF_IO[8];

@@ -12,6 +12,7 @@ void initHTTP(void)
 	HTTP.on("/ssid", handleSetSSID);     // Установить имя и пароль роутера по запросу вида /ssid?ssid=home2&password=12345678
 	HTTP.on("/ssidap", handleSetSSIDAP); // Установить имя и пароль для точки доступа по запросу вида /ssidap?ssidAP=home1&passwordAP=8765439
 	HTTP.on("/rotate", handleSetRotate); // Переворот экрана и тачскрина
+	HTTP.on("/volume", handleSetVolume); // Громкость
 	HTTP.on("/restart", handleRestart);   // Перезагрузка модуля по запросу вида /restart?device=ok
 
 	// Добавляем функцию Update для перезаписи прошивки по WiFi при 1М(256K SPIFFS) и выше
@@ -218,10 +219,21 @@ void handleSetRotate() {
 	else HTTP.send(200, "text/plain", "ERR");   // отправляем ответ о выполнении
 	EEPROM.end();
 }
-
+void handleSetVolume() {
+	BuzzerVolumeLevel = HTTP.arg("value").toInt();
+	if (BuzzerVolumeLevel > 100) {
+		BuzzerVolumeLevel = 100;
+		HTTP.send(200, "text/plain", "ERR");
+	}
+	else HTTP.send(200, "text/plain", "OK");   // отправляем ответ о выполнении
+	EEPROM.begin(2048);
+	EEPROM.write(1981, BuzzerVolumeLevel);
+	BuzzerVolumeLevel *= 40;
+	EEPROM.commit();
+	delay(100);
+}
 // Перезагрузка модуля по запросу вида http://192.168.0.101/restart?device=ok
-void handleRestart()
-{
+void handleRestart() {
 	String restart = HTTP.arg("device");          // Получаем значение device из запроса
 	if (restart == "ok")
 	{                         // Если значение равно Ок
@@ -243,34 +255,4 @@ void handleConfigJSON()
 	dataForWeb += "\"ssid\":\"" + String(_ssid) + "\",";
 	dataForWeb += "\"timezone\":" + String(timezone) + "}";
 	HTTP.send(200, "text/json", dataForWeb);
-
-
-	/*String root = "{}";  // Формируем строку для отправки в файл конфигурации в json формате
-						 //{"SSDP":"LuckyBox","ssid":"LuckyBox","password":"12345678","ssidAP":"WiFi","passwordAP":"","ip":"192.168.0.101" и т.д.}
-						 // Резервируем память для json объекта буфер может рости по мере необходимости, предпочтительно для ESP8266
-	DynamicJsonBuffer jsonBuffer;
-	//  вызовите парсер JSON через экземпляр jsonBuffer
-	JsonObject& json = jsonBuffer.parseObject(root);
-	// Заполняем поля json
-	json["SSDP"] = SSDP_Name;
-	json["ssidAP"] = _ssidAP;
-	//json["passwordAP"] = _passwordAP;
-	json["ssid"] = _ssid;
-	//json["password"] = _password;
-	json["timezone"] = timezone;
-	//json["ip"] = WiFi.localIP().toString();
-	//json["time"] = GetTime();
-	//json["date"] = GetDate();
-	//json["temperature"] = temperatureSensor[DS_Cube].data;
-	//json["temperature2"] = temperatureSensor[DS_Tube].data;
-	//json["temperature3"] = temperatureSensor[DS_Out].data;
-	//json["temperature4"] = temperatureSensor[DS_Def].data;
-	//json["setting"] = settingColumn;
-	//json["settingAlarm"] = settingAlarm;
-
-
-	// Помещаем созданный json в переменную root
-	root = "";
-	json.printTo(root);
-	HTTP.send(200, "text/json", root);*/
 }
