@@ -10,7 +10,7 @@
 
 #include "SPI.h"
 #include "Adafruit_GFX.h"
-//#include "Fonts/FreeSerifBold24pt7b.h"
+#include <EEPROM.h>
 #include "TFT_ILI9341.h"
 #include "sensors.h"
 #include "time_config.h"

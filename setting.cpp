@@ -138,6 +138,7 @@ unsigned long timePauseErrT;
 
 bool alertEnable = true;
 bool alertLevelEnable = true;
+uint16_t BuzzerVolumeLevel;
 
 uint8_t powerSendOld;
 uint8_t RX_BUF_IO[8];
