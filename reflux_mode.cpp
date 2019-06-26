@@ -602,6 +602,7 @@ void rfluxLoopMode_2() {
 // пищалка на 10 сек.
 		case 4: {
 			if (timeAllertInterval <= millis() || stepNext == 1) {
+				if (pwmOut[1].member == 1) csOn(PWM_CH2); // доп. клапан отбора голов, если есть
 				processMode.step = 5;		// перешли на следующий шаг алгоритма отбора голов
 				stepNext = 0;
 			}
@@ -619,8 +620,8 @@ void rfluxLoopMode_2() {
 			else countHaedEnd = millis() + 10000;
 
 			if (processMode.step == 6) {
-				if (typeRefOfValwe == 3 || typeRefOfValwe == 1) csOff(PWM_CH1);	// закрыли клапан отбора голов
-				else if (typeRefOfValwe == 2) csOff(PWM_CH2);	// закрыли  клапан отбора голов
+				csOff(PWM_CH1);	// закрыли клапан отбора голов
+				csOff(PWM_CH2);	// закрыли доп. клапан отбора голов в раздельные емкости
 				if (pwmOut[3].member == 1) csOff(PWM_CH4);		// закрыли клапан слива ПБ
 				// открыть шаровый кран отбора по пару
 				bodyPrimaPercentSet = percentCalc(bodyPrimaPercentStart);
@@ -632,8 +633,7 @@ void rfluxLoopMode_2() {
 				nameProcessStep = "Отбор тела";
 			}
 			// рулим клапаном отбора голов
-			else if (typeRefOfValwe == 3 || typeRefOfValwe == 1) valveSet(PWM_CH1);
-			else if (typeRefOfValwe == 2) valveSet(PWM_CH2);
+			else if (pwmOut[0].member == 1) valveSet(PWM_CH1);
 			break;
 		}
 // ждем окончание по достижению температуры в кубе или пищим при достижении уставки
@@ -657,8 +657,8 @@ void rfluxLoopMode_2() {
 			// контроль Т в царге
 			else if (temperatureSensor[DS_Tube].allertValue > 0 && temperatureSensor[DS_Tube].data >= temperatureSensor[DS_Tube].allertValue) {
 				temperatureSensor[DS_Tube].allert = true;	// сигнализация для WEB
-				csOff(PWM_CH1);
-				csOff(PWM_CH2);								// закрыли клапан отбора
+				//csOff(PWM_CH1);
+				//csOff(PWM_CH2);								// закрыли клапан отбора
 				// если первый стоп пищим 10 сек.
 				if (counterStartStop == 0) timeAllertInterval = millis() + 10000;			// установим счетчик времени для зв.сигнала
 				if (bodyValveSet) counterStartStop++;
@@ -696,11 +696,11 @@ void rfluxLoopMode_2() {
 				bodyValveSet = true;							// признак, что надо открыть клапан отбора
 			}
 
-			if (adcIn[0].member == 1 && adcIn[0].allert == true) {
+			if (adcIn[0].member == 1 && adcIn[0].allert == true && alertLevelEnable == true) {
 				setPWM(PWM_CH5, 0, 10); // емкость полная
 				bodyValveSet = false;
 			}
-			else if (temperatureSensor[DS_Tube].data < temperatureSensor[DS_Tube].allertValue) bodyValveSet = true;
+			else if (counterStartStop == 0) bodyValveSet = true;
 
 			if (bodyValveSet == true && processMode.step != 7) {
 				bodyTimeOffCount = processMode.timeStep;			// сбрасываем таймер остановки процесса
@@ -831,6 +831,7 @@ void rfluxLoopMode_3() {
 				// пищалка на 10 сек.
 		case 4: {
 			if (timeAllertInterval <= millis() || stepNext == 1) {
+				if (pwmOut[1].member == 1) csOn(PWM_CH2); // доп. клапан отбора голов, если есть
 				processMode.step = 5;		// перешли на следующий шаг алгоритма отбора голов
 				stepNext = 0;
 			}
@@ -848,6 +849,7 @@ void rfluxLoopMode_3() {
 			else countHaedEnd = millis() + 10000;
 
 			if (processMode.step == 6) {
+				csOff(PWM_CH2);
 				if (pwmOut[3].member == 1) csOff(PWM_CH4);		// закрыли клапан слива ПБ
 				// открыть шаровый кран отбора по пару на тело
 				bodyPrimaPercentSet = percentCalc(bodyPrimaPercentStart);
@@ -918,11 +920,11 @@ void rfluxLoopMode_3() {
 				bodyValveSet = true;							// признак, что надо открыть клапан отбора
 			}
 
-			if (adcIn[0].member == 1 && adcIn[0].allert == true) {
+			if (adcIn[0].member == 1 && adcIn[0].allert == true && alertLevelEnable == true) {
 				setPWM(PWM_CH5, 0, 10); // емкость полная
 				bodyValveSet = false;
 			}
-			else if (temperatureSensor[DS_Tube].data < temperatureSensor[DS_Tube].allertValue) bodyValveSet = true;
+			else if (counterStartStop == 0) bodyValveSet = true;
 
 			if (bodyValveSet == true && processMode.step != 7) {
 				bodyTimeOffCount = processMode.timeStep;			// сбрасываем таймер остановки процесса
@@ -1272,6 +1274,7 @@ void rfluxLoopMode_5() {
 			if (timeAllertInterval <= millis() || stepNext == 1) {
 				processMode.step = 5;		// перешли на следующий шаг алгоритма отбора голов
 				countHaedEnd = millis() + 10000;
+				if (pwmOut[0].member == 1) csOn(PWM_CH1); // клапан отбора голов, если есть
 				stepNext = 0;
 			}
 			break;
@@ -1287,6 +1290,7 @@ void rfluxLoopMode_5() {
 			else countHaedEnd = millis() + 10000;
 
 			if (processMode.step == 6 || stepNext == 1) {
+				if (pwmOut[0].member == 1) csOff(PWM_CH1);		// клапан отбора голов, если есть
 				if (pwmOut[3].member == 1) csOff(PWM_CH4);		// закрыли клапан слива ПБ
 				csOff(PWM_CH2);		// закрыли клапан доп. подачи воды
 				processMode.timeStep = 0;
@@ -1295,6 +1299,7 @@ void rfluxLoopMode_5() {
 				nameProcessStep = "Отбор тела";
 				stepNext = 0;
 			}
+
 			break;
 		}
 // ждем окончание по достижению температуры в кубе и рулим клапаном доп. охлаждения
@@ -1305,11 +1310,7 @@ void rfluxLoopMode_5() {
 				temperatureSensor[DS_Cube].allert = true;	// сигнализация для WEB
 				processMode.timeStep = 0;
 				nameProcessStep = "Процесс закончен";
-				if (pwmOut[3].member == 1) {
-					//timePauseOff = 60000 * 20 + millis();
-					csOn(PWM_CH4);
-				}
-				//else timePauseOff = 60000 * 2 + millis();
+				if (pwmOut[3].member == 1) csOn(PWM_CH4);
 				processMode.step = 7;						// перешли на следующий шаг алгоритма
 				stepNext = 0;
 				break;
@@ -1326,7 +1327,8 @@ void rfluxLoopMode_5() {
 				csOn(PWM_CH2);								// открыли клапан доп. подачи воды
 			}
 
-			if (temperatureSensor[DS_Tube].data <= temperatureSensor[DS_Tube].allertValue - settingBoilTube) {
+			if (adcIn[0].allert == true && alertLevelEnable == true) csOn(PWM_CH2);  // если емкость полная - уменьшаем отбор
+			else if (temperatureSensor[DS_Tube].data <= temperatureSensor[DS_Tube].allertValue - settingBoilTube) {
 				temperatureSensor[DS_Tube].allert = false;
 				csOff(PWM_CH2);	// закрыли клапан доп. подачи воды
 				if (counterStartStop == 0) nameProcessStep = "Отбор тела";
@@ -1412,7 +1414,6 @@ void rfluxLoopMode_6() {
 
 // если запущена ректификация
 void refluxLoop() {
-
 	if (processMode.step == 0) {
 		temperatureSensor[DS_Cube].allert = false;
 		temperatureSensor[DS_Tube].allert = false;
@@ -1494,7 +1495,8 @@ void refluxLoop() {
 		}
 
 		// разрешение или запрет сигнала на датчик уровня
-		if ((processMode.number == 3 && typeRefOfValwe != 3) || processMode.number == 2 || processMode.number == 4) alertLevelEnable = true;
+		if ((processMode.number == 1 && pwmOut[1].member == 0) || (processMode.number == 2 && pwmOut[1].member == 0) ||
+			(processMode.number == 3 && typeRefOfValwe != 3) || (processMode.number == 4 && pwmOut[0].member == 0)) alertLevelEnable = true;
 		else if (adcIn[0].allert == true && processMode.step == 6 && processMode.timeStep > 20 && processMode.timeStep < 25) {
 			alertLevelEnable = false; // не пищим от датчика уровня
 			settingAlarm = false;
@@ -1524,7 +1526,8 @@ void refluxLoop() {
 
 		// выключение звука
 		if (alertEnable == false || (errA == false && errT == false && (adcIn[0].allert == false || alertLevelEnable == false)
-			&& temperatureSensor[DS_Tube].allert == false && timeAllertInterval <= millis())) settingAlarm = false;
+			//&& temperatureSensor[DS_Tube].allert == false 
+			&& timeAllertInterval <= millis())) settingAlarm = false;
 
 	}
 

@@ -477,7 +477,21 @@ void handleProcessModeIn() {
 	uint8_t processModeOld = processMode.allow;
 	processMode.allow = HTTP.arg("process[allow]").toInt();
 	processMode.number = HTTP.arg("process[number]").toInt();
-	
+
+	// проверим выбраны ли датчики для процесса
+	if (processMode.allow == 1 && EEPROM.read(1300) != 1) {
+		processMode.allow = 0;
+		processMode.number = 0;
+	}
+	else if (processMode.allow == 2 && EEPROM.read(1400) != 2) {
+		processMode.allow = 0;
+		processMode.number = 0;
+	}
+	else if (processMode.allow == 3 && EEPROM.read(1500) != 3) {
+		processMode.allow = 0;
+		processMode.number = 0;
+	}
+
 	if (processMode.allow < 3) {
 #if defined Debug_en
 		Serial.println(""); Serial.println("Прием уставок:");
@@ -707,8 +721,8 @@ void sensorLoop() {
 		processMode.timeStep++;
 
 		// Пищалка для WEB
-		if (settingAlarm == true) {
-			setPWM(BUZ_VOL, 4096, 0);
+		if (settingAlarm == true && BuzzerVolumeLevel > 0) {
+			setPWM(BUZ_VOL, 0, BuzzerVolumeLevel);
 			initBuzzer(500);
 		}
 		else {

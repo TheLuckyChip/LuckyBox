@@ -1534,6 +1534,10 @@ $(function () {
 			$("#distillation_start_group_button").removeClass("hidden");
 		} else {
 			$("#distillation_start_group_button").addClass("hidden");
+			if(sensors_select) {
+				distillationProcess["sensors"] = {};
+				$.fn.pasteDistillationSensors(false);
+			}
 		}
 		$("#distillation_process").html(distillationTemplate);
 		$("#distillation_power_set").val(distillationProcess["powerHigh"]);
@@ -2164,83 +2168,6 @@ $(function () {
 				if (re_out.test(sensor_key) && Number(e["member"]) !== 0) {
 					sensorsRefluxSend[sensor_key]["member"] = 1;
 					//console.log(sensor_key);
-					/*if(sensor_key === "out1") {
-						flagout = true;
-						let val_head_cycle = (globalSensorsJson.hasOwnProperty("valwe") ? globalSensorsJson["valwe"][0]["head"]["timeCycle"] : 5);
-						let tpl_head_cycle = returnTplHtml([{id: "reflux_head_cycle", value: val_head_cycle, min: '5', max: '30', step: '1'}], deltaTempl);
-						let val_head_time = (globalSensorsJson.hasOwnProperty("valwe") ? globalSensorsJson["valwe"][0]["head"]["timeOn"] : 1);
-						let tpl_head_time = returnTplHtml([{id: "reflux_head_time", value: val_head_time, min: '1', max: '100', step: '0.5'}], deltaTempl);
-						tpl_devices_body += '<div id="reflux_out_3" class="row' + visible_reflux_out_3 +'"><div class="col-xs-12">' +
-							'<div class="row row-striped">' +
-							head_devices +
-							'<div class="pt-10 pb-10 clearfix">' +
-							'<div class="col-xs-12 col-sm-3 text-middle text-center-xs text-strong">Клапан отбора голов</div>' +
-							//'<div class="col-xs-6 col-sm-2 text-center-xs text-middle text-strong pb-10">Период</div>' +
-							'<div class="col-xs-4 col-xs-offset-1_ col-sm-3 col-sm-offset-0_">' + tpl_head_cycle + '</div>' +
-							//'<div class="col-xs-6 col-sm-2 text-center-xs text-middle text-strong text-nowrap">Откр.%</div>' +
-							'<div class="col-xs-4 col-xs-offset-1_ col-sm-3 col-sm-offset-1_">' + tpl_head_time + '</div>' +
-							'</div></div>';
-
-						let val_body_cycle = (globalSensorsJson.hasOwnProperty("valwe") ? globalSensorsJson["valwe"][1]["body"]["timeCycle"] : 5);
-						let tpl_body_cycle = returnTplHtml([{id: "reflux_body_cycle", value: val_body_cycle, min: '5', max: '30', step: '1'}], deltaTempl);
-						let val_body_time = (globalSensorsJson.hasOwnProperty("valwe") ? globalSensorsJson["valwe"][1]["body"]["timeOn"] : 0);
-						let tpl_body_time = returnTplHtml([{id: "reflux_body_time", value: val_body_time, min: '0', max: '100', step: '0.5'}], deltaTempl);
-						let val_body_decline = (globalSensorsJson.hasOwnProperty("valwe") ? globalSensorsJson["valwe"][1]["body"]["decline"] : 0);
-						let tpl_body_decline = returnTplHtml([{id: "reflux_body_decline", value: val_body_decline, min: '0', max: '30', step: '1'}], deltaTempl);
-							//(Number(globalSensorsJson["valwe"][1]["body"]["decline"]) > 0 ? " checked" : "");
-						//if(flagout1){ head_devices = '';}
-						tpl_devices_body += '<div class="row row-striped">' +
-							//head_devices +
-							'<div class="pt-10 pb-10 clearfix">' +
-							'<div class="col-xs-12 col-sm-3 pxs-10 text-middle text-center-xs text-strong">Клапан отбора тела</div>' +
-							//'<div class="col-xs-6 col-sm-2 text-center-xs text-middle text-strong pb-10">Период</div>' +
-							'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_cycle + '</div>' +
-							//'<div class="col-xs-4 col-sm-2 text-center-xs text-middle text-strong text-nowrap">Откр.%</div>' +
-							'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_time + '</div>' +
-							'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_decline + '</div>' +
-							//'<div class="col-xs-2 col-sm-1 text-center text-middle"><label class="checkbox-inline">' +
-							//'<input class="noSwipe" id="reflux_body_decline"' + checked_body_decline + ' type="checkbox" value="Y"></label></div>' +
-							'</div></div>'+
-							'</div></div>';
-					}else if(sensor_key === "out2"){
-						if(!flagout) {
-							let val_head_cycle = (globalSensorsJson.hasOwnProperty("valwe") ? globalSensorsJson["valwe"][0]["head"]["timeCycle"] : 5);
-							let tpl_head_cycle = returnTplHtml([{id: "reflux_head_cycle", value: val_head_cycle, min: '5', max: '30', step: '1'}], deltaTempl);
-							let val_head_time = (globalSensorsJson.hasOwnProperty("valwe") ? globalSensorsJson["valwe"][0]["head"]["timeOn"] : 1);
-							let tpl_head_time = returnTplHtml([{id: "reflux_head_time", value: val_head_time, min: '1', max: '100', step: '0.5'}], deltaTempl);
-							tpl_devices_body += '<div id="reflux_out_3" class="row' + visible_reflux_out_3 +'"><div class="col-xs-12">' +
-								'<div class="row row-striped">' +
-								head_devices +
-								'<div class="pt-10 pb-10 clearfix">' +
-								'<div class="col-xs-12 col-sm-3 text-middle text-center-xs text-strong">Клапан отбора голов</div>' +
-								//'<div class="col-xs-6 col-sm-2 text-center-xs text-middle text-strong pb-10">Период</div>' +
-								'<div class="col-xs-4 col-xs-offset-1_ col-sm-3 col-sm-offset-0_">' + tpl_head_cycle + '</div>' +
-								//'<div class="col-xs-6 col-sm-2 text-center-xs text-middle text-strong text-nowrap">Откр.%</div>' +
-								'<div class="col-xs-4 col-xs-offset-1_ col-sm-3 col-sm-offset-1_">' + tpl_head_time + '</div>' +
-								'</div></div>';
-
-							let val_body_cycle = (globalSensorsJson.hasOwnProperty("valwe") ? globalSensorsJson["valwe"][1]["body"]["timeCycle"] : 5);
-							let tpl_body_cycle = returnTplHtml([{id: "reflux_body_cycle", value: val_body_cycle, min: '5', max: '30', step: '1'}], deltaTempl);
-							let val_body_time = (globalSensorsJson.hasOwnProperty("valwe") ? globalSensorsJson["valwe"][1]["body"]["timeOn"] : 1);
-							let tpl_body_time = returnTplHtml([{id: "reflux_body_time", value: val_body_time, min: '0', max: '100', step: '0.5'}], deltaTempl);
-							let val_body_decline = (globalSensorsJson.hasOwnProperty("valwe") ? globalSensorsJson["valwe"][1]["body"]["decline"] : 0);
-							let tpl_body_decline = returnTplHtml([{id: "reflux_body_decline", value: val_body_decline, min: '0', max: '30', step: '1'}], deltaTempl);
-							//(Number(globalSensorsJson["valwe"][1]["body"]["decline"]) > 0 ? " checked" : "");
-							//if(flagout1){ head_devices = '';}
-							tpl_devices_body += '<div class="row row-striped">' +
-								//head_devices +
-								'<div class="pt-10 pb-10 clearfix">' +
-								'<div class="col-xs-12 col-sm-3 pxs-10 text-middle text-center-xs text-strong">Клапан отбора тела</div>' +
-								//'<div class="col-xs-6 col-sm-2 text-center-xs text-middle text-strong pb-10">Период</div>' +
-								'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_cycle + '</div>' +
-								//'<div class="col-xs-4 col-sm-2 text-center-xs text-middle text-strong text-nowrap">Откр.%</div>' +
-								'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_time + '</div>' +
-								'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_decline + '</div>' +
-								//'<div class="col-xs-2 col-sm-1 text-center text-middle"><label class="checkbox-inline">' +
-								//'<input class="noSwipe" id="reflux_body_decline"' + checked_body_decline + ' type="checkbox" value="Y"></label></div>' +
-								'</div></div>'+
-								'</div></div>';
-						}*/
 					if(sensor_key === "out1" || sensor_key === "out2") {
 						flagout = true;
 					}else {
@@ -2429,6 +2356,10 @@ $(function () {
 			$("#reflux_start_group_button").removeClass("hidden");
 		} else {
 			$("#reflux_start_group_button").addClass("hidden");
+			if(sensors_select) {
+				refluxProcess["sensors"] = {};
+				$.fn.pasteRefluxSensors(false);
+			}
 		}
 		$("#reflux_process").html(refluxTemplate);
 		$.fn.clearSelect($("#reflux_algorithm_select"));
@@ -3179,6 +3110,10 @@ $(function () {
 			$("#mashing_start_group_button").removeClass("hidden");
 		} else {
 			$("#mashing_start_group_button").addClass("hidden");
+			if(sensors_select) {
+				mashingProcess["sensors"] = {};
+				$.fn.pasteMashingSensors(false);
+			}
 		}
 		$("#mashing_process").html(mashingTemplate);
 		if (mashingProcess["start"] === true) {
@@ -3852,9 +3787,9 @@ $(function () {
 				globalSensorsJson = msg;
 				if(countProcess > 2 && curProcess !== globalSensorsJson["process"]["allow"]){
 					curProcess = globalSensorsJson["process"]["allow"];
-					console.log('curProcess',curProcess);
+					// console.log('curProcess',curProcess);
 				}
-				console.log('countProcess',countProcess);
+				// console.log('countProcess',countProcess);
 
 				if(countProcess > 2){
 					countProcess = 0;
@@ -4149,6 +4084,15 @@ $(function () {
 		sendRequest("rotate", {
 			"tft_rotate": tft_rotate,
 			"touchpad_rotate": touchpad_rotate
+		}, "text", false, _this, $("#error_settings"), false);
+	});
+	//Громкость
+	$("#settings_set_volume").on("click", function (e) {
+		e.preventDefault();
+		let _this = $(this);
+		let sound_volume = $("#settings_volume").val();
+		sendRequest("volume", {
+			"value": sound_volume
 		}, "text", false, _this, $("#error_settings"), false);
 	});
 });
