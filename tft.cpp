@@ -930,7 +930,26 @@ void outStopInfo() {
 				tft.print(utf8rus("Штатно по алгоритму."));
 			}
 		}
-		else tft.print(utf8rus("Штатно по алгоритму."));
+		else {
+			tft.print(utf8rus("Штатно по алгоритму."));
+			y += 20;
+			if (numOkStop == 1) {
+				tft.setCursor(10, y);
+				tft.print(utf8rus("Т в кубе"));
+			}
+			else if (numOkStop == 2) {
+				tft.setCursor(10, y);
+				tft.print(utf8rus("Время Старт/Стоп"));
+			}
+			else if (numOkStop == 3) {
+				tft.setCursor(10, y);
+				tft.print(utf8rus("Min. скорость отбора"));
+			}
+			else if (numOkStop == 4) {
+				tft.setCursor(10, y);
+				tft.print(utf8rus("ПБ и 1-й Стоп"));
+			}
+		}
 	}
 	if (processMode.allow == 2) {
 		tft.setCursor(10, 165);

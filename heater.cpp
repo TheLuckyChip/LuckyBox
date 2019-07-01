@@ -47,7 +47,6 @@ void ResOut()
 		errorBr = reg - tenRealPower;
 	}
 	digitalWrite(heater, outHeater); //пин через который осуществляется дискретное управление реле
-	;
 }
 
 void initHeater()

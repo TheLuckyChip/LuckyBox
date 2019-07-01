@@ -220,6 +220,7 @@ extern uint8_t timeBoilTubeSetReflux;
 
 extern bool stopInfoOutScreen;
 // Для датчиков безопасности
+extern uint8_t numOkStop;
 extern uint8_t numCrashStop;
 extern bool errA;
 extern bool errT;
@@ -233,7 +234,7 @@ extern uint16_t BuzzerVolumeLevel;
 extern uint8_t powerSendOld;
 extern uint8_t RX_BUF_IO[8];
 extern uint8_t RXio_cnt;
-extern uint8_t RX_Pause;
+extern unsigned long RX_Pause;
 
 extern uint8_t DistillationTransitionTemperature;
 extern uint8_t RefluxTransitionTemperature;

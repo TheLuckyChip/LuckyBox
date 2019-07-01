@@ -253,6 +253,7 @@ void handleConfigJSON()
 	dataForWeb += "\"SSDP\":\"" + String(SSDP_Name) + "\",";
 	dataForWeb += "\"ssidAP\":\"" + String(_ssidAP) + "\",";
 	dataForWeb += "\"ssid\":\"" + String(_ssid) + "\",";
-	dataForWeb += "\"timezone\":" + String(timezone) + "}";
+	dataForWeb += "\"ssid\":\"" + String(BuzzerVolumeLevel/40) + "\",";
+	dataForWeb += "\"volume\":" + String(timezone) + "}";
 	HTTP.send(200, "text/json", dataForWeb);
 }

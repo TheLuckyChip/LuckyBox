@@ -130,6 +130,7 @@ uint8_t stepNext = 0;
 uint8_t answer = 0;
 
 bool stopInfoOutScreen = true;
+uint8_t numOkStop = 0;
 uint8_t numCrashStop;
 bool errA;
 bool errT;
@@ -143,7 +144,7 @@ uint16_t BuzzerVolumeLevel;
 uint8_t powerSendOld;
 uint8_t RX_BUF_IO[8];
 uint8_t RXio_cnt;
-uint8_t RX_Pause = 0;
+unsigned long RX_Pause;
 
 uint8_t DistillationTransitionTemperature = 80;
 uint8_t RefluxTransitionTemperature = 55;

@@ -32,8 +32,11 @@ void loop() {
 
   if (processMode.allow < 3 || processMode.allow > 5) {
 	  adcLoop();
-	  heaterLoop();
+#if defined setHeater
 	  serialLoop();
+#else
+	  heaterLoop();
+#endif
 	  stepApLoop();
   }
 

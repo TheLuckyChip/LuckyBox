@@ -1,5 +1,9 @@
 #include "misc.h"
 
+#if defined setHeater
+	#define WAIT { while (ESP.getCycleCount()-start < wait) optimistic_yield(1); wait += F_CPU/19200; }
+#endif
+
 float EEPROM_float_read(int addr) {
 	byte x[4];
 	for (byte i = 0; i < 4; i++) x[i] = EEPROM.read(i + addr);
@@ -53,32 +57,45 @@ void check_Err() {
 	if (!errT) timePauseErrT = millis() + 10000;		// 10 секунд пауза до защиты
 }
 
-// прием мощности по UART
-void serialLoop() {
-	while (Serial.available()) {
-
-		RX_BUF_IO[RXio_cnt] = Serial.read();
-		RXio_cnt++;
-
-		if (RXio_cnt == 1 && RX_BUF_IO[0] != 0x41) RXio_cnt = 0;
-		else if (RXio_cnt == 7) {
-			uint8_t crc_calc = RX_BUF_IO[0] + RX_BUF_IO[1] + RX_BUF_IO[2] + RX_BUF_IO[3] + RX_BUF_IO[4] + RX_BUF_IO[5];
-			if (RX_BUF_IO[1] == 0x54 && RX_BUF_IO[2] == 0x2B && RX_BUF_IO[3] == 0x50 && RX_BUF_IO[4] == 0x3D && RX_BUF_IO[6] == crc_calc) {
-				RXio_cnt = 0;
-				if (processMode.allow == 1 && RX_BUF_IO[5] <= 100) {
-					if (processMode.step < 2) power.inPowerHigh = RX_BUF_IO[5];
-					else if (processMode.step < 4) power.inPowerLow = RX_BUF_IO[5];
-				}
-				else if (processMode.allow == 2 && RX_BUF_IO[5] <= 100) {
-					if (processMode.step < 2) power.inPowerHigh = RX_BUF_IO[5];
-					else if (processMode.step < 7) power.inPowerLow = RX_BUF_IO[5];
-				}
-			}
-		}
-
-		if (RXio_cnt > 7) RXio_cnt = 0;
-		RX_Pause = 1;
+#if defined setHeater
+void swSerial_write(uint8_t b) {
+	// запретим прерывания
+	//cli();
+	unsigned long wait = F_CPU / 19200;
+	digitalWrite(heater, HIGH);
+	unsigned long start = ESP.getCycleCount();
+	// Start bit;
+	digitalWrite(heater, LOW);
+	WAIT;
+	for (int i = 0; i < 8; i++) {
+		digitalWrite(heater, (b & 1) ? HIGH : LOW);
+		WAIT;
+		b >>= 1;
 	}
+	// Stop bit
+	digitalWrite(heater, HIGH);
+	WAIT;
+	// разрешим прерывания
+	//sei();
+}
+#endif
+// передача мощности по UART
+void serialLoop() {
+#if defined setHeater	
+	// отправим мощность для ТЕНа на внешнее устройство
+	if (RX_Pause <= millis() || powerSendOld != power.heaterPower) {
+		uint8_t crc_send = power.heaterPower + 0x6D;
+		swSerial_write(0x41);		// A
+		swSerial_write(0x54);		// T
+		swSerial_write(0x2B);		// +
+		swSerial_write(0x70);		// p
+		swSerial_write(0x3D);		// =
+		swSerial_write(power.heaterPower);
+		swSerial_write(crc_send);
+		powerSendOld = power.heaterPower;
+		RX_Pause = millis() + 1000;
+	}
+#endif
 }
 
 // Выключение повышенного напряжения на клапана
