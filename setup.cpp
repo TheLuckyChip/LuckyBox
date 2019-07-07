@@ -60,7 +60,8 @@ void setup()
 	csOff(TFT_RES_PRG);
 	delay(2);
 
-	Serial.begin(115200);
+	//Serial.begin(115200);
+	Serial.begin(38400);
 	Serial.println("");
 	Serial.println("");
 	Serial.println("Start Setup");
