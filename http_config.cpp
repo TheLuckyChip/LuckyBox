@@ -129,9 +129,9 @@ void handleSetSSDP()
 	uint16_t index = 1700;
 	if (SSDP_Name.length() >= 2 && SSDP_Name.length() <= 60) {
 		for (uint8_t k = 0; k < 60; k++) { EEPROM.write(index, SSDP_Name[k]); index++; }
-		EEPROM.commit();
+		////EEPROM.commit();
 		EEPROM.end();
-		delay(100);
+		////delay(100);
 	}
 }
 // Установка параметров для подключения к внешней AP по запросу вида http://192.168.0.101/ssid?ssid=home2&password=12345678
@@ -148,8 +148,8 @@ void handleSetSSID()
 		for (uint8_t k = 0; k < 60; k++) { EEPROM.write(index, _ssid[k]);  index++; }
 		index = 1900;
 		for (uint8_t k = 0; k < 32; k++) { EEPROM.write(index, _password[k]);  index++; }
-		EEPROM.commit();
-		delay(100);
+		////EEPROM.commit();
+		////delay(100);
 	}
 	EEPROM.end();
 }
@@ -167,8 +167,8 @@ void handleSetSSIDAP()
 		for (uint8_t k = 0; k < 60; k++) { EEPROM.write(index, _ssidAP[k]);  index++; }
 		index = 1940;
 		for (uint8_t k = 0; k < 32; k++) { EEPROM.write(index, _passwordAP[k]);  index++; }
-		EEPROM.commit();
-		delay(100);
+		////EEPROM.commit();
+		////delay(100);
 	}
 	EEPROM.end();
 }
@@ -210,11 +210,11 @@ void handleSetRotate() {
 				EEPROM.write(1299, 1);
 			}
 		}
-		if (tft180 == 1 || touch180 == 1) {
-			EEPROM.commit();
-			delay(100);
+		/*if (tft180 == 1 || touch180 == 1) {
+			////EEPROM.commit();
+			////delay(100);
 			processMode.step = 0;
-		}
+		}*/
 	}
 	else HTTP.send(200, "text/plain", "ERR");   // отправляем ответ о выполнении
 	EEPROM.end();
@@ -229,8 +229,9 @@ void handleSetVolume() {
 	EEPROM.begin(2048);
 	EEPROM.write(1981, BuzzerVolumeLevel);
 	BuzzerVolumeLevel *= 40;
-	EEPROM.commit();
-	delay(100);
+	////EEPROM.commit();
+	////delay(100);
+	EEPROM.end();
 }
 // Перезагрузка модуля по запросу вида http://192.168.0.101/restart?device=ok
 void handleRestart() {

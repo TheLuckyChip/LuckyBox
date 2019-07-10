@@ -44,6 +44,7 @@ byte DS_Res2 = 10;
 byte DS_Res3 = 10;
 byte DS_Res4 = 10;
 struct TPL_Str tpl2web;
+struct DS_present_Str temperatureSensorPresent[DS_Cnt];
 struct DS_Str temperatureSensor[DS_Cnt];
 struct BMP_Str pressureSensor;
 struct OUT_Pwm pwmOut[PWM_Cnt];
@@ -142,6 +143,7 @@ bool alertLevelEnable = true;
 uint16_t BuzzerVolumeLevel;
 
 uint8_t powerSendOld;
+uint8_t TX_BUF_IO_Power[8];
 uint8_t RX_BUF_IO[8];
 uint8_t RXio_cnt;
 unsigned long RX_Pause;

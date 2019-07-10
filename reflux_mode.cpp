@@ -311,7 +311,7 @@ void handleRefluxSensorSetSave() {
 	EEPROM.write(index, TapCorrectionWeb);
 	
 	EEPROM.end();
-	delay(200);
+	////delay(200);
 }
 
 void valveSet(uint8_t ch) {

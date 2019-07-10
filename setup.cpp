@@ -330,6 +330,12 @@ void setup()
   processMashing[4].time = 10; processMashing[4].temperature = 78;
   numSenseMashBrew = DS_Cube;
 
+  TX_BUF_IO_Power[0] = 0x41;		// A
+  TX_BUF_IO_Power[1] = 0x54;		// T
+  TX_BUF_IO_Power[2] = 0x2B;		// +
+  TX_BUF_IO_Power[3] = 0x70;		// p
+  TX_BUF_IO_Power[4] = 0x3D;		// =
+
   Serial.println("Setup Done!");
 
   /*Serial.println();

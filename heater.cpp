@@ -46,15 +46,19 @@ void initHeater() {
 void comHeaterLoop() {
 	// отправим мощность для ТЕНа на внешнее устройство
 	if (RX_Pause <= millis() || powerSendOld != power.heaterPower) {
-		//uint8_t crc_send = power.heaterPower + 0x6D;
-		Serial.write(0x41);		// A
+		TX_BUF_IO_Power[5] = power.heaterPower;
+		TX_BUF_IO_Power[6] = (uint8_t)(power.heaterPower + 0x6D);
+		Serial.write(TX_BUF_IO_Power, 7);
+
+		/*Serial.write(0x41);		// A
 		Serial.write(0x54);		// T
 		Serial.write(0x2B);		// +
 		Serial.write(0x70);		// p
 		Serial.write(0x3D);		// =
 		Serial.write(power.heaterPower);
-		Serial.write((uint8_t)(power.heaterPower + 0x6D));// crc_send);
+		Serial.write((uint8_t)(power.heaterPower + 0x6D)); // Serial.write(buf, len)*/
+
 		powerSendOld = power.heaterPower;
-		RX_Pause = millis() + 500;
+		RX_Pause = millis() + 1000;
 	}
 }
