@@ -1,1 +1,12 @@
-{"SSDP":"LuckyBox","ssidAP":"LuckyBox","passwordAP":"12345678","ssid":"SSID","password":"PASSWORD","timezone":3,"ip":"192.168.0.106","time":"21:19:23","date":"Mon Apr 23 2018\n","version":2.1}
+{"SSDP":"LuckyBox",
+  "ssidAP":"LuckyBox",
+  "passwordAP":"12345678",
+  "ssid":"SSID",
+  "password":"PASSWORD",
+  "timezone":3,
+  "ip":"192.168.0.106",
+  "time":"21:19:23",
+  "date":"Mon Apr 23 2018\n",
+  "version":2.1,
+  "volume": 50
+}
