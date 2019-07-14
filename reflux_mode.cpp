@@ -1471,7 +1471,7 @@ void refluxLoop() {
 	}
 
 	// Мощности ТЭНа (разогрев / работа)
-	if (processMode.step == 1) {
+	if (processMode.step <= 1) {
 		if (power.heaterPower != power.inPowerHigh) power.heaterPower = power.inPowerHigh;
 	}
 	else if (processMode.step < 7) {

@@ -45,7 +45,7 @@ void initHeater() {
 
 void comHeaterLoop() {
 	// отправим мощность для ТЕНа на внешнее устройство
-	if (RX_Pause <= millis() || powerSendOld != power.heaterPower) {
+	if (RX_Pause <= millis()) {// || powerSendOld != power.heaterPower) {
 		TX_BUF_IO_Power[5] = power.heaterPower;
 		TX_BUF_IO_Power[6] = (uint8_t)(power.heaterPower + 0x6D);
 		Serial.write(TX_BUF_IO_Power, 7);
