@@ -60,8 +60,8 @@ void setup()
 	csOff(TFT_RES_PRG);
 	delay(2);
 
-	//Serial.begin(115200);
-	Serial.begin(38400);
+	Serial.begin(115200);
+	//Serial.begin(38400);
 	Serial.println("");
 	Serial.println("");
 	Serial.println("Start Setup");
@@ -337,6 +337,9 @@ void setup()
   TX_BUF_IO_Power[4] = 0x3D;		// =
 
   Serial.println("Setup Done!");
+
+  Serial.end();
+  Serial.begin(9600);
 
   /*Serial.println();
   Serial.print("T1 = num:"); Serial.print(temperatureSensor[0].num); Serial.print(" name:"); Serial.println(DS_Cube);

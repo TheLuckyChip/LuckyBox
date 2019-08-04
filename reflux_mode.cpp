@@ -1471,13 +1471,13 @@ void refluxLoop() {
 	}
 
 	// Мощности ТЭНа (разогрев / работа)
-	if (processMode.step <= 1) {
+	if (processMode.step < 2) {
 		if (power.heaterPower != power.inPowerHigh) power.heaterPower = power.inPowerHigh;
 	}
 	else if (processMode.step < 7) {
 		if (power.heaterPower != power.inPowerLow) power.heaterPower = power.inPowerLow;
 	}
-	else power.heaterPower = 0;
+	//else power.heaterPower = 0;
 
 	if (processMode.number > 0) {
 
@@ -1541,7 +1541,7 @@ void refluxLoop() {
 
 	}
 
-	if (processMode.number > 0 && processMode.number < 4 && processMode.step == 6) {
+	if (processMode.number > 0 && processMode.number < 5 && processMode.step == 6) {
 		// завершение отбора по времени закрытого состояния клапана на отборе тела
 		if (counterStartStop > 0 && processMode.timeStep >= (timeStabilizationReflux * 60 + bodyTimeOffCount)) {
 			stop_Err();
