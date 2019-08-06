@@ -70,7 +70,7 @@ void loadEepromReflux() {
 		RefluxTransitionTemperature = EEPROM.read(index); index++;
 		if (RefluxTransitionTemperature > 100) RefluxTransitionTemperature = 55;
 		TapCorrectionWeb = EEPROM.read(index);
-		if (TapCorrectionWeb > 170) TapCorrectionWeb = 120;
+		if (TapCorrectionWeb < 50 || TapCorrectionWeb > 200) TapCorrectionWeb = 120;
 		TapCorrection = (float)TapCorrectionWeb / 100;
 
 		power.inPowerHigh = EEPROM.read(1497);
