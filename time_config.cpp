@@ -39,8 +39,8 @@ void handleTimeZone()
 	uint16_t index = 1980;
 	if (timezone <= 12 && timezone >= -12) {
 		EEPROM.write(index, timezone);
-		EEPROM.commit();
-		delay(100);
+		////EEPROM.commit();
+		////delay(100);
 	}
 	else timezone = 3;
 	EEPROM.end();
