@@ -195,7 +195,7 @@ void handleDistillationSensorSetSave() {
 	EEPROM.write(index, DistillationTransitionTemperature);
 
 	EEPROM.end();
-	delay(200);
+	////delay(200);
 	HTTP.send(200, "text/json", "{\"result\":\"ok\"}");
 }
 
@@ -206,7 +206,7 @@ void distillationLoop() {
 	else if (processMode.step < 4) {
 		if (power.heaterPower != power.inPowerLow) power.heaterPower = power.inPowerLow;
 	}
-	else power.heaterPower = 0;
+	//else power.heaterPower = 0;
 
 	// Пищалка для WEB и самой автоматики
 	if (timeAllertInterval > millis()) settingAlarm = true;

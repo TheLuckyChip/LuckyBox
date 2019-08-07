@@ -1,6 +1,6 @@
 //   Система автоматики винокура. 
 //   Проект центра открытого проектирования у Счастливчика https://LuckyCenter.ru
-//   Версия 2.0 Release Candidate 17
+//   Версия 2.0 Release Candidate 18
 
 #include "device_view.h"
 #include "pid_config.h"
@@ -32,8 +32,12 @@ void loop() {
 
   if (processMode.allow < 3 || processMode.allow > 5) {
 	  adcLoop();
-	  heaterLoop();
+#if defined setHeater
 	  serialLoop();
+#else
+	  heaterLoop();
+	  comHeaterLoop();
+#endif
 	  stepApLoop();
   }
 

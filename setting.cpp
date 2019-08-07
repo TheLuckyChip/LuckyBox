@@ -13,8 +13,8 @@ ESP8266WebServer HTTP;
 // PID
 PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
 
-String curVersion = "2.0RC17";
-uint16_t versionForWeb = 2017;
+String curVersion = "2.0RC18";
+uint16_t versionForWeb = 2018;
 // Определяем переменные wifi
 String _ssid;      // Для хранения SSID
 String _password;  // Для хранения пароля сети
@@ -44,6 +44,7 @@ byte DS_Res2 = 10;
 byte DS_Res3 = 10;
 byte DS_Res4 = 10;
 struct TPL_Str tpl2web;
+struct DS_present_Str temperatureSensorPresent[DS_Cnt];
 struct DS_Str temperatureSensor[DS_Cnt];
 struct BMP_Str pressureSensor;
 struct OUT_Pwm pwmOut[PWM_Cnt];
@@ -52,9 +53,7 @@ struct PR_Type processMode;
 struct PR_Mashing processMashing[5];
 struct PR_Power power;
 									// 0% - 100% с шагом 5%
-//uint16_t percentCorrectSquare[21] = { 350, 2250, 4250, 5125, 5875, 6500, 6750, 7125, 7500, 7750, 8000, 8250, 8500, 8750, 8875, 9125, 9250, 9375, 9500, 9750, 10000};
-//uint16_t percentCorrectSquare[21] = { 350,600,850,975,1100,1225,1475,1600,1850,2100,2350,2600,2850,3225,3600,3850,4475,5225,6100,8100,10000 };
-uint16_t percentCorrectSquare[21] = { 2000,2107,2299,2545,2833,3154,3505,3881,4278,4695,5128,5576,6037,6509,6991,7480,7976,8478,8983,9491,10000 };
+uint16_t percentCorrectSquare[22] = { 2000,2107,2299,2545,2833,3154,3505,3881,4278,4695,5128,5576,6037,6509,6991,7480,7976,8478,8983,9491,10000,10000 };
 
 uint8_t StateDsReset;
 boolean outHeater;
@@ -130,6 +129,7 @@ uint8_t stepNext = 0;
 uint8_t answer = 0;
 
 bool stopInfoOutScreen = true;
+uint8_t numOkStop = 0;
 uint8_t numCrashStop;
 bool errA;
 bool errT;
@@ -141,9 +141,10 @@ bool alertLevelEnable = true;
 uint16_t BuzzerVolumeLevel;
 
 uint8_t powerSendOld;
+uint8_t TX_BUF_IO_Power[8];
 uint8_t RX_BUF_IO[8];
 uint8_t RXio_cnt;
-uint8_t RX_Pause = 0;
+unsigned long RX_Pause;
 
 uint8_t DistillationTransitionTemperature = 80;
 uint8_t RefluxTransitionTemperature = 55;

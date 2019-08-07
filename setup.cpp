@@ -61,6 +61,7 @@ void setup()
 	delay(2);
 
 	Serial.begin(115200);
+	//Serial.begin(38400);
 	Serial.println("");
 	Serial.println("");
 	Serial.println("Start Setup");
@@ -329,7 +330,16 @@ void setup()
   processMashing[4].time = 10; processMashing[4].temperature = 78;
   numSenseMashBrew = DS_Cube;
 
+  TX_BUF_IO_Power[0] = 0x41;		// A
+  TX_BUF_IO_Power[1] = 0x54;		// T
+  TX_BUF_IO_Power[2] = 0x2B;		// +
+  TX_BUF_IO_Power[3] = 0x70;		// p
+  TX_BUF_IO_Power[4] = 0x3D;		// =
+
   Serial.println("Setup Done!");
+
+  Serial.end();
+  Serial.begin(9600);
 
   /*Serial.println();
   Serial.print("T1 = num:"); Serial.print(temperatureSensor[0].num); Serial.print(" name:"); Serial.println(DS_Cube);

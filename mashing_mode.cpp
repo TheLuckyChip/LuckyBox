@@ -181,7 +181,7 @@ void handleMashingSensorSetSave() {
 	}
 	
 	EEPROM.end();
-	delay(200);
+	////delay(200);
 
 	HTTP.send(200, "text/json", "{\"result\":\"ok\"}");
 }

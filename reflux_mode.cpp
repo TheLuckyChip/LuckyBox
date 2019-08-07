@@ -70,7 +70,7 @@ void loadEepromReflux() {
 		RefluxTransitionTemperature = EEPROM.read(index); index++;
 		if (RefluxTransitionTemperature > 100) RefluxTransitionTemperature = 55;
 		TapCorrectionWeb = EEPROM.read(index);
-		if (TapCorrectionWeb > 170) TapCorrectionWeb = 120;
+		if (TapCorrectionWeb < 50 || TapCorrectionWeb > 200) TapCorrectionWeb = 120;
 		TapCorrection = (float)TapCorrectionWeb / 100;
 
 		power.inPowerHigh = EEPROM.read(1497);
@@ -311,7 +311,7 @@ void handleRefluxSensorSetSave() {
 	EEPROM.write(index, TapCorrectionWeb);
 	
 	EEPROM.end();
-	delay(200);
+	////delay(200);
 }
 
 void valveSet(uint8_t ch) {
@@ -651,6 +651,7 @@ void rfluxLoopMode_2() {
 				nameProcessStep = "Процесс закончен";
 				settingAlarm = true;
 				processMode.step = 7;						// перешли на следующий шаг алгоритма
+				numOkStop = 1;
 				break;
 			}
 
@@ -683,6 +684,7 @@ void rfluxLoopMode_2() {
 					settingAlarm = true;
 					timePauseOff = 60000 * 20 + millis();
 					processMode.step = 7;						// перешли на следующий шаг алгоритма
+					numOkStop = 4;
 					break;
 				}
 			}
@@ -721,6 +723,7 @@ void rfluxLoopMode_2() {
 					nameProcessStep = "Процесс закончен";
 					settingAlarm = true;
 					processMode.step = 7;						// перешли на следующий шаг алгоритма
+					numOkStop = 3;
 				}
 				else {
 					if (counterStartStop != 0) nameProcessStep = "Отбор тела, " + String(counterStartStop) + "-й стоп";
@@ -882,6 +885,7 @@ void rfluxLoopMode_3() {
 				nameProcessStep = "Процесс закончен";
 				settingAlarm = true;
 				processMode.step = 7;						// перешли на следующий шаг алгоритма
+				numOkStop = 1;
 				break;
 			}
 
@@ -907,6 +911,7 @@ void rfluxLoopMode_3() {
 					settingAlarm = true;
 					timePauseOff = 60000 * 20 + millis();
 					processMode.step = 7;						// перешли на следующий шаг алгоритма
+					numOkStop = 4;
 					break;
 				}
 			}
@@ -945,6 +950,7 @@ void rfluxLoopMode_3() {
 					nameProcessStep = "Процесс закончен";
 					settingAlarm = true;
 					processMode.step = 7;						// перешли на следующий шаг алгоритма
+					numOkStop = 3;
 				}
 				else {
 					if (counterStartStop != 0) nameProcessStep = "Отбор тела, " + String(counterStartStop) + "-й стоп";
@@ -1104,6 +1110,7 @@ void rfluxLoopMode_4() {
 				nameProcessStep = "Процесс закончен";
 				settingAlarm = true;
 				processMode.step = 7;						// перешли на следующий шаг алгоритма
+				numOkStop = 1;
 				stepNext = 0;
 				break;
 			}
@@ -1125,6 +1132,7 @@ void rfluxLoopMode_4() {
 					nameProcessStep = "Процесс закончен";
 					settingAlarm = true;
 					processMode.step = 7;						// перешли на следующий шаг алгоритма
+					numOkStop = 4;
 					break;
 				}
 			}
@@ -1312,6 +1320,7 @@ void rfluxLoopMode_5() {
 				nameProcessStep = "Процесс закончен";
 				if (pwmOut[3].member == 1) csOn(PWM_CH4);
 				processMode.step = 7;						// перешли на следующий шаг алгоритма
+				numOkStop = 1;
 				stepNext = 0;
 				break;
 			}
@@ -1328,7 +1337,7 @@ void rfluxLoopMode_5() {
 			}
 
 			if (adcIn[0].allert == true && alertLevelEnable == true) csOn(PWM_CH2);  // если емкость полная - уменьшаем отбор
-			else if (temperatureSensor[DS_Tube].data <= temperatureSensor[DS_Tube].allertValue - settingBoilTube) {
+			else if ((temperatureSensor[DS_Tube].data <= temperatureSensor[DS_Tube].allertValue - settingBoilTube) || temperatureSensor[DS_Tube].allertValue == 0) {
 				temperatureSensor[DS_Tube].allert = false;
 				csOff(PWM_CH2);	// закрыли клапан доп. подачи воды
 				if (counterStartStop == 0) nameProcessStep = "Отбор тела";
@@ -1442,6 +1451,7 @@ void refluxLoop() {
 		processMode.timeStep = 0;
 		processMode.timeStart = time(nullptr);
 		stopInfoOutScreen = true;
+		numOkStop = 0;
 		stepNext = 0;
 		countHaedEnd = 0;
 		beepEnd = false;
@@ -1461,13 +1471,13 @@ void refluxLoop() {
 	}
 
 	// Мощности ТЭНа (разогрев / работа)
-	if (processMode.step == 1) {
+	if (processMode.step < 2) {
 		if (power.heaterPower != power.inPowerHigh) power.heaterPower = power.inPowerHigh;
 	}
 	else if (processMode.step < 7) {
 		if (power.heaterPower != power.inPowerLow) power.heaterPower = power.inPowerLow;
 	}
-	else power.heaterPower = 0;
+	//else power.heaterPower = 0;
 
 	if (processMode.number > 0) {
 
@@ -1531,11 +1541,12 @@ void refluxLoop() {
 
 	}
 
-	if (processMode.number > 0 && processMode.number < 4 && processMode.step == 6) {
+	if (processMode.number > 0 && processMode.number < 5 && processMode.step == 6) {
 		// завершение отбора по времени закрытого состояния клапана на отборе тела
 		if (counterStartStop > 0 && processMode.timeStep >= (timeStabilizationReflux * 60 + bodyTimeOffCount)) {
 			stop_Err();
 			nameProcessStep = "Стоп по времени Старт/Стоп";
+			numOkStop = 2;
 		}
 	}
 
