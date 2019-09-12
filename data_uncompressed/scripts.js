@@ -1728,6 +1728,8 @@ $(function () {
 		}, 2000);
 	}
 
+	let alertChange = 0;
+	let powerChange = 0;
 	function getDistillation() {
 		console.log(flagSendProcess,"getDistillation");
 		//let sek= parseInt(+new Date()/1000);
@@ -1738,46 +1740,57 @@ $(function () {
 			dtoJson["t"] = {};
 			$.each(globalSensorsJson["sensors"], function (i, e) {
 				let sensor_key = Object.keys(e).shift();
-				let sensor_value = Number(globalSensorsJson["sensors"][i][sensor_key]["value"]);
-				let alert_value = Number(globalSensorsJson["sensors"][i][sensor_key]["allertValue"]);
-				$.each(distillationProcess["sensors"], function (j, q) {
-					if (j === sensor_key && re_t.test(sensor_key)) {
-						q["value"] = sensor_value;
-						let color_value = q["color"];
-						let fillcolor = "#" + dec2hex(color_value);
-						if (alert_value > 0 && sensor_value >= alert_value) {
-							$("#distillation_alert_bg_" + sensor_key).addClass("bg-danger");
-							$("#distillation_alert_text_" + sensor_key).addClass("text-danger");
-						} else {
-							$("#distillation_alert_bg_" + sensor_key).removeClass("bg-danger");
-							$("#distillation_alert_text_" + sensor_key).removeClass("text-danger");
-						}
-						$("#svg_distillation_color_" + sensor_key).css('fill', colorPersent(fillcolor, sensor_value, alert_value));
-						if (Number(q["member"]) !== 0) {
-							dtoJson["t"][sensor_key] = sensor_value;
-						}
+				if(re_t.test(sensor_key)) {
+					let sensor_value = Number(globalSensorsJson["sensors"][i][sensor_key]["value"]);
+					let alert_value = Number(globalSensorsJson["sensors"][i][sensor_key]["allertValue"]);
+					$.each(distillationProcess["sensors"], function (j, q) {
+						if (j === sensor_key && re_t.test(sensor_key)) {
+							q["value"] = sensor_value;
+							let color_value = q["color"];
+							let fillcolor = "#" + dec2hex(color_value);
+							if (alert_value > 0 && sensor_value >= alert_value) {
+								$("#distillation_alert_bg_" + sensor_key).addClass("bg-danger");
+								$("#distillation_alert_text_" + sensor_key).addClass("text-danger");
+							} else {
+								$("#distillation_alert_bg_" + sensor_key).removeClass("bg-danger");
+								$("#distillation_alert_text_" + sensor_key).removeClass("text-danger");
+							}
+							$("#svg_distillation_color_" + sensor_key).css('fill', colorPersent(fillcolor, sensor_value, alert_value));
+							if (Number(q["member"]) !== 0) {
+								dtoJson["t"][sensor_key] = sensor_value;
+							}
 
-						$("#distillation_" + sensor_key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
-						//убрал пока
-						/*if(!flagSendProcess) {
-							$("#distillation_cutoff_" + sensor_key).val(alert_value.toFixed(0));
-							//$("#distillation_temperature_" + sensor_key).val(temperature);
-						}*/
-						let allertValue = alert_value;
-						allertValue = allertValue > 0 ? allertValue.toFixed(2) : "";
-						if (allertValue !== "") {
-							$("#distillation_cutoff_result_" + sensor_key).text(allertValue).parent().find(".hidden").removeClass("hidden").addClass("show");
-						}else{
-							$("#distillation_cutoff_result_" + sensor_key).text(allertValue).parent().find(".show").removeClass("show").addClass("hidden");
+							$("#distillation_" + sensor_key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
+							//убрал пока
+							if (!flagSendProcess) {
+								if($("#distillation_cutoff_" + sensor_key).length) {
+									//console.log(countChange, $("#distillation_cutoff_" + sensor_key).val(), alert_value);
+									if (Number($("#distillation_cutoff_" + sensor_key).val()) !== alert_value) {
+										alertChange++
+									}
+									if (alertChange > 5) {
+										$("#distillation_cutoff_" + sensor_key).val(alert_value);
+										//$("#distillation_temperature_" + sensor_key).val(temperature);
+										alertChange = 0;
+									}
+								}
+							}
+							let allertValue = alert_value;
+							allertValue = allertValue > 0 ? allertValue.toFixed(2) : "";
+							if (allertValue !== "") {
+								$("#distillation_cutoff_result_" + sensor_key).text(allertValue).parent().find(".hidden").removeClass("hidden").addClass("show");
+							} else {
+								$("#distillation_cutoff_result_" + sensor_key).text(allertValue).parent().find(".show").removeClass("show").addClass("hidden");
+							}
+							//svg
+							if (sensor_value < 150) {
+								$("#svg_distillation_" + sensor_key).text(sensor_value.toFixed(1) + '°С');
+							} else {
+								$("#svg_distillation_" + sensor_key).text('');
+							}
 						}
-						//svg
-						if(sensor_value < 150) {
-							$("#svg_distillation_" + sensor_key).text(sensor_value.toFixed(1) + '°С');
-						}else{
-							$("#svg_distillation_" + sensor_key).text('');
-						}
-					}
-				});
+					});
+				}
 			});
 			//Исполнительные устройства
 			$.each(globalSensorsJson["devices"], function (i, e) {
@@ -1813,12 +1826,23 @@ $(function () {
 				})
 			});
 			let power_value = Number(globalSensorsJson["power"]);
-			let power_higt_value = distillationProcess["powerHigh"];
-			let power_lower_value = distillationProcess["powerLower"];
+			//let power_higt_value = distillationProcess["powerHigh"];
+			//let power_lower_value = distillationProcess["powerLower"];
 			//заполнение поля регулировки тена и рабочей мощности
 			if(!flagSendProcess) {
-				$("#distillation_power_set").val(power_higt_value.toFixed(0));
-				$("#distillation_power_lower_set").val(power_lower_value.toFixed(0));
+				//$("#distillation_power_set").val(power_higt_value.toFixed(0));
+				//$("#distillation_power_lower_set").val(power_lower_value.toFixed(0));
+
+				if (Number($("#distillation_power_set").val()) !== Number(globalSensorsJson["powerHigh"]) ||
+					Number($("#distillation_power_lower_set").val()) !== Number(globalSensorsJson["powerLower"])
+				) {
+					powerChange++
+				}
+				if (powerChange > 5) {
+					$("#distillation_power_set").val(globalSensorsJson["powerHigh"].toFixed(0));
+					$("#distillation_power_lower_set").val(globalSensorsJson["powerLower"].toFixed(0));
+					powerChange = 0;
+				}
 			}
 			$("#distillation_power_value").text(power_value.toFixed(0)).parent().find(".hidden").removeClass("hidden").addClass("show");
 
