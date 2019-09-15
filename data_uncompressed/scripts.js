@@ -763,6 +763,10 @@ $(function () {
 	//let flagSendProcess = false;
 	//Интервал запуска процесса
 	let sensorsProcessId = 0;
+	//количество ошибок при запросе
+	let countError = 0;
+	//громкость звука
+	let soundVolume = 0;
 	//регекспы для датчиков
 	const re_p = new RegExp(/p1/);
 	const re_t = new RegExp(/^t/);
@@ -1389,7 +1393,7 @@ $(function () {
 	});
 
 	$.fn.pasteDistillationSensors = function (sensors_select) {
-		if ($.fn.objIsEmpty(globalSensorsJson, false)) {
+		if ($.fn.objIsEmpty(globalSensorsJson, false) && countError < 10) {
 			setTimeout(function () {
 				//console.log("distillationTemplate",globalSensorsJson);
 				$.fn.pasteDistillationSensors(false);
@@ -1532,8 +1536,15 @@ $(function () {
 				returnTplHtml([{id_lower_set: "distillation_power_lower_set"}], powerLowerTempl) +
 				distillationTemplate + tpl_devices_body + tpl_safety_body;
 			$("#distillation_start_group_button").removeClass("hidden");
+			$("#distillation_group_volume").removeClass("hidden");
+			$("#distillation_volume").val(soundVolume);
 		} else {
 			$("#distillation_start_group_button").addClass("hidden");
+			$("#distillation_group_volume").addClass("hidden");
+			if(sensors_select) {
+				distillationProcess["sensors"] = {};
+				$.fn.pasteDistillationSensors(false);
+			}
 		}
 		$("#distillation_process").html(distillationTemplate);
 		$("#distillation_power_set").val(distillationProcess["powerHigh"]);
@@ -1543,10 +1554,12 @@ $(function () {
 			//console.log('distillationProcess');
 			getDistillation();
 			$('#distillation_start').prop("disabled", true);
-			$('#distillation_add_sensor').prop("disabled", true);
+			$('#distillation_add_sensor').parent().addClass("hidden");
+			// $('#distillation_add_sensor').prop("disabled", true);
 		} else {
 			$('#distillation_stop').prop("disabled", true);
-			$('#distillation_add_sensor').prop("disabled", false);
+			$('#distillation_add_sensor').parent().removeClass("hidden");
+			// $('#distillation_add_sensor').prop("disabled", false);
 		}
 	};
 
@@ -1555,7 +1568,8 @@ $(function () {
 		countProcess = 0;
 		distillationProcess["start"] = flagSendProcess = true;
 		$('#distillation_start').prop("disabled", true);
-		$('#distillation_add_sensor').prop("disabled", true);
+		// $('#distillation_add_sensor').prop("disabled", true);
+		$('#distillation_add_sensor').parent().addClass("hidden");
 		$('#distillation_stop').prop("disabled", false);
 		clearInterval(sensorsProcessId);
 		stopInterval();
@@ -1610,7 +1624,8 @@ $(function () {
 	});
 	function stopDistillation(){
 		$('#distillation_stop').prop("disabled", true);
-		$('#distillation_add_sensor').prop("disabled", false);
+		// $('#distillation_add_sensor').prop("disabled", false);
+		$('#distillation_add_sensor').parent().removeClass("hidden");
 		$('#distillation_start').prop("disabled", false);
 		$("#svg_distillation_start").css('stroke', "#000000");
 		$("#svg_distillation_alco_txt").hide();
@@ -2013,7 +2028,7 @@ $(function () {
 	});
 
 	$.fn.pasteRefluxSensors = function (sensors_select) {
-		if ($.fn.objIsEmpty(globalSensorsJson, false)) {
+		if ($.fn.objIsEmpty(globalSensorsJson, false) && countError < 10) {
 			setTimeout(function () {
 				$.fn.pasteRefluxSensors(false);
 			}, 1000);
@@ -2164,83 +2179,6 @@ $(function () {
 				if (re_out.test(sensor_key) && Number(e["member"]) !== 0) {
 					sensorsRefluxSend[sensor_key]["member"] = 1;
 					//console.log(sensor_key);
-					/*if(sensor_key === "out1") {
-						flagout = true;
-						let val_head_cycle = (globalSensorsJson.hasOwnProperty("valwe") ? globalSensorsJson["valwe"][0]["head"]["timeCycle"] : 5);
-						let tpl_head_cycle = returnTplHtml([{id: "reflux_head_cycle", value: val_head_cycle, min: '5', max: '30', step: '1'}], deltaTempl);
-						let val_head_time = (globalSensorsJson.hasOwnProperty("valwe") ? globalSensorsJson["valwe"][0]["head"]["timeOn"] : 1);
-						let tpl_head_time = returnTplHtml([{id: "reflux_head_time", value: val_head_time, min: '1', max: '100', step: '0.5'}], deltaTempl);
-						tpl_devices_body += '<div id="reflux_out_3" class="row' + visible_reflux_out_3 +'"><div class="col-xs-12">' +
-							'<div class="row row-striped">' +
-							head_devices +
-							'<div class="pt-10 pb-10 clearfix">' +
-							'<div class="col-xs-12 col-sm-3 text-middle text-center-xs text-strong">Клапан отбора голов</div>' +
-							//'<div class="col-xs-6 col-sm-2 text-center-xs text-middle text-strong pb-10">Период</div>' +
-							'<div class="col-xs-4 col-xs-offset-1_ col-sm-3 col-sm-offset-0_">' + tpl_head_cycle + '</div>' +
-							//'<div class="col-xs-6 col-sm-2 text-center-xs text-middle text-strong text-nowrap">Откр.%</div>' +
-							'<div class="col-xs-4 col-xs-offset-1_ col-sm-3 col-sm-offset-1_">' + tpl_head_time + '</div>' +
-							'</div></div>';
-
-						let val_body_cycle = (globalSensorsJson.hasOwnProperty("valwe") ? globalSensorsJson["valwe"][1]["body"]["timeCycle"] : 5);
-						let tpl_body_cycle = returnTplHtml([{id: "reflux_body_cycle", value: val_body_cycle, min: '5', max: '30', step: '1'}], deltaTempl);
-						let val_body_time = (globalSensorsJson.hasOwnProperty("valwe") ? globalSensorsJson["valwe"][1]["body"]["timeOn"] : 0);
-						let tpl_body_time = returnTplHtml([{id: "reflux_body_time", value: val_body_time, min: '0', max: '100', step: '0.5'}], deltaTempl);
-						let val_body_decline = (globalSensorsJson.hasOwnProperty("valwe") ? globalSensorsJson["valwe"][1]["body"]["decline"] : 0);
-						let tpl_body_decline = returnTplHtml([{id: "reflux_body_decline", value: val_body_decline, min: '0', max: '30', step: '1'}], deltaTempl);
-							//(Number(globalSensorsJson["valwe"][1]["body"]["decline"]) > 0 ? " checked" : "");
-						//if(flagout1){ head_devices = '';}
-						tpl_devices_body += '<div class="row row-striped">' +
-							//head_devices +
-							'<div class="pt-10 pb-10 clearfix">' +
-							'<div class="col-xs-12 col-sm-3 pxs-10 text-middle text-center-xs text-strong">Клапан отбора тела</div>' +
-							//'<div class="col-xs-6 col-sm-2 text-center-xs text-middle text-strong pb-10">Период</div>' +
-							'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_cycle + '</div>' +
-							//'<div class="col-xs-4 col-sm-2 text-center-xs text-middle text-strong text-nowrap">Откр.%</div>' +
-							'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_time + '</div>' +
-							'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_decline + '</div>' +
-							//'<div class="col-xs-2 col-sm-1 text-center text-middle"><label class="checkbox-inline">' +
-							//'<input class="noSwipe" id="reflux_body_decline"' + checked_body_decline + ' type="checkbox" value="Y"></label></div>' +
-							'</div></div>'+
-							'</div></div>';
-					}else if(sensor_key === "out2"){
-						if(!flagout) {
-							let val_head_cycle = (globalSensorsJson.hasOwnProperty("valwe") ? globalSensorsJson["valwe"][0]["head"]["timeCycle"] : 5);
-							let tpl_head_cycle = returnTplHtml([{id: "reflux_head_cycle", value: val_head_cycle, min: '5', max: '30', step: '1'}], deltaTempl);
-							let val_head_time = (globalSensorsJson.hasOwnProperty("valwe") ? globalSensorsJson["valwe"][0]["head"]["timeOn"] : 1);
-							let tpl_head_time = returnTplHtml([{id: "reflux_head_time", value: val_head_time, min: '1', max: '100', step: '0.5'}], deltaTempl);
-							tpl_devices_body += '<div id="reflux_out_3" class="row' + visible_reflux_out_3 +'"><div class="col-xs-12">' +
-								'<div class="row row-striped">' +
-								head_devices +
-								'<div class="pt-10 pb-10 clearfix">' +
-								'<div class="col-xs-12 col-sm-3 text-middle text-center-xs text-strong">Клапан отбора голов</div>' +
-								//'<div class="col-xs-6 col-sm-2 text-center-xs text-middle text-strong pb-10">Период</div>' +
-								'<div class="col-xs-4 col-xs-offset-1_ col-sm-3 col-sm-offset-0_">' + tpl_head_cycle + '</div>' +
-								//'<div class="col-xs-6 col-sm-2 text-center-xs text-middle text-strong text-nowrap">Откр.%</div>' +
-								'<div class="col-xs-4 col-xs-offset-1_ col-sm-3 col-sm-offset-1_">' + tpl_head_time + '</div>' +
-								'</div></div>';
-
-							let val_body_cycle = (globalSensorsJson.hasOwnProperty("valwe") ? globalSensorsJson["valwe"][1]["body"]["timeCycle"] : 5);
-							let tpl_body_cycle = returnTplHtml([{id: "reflux_body_cycle", value: val_body_cycle, min: '5', max: '30', step: '1'}], deltaTempl);
-							let val_body_time = (globalSensorsJson.hasOwnProperty("valwe") ? globalSensorsJson["valwe"][1]["body"]["timeOn"] : 1);
-							let tpl_body_time = returnTplHtml([{id: "reflux_body_time", value: val_body_time, min: '0', max: '100', step: '0.5'}], deltaTempl);
-							let val_body_decline = (globalSensorsJson.hasOwnProperty("valwe") ? globalSensorsJson["valwe"][1]["body"]["decline"] : 0);
-							let tpl_body_decline = returnTplHtml([{id: "reflux_body_decline", value: val_body_decline, min: '0', max: '30', step: '1'}], deltaTempl);
-							//(Number(globalSensorsJson["valwe"][1]["body"]["decline"]) > 0 ? " checked" : "");
-							//if(flagout1){ head_devices = '';}
-							tpl_devices_body += '<div class="row row-striped">' +
-								//head_devices +
-								'<div class="pt-10 pb-10 clearfix">' +
-								'<div class="col-xs-12 col-sm-3 pxs-10 text-middle text-center-xs text-strong">Клапан отбора тела</div>' +
-								//'<div class="col-xs-6 col-sm-2 text-center-xs text-middle text-strong pb-10">Период</div>' +
-								'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_cycle + '</div>' +
-								//'<div class="col-xs-4 col-sm-2 text-center-xs text-middle text-strong text-nowrap">Откр.%</div>' +
-								'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_time + '</div>' +
-								'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_decline + '</div>' +
-								//'<div class="col-xs-2 col-sm-1 text-center text-middle"><label class="checkbox-inline">' +
-								//'<input class="noSwipe" id="reflux_body_decline"' + checked_body_decline + ' type="checkbox" value="Y"></label></div>' +
-								'</div></div>'+
-								'</div></div>';
-						}*/
 					if(sensor_key === "out1" || sensor_key === "out2") {
 						flagout = true;
 					}else {
@@ -2427,27 +2365,40 @@ $(function () {
 				tpl_stab + refluxTemplate + pressureTemplate + tpl_devices_body + tpl_safety_body;
 
 			$("#reflux_start_group_button").removeClass("hidden");
+			$("#reflux_group_volume").removeClass("hidden");
+			$("#reflux_volume").val(soundVolume);
 		} else {
 			$("#reflux_start_group_button").addClass("hidden");
+			$("#reflux_group_volume").addClass("hidden");
+			if(sensors_select) {
+				refluxProcess["sensors"] = {};
+				$.fn.pasteRefluxSensors(false);
+			}
 		}
 		$("#reflux_process").html(refluxTemplate);
 		$.fn.clearSelect($("#reflux_algorithm_select"));
 		$.fn.fillSelect($("#reflux_algorithm_select"), algorithmReflux, false);
 		$("#reflux_algorithm_select").val(refluxProcess["number"]).change();
-		$("#reflux_algorithm").removeClass("hidden");
+		// $("#reflux_algorithm").removeClass("hidden");
 		$("#reflux_power_set").val(refluxProcess["powerHigh"]);
 		$("#reflux_power_lower_set").val(refluxProcess["powerLower"]);
 		if (refluxProcess["start"] === true) {
 			getReflux();
 			$('#reflux_start').prop("disabled", true);
-			$('#reflux_add_sensor').prop("disabled", true);
+			// $('#reflux_add_sensor').prop("disabled", true);
+			$('#reflux_add_sensor').parent().addClass("hidden");
 			$("#reflux_algorithm_select option[value=" + refluxProcess["number"] + "]").prop('selected',true);
-			$('#reflux_algorithm_select').prop("disabled", true);
+			// $('#reflux_algorithm_select').prop("disabled", true);
+			$('#reflux_add_sensor').parent().addClass("hidden");
+			$("#reflux_algorithm").addClass("hidden");
 		} else {
-			$('#reflux_add_sensor').prop("disabled", false);
+			// $('#reflux_add_sensor').prop("disabled", false);
+			$('#reflux_add_sensor').parent().removeClass("hidden");
 			$('#reflux_stop').prop("disabled", true);
 			$('#reflux_next').prop("disabled", true);
-			$('#reflux_algorithm_select').prop("disabled", false);
+			// $('#reflux_algorithm_select').prop("disabled", false);
+			$('#reflux_add_sensor').parent().removeClass("hidden");
+			$("#reflux_algorithm").removeClass("hidden");
 		}
 	};
 	$(document).on('change', '#reflux_algorithm_select', function () {
@@ -2493,11 +2444,13 @@ $(function () {
 		countProcess = 0;
 		refluxProcess["start"] = flagSendProcess = true;
 		$('#reflux_start').prop("disabled", true);
-		$('#reflux_add_sensor').prop("disabled", true);
+		// $('#reflux_add_sensor').prop("disabled", true);
+		$('#reflux_add_sensor').parent().addClass("hidden");
 		$('#reflux_stop').prop("disabled", false);
 		$('#reflux_next').prop("disabled", false);
 		$("#reflux_algorithm_select option[value=" + refluxProcess["number"] + "]").prop('selected',true);
-		$('#reflux_algorithm_select').prop("disabled", true);
+		$('#reflux_algorithm').addClass("hidden");
+		// $('#reflux_algorithm_select').prop("disabled", true);
 		clearInterval(sensorsProcessId);
 		stopInterval();
 		localStorage.setObj('oldStartProcess', 2);
@@ -2573,9 +2526,11 @@ $(function () {
 	function stopReflux(){
 		$('#reflux_stop').prop("disabled", true);
 		$('#reflux_next').prop("disabled", true);
-		$('#reflux_add_sensor').prop("disabled", false);
+		// $('#reflux_add_sensor').prop("disabled", false);
+		$('#reflux_add_sensor').parent().removeClass("hidden");
 		$('#reflux_start').prop("disabled", false);
-		$('#reflux_algorithm_select').prop("disabled", false);
+		// $('#reflux_algorithm_select').prop("disabled", false);
+		$('#reflux_algorithm').removeClass("hidden");
 		$("#svg_reflux_start").css('stroke', "#000000");
 		$("#svg_reflux_alco_txt").hide();
 		$("#svg_reflux_alco_val").hide().text("");
@@ -3076,7 +3031,7 @@ $(function () {
 		}
 	});
 	$.fn.pasteMashingSensors = function (sensors_select) {
-		if ($.fn.objIsEmpty(globalSensorsJson, false)) {
+		if ($.fn.objIsEmpty(globalSensorsJson, false) && countError < 10) {
 			setTimeout(function () {
 				$.fn.pasteMashingSensors(false);
 			}, 1000);
@@ -3177,17 +3132,26 @@ $(function () {
 			}
 			mashingTemplate = mashingTemplate + tpl_timer_body + tpl_pause_body;
 			$("#mashing_start_group_button").removeClass("hidden");
+			$("#mashing_group_volume").removeClass("hidden");
+			$("#mashing_volume").val(soundVolume);
 		} else {
 			$("#mashing_start_group_button").addClass("hidden");
+			$("#mashing_group_volume").addClass("hidden");
+			if(sensors_select) {
+				mashingProcess["sensors"] = {};
+				$.fn.pasteMashingSensors(false);
+			}
 		}
 		$("#mashing_process").html(mashingTemplate);
 		if (mashingProcess["start"] === true) {
 			getMashing();
 			$('#mashing_start').prop("disabled", true);
-			$('#mashing_add_sensor').prop("disabled", true);
+			$('#mashing_add_sensor').parent().addClass("hidden");
+			// $('#mashing_add_sensor').prop("disabled", true);
 		} else {
 			$('#mashing_stop').prop("disabled", true);
-			$('#mashing_add_sensor').prop("disabled", false);
+			$('#mashing_add_sensor').parent().removeClass("hidden");
+			// $('#mashing_add_sensor').prop("disabled", false);
 		}
 	};
 	function launchMashing(){
@@ -3195,7 +3159,8 @@ $(function () {
 		countProcess = 0;
 		mashingProcess["start"] = flagSendProcess = true;
 		$('#mashing_start').prop("disabled", true);
-		$('#mashing_add_sensor').prop("disabled", true);
+		$('#mashing_add_sensor').parent().addClass("hidden");
+		// $('#mashing_add_sensor').prop("disabled", true);
 		$('#mashing_stop').prop("disabled", false);
 		clearInterval(sensorsProcessId);
 		stopInterval();
@@ -3249,7 +3214,8 @@ $(function () {
 	});
 	function stopMashing(){
 		$('#mashing_stop').prop("disabled", true);
-		$('#mashing_add_sensor').prop("disabled", false);
+		$('#mashing_add_sensor').parent().removeClass("hidden");
+		// $('#mashing_add_sensor').prop("disabled", false);
 		$('#mashing_start').prop("disabled", false);
 		$("#svg_mashing_start").css('stroke', "#000000");
 		clearInterval(sensorsProcessId);
@@ -3527,7 +3493,7 @@ $(function () {
 		}
 	});
 	$.fn.pastePidSensors = function (sensors_select) {
-		if ($.fn.objIsEmpty(globalSensorsJson, false)) {
+		if ($.fn.objIsEmpty(globalSensorsJson, false) && countError < 10) {
 			setTimeout(function () {
 				$.fn.pastePidSensors(false);
 			}, 1000);
@@ -3818,7 +3784,6 @@ $(function () {
 	let tmpTime = 0;
 	let stopTime = 10;
 	let openModalError = false;
-	let countError = 0;
 	let secondInterval = 1000;
 	let curProcess = 0;
 	let countProcess = 0;
@@ -3843,6 +3808,7 @@ $(function () {
 			data: {},
 			type: 'GET',
 			dataType: 'json',
+			timeout: 3000,
 			success: function (msg) {
 				//clearInterval(sensorsIntervalId);
 				startInterval();
@@ -3852,9 +3818,9 @@ $(function () {
 				globalSensorsJson = msg;
 				if(countProcess > 2 && curProcess !== globalSensorsJson["process"]["allow"]){
 					curProcess = globalSensorsJson["process"]["allow"];
-					console.log('curProcess',curProcess);
+					// console.log('curProcess',curProcess);
 				}
-				console.log('countProcess',countProcess);
+				// console.log('countProcess',countProcess);
 
 				if(countProcess > 2){
 					countProcess = 0;
@@ -3869,7 +3835,6 @@ $(function () {
 			},
 			error: function (err, exception) {
 				countError ++;
-				startInterval();
 				if(countError > 10) {
 					globalSensorsJson = {};
 					if (!openModalError) {
@@ -3902,6 +3867,8 @@ $(function () {
 						tmpTime = 0;
 						openModalError = false;
 					}*/
+				}else{
+					startInterval();
 				}
 			},
 		});
@@ -3919,6 +3886,7 @@ $(function () {
 		// sensorsIntervalId = setInterval(getIntervalSensors, secondInterval);
 	}
 	function stopInterval(){
+		console.log("stopInterval");
 		clearTimeout(sensorsIntervalId);
 		// clearInterval(sensorsIntervalId);
 	}
@@ -3953,6 +3921,10 @@ $(function () {
 				$("#settings_ssidap").val(msg["ssidAP"]);
 				// $("#settings_passwordap").val(msg["passwordAP"]);
 				$("#settings_timezone").val(msg["timezone"]);
+				soundVolume = msg["volume"];
+				$("#distillation_volume").val(soundVolume);
+				$("#reflux_volume").val(soundVolume);
+				$("#mashing_volume").val(soundVolume);
 			}
 		});
 	}
@@ -4151,4 +4123,42 @@ $(function () {
 			"touchpad_rotate": touchpad_rotate
 		}, "text", false, _this, $("#error_settings"), false);
 	});
+	//Громкость дистилляция
+	$(document).on("click", "#distillation_set_volume", function (e) {
+		e.preventDefault();
+		let _this = $(this);
+		let sound_volume = $("#distillation_volume").val();
+		soundVolume = sound_volume;
+		sendRequest("volume", {
+			"value": sound_volume
+		}, "text", false, _this, $("#error_settings"), false);
+	});
+	//Громкость ректификация
+	$(document).on("click", "#reflux_set_volume", function (e) {
+		e.preventDefault();
+		let _this = $(this);
+		let sound_volume = $("#reflux_volume").val();
+		soundVolume = sound_volume;
+		sendRequest("volume", {
+			"value": sound_volume
+		}, "text", false, _this, $("#error_settings"), false);
+	});
+	//Громкость затирание
+	$(document).on("click", "#mashing_set_volume", function (e) {
+		e.preventDefault();
+		let _this = $(this);
+		let sound_volume = $("#mashing_volume").val();
+		soundVolume = sound_volume;
+		sendRequest("volume", {
+			"value": sound_volume
+		}, "text", false, _this, $("#error_settings"), false);
+	});
+	/*$("#settings_set_volume").on("click", function (e) {
+		e.preventDefault();
+		let _this = $(this);
+		let sound_volume = $("#settings_volume").val();
+		sendRequest("volume", {
+			"value": sound_volume
+		}, "text", false, _this, $("#error_settings"), false);
+	});*/
 });

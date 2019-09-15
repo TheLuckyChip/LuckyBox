@@ -762,25 +762,42 @@ void tftStartLoop() {
 	while (1) {
 		// вывод менюшки Да Нет
 		if (touchScreen == 0) {
-			csOn(TFT_CS);
-			fillScreenRect(25, 57, 270, 140, 0xFFF6);
-			tft.drawRect(27, 59, 266, 136, ILI9341_BLACK);// 0xFC00);
-			tft.drawRect(28, 60, 264, 134, ILI9341_BLACK);// 0xFC00);
-			fillScreenRect(45, 125, 100, 60, 0xFB6D);
-			tft.drawRect(45, 125, 100, 60, 0x0000);
-			fillScreenRect(175, 125, 100, 60, 0x67EC);
-			tft.drawRect(175, 125, 100, 60, 0x0000);
+			EEPROM.begin(2048);
+			if ((touchArea == 1 && EEPROM.read(1300) == 1) || (touchArea == 2 && EEPROM.read(1400) == 2) || (touchArea == 3 && EEPROM.read(1500) == 3)) {
+				csOn(TFT_CS);
+				fillScreenRect(25, 57, 270, 140, 0xFFF6);
+				tft.drawRect(27, 59, 266, 136, ILI9341_BLACK);// 0xFC00);
+				tft.drawRect(28, 60, 264, 134, ILI9341_BLACK);// 0xFC00);
+				fillScreenRect(45, 125, 100, 60, 0xFB6D);
+				tft.drawRect(45, 125, 100, 60, 0x0000);
+				fillScreenRect(175, 125, 100, 60, 0x67EC);
+				tft.drawRect(175, 125, 100, 60, 0x0000);
 
-			if (touchArea == 1) { typePr = 1; drawBitmapString(56, 68, &StartDist, ILI9341_RED, 0xFFF6); }
-			else if (touchArea == 2) { typePr = 2; drawBitmapString(50, 68, &StartRect, ILI9341_RED, 0xFFF6); }
-			else if (touchArea == 3) { typePr = 3; drawBitmapString(82, 68, &StartMash, ILI9341_RED, 0xFFF6); }
-			touchArea = 0;
-			drawBitmapString(60, 141, &Esc, ILI9341_BLACK, 0xFB6D);
-			drawBitmapString(196, 140, &Ok, ILI9341_BLACK, 0x67EC);
+				if (touchArea == 1) {
+					typePr = 1;
+					drawBitmapString(56, 68, &StartDist, ILI9341_RED, 0xFFF6);
+				}
+				else if (touchArea == 2) {
+					typePr = 2;
+					drawBitmapString(50, 68, &StartRect, ILI9341_RED, 0xFFF6);
+				}
+				else if (touchArea == 3) {
+					typePr = 3;
+					drawBitmapString(82, 68, &StartMash, ILI9341_RED, 0xFFF6);
+				}
+				touchArea = 0;
+				drawBitmapString(60, 141, &Esc, ILI9341_BLACK, 0xFB6D);
+				drawBitmapString(196, 140, &Ok, ILI9341_BLACK, 0x67EC);
 
-			csOff(TFT_CS);
-			touchScreen = 3;
-			timeOffMenu = millis() + 10000;
+				csOff(TFT_CS);
+				touchScreen = 3;
+				timeOffMenu = millis() + 10000;
+			}
+			else {
+				if (touchArea != 4) touchArea = 0;
+				break;
+			}
+			EEPROM.end();
 		}
 		else {
 			// ждем нажатие
@@ -913,7 +930,26 @@ void outStopInfo() {
 				tft.print(utf8rus("Штатно по алгоритму."));
 			}
 		}
-		else tft.print(utf8rus("Штатно по алгоритму."));
+		else {
+			tft.print(utf8rus("Штатно по алгоритму."));
+			y += 20;
+			if (numOkStop == 1) {
+				tft.setCursor(10, y);
+				tft.print(utf8rus("Т в кубе"));
+			}
+			else if (numOkStop == 2) {
+				tft.setCursor(10, y);
+				tft.print(utf8rus("Время Старт/Стоп"));
+			}
+			else if (numOkStop == 3) {
+				tft.setCursor(10, y);
+				tft.print(utf8rus("Min. скорость отбора"));
+			}
+			else if (numOkStop == 4) {
+				tft.setCursor(10, y);
+				tft.print(utf8rus("ПБ и 1-й Стоп"));
+			}
+		}
 	}
 	if (processMode.allow == 2) {
 		tft.setCursor(10, 165);

@@ -72,8 +72,8 @@ void handlePidSet() {
 		EEPROM_float_write_pid(index, Ki); index += 4;
 		EEPROM_float_write_pid(index, Kd); index += 4;
 		EEPROM_float_write_pid(index, setTempForPID);
-		EEPROM.commit();
-		delay(100);
+		////EEPROM.commit();
+		////delay(100);
 		EEPROM.end();
 	}
 	//else processMode.step = 0;

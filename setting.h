@@ -16,8 +16,7 @@
 #include <EEPROM.h>
 #include <PID_v1.h>
 
-struct TPL_Str
-{
+struct TPL_Str {
 	bool		dsMember[8];
 	byte		dsPriority[8];
 	float		dsAllertValue[8];
@@ -26,9 +25,13 @@ struct TPL_Str
 	bool		pwmMember[8];
 	bool		adcMember[4];
 };
-struct DS_Str
-{
+struct DS_present_Str {
 	byte		addrSearch[8];	// серийный номер датчика для поиска
+	byte		num;			// порядковый номер датчика
+	byte		pos;			// номер датчика в массиве
+};
+struct DS_Str {
+	//byte		addrSearch[8];	// серийный номер датчика для поиска
 	byte		addr[8];		// серийный номер датчика
 	byte		num;			// порядковый номер датчика
 	bool		member;			// участвует в выводе или нет
@@ -44,46 +47,40 @@ struct DS_Str
 	byte		priority;		// приоритет
 	char		name[60];		// название назначенное пользователем
 };
-struct BMP_Str
-{
+struct BMP_Str {
 	float		data;			// значение атмосферного давления
 	float		dataStart;		// значение атмосферного давления для коррекции дельты
 	bool		status;			// наличие датчика
 	uint16_t	color;			// цвет для графика
 	bool		member;			// участвует в выводе или нет
 };
-struct OUT_Pwm
-{
+struct OUT_Pwm {
 	uint16_t	data;			// значение PWM или ON/OFF
 	bool		member;			// используется или нет
 	bool		allert;			// для индикации
 	bool		invert;			// для клапанов - НО или НЗ
 	char		name[60];		// название назначенное пользователем
 };
-struct IN_Adc
-{
+struct IN_Adc {
 	uint16_t	data;			// данные АЦП
 	bool		member;			// используется или нет
 	bool		allert;			// сигнализация аварии по датчику
 	char		name[60];		// название назначенное пользователем
 };
-struct PR_Type
-{
+struct PR_Type {
 	uint8_t			allow;			// какой процесс (дистилляция, ректификация или затирание) включен
 	uint8_t			step;			// номер шага алгоритма
 	unsigned long	timeStep;		// время шага алгоритма в секундах
 	unsigned long	timeStart;		// время старта процесса
 	uint8_t			number;			// тип (номер) алгоритма для ректификации или затирания
 };
-struct PR_Mashing
-{
+struct PR_Mashing {
 	uint16_t	time;
 	float		temperature;
 	uint8_t		step;
 	bool		stop;
 };
-struct PR_Power
-{
+struct PR_Power {
 	bool heaterStatus;
 	uint8_t	heaterPower;
 	uint8_t heaterPowerCorr;
@@ -91,6 +88,7 @@ struct PR_Power
 	uint8_t inPowerLow;
 };
 extern struct TPL_Str tpl2web;
+extern struct DS_present_Str temperatureSensorPresent[DS_Cnt];
 extern struct DS_Str temperatureSensor[DS_Cnt];
 extern struct BMP_Str pressureSensor;
 extern struct OUT_Pwm pwmOut[PWM_Cnt];
@@ -220,6 +218,7 @@ extern uint8_t timeBoilTubeSetReflux;
 
 extern bool stopInfoOutScreen;
 // Для датчиков безопасности
+extern uint8_t numOkStop;
 extern uint8_t numCrashStop;
 extern bool errA;
 extern bool errT;
@@ -228,11 +227,13 @@ extern unsigned long timePauseErrT;
 
 extern bool alertEnable;
 extern bool alertLevelEnable;
+extern uint16_t BuzzerVolumeLevel;
 
 extern uint8_t powerSendOld;
+extern uint8_t TX_BUF_IO_Power[8];
 extern uint8_t RX_BUF_IO[8];
 extern uint8_t RXio_cnt;
-extern uint8_t RX_Pause;
+extern unsigned long RX_Pause;
 
 extern uint8_t DistillationTransitionTemperature;
 extern uint8_t RefluxTransitionTemperature;

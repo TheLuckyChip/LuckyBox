@@ -72,9 +72,31 @@
 					<div id="distillation_process">
 
 					</div>
-					<div class="form-group pt-10 clearfix">
+					<div class="form-group pt-10 clearfix hidden">
 						<button id="distillation_add_sensor" type="button" class="btn btn-primary btn-sm noSwipe">Добавить датчики для процесса</button>
 					</div>
+					<div id="distillation_group_volume" class="row row-striped pb-10 hidden">
+							<div class="col-xs-12 col-sm-4 text-middle text-center-xs text-strong">Громкость звукового сигнала</div>
+							<div class="col-xs-6 col-sm-4">
+								<div class="input-group input-group-sm number-group">
+                                        <span class="input-group-btn minus">
+                                            <button type="button" class="btn btn-danger btn-number noSwipe" data-type="minus" data-field="count">
+                                                <span class="glyphicon glyphicon-minus"></span>
+                                            </button>
+                                        </span>
+									<input id="distillation_volume" class="form-control input-number noSwipe" type="number" value="0" min="0" max="100" step="1" size="3">
+									<span class="input-group-btn plus">
+                                            <button type="button" class="btn btn-success btn-number noSwipe" data-type="plus" data-field="count">
+                                                <span class="glyphicon glyphicon-plus"></span>
+                                            </button>
+                                        </span>
+								</div>
+							</div>
+							<div class="col-xs-6 col-sm-4 text-center">
+								<button id="distillation_set_volume" type="button" class="btn btn-success btn-sm noSwipe">Сохранить</button>
+							</div>
+					</div>
+
 					<div class="form-group pt-10 pb-10 clearfix hidden" id="distillation_start_group_button">
 						<button id="distillation_stop" type="button" class="btn btn-danger btn-sm pull-left noSwipe">СТОП</button>
 						<button id="distillation_start" type="button" class="btn btn-success btn-sm pull-right noSwipe">СТАРТ</button>
@@ -91,7 +113,6 @@
 </div>
 <script>
 	$(function() {
-		$("#distillation_add_sensor").prop("disabled",true);
 		setTimeout(function () {
 			$.fn.pasteDistillationSensors(false);
 		}, 1000);

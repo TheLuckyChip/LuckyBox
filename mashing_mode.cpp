@@ -181,14 +181,14 @@ void handleMashingSensorSetSave() {
 	}
 	
 	EEPROM.end();
-	delay(200);
+	////delay(200);
 
 	HTTP.send(200, "text/json", "{\"result\":\"ok\"}");
 }
 
 void mashingLoop() {
 	// запомним текущую температуру для PID регулировки
-	Input = temperatureSensor[numSenseMashBrew].data + 0.5; // + 0.5 - чтобы отсчет времени пошел уже на подходе Т
+	if (processMode.step > 0) Input = temperatureSensor[numSenseMashBrew].data + 0.5; // + 0.5 - чтобы отсчет времени пошел уже на подходе Т
 
 	switch (processMode.step) {
 		// пришли при старте затирания
