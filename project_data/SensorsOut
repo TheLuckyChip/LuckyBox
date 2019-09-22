@@ -1,7 +1,7 @@
 {
-	"process":{"allow":1,"number":0,"step":"Нагрев куба","time":0,"timeStart":0},
+	"process":{"allow":0,"number":0,"step":"Нагрев куба","time":0,"timeStart":0},
 	"sensors":[
-	{"t1":{"value":50.00,"name":"В кубе","color":64588,"member":1,"priority":0,"allertValue":60}},
+	{"t1":{"value":50.00,"name":"В кубе","color":64588,"member":1,"priority":0,"allertValue":96}},
 	{"t2":{"value":55.00,"name":"В царге","color":7905,"member":0,"priority":0,"allertValue":55.5}},
 	{"t3":{"value":78.00,"name":"В узле отбора","color":65504,"member":0,"priority":0,"allertValue":0}},
 	{"t4":{"value":25.00,"name":"Вода на выходе","color":16799,"member":0,"priority":0,"allertValue":30}},
@@ -44,10 +44,10 @@
 	{"out8":{"value":0,"name":"","member":0,"allert":0}}
 ],
 	"valwe": [
-	{"head":{"timeCycle":5,"timeOn":1}},
+	{"head":{"timeCycle":6,"timeOn":2}},
 	{"headSteam":{"percent":30}},
-	{"body":{"timeCycle":50,"timeOn":11,"decline":12}},
-	{"bodyPrima":{"percentStart":60,"percentStop":10,"decline":10}}
+	{"body":{"timeCycle":20,"timeOn":11,"decline":12}},
+	{"bodyPrima":{"percentStart":80,"percentStop":10,"decline":10}}
 ],
 	"safety":[
 	{"in1":{"value":0,"name":"Датчик протечки","member":0,"allert":0}},
@@ -61,9 +61,10 @@
 	{"Kd":{"userSetValue":40}},
 	{"t1":{"userSetValue":70}}
 	],
+    "delta":0.15,
 	"power":90,
-	"powerHigh":100,
-	"powerLower":85,
+	"powerHigh":90,
+	"powerLower":70,
 	"temperatureAlcoholBoil":78.15,
 	"temperatureStartPressure":78.00,
     "cubeAlcohol":0,

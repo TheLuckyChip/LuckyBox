@@ -767,6 +767,12 @@ $(function () {
 	let countError = 0;
 	//громкость звука
 	let soundVolume = 0;
+	//изменение данных со стороны контроллера (считаем каунт 5)
+	let deltaChange = 0;
+	let alertChange = 0;
+	let powerChange = 0;
+	let mashingChange = 0;
+	let algorithmChange = 0;
 	//регекспы для датчиков
 	const re_p = new RegExp(/p1/);
 	const re_t = new RegExp(/^t/);
@@ -1728,8 +1734,6 @@ $(function () {
 		}, 2000);
 	}
 
-	let alertChange = 0;
-	let powerChange = 0;
 	function getDistillation() {
 		console.log(flagSendProcess,"getDistillation");
 		//let sek= parseInt(+new Date()/1000);
@@ -2088,6 +2092,7 @@ $(function () {
 		let tpl_safety_body = '';
 		let tpl_stab = '';
 		if (!sensors_select && $.fn.objIsEmpty(refluxProcess["sensors"], false)) {
+			console.log('ajax refluxSensorsGetTpl');
 			$.ajax({
 				url: ajax_url_debug + 'refluxSensorsGetTpl',
 				data: {},
@@ -2854,6 +2859,35 @@ $(function () {
 							//$("#reflux_delta_" + sensor_key).val(alert_value);
 							$("#reflux_cutoff_" + sensor_key).val(alert_value.toFixed(0));
 						}*/
+						//убрал пока
+						if (!flagSendProcess) {
+							//дельта
+							if(globalSensorsJson.hasOwnProperty("delta")){
+								let reflux_delta = $("#reflux_delta_" + sensor_key);
+								if (reflux_delta.length) {
+									if (Number(reflux_delta.val()) !== Number(globalSensorsJson["delta"])) {
+										deltaChange++
+									}
+									if (deltaChange > 5) {
+										reflux_delta.val(globalSensorsJson["delta"]);
+										deltaChange = 0;
+									}
+								}
+							}
+
+							let reflux_cutoff = $("#reflux_cutoff_" + sensor_key);
+							if(reflux_cutoff.length) {
+								//console.log(countChange, $("#distillation_cutoff_" + sensor_key).val(), alert_value);
+								if (Number(reflux_cutoff.val()) !== alert_value) {
+									alertChange++
+								}
+								if (alertChange > 5) {
+									reflux_cutoff.val(alert_value);
+									//$("#distillation_temperature_" + sensor_key).val(temperature);
+									alertChange = 0;
+								}
+							}
+						}
 						$("#reflux_" + sensor_key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 						let allertValue = alert_value;
 						allertValue = allertValue > 0 ? allertValue.toFixed(2) : "";
@@ -2917,12 +2951,182 @@ $(function () {
 			});
 			$("#reflux_alco_boil").text(globalSensorsJson["temperatureAlcoholBoil"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 			let power_value = Number(globalSensorsJson["power"]);
-			let power_higt_value = refluxProcess["powerHigh"];
-			let power_lower_value = refluxProcess["powerLower"];
+			// let power_higt_value = refluxProcess["powerHigh"];
+			// let power_lower_value = refluxProcess["powerLower"];
 			//заполнение поля регулировки тена и рабочей мощности
 			if(!flagSendProcess) {
-				$("#reflux_power_set").val(power_higt_value.toFixed(0));
-				$("#reflux_power_lower_set").val(power_lower_value.toFixed(0));
+				// $("#reflux_power_set").val(power_higt_value.toFixed(0));
+				// $("#reflux_power_lower_set").val(power_lower_value.toFixed(0));
+
+				if (Number($("#reflux_power_set").val()) !== Number(globalSensorsJson["powerHigh"]) ||
+					Number($("#reflux_power_lower_set").val()) !== Number(globalSensorsJson["powerLower"])
+				) {
+					powerChange++
+				}
+				if (powerChange > 5) {
+					$("#reflux_power_set").val(globalSensorsJson["powerHigh"].toFixed(0));
+					$("#reflux_power_lower_set").val(globalSensorsJson["powerLower"].toFixed(0));
+					powerChange = 0;
+				}
+				//настройки колонн
+				let valwe_head = {};
+				let valwe_headSteam = {};
+				let valwe_body = {};
+				let valwe_bodyPrima = {};
+				if(globalSensorsJson.hasOwnProperty("valwe")){
+					$.each(globalSensorsJson["valwe"], function (i, e) {
+						// console.log(i,e);
+						let valwe_key = Object.keys(e).shift();
+						switch(valwe_key){
+							case "head":
+								valwe_head = e;
+								break;
+							case "headSteam":
+								valwe_headSteam = e;
+								break;
+							case "body":
+								valwe_body = e;
+								break;
+							case "bodyPrima":
+								valwe_bodyPrima = e;
+								break;
+						}
+					})
+				}
+				//прима
+				let reflux_head_cycle_prima = $("#reflux_head_cycle_prima");
+				let reflux_head_time_prima = $("#reflux_head_time_prima");
+				let reflux_body_start_prima = $("#reflux_body_start_prima");
+				let reflux_body_stop_prima = $("#reflux_body_stop_prima");
+				let reflux_body_decline_prima = $("#reflux_body_decline_prima");
+				if (reflux_head_cycle_prima.length &&
+					reflux_head_time_prima.length &&
+					reflux_body_start_prima.length &&
+					reflux_body_stop_prima.length &&
+					reflux_body_decline_prima.length) {
+
+					if (Number(valwe_head["head"]["timeCycle"]) !== Number(reflux_head_cycle_prima.val())) {
+						algorithmChange ++;
+					}
+					if (Number(valwe_head["head"]["timeOn"]) !== Number(reflux_head_time_prima.val())) {
+						algorithmChange ++;
+					}
+					if (Number(valwe_bodyPrima["bodyPrima"]["percentStart"]) !== Number(reflux_body_start_prima.val())) {
+						algorithmChange ++;
+					}
+					if (Number(valwe_bodyPrima["bodyPrima"]["percentStop"]) !== Number(reflux_body_stop_prima.val())) {
+						algorithmChange ++;
+					}
+					if (Number(valwe_bodyPrima["bodyPrima"]["decline"]) !== Number(reflux_body_decline_prima.val())) {
+						algorithmChange ++;
+					}
+
+					if (algorithmChange > 5) {
+						if (Number(valwe_head["head"]["timeCycle"]) !== Number(reflux_head_cycle_prima.val())) {
+							reflux_head_cycle_prima.val(valwe_head["head"]["timeCycle"])
+						}
+						if (Number(valwe_head["head"]["timeOn"]) !== Number(reflux_head_time_prima.val())) {
+							reflux_head_time_prima.val(valwe_head["head"]["timeOn"])
+						}
+						if (Number(valwe_bodyPrima["bodyPrima"]["percentStart"]) !== Number(reflux_body_start_prima.val())) {
+							reflux_body_start_prima.val(valwe_bodyPrima["bodyPrima"]["percentStart"])
+						}
+						if (Number(valwe_bodyPrima["bodyPrima"]["percentStop"]) !== Number(reflux_body_stop_prima.val())) {
+							reflux_body_stop_prima.val(valwe_bodyPrima["bodyPrima"]["percentStop"])
+						}
+						if (Number(valwe_bodyPrima["bodyPrima"]["decline"]) !== Number(reflux_body_decline_prima.val())) {
+							reflux_body_decline_prima.val(valwe_bodyPrima["bodyPrima"]["decline"])
+						}
+						algorithmChange = 0;
+					}
+
+				}
+				//пар
+				let reflux_head_steam = $("#reflux_head_steam");
+				let reflux_body_start_steam = $("#reflux_body_start_steam");
+				let reflux_body_stop_steam = $("#reflux_body_stop_steam");
+				let reflux_body_decline_steam = $("#reflux_body_decline_steam");
+				if (reflux_head_steam.length &&
+					reflux_body_start_steam.length &&
+					reflux_body_stop_steam.length &&
+					reflux_body_decline_steam.length) {
+
+					if (Number(valwe_headSteam["headSteam"]["percent"]) !== Number(reflux_head_steam.val())) {
+						algorithmChange ++;
+					}
+					if (Number(valwe_bodyPrima["bodyPrima"]["percentStart"]) !== Number(reflux_body_start_steam.val())) {
+						algorithmChange ++;
+					}
+					if (Number(valwe_bodyPrima["bodyPrima"]["percentStop"]) !== Number(reflux_body_stop_steam.val())) {
+						algorithmChange ++;
+					}
+					if (Number(valwe_bodyPrima["bodyPrima"]["decline"]) !== Number(reflux_body_decline_steam.val())) {
+						algorithmChange ++;
+					}
+					if (algorithmChange > 5) {
+						if (Number(valwe_headSteam["headSteam"]["percent"]) !== Number(reflux_head_steam.val())) {
+							reflux_head_steam.val(valwe_headSteam["headSteam"]["percent"])
+						}
+						if (Number(valwe_bodyPrima["bodyPrima"]["percentStart"]) !== Number(reflux_body_start_steam.val())) {
+							reflux_body_start_steam.val(valwe_bodyPrima["bodyPrima"]["percentStart"])
+						}
+						if (Number(valwe_bodyPrima["bodyPrima"]["percentStop"]) !== Number(reflux_body_stop_steam.val())) {
+							reflux_body_stop_steam.val(valwe_bodyPrima["bodyPrima"]["percentStop"])
+						}
+						if (Number(valwe_bodyPrima["bodyPrima"]["decline"]) !== Number(reflux_body_decline_steam.val())) {
+							reflux_body_decline_steam.val(valwe_bodyPrima["bodyPrima"]["decline"])
+						}
+						algorithmChange = 0;
+					}
+
+				}
+				//жижа
+				let reflux_head_cycle_rk = $("#reflux_head_cycle_rk");
+				let reflux_head_time_rk = $("#reflux_head_time_rk");
+				let reflux_body_cycle_rk = $("#reflux_body_cycle_rk");
+				let reflux_body_time_rk = $("#reflux_body_time_rk");
+				let reflux_body_decline_rk = $("#reflux_body_decline_rk");
+				if (reflux_head_cycle_rk.length &&
+					reflux_head_time_rk.length &&
+					reflux_body_cycle_rk.length &&
+					reflux_body_time_rk.length &&
+					reflux_body_decline_rk.length) {
+
+					if (Number(valwe_head["head"]["timeCycle"]) !== Number(reflux_head_cycle_rk.val())) {
+						algorithmChange ++;
+					}
+					if (Number(valwe_head["head"]["timeOn"]) !== Number(reflux_head_time_rk.val())) {
+						algorithmChange ++;
+					}
+					if (Number(valwe_body["body"]["timeCycle"]) !== Number(reflux_body_cycle_rk.val())) {
+						algorithmChange ++;
+					}
+					if (Number(valwe_body["body"]["timeOn"]) !== Number(reflux_body_time_rk.val())) {
+						algorithmChange ++;
+					}
+					if (Number(valwe_body["body"]["decline"]) !== Number(reflux_body_decline_rk.val())) {
+						algorithmChange ++;
+					}
+					if (algorithmChange > 5) {
+						if (Number(valwe_head["head"]["timeCycle"]) !== Number(reflux_head_cycle_rk.val())) {
+							reflux_head_cycle_rk.val(valwe_head["head"]["timeCycle"])
+						}
+						if (Number(valwe_head["head"]["timeOn"]) !== Number(reflux_head_time_rk.val())) {
+							reflux_head_time_rk.val(valwe_head["head"]["timeOn"])
+						}
+						if (Number(valwe_body["body"]["timeCycle"]) !== Number(reflux_body_cycle_rk.val())) {
+							reflux_body_cycle_rk.val(valwe_body["body"]["timeCycle"])
+						}
+						if (Number(valwe_body["body"]["timeOn"]) !== Number(reflux_body_time_rk.val())) {
+							reflux_body_time_rk.val(valwe_body["body"]["timeOn"])
+						}
+						if (Number(valwe_body["body"]["decline"]) !== Number(reflux_body_decline_rk.val())) {
+							reflux_body_decline_rk.val(valwe_body["body"]["decline"])
+						}
+						algorithmChange = 0;
+					}
+
+				}
 			}
 			$("#reflux_power_value").text(power_value.toFixed(0)).parent().find(".hidden").removeClass("hidden").addClass("show");
 
@@ -3382,15 +3586,47 @@ $(function () {
 				}
 
 				let temperature = Number(e[pause_key]["temperature"]);
+
 				if(!flagSendProcess) {
 					//убрал пока
-					//$("#mashing_time_" + pause_key).val(time);
-					//$("#mashing_temperature_" + pause_key).val(temperature);
-					if (stop > 0) {
-						$("#mashing_stop_" + pause_key).prop("checked", true);
-					} else {
-						$("#mashing_stop_" + pause_key).prop("checked", false);
+					// $("#mashing_time_" + pause_key).val(time);
+					// $("#mashing_temperature_" + pause_key).val(temperature);
+					// if (stop > 0) {
+					// 	$("#mashing_stop_" + pause_key).prop("checked", true);
+					// } else {
+					// 	$("#mashing_stop_" + pause_key).prop("checked", false);
+					// }
+					let mashing_time = $("#mashing_time_" + pause_key);
+					let mashing_temperature = $("#mashing_temperature_" + pause_key);
+					let mashing_stop = $("#mashing_stop_" + pause_key);
+					if(mashing_time.length && mashing_temperature.length && mashing_stop.length){
+						if(time !== Number(mashing_time.val())){
+							mashingChange ++;
+						}
+						if(temperature !== Number(mashing_temperature.val())){
+							mashingChange ++;
+						}
+						if(stop !== Number(mashing_stop.prop("checked"))){
+							mashingChange ++;
+						}
+						if(mashingChange > 5){
+							if(time !== Number(mashing_time.val())){
+								mashing_time.val(time);
+							}
+							if(temperature !== Number(mashing_temperature.val())){
+								mashing_temperature.val(temperature);
+							}
+							if(stop !== Number(mashing_stop.prop("checked"))){
+								if (stop > 0) {
+									mashing_stop.prop("checked", true);
+								} else {
+									mashing_stop.prop("checked", false);
+								}
+							}
+							mashingChange = 0;
+						}
 					}
+
 				}
 				if(step>0) {
 					$("#mashing_step_bg_" + pause_key).addClass("bg-success");
@@ -3751,9 +3987,21 @@ $(function () {
 					$("#pid_value_" + sensor_key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 				}
 			});
+			let active_tabs = $( "#nav-tabs li.active a" );
+
+			// console.log('active_tabs',active_tabs);
+			// $('#nav-tabs li a').on('shown.bs.tab', function (tab) {
+			// 	console.log('active_tabs',tab.target); // activated tab
+			// 	// tab.relatedTarget // previous tab
+			// });
 			//старт/стоп дистилляции
 			if (distillationProcess["start"] !== true && process === 1) {
-				$('#nav-tabs li a[data-target="#distillation"]').tab('show');
+				if(active_tabs.data('target') === "#distillation") {
+					distillationProcess["sensors"] = {};
+					$.fn.pasteDistillationSensors(false);
+				}else {
+					$('#nav-tabs li a[data-target="#distillation"]').tab('show');
+				}
 				$("#distillation_start").trigger("start-event");
 			}
 			if (distillationProcess["start"] === true && process !== 1) {
@@ -3761,7 +4009,12 @@ $(function () {
 			}
 			//старт/стоп ректификации
 			if (refluxProcess["start"] !== true && process === 2) {
-				$('#nav-tabs li a[data-target="#reflux"]').tab('show');
+				if(active_tabs.data('target') === "#reflux") {
+					refluxProcess["sensors"] = {};
+				 	$.fn.pasteRefluxSensors(false);
+				}else {
+					$('#nav-tabs li a[data-target="#reflux"]').tab('show');
+				}
 				$("#reflux_start").trigger("start-event");
 			}
 			if (refluxProcess["start"] === true && process !== 2) {
@@ -3769,7 +4022,13 @@ $(function () {
 			}
 			//старт/стоп затирания
 			if (mashingProcess["start"] !== true && process === 3) {
-				$('#nav-tabs li a[data-target="#mashing"]').tab('show');
+				// $('#nav-tabs li a[data-target="#mashing"]').tab('show');
+				if(active_tabs.data('target') === "#mashing") {
+					mashingProcess["sensors"] = {};
+					$.fn.pasteMashingSensors(false);
+				}else {
+					$('#nav-tabs li a[data-target="#mashing"]').tab('show');
+				}
 				$("#mashing_start").trigger("start-event");
 			}
 			if (mashingProcess["start"] === true && process !== 3) {
