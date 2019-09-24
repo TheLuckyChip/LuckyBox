@@ -1289,18 +1289,19 @@ void rfluxLoopMode_5() {
 		}
 // ждем срабатывание датчика уровня в приемной емкоси голов если он есть, включаем пищалку, поднимаем мощность ТЭН для отбора
 		case 5: {
-			if (adcIn[0].allert == true) {
-				if (countHaedEnd <= millis()) {	// антирдебезг 10 сек. :)
+			if ((adcIn[0].member == 1 && adcIn[0].allert == true) || stepNext == 1) {
+				if (countHaedEnd <= millis() || stepNext == 1) {	// антирдебезг 10 сек. :)
 					timeAllertInterval = millis() + 10000;	// счетчик времени для зв.сигнала
 					processMode.step = 6;		// перешли на следующий шаг алгоритма
 				}
 			}
 			else countHaedEnd = millis() + 10000;
 
-			if (processMode.step == 6 || stepNext == 1) {
+			if (processMode.step == 6) {
 				if (pwmOut[0].member == 1) csOff(PWM_CH1);		// клапан отбора голов, если есть
 				if (pwmOut[3].member == 1) csOff(PWM_CH4);		// закрыли клапан слива ПБ
 				csOff(PWM_CH2);		// закрыли клапан доп. подачи воды
+				processMode.step = 6;		// перешли на следующий шаг алгоритма (если по stepNext)
 				processMode.timeStep = 0;
 				bodyTimeOffCount = 0;
 				bodyValveSet = true;
@@ -1336,15 +1337,20 @@ void rfluxLoopMode_5() {
 				csOn(PWM_CH2);								// открыли клапан доп. подачи воды
 			}
 
-			if (adcIn[0].allert == true && alertLevelEnable == true) csOn(PWM_CH2);  // если емкость полная - уменьшаем отбор
+			if (adcIn[0].allert == true && alertLevelEnable == true) {
+				csOn(PWM_CH2);  // если емкость полная - уменьшаем отбор
+				//bodyTimeOffCount = processMode.timeStep;			// сбрасываем таймер остановки процесса
+			}
 			else if ((temperatureSensor[DS_Tube].data <= temperatureSensor[DS_Tube].allertValue - settingBoilTube) || temperatureSensor[DS_Tube].allertValue == 0) {
 				temperatureSensor[DS_Tube].allert = false;
 				csOff(PWM_CH2);	// закрыли клапан доп. подачи воды
 				if (counterStartStop == 0) nameProcessStep = "Отбор тела";
 				else nameProcessStep = "Отбор тела, старт/стопов - " + String(counterStartStop);
 				bodyValveSet = true;
-				bodyTimeOffCount = processMode.timeStep;			// сбрасываем таймер остановки процесса
+				//bodyTimeOffCount = processMode.timeStep;			// сбрасываем таймер остановки процесса
 			}
+
+			if (bodyValveSet == true) bodyTimeOffCount = processMode.timeStep;			// сбрасываем таймер остановки процесса
 
 			break;
 		}
