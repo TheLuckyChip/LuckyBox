@@ -1105,8 +1105,8 @@ void rfluxLoopMode_4() {
 
 
 			// рулим клапаном отбора голов
-			else if (typeRefOfValwe == 3 || typeRefOfValwe == 1) valveSet(PWM_CH1);
-			else if (typeRefOfValwe == 2) valveSet(PWM_CH2);
+			else if (typeRefOfValwe == 1) valveSet(PWM_CH1);
+			else valveSet(PWM_CH2);
 			
 			
 			
