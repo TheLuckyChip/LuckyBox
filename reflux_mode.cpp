@@ -1059,6 +1059,7 @@ void rfluxLoopMode_4() {
 				nameProcessStep = "Отбор голов";
 				processMode.step = 4;						// перешли на следующий шаг алгоритма
 				stepNext = 0;
+				if (typeRefOfValwe == 3) csOn(PWM_CH1);     // с 2-мя клапанами открыли CH1 на отбор голов
 			}
 			break;
 		}
@@ -1082,16 +1083,35 @@ void rfluxLoopMode_4() {
 			else countHaedEnd = millis() + 10000;
 
 			if (processMode.step == 6) {
+				
+				
+				
+
 				if (typeRefOfValwe == 3) csOff(PWM_CH1);	// закрыли клапан отбора голов т.к. 2 клапана на отбор
+				
+				
+				
+				
+				
 				if (pwmOut[3].member == 1) csOff(PWM_CH4);	// закрыли клапан слива ПБ
 				processMode.timeStep = 0;
 				bodyTimeOffCount = 0;
 				bodyValveSet = true;
 				nameProcessStep = "Отбор тела";
 			}
+
+
+
+
+
 			// рулим клапаном отбора голов
 			else if (typeRefOfValwe == 3 || typeRefOfValwe == 1) valveSet(PWM_CH1);
 			else if (typeRefOfValwe == 2) valveSet(PWM_CH2);
+			
+			
+			
+			
+			
 			break;
 		}
 // ждем окончание по достижению температуры в кубе и рулим клапаном отбора
@@ -1101,8 +1121,14 @@ void rfluxLoopMode_4() {
 				power.heaterPower = 0;						// установили мощность на ТЭН 0 %
 				timeAllertInterval = millis() + 10000;		// установим счетчик времени для зв.сигнала
 				temperatureSensor[DS_Cube].allert = true;	// сигнализация для WEB
+				
+				
+				
 				csOff(PWM_CH1);
-				csOff(PWM_CH2);								// закрыли клапан отбора
+				csOff(PWM_CH2);								// закрыли клапана отбора, т.к. процесс закончен
+				
+				
+				
 				if (pwmOut[3].member == 1) {
 					csOn(PWM_CH4);							// включаем клапан слива ПБ
 				}
@@ -1116,9 +1142,15 @@ void rfluxLoopMode_4() {
 			}
 			else if (temperatureSensor[DS_Tube].allertValue > 0 && temperatureSensor[DS_Tube].data >= temperatureSensor[DS_Tube].allertValue) {
 				temperatureSensor[DS_Tube].allert = true;	// сигнализация для WEB
-				csOff(PWM_CH1);
-				csOff(PWM_CH2);								// закрыли клапан отбора
-				// если первый стоп пищим 10 сек.
+				
+				
+				
+				if (typeRefOfValwe == 1) csOff(PWM_CH1);
+				else csOff(PWM_CH2);								// закрыли клапан отбора
+				
+															
+															
+															// если первый стоп пищим 10 сек.
 				if (counterStartStop == 0) timeAllertInterval = millis() + 10000;		// установим счетчик времени для зв.сигнала
 				if (bodyValveSet) counterStartStop++;
 				bodyValveSet = false;
@@ -1144,16 +1176,33 @@ void rfluxLoopMode_4() {
 			}
 
 			if (bodyValveSet == true && processMode.step != 7) {
-				if (typeRefOfValwe == 1) valveSet(PWM_CH1);
-				else if (typeRefOfValwe == 2 || typeRefOfValwe == 3) valveSet(PWM_CH2);
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+				if (adcIn[0].allert == true && alertLevelEnable == true) { // если емкость полная - прекращаем отбор
+					if (typeRefOfValwe == 1) csOn(PWM_CH1);
+					else csOn(PWM_CH2);
+				}
+				else {
+					if (typeRefOfValwe == 1) valveSet(PWM_CH1);
+					else valveSet(PWM_CH2);
+				}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+				
 				bodyTimeOffCount = processMode.timeStep;		// сбрасываем таймер остановки процесса
 				if (counterStartStop == 0) nameProcessStep = "Отбор тела";
 				else nameProcessStep = "Отбор тела, старт/стопов - " + String(counterStartStop);
 			}
 			else {
 				if (counterStartStop != 0) nameProcessStep = "Отбор тела, " + String(counterStartStop) + "-й стоп";
-				csOff(PWM_CH1);
-				csOff(PWM_CH2);
+				
+				
+				
+				if (typeRefOfValwe == 1) csOff(PWM_CH1);
+				else csOff(PWM_CH2);
+			
+			
+			
 			}
 
 			break;
