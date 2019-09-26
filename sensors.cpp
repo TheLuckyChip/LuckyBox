@@ -421,7 +421,7 @@ void handleProcessSensorOut() {
 	dataForWeb += "{\"t1\":{\"userSetValue\":" + String(setTempForPID) + "}}]";
 	// power & other
 	dataForWeb += ",\"version\":" + String(versionForWeb) + ",\"power\":" + String(power.heaterPower) + ",\"powerHigh\":" + String(power.inPowerHigh) + ",\"powerLower\":" + String(power.inPowerLow) + ",\"temperatureAlcoholBoil\":" + String(temperatureAlcoholBoil);
-	dataForWeb += ",\"cubeAlcohol\":" + String(cubeAlcohol) + ",\"delta\":" + String(settingBoilTube) + ",\"sound\":" + String(settingAlarm) + ",\"answer\":" + String(answer) + "}";
+	dataForWeb += ",\"cubeAlcohol\":" + String(cubeAlcohol) + ",\"delta\":" + String(temperatureSensor[DS_Tube].allertValueIn) + ",\"sound\":" + String(settingAlarm) + ",\"answer\":" + String(answer) + "}";
 
 	HTTP.send(200, "text/json", dataForWeb);
 }
