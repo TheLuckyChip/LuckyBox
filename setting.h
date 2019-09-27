@@ -151,6 +151,7 @@ extern byte tempBigOut;
 extern byte tempBigOutOld;
 extern bool reSetTemperatureStartPressure;
 //extern bool settingColumnSet;
+extern float deltaBoilTube;
 extern float settingBoilTube;
 extern float settingColumn;
 extern float temperatureStartPressure;

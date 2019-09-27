@@ -66,6 +66,7 @@ uint16_t scaleCount;
 byte tempBigOut;
 byte tempBigOutOld;
 bool reSetTemperatureStartPressure;
+float deltaBoilTube;				// уставка
 float settingBoilTube;
 float settingColumn = 101;         // Температура срабатывания оповещения от датчика в царге
 float temperatureStartPressure = 78;   //Температура кипения спирта при запуске отслеживания ректификации

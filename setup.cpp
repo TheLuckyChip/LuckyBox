@@ -319,6 +319,7 @@ void setup()
   attachInterrupt(intTouch, touchscreenUpdateSet, FALLING);
 #endif
   loadEepromReflux();
+  deltaBoilTube = temperatureSensor[DS_Tube].allertValueIn;
   loadEepromPid();
   setKp = Kp;
   setKi = Ki;
