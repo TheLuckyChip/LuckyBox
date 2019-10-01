@@ -584,7 +584,9 @@ $(function () {
 	}
 	//Кнопки + и -
 	let flagSendProcess = false;
+	let flagButtonPress = false;
 	let timeout = false;
+	let timeMouse = false;
 	function f(n) {
 		n = (typeof n === 'string') ? n : n.toString();
 		if (n.indexOf('e') !== -1) return parseInt(n.split('e')[1]) * -1;
@@ -598,7 +600,8 @@ $(function () {
 	}*/
 	$(document).on('mousedown', '.minus', function (e) {
 		e.preventDefault();
-		flagSendProcess = true;
+		flagButtonPress = true;
+		// flagSendProcess = false;
 		let _this = $(this);
 		let count_interval = 0;
 		let time = 500;
@@ -636,9 +639,10 @@ $(function () {
 	$(document).on('mouseup', '.minus', function (e) {
 		e.preventDefault();
 		let $input = $(this).parent().find('input');
-		$input.change();
+		// $input.change();
 		clearInterval(timeout);
-		setTimeout(function() {flagSendProcess = false;}, 500);
+		clearTimeout(timeMouse);
+		timeMouse = setTimeout(function() {$input.change(); /*flagSendProcess = true;*/}, 1000);
 	});
 	$(document).on('click', '.minus', function (e) {
 		e.preventDefault();
@@ -667,7 +671,8 @@ $(function () {
 	$(document).on('mousedown', '.plus', function (e) {
 		//$(".plus").on('mouseup',function(e) {
 		e.preventDefault();
-		flagSendProcess = true;
+		flagButtonPress = true;
+		// flagSendProcess = true;
 		let _this = $(this);
 		let count_interval = 0;
 		let time = 500;
@@ -705,9 +710,10 @@ $(function () {
 	$(document).on('mouseup', '.plus', function (e) {
 		e.preventDefault();
 		let $input = $(this).parent().find('input');
-		$input.change();
+
 		clearInterval(timeout);
-		setTimeout(function() {flagSendProcess = false;}, 500);
+		clearTimeout(timeMouse);
+		timeMouse = setTimeout(function() {/*flagSendProcess = true;*/$input.change();}, 1000);
 	});
 	$(document).on('click', '.plus', function (e) {
 		e.preventDefault();
@@ -773,6 +779,7 @@ $(function () {
 	let powerChange = 0;
 	let mashingChange = 0;
 	let algorithmChange = 0;
+	let pidChange = 0;
 	//регекспы для датчиков
 	const re_p = new RegExp(/p1/);
 	const re_t = new RegExp(/^t/);
@@ -1709,12 +1716,14 @@ $(function () {
 			}
 		}
 	}
-	$(document).on('mousedown',"#distillation_process input", function () {
-		flagSendProcess = true;
-	});
+	// $(document).on('mousedown',"#distillation_process input", function () {
+		// flagSendProcess = true;
+		// flagButtonPress = true;
+	// });
 	$(document).on('change',"#distillation_process input",
 		$.debounce(function() {
-			flagSendProcess = true;
+			flagButtonPress = false;
+			// flagSendProcess = true;
 			if(distillationProcess["start"] === true) {
 				setDistillation();
 			}
@@ -1766,7 +1775,7 @@ $(function () {
 
 							$("#distillation_" + sensor_key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 							//убрал пока
-							if (!flagSendProcess) {
+							if (!flagSendProcess && !flagButtonPress) {
 								if($("#distillation_cutoff_" + sensor_key).length) {
 									//console.log(countChange, $("#distillation_cutoff_" + sensor_key).val(), alert_value);
 									if (Number($("#distillation_cutoff_" + sensor_key).val()) !== alert_value) {
@@ -1833,7 +1842,7 @@ $(function () {
 			//let power_higt_value = distillationProcess["powerHigh"];
 			//let power_lower_value = distillationProcess["powerLower"];
 			//заполнение поля регулировки тена и рабочей мощности
-			if(!flagSendProcess) {
+			if(!flagSendProcess && !flagButtonPress) {
 				//$("#distillation_power_set").val(power_higt_value.toFixed(0));
 				//$("#distillation_power_lower_set").val(power_lower_value.toFixed(0));
 
@@ -2801,12 +2810,13 @@ $(function () {
 			}
 		}
 	}
-	$(document).on('mousedown',"#reflux_process input", function () {
-		flagSendProcess = true;
-	});
+	// $(document).on('mousedown',"#reflux_process input", function () {
+	// 	flagSendProcess = true;
+	// });
 	$(document).on('change',"#reflux_process input",
 		$.debounce(function() {
-			flagSendProcess = true;
+			flagButtonPress = false;
+			// flagSendProcess = true;
 			if(refluxProcess["start"] === true) {
 				setReflux();
 			}
@@ -2860,7 +2870,7 @@ $(function () {
 							$("#reflux_cutoff_" + sensor_key).val(alert_value.toFixed(0));
 						}*/
 						//убрал пока
-						if (!flagSendProcess) {
+						if (!flagSendProcess && !flagButtonPress) {
 							//дельта
 							if(globalSensorsJson.hasOwnProperty("delta")){
 								let reflux_delta = $("#reflux_delta_" + sensor_key);
@@ -2954,7 +2964,7 @@ $(function () {
 			// let power_higt_value = refluxProcess["powerHigh"];
 			// let power_lower_value = refluxProcess["powerLower"];
 			//заполнение поля регулировки тена и рабочей мощности
-			if(!flagSendProcess) {
+			if(!flagSendProcess && !flagButtonPress) {
 				// $("#reflux_power_set").val(power_higt_value.toFixed(0));
 				// $("#reflux_power_lower_set").val(power_lower_value.toFixed(0));
 
@@ -3515,12 +3525,13 @@ $(function () {
 			}
 		}
 	}
-	$(document).on('mousedown',"#mashing_process input", function () {
-		flagSendProcess = true;
-	});
+	// $(document).on('mousedown',"#mashing_process input", function () {
+	// 	flagSendProcess = true;
+	// });
 	$(document).on('change',"#mashing_process input",
 		$.debounce(function() {
-			flagSendProcess = true;
+			flagButtonPress = false;
+			// flagSendProcess = true;
 			if(mashingProcess["start"] === true) {
 				setMashing();
 			}
@@ -3587,7 +3598,7 @@ $(function () {
 
 				let temperature = Number(e[pause_key]["temperature"]);
 
-				if(!flagSendProcess) {
+				if(!flagSendProcess && !flagButtonPress) {
 					//убрал пока
 					// $("#mashing_time_" + pause_key).val(time);
 					// $("#mashing_temperature_" + pause_key).val(temperature);
@@ -3813,12 +3824,13 @@ $(function () {
 			}
 		}
 	}
-	$(document).on('mousedown',"#pid_process input", function () {
-		flagSendProcess = true;
-	});
+	// $(document).on('mousedown',"#pid_process input", function () {
+	// 	flagSendProcess = true;
+	// });
 	$(document).on('change',"#pid_process input",
 		$.debounce(function() {
-			flagSendProcess = true;
+			flagButtonPress = false;
+			// flagSendProcess = true;
 			if(pidProcess["start"] === true) {
 				setPid();
 			}
@@ -3855,12 +3867,12 @@ $(function () {
 				$.each(pidProcess["pid"], function (pid_key, q) {
 					if (!re_t.test(pid_key)) {
 						if(pidProcess["pid"][pid_key].hasOwnProperty("deviceOutValue")) {
-							let pid_value = Number(pidProcess["pid"][pid_key]["deviceOutValue"]);
-							if (pid_value > 0) {
+							let pid_device_value = Number(pidProcess["pid"][pid_key]["deviceOutValue"]);
+							if (pid_device_value > 0) {
 								if (pid_key === "Ki") {
-									$(".pid_device_" + pid_key).text(pid_value.toFixed(2));
+									$(".pid_device_" + pid_key).text(pid_device_value.toFixed(2));
 								} else {
-									$(".pid_device_" + pid_key).text(pid_value.toFixed(0));
+									$(".pid_device_" + pid_key).text(pid_device_value.toFixed(0));
 								}
 							}
 						}
@@ -3885,6 +3897,20 @@ $(function () {
 			if (!$.fn.objIsEmpty(dtoJson["t"], false) && drowChart) {
 				dtoReceiver.start(dtoJson, 'view_pid_chart');
 			}
+			$.each(globalSensorsJson["pid"], function (i, e) {
+				let pid_key = Object.keys(e).shift();
+				let pid_value = Number(globalSensorsJson["pid"][i][pid_key]["userSetValue"]);
+				if (!flagSendProcess && !flagButtonPress) {
+					if(pid_value !== Number($("#pid_" + pid_key).val())){
+						pidChange++;
+					}
+					if(pidChange>5){
+						if(pid_value !== Number($("#pid_" + pid_key).val())){
+							$("#pid_" + pid_key).val(pid_value);
+						}
+					}
+				}
+			});
 		}
 	}
 

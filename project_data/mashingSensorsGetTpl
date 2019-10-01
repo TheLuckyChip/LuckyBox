@@ -1,6 +1,6 @@
 {
-  "t1":{"value":50.00,"name":"В кубе","color":64588,"member":1,"priority":0,"allertValue":0},
-  "t2":{"value":55.00,"name":"В царге","color":7905,"member":1,"priority":1,"allertValue":0},
+  "t1":{"value":50.00,"name":"В кубе","color":64588,"member":1,"priority":1,"allertValue":0},
+  "t2":{"value":55.00,"name":"В царге","color":7905,"member":0,"priority":0,"allertValue":0},
   "t3":{"value":78.00,"name":"В узле отбора","color":65504,"member":0,"priority":0,"allertValue":0},
   "t4":{"value":25.00,"name":"Вода на выходе","color":16799,"member":0,"priority":0,"allertValue":0},
   "t5":{"value":35.00,"name":"Датчик в струе","color":64870,"member":0,"priority":0,"allertValue":0},
