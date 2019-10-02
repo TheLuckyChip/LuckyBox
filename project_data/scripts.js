@@ -775,7 +775,16 @@ $(function () {
 	let soundVolume = 0;
 	//изменение данных со стороны контроллера (считаем каунт 5)
 	let deltaChange = 0;
-	let alertChange = 0;
+	let alertChange = {
+		"t1":0,
+		"t2":0,
+		"t3":0,
+		"t4":0,
+		"t5":0,
+		"t6":0,
+		"t7":0,
+		"t8":0,
+	};
 	let powerChange = 0;
 	let mashingChange = 0;
 	let algorithmChange = 0;
@@ -1779,12 +1788,12 @@ $(function () {
 								if($("#distillation_cutoff_" + sensor_key).length) {
 									//console.log(countChange, $("#distillation_cutoff_" + sensor_key).val(), alert_value);
 									if (Number($("#distillation_cutoff_" + sensor_key).val()) !== alert_value) {
-										alertChange++
+										alertChange[sensor_key]++
 									}
-									if (alertChange > 5) {
+									if (alertChange[sensor_key] > 5) {
 										$("#distillation_cutoff_" + sensor_key).val(alert_value);
 										//$("#distillation_temperature_" + sensor_key).val(temperature);
-										alertChange = 0;
+										alertChange[sensor_key] = 0;
 									}
 								}
 							}
@@ -1926,13 +1935,15 @@ $(function () {
 					let sensor_name = (sensors[key].hasOwnProperty("name") ? sensors[key]["name"] : "");
 					if (sensor_name !== "") {
 						if (re_t.test(key)) {
-							let sensor_delta = '<label class="checkbox-inline"><input class="reflux_delta_radio" disabled id="delta_' + key + '" name="reflux_radio_' + key + '" type="radio"' +
-								' value="Y">Уставка</label>';
-							let sensor_cutoff = '<label class="checkbox-inline"><input disabled id="cutoff_' + key + '" name="reflux_radio_' + key + '" type="radio" value="Y">Отсечка</label>';
+							let sensor_delta = (key === 't2' ? '<label class="checkbox-inline pl-10">' +
+								'<input class="reflux_delta_radio" disabled id="delta_' + key + '" name="reflux_radio_' + key + '" type="radio"' +
+								' value="Y">Уставка</label>' : '');
+							let sensor_cutoff = '<label class="checkbox-inline pl-10">' +
+								'<input disabled id="cutoff_' + key + '" name="reflux_radio_' + key + '" type="radio" value="Y">Отсечка</label>';
 
 							let jscolor = sensors[key]["color"] > 0 ? dec2hex(sensors[key]["color"]) : "FFFFFF";
 
-							tpl_temperature += '<tr><td>' +
+							tpl_temperature += '<tr><td style="width: 320px">' +
 								'<div class="input-group input-group-sm">' +
 								'<span class="input-group-addon" style="background-color: #' + jscolor + '">' + key + '</span>' +
 								'<input readonly id="reflux_name_' + key + '" class="form-control input-sm" type="text" value="' + sensor_name + '">' +
@@ -2857,12 +2868,14 @@ $(function () {
 							$("#reflux_alert_bg_" + sensor_key).removeClass("bg-danger");
 							$("#reflux_alert_text_" + sensor_key).removeClass("text-danger");
 						}
-						if (q["delta"] === false) {
+						// console.log(q);
+						if (q["delta"] === 0) {
 							$("#svg_reflux_color_" + sensor_key).css('fill', colorPersent(fillcolor, sensor_value, alert_value));
 						} else {
-							let delta_alert = $("#reflux_delta_" + sensor_key).val();
-							let delta_value = (delta_alert - alert_value + sensor_value).toFixed(2);
-							$("#svg_reflux_color_" + sensor_key).css('fill', colorPersent(fillcolor, delta_value, delta_alert));
+							let delta_alert = Number($("#reflux_delta_" + sensor_key).val());
+							let delta_value = parseFloat((delta_alert + sensor_value).toFixed(2));
+							$("#svg_reflux_color_" + sensor_key).css('fill', colorPersent(fillcolor, delta_value, (sensor_value + delta_alert)));
+							console.log(q["delta"], fillcolor, delta_value, (sensor_value + delta_alert))
 						}
 						//убрал пока
 						/*if(!flagSendProcess) {
@@ -2889,12 +2902,12 @@ $(function () {
 							if(reflux_cutoff.length) {
 								//console.log(countChange, $("#distillation_cutoff_" + sensor_key).val(), alert_value);
 								if (Number(reflux_cutoff.val()) !== alert_value) {
-									alertChange++
+									alertChange[sensor_key]++
 								}
-								if (alertChange > 5) {
+								if (alertChange[sensor_key] > 5) {
 									reflux_cutoff.val(alert_value);
 									//$("#distillation_temperature_" + sensor_key).val(temperature);
-									alertChange = 0;
+									alertChange[sensor_key] = 0;
 								}
 							}
 						}
