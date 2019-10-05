@@ -3503,8 +3503,8 @@ $(function () {
 			};
 			mashingSendData["process"]["allow"] = (mashingProcess["start"] ? 3 : 0);
 
-			$.each(mashingProcess["sensors"], function (i, e) {
-				let sensor_key = i;
+			$.each(globalSensorsJson["mashing"], function (i, e) {
+				let sensor_key = Object.keys(e).shift();
 				let mashing_time = $("#mashing_time_" + sensor_key);
 				let mashing_temperature = $("#mashing_temperature_" + sensor_key);
 				let mashing_stop = $("#mashing_stop_" + sensor_key);
@@ -3512,23 +3512,24 @@ $(function () {
 					if (e["time"] !== mashing_time.val()) {
 						flagSendProcess = true;
 					}
-					mashingSendData[sensor_key]["time"] = e["time"] = mashing_time.val();
+					mashingSendData[sensor_key]["time"] = mashing_time.val();
 				}
 				if (mashing_temperature.length) {
 					if (e["temperature"] !== mashing_temperature.val()) {
 						flagSendProcess = true;
 					}
-					mashingSendData[sensor_key]["temperature"] = e["temperature"] = mashing_temperature.val();
+					mashingSendData[sensor_key]["temperature"] = mashing_temperature.val();
 				}
 				if (mashing_stop.length) {
 					let stop = Number(mashing_stop.prop("checked"));
 					if (e["stop"] !== stop) {
 						flagSendProcess = true;
 					}
-					mashingSendData[sensor_key]["stop"] = e["stop"] = stop;
+					mashingSendData[sensor_key]["stop"] = stop;
 				}
 			});
 			if (flagSendProcess) {
+				console.log(mashingProcess);
 				flagSendProcess = false;
 				clearInterval(sensorsProcessId);
 				// clearInterval(sensorsIntervalId);
@@ -3547,6 +3548,7 @@ $(function () {
 			// flagSendProcess = true;
 			if(mashingProcess["start"] === true) {
 				setMashing();
+				console.log("debounce input")
 			}
 		}, 300)
 	);
@@ -3639,6 +3641,8 @@ $(function () {
 							}
 							if(temperature !== Number(mashing_temperature.val())){
 								mashing_temperature.val(temperature);
+								// mashingProcess["sensors"][]
+								// mashing_temperature.change();
 							}
 							if(stop !== Number(mashing_stop.prop("checked"))){
 								if (stop > 0) {

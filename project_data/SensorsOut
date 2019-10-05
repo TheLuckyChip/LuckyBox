@@ -1,10 +1,10 @@
 {
-	"process":{"allow":0,"number":0,"step":"Нагрев куба","time":0,"timeStart":0},
+	"process":{"allow":3,"number":0,"step":"Нагрев куба","time":0,"timeStart":0},
 	"sensors":[
 	{"t1":{"value":50.00,"name":"В кубе","color":64588,"member":1,"priority":0,"allertValue":90}},
 	{"t2":{"value":55.00,"name":"В царге","color":7905,"member":0,"priority":0,"allertValue":55.5}},
 	{"t3":{"value":78.00,"name":"В узле отбора","color":65504,"member":0,"priority":0,"allertValue":0}},
-	{"t4":{"value":25.00,"name":"Вода на выходе","color":16799,"member":0,"priority":0,"allertValue":30}},
+	{"t4":{"value":25.00,"name":"Вода на выходе","color":16799,"member":0,"priority":0,"allertValue":40}},
 	{"t5":{"value":35.00,"name":"Датчик в струе","color":64870,"member":1,"priority":1,"allertValue":0}},
 	{"t6":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0}},
 	{"t7":{"value":150.00,"name":"","color":0,"member":0,"priority":0,"allertValue":0}},
@@ -12,10 +12,10 @@
 	{"p1":{"value":760.00,"color":0,"member":0}}
 ],
     "mashing":[
-    {"pause1":{"name":"Кислотная пауза","time":20,"temperature":40,"stop":0,"step":0}},
+    {"pause1":{"name":"Кислотная пауза","time":20,"temperature":50,"stop":1,"step":0}},
     {"pause2":{"name":"Белковая пауза","time":20,"temperature":55,"stop":0,"step":0}},
     {"pause3":{"name":"Мальтозная пауза","time":30,"temperature":63,"stop":0,"step":0}},
-    {"pause4":{"name":"Осахаривание","time":60,"temperature":67,"stop":0,"step":0}},
+    {"pause4":{"name":"Осахаривание","time":60,"temperature":67,"stop":1,"step":0}},
     {"pause5":{"name":"Мэш аут","time":10,"temperature":78,"stop":0,"step":0}}
 ],
    "brewing":[
@@ -44,9 +44,9 @@
 	{"out8":{"value":0,"name":"","member":0,"allert":0}}
 ],
 	"valwe": [
-	{"head":{"timeCycle":6,"timeOn":2}},
+	{"head":{"timeCycle":10,"timeOn":3}},
 	{"headSteam":{"percent":30}},
-	{"body":{"timeCycle":20,"timeOn":11,"decline":12}},
+	{"body":{"timeCycle":25,"timeOn":10,"decline":10}},
 	{"bodyPrima":{"percentStart":80,"percentStop":10,"decline":10}}
 ],
 	"safety":[
