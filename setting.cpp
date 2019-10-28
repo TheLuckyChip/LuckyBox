@@ -9,6 +9,8 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
 // Web интерфейс для устройства
 ESP8266WebServer HTTP;
+// HTTP клиент
+WiFiClient client;
 
 // PID
 PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
@@ -146,6 +148,9 @@ uint8_t TX_BUF_IO_Power[8];
 uint8_t RX_BUF_IO[8];
 uint8_t RXio_cnt;
 unsigned long RX_Pause;
+unsigned long Tx_WiFi_Pause;
+uint8_t powerSendOldWiFi;
+bool powerWiFiPresent = false;
 
 uint8_t DistillationTransitionTemperature = 80;
 uint8_t RefluxTransitionTemperature = 55;

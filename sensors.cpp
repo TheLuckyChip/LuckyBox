@@ -459,8 +459,8 @@ void handleProcessModeIn() {
 		Serial.println(""); Serial.println("Прием уставок:");
 #endif
 		for (i = 0; i < DS_Cnt; i++) {
-			n = temperatureSensor[i].num - 1;
-			arg = "t" + String(n + 1);
+			n = temperatureSensor[i].num;
+			arg = "t" + String(n);
 			tmpAllertValue = HTTP.arg(arg + "[allertValue]").toFloat();
 			
 			if (temperatureSensor[i].num != 2) {
@@ -472,7 +472,7 @@ void handleProcessModeIn() {
 					reSetTemperatureStartPressure = true;
 					commandWriteSD = "WebSend: Смена уставки";
 					commandSD_en = true;
-					deltaBoilTube = temperatureSensor[i].allertValueIn;
+					deltaBoilTube = tmpAllertValue;// temperatureSensor[i].allertValueIn;
 				}
 				else if (tmpAllertValue == 0 && tmpAllertValue != temperatureSensor[i].allertValueIn) {
 					commandWriteSD = "WebSend: Отмена уставки";

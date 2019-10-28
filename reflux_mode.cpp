@@ -1526,13 +1526,11 @@ void refluxLoop() {
 	}
 
 	// Мощности ТЭНа (разогрев / работа)
-	if (processMode.step < 2) {
-		if (power.heaterPower != power.inPowerHigh) power.heaterPower = power.inPowerHigh;
-	}
+	if (processMode.step < 2) power.heaterPower = power.inPowerHigh;
 	else if (processMode.step < 7) {
-		if (power.heaterPower != power.inPowerLow) power.heaterPower = power.inPowerLow;
+		if (processMode.number == 4 && processMode.step < 4) power.heaterPower = (float)power.inPowerLow * 0.8; // БК стабилизация
+		else power.heaterPower = power.inPowerLow;
 	}
-	//else power.heaterPower = 0;
 
 	if (processMode.number > 0) {
 

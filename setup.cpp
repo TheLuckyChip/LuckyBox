@@ -337,6 +337,10 @@ void setup()
   TX_BUF_IO_Power[3] = 0x70;		// p
   TX_BUF_IO_Power[4] = 0x3D;		// =
 
+  client.setTimeout(1000);
+  client.connect("192.168.1.250", 80);
+  if (client.connected()) powerWiFiPresent = true;
+
   Serial.println("Setup Done!");
 
   Serial.end();

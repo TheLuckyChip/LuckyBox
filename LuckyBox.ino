@@ -37,6 +37,7 @@ void loop() {
 #else
 	  heaterLoop();
 	  comHeaterLoop();
+	  wifiHeaterLoop();
 #endif
 	  stepApLoop();
   }

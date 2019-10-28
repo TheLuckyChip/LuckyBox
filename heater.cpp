@@ -1,4 +1,7 @@
 #include "heater.h"
+//#include <WiFiClient.h>
+
+//char* host = "192.168.1.250";
 
 int	reg				=	0;		// переменная для расчетов
 int	tenRealPower	=	100;	// мощности ТЭН от напряжения сети, может быть от 50% (при напряжении сети 160В) до 135%(при напряжении сети 260В)
@@ -60,5 +63,54 @@ void comHeaterLoop() {
 
 		powerSendOld = power.heaterPower;
 		RX_Pause = millis() + 1000;
+	}
+}
+
+void wifiHeaterLoop() {
+	// отправим мощность для ТЕНа на внешнее устройство
+	if ((Tx_WiFi_Pause <= millis() || powerSendOldWiFi != power.heaterPower) && powerWiFiPresent) {
+		//WiFiClient client;
+		client.setTimeout(250);
+		if (client.connected() == 0) client.connect("192.168.1.250", 80);
+
+		TX_BUF_IO_Power[5] = power.heaterPower;
+		TX_BUF_IO_Power[6] = (uint8_t)(power.heaterPower + 0x6D);
+
+		String url = "/powerLB?";
+		url += "cap1=";
+		url += TX_BUF_IO_Power[0];
+		url += "&";
+		url += "cap2=";
+		url += TX_BUF_IO_Power[1];
+		url += "&";
+		url += "cap3=";
+		url += TX_BUF_IO_Power[2];
+		url += "&";
+		url += "cap4=";
+		url += TX_BUF_IO_Power[3];
+		url += "&";
+		url += "cap5=";
+		url += TX_BUF_IO_Power[4];
+		url += "&";
+		url += "dat=";
+		url += TX_BUF_IO_Power[5];
+		url += "&";
+		url += "crc=";
+		url += TX_BUF_IO_Power[6];
+
+		client.print(String("POST ") + url + " HTTP/1.1\r\n" +
+			"Host: " + "192.168.1.250" + "\r\n" +
+			"Connection: close\r\n\r\n");
+
+		unsigned long Tx_Pause = millis() + 250;
+		while (client.available() == 0) {
+			if (millis() >= Tx_Pause) {
+				client.stop();
+				break;
+			}
+		}
+
+		powerSendOldWiFi = power.heaterPower;
+		Tx_WiFi_Pause = millis() + 5000;
 	}
 }
