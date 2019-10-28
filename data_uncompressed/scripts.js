@@ -805,7 +805,7 @@ $(function () {
 		{"value":2,"text":"Отбор по пару"},
 		{"value":3,"text":"РК по жидкости"},
 		{"value":4,"text":"Бражная колонна, регулировка отбора охлаждением"},
-		{"value":5,"text":"Бражная колонна, регулировка отбора мощностью"}
+		{"value":5,"text":"РК по жидкости (два клапана)"}
 		// {"value":3,"text":"РК по жидкости 1 клапан (головы - импульсы, тело - дельта)"},
 		// {"value":4,"text":"РК по жидкости 2 клапана (головы - импульсы, тело - дельта)"},
 		// {"value":5,"text":"РК по жидкости 2 клапана (головы - открыт, тело - дельта)"},
@@ -2455,7 +2455,7 @@ $(function () {
 		refluxProcess["number"] = algorithm_val;
 		if($("#reflux_devices_out").length > 0) {
 			console.log("reflux_devices_out", algorithm_val);
-			if (algorithm_val === 1 || algorithm_val === 2 || algorithm_val === 3) {
+			if (algorithm_val === 1 || algorithm_val === 2 || algorithm_val === 3 || algorithm_val === 5) {
 				$("#reflux_devices_out").removeClass("hidden");
 			}else{
 				$("#reflux_devices_out").addClass("hidden");
@@ -2477,6 +2477,14 @@ $(function () {
 				$("#reflux_devices_body_prima").addClass("hidden");
 				// $("#reflux_devices_out_header").removeClass("hidden");
 			}else if (algorithm_val === 3){
+				$("#reflux_devices_head_rk").removeClass("hidden");
+				$("#reflux_devices_body_rk").removeClass("hidden");
+				$("#reflux_devices_head_steam").addClass("hidden");
+				$("#reflux_devices_body_steam").addClass("hidden");
+				$("#reflux_devices_head_prima").addClass("hidden");
+				$("#reflux_devices_body_prima").addClass("hidden");
+				// $("#reflux_devices_out_header").removeClass("hidden");
+			}else if (algorithm_val === 5){
 				$("#reflux_devices_head_rk").removeClass("hidden");
 				$("#reflux_devices_body_rk").removeClass("hidden");
 				$("#reflux_devices_head_steam").addClass("hidden");
@@ -2763,7 +2771,7 @@ $(function () {
 					}
 				}
 				//жижа
-				if (Number(refluxSendData["process"]["number"]) === 3) {
+				if (Number(refluxSendData["process"]["number"]) === 3 || Number(refluxSendData["process"]["number"]) === 5) {
 					let reflux_head_cycle_rk = $("#reflux_head_cycle_rk");
 					let reflux_head_time_rk = $("#reflux_head_time_rk");
 					let reflux_body_cycle_rk = $("#reflux_body_cycle_rk");
@@ -4477,6 +4485,15 @@ $(function () {
 		soundVolume = sound_volume;
 		sendRequest("volume", {
 			"value": sound_volume
+		}, "text", false, _this, $("#error_settings"), false);
+	});
+	// Настройки блока питания
+	$(document).on("click", "#settings_power_block", function (e) {
+		e.preventDefault();
+		let _this = $(this);
+		let power_block_val = $("#power_block").val();
+		sendRequest("powerblock", {
+			"value": power_block_val
 		}, "text", false, _this, $("#error_settings"), false);
 	});
 	/*$("#settings_set_volume").on("click", function (e) {
