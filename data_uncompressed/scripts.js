@@ -4259,6 +4259,7 @@ $(function () {
 				$("#distillation_volume").val(soundVolume);
 				$("#reflux_volume").val(soundVolume);
 				$("#mashing_volume").val(soundVolume);
+				$("#power_block").val(msg["powerblock"]).change();
 			}
 		});
 	}
