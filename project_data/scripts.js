@@ -1998,7 +1998,7 @@ $(function () {
 					if(key === "tapCorrection"){
 						tpl_stab += '<tr>'+
 							'<td>Коррекция угла открытия шарового крана</td>'+
-							'<td colspan="3" class="text-center">' + returnTplHtml([{id: "tapCorrection", value: sensors[key], min: '82', max: '170', step: '1'}], deltaTempl) + '</td>'+
+							'<td colspan="3" class="text-center">' + returnTplHtml([{id: "tapCorrection", value: sensors[key], min: '50', max: '250', step: '1'}], deltaTempl) + '</td>'+
 							'</tr>';
 					}
 				}
