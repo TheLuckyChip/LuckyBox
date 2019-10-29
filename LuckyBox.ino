@@ -30,18 +30,12 @@ void loop() {
 	case 6: deviceViewLoop(); break;
   }
 
-  if (processMode.allow < 3 || processMode.allow > 5) {
+  if (processMode.allow < 3 || processMode.allow == 6) {
 	  adcLoop();
-#if defined setHeater
-	  serialLoop();
-#else
-	  heaterLoop();
-	  comHeaterLoop();
-	  wifiHeaterLoop();
-#endif
 	  stepApLoop();
   }
-
+  if (powerType <= 1) heaterLoop();
+  else { comHeaterLoop(); wifiHeaterLoop(); }
   sensorLoop();
   displayLoop();
   logfileLoop();

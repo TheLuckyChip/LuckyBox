@@ -143,6 +143,8 @@ bool alertEnable = true;
 bool alertLevelEnable = true;
 uint16_t BuzzerVolumeLevel;
 
+uint8_t powerType;
+
 uint8_t powerSendOld;
 uint8_t TX_BUF_IO_Power[8];
 uint8_t RX_BUF_IO[8];

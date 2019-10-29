@@ -232,6 +232,8 @@ extern bool alertEnable;
 extern bool alertLevelEnable;
 extern uint16_t BuzzerVolumeLevel;
 
+extern uint8_t powerType;
+
 extern uint8_t powerSendOld;
 extern uint8_t TX_BUF_IO_Power[8];
 extern uint8_t RX_BUF_IO[8];

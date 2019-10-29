@@ -12,6 +12,7 @@ void initHTTP(void)
 	HTTP.on("/ssid", handleSetSSID);     // Установить имя и пароль роутера по запросу вида /ssid?ssid=home2&password=12345678
 	HTTP.on("/ssidap", handleSetSSIDAP); // Установить имя и пароль для точки доступа по запросу вида /ssidap?ssidAP=home1&passwordAP=8765439
 	HTTP.on("/rotate", handleSetRotate); // Переворот экрана и тачскрина
+	HTTP.on("/powerblock", handleSetPowerBlock); // Тип блока питания
 	HTTP.on("/volume", handleSetVolume); // Громкость
 	HTTP.on("/restart", handleRestart);   // Перезагрузка модуля по запросу вида /restart?device=ok
 
@@ -219,6 +220,17 @@ void handleSetRotate() {
 	else HTTP.send(200, "text/plain", "ERR");   // отправляем ответ о выполнении
 	EEPROM.end();
 }
+void handleSetPowerBlock() {
+	powerType = HTTP.arg("value").toInt();
+	if (powerType < 1 || powerType > 2) {
+		powerType = 1;
+		HTTP.send(200, "text/plain", "ERR");
+	}
+	else HTTP.send(200, "text/plain", "OK");   // отправляем ответ о выполнении
+	EEPROM.begin(2048);
+	EEPROM.write(1982, powerType);
+	EEPROM.end();
+}
 void handleSetVolume() {
 	BuzzerVolumeLevel = HTTP.arg("value").toInt();
 	if (BuzzerVolumeLevel > 100) {
@@ -229,8 +241,6 @@ void handleSetVolume() {
 	EEPROM.begin(2048);
 	EEPROM.write(1981, BuzzerVolumeLevel);
 	BuzzerVolumeLevel *= 40;
-	////EEPROM.commit();
-	////delay(100);
 	EEPROM.end();
 }
 // Перезагрузка модуля по запросу вида http://192.168.0.101/restart?device=ok
@@ -254,6 +264,7 @@ void handleConfigJSON()
 	dataForWeb += "\"SSDP\":\"" + String(SSDP_Name) + "\",";
 	dataForWeb += "\"ssidAP\":\"" + String(_ssidAP) + "\",";
 	dataForWeb += "\"ssid\":\"" + String(_ssid) + "\",";
+	dataForWeb += "\"powerblock\":\"" + String(powerType) + "\",";
 	dataForWeb += "\"volume\":\"" + String(BuzzerVolumeLevel/40) + "\",";
 	dataForWeb += "\"timezone\":" + String(timezone) + "}";
 	HTTP.send(200, "text/json", dataForWeb);

@@ -69,9 +69,11 @@ void comHeaterLoop() {
 void wifiHeaterLoop() {
 	// отправим мощность для ТЕНа на внешнее устройство
 	if ((Tx_WiFi_Pause <= millis() || powerSendOldWiFi != power.heaterPower) && powerWiFiPresent) {
-		//WiFiClient client;
-		client.setTimeout(250);
-		if (client.connected() == 0) client.connect("192.168.1.250", 80);
+	
+		if (client.connected() == 0) {
+			client.setTimeout(250);
+			client.connect("192.168.1.250", 80);
+		}
 
 		TX_BUF_IO_Power[5] = power.heaterPower;
 		TX_BUF_IO_Power[6] = (uint8_t)(power.heaterPower + 0x6D);

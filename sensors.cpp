@@ -472,7 +472,7 @@ void handleProcessModeIn() {
 					reSetTemperatureStartPressure = true;
 					commandWriteSD = "WebSend: Смена уставки";
 					commandSD_en = true;
-					deltaBoilTube = tmpAllertValue;// temperatureSensor[i].allertValueIn;
+					deltaBoilTube = tmpAllertValue;
 				}
 				else if (tmpAllertValue == 0 && tmpAllertValue != temperatureSensor[i].allertValueIn) {
 					commandWriteSD = "WebSend: Отмена уставки";
