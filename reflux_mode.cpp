@@ -1513,6 +1513,7 @@ void rfluxLoopMode_6() {
 			if (temperatureSensor[DS_Tube].data >= RefluxTransitionTemperature || stepNext == 1) {
 				csOn(PWM_CH3);
 				csOn(PWM_CH2);				// включаем клапан доп. подачи воды
+				if (pwmOut[0].member == 1) csOn(PWM_CH1); // клапан отбора голов, если есть
 #ifndef Sign_of_Work
 				csOff(PWM_CH6);							// выключить дополнительный ТЭН на разгон
 #endif
@@ -1550,7 +1551,7 @@ void rfluxLoopMode_6() {
 			if (timeAllertInterval <= millis() || stepNext == 1) {
 				processMode.step = 5;		// перешли на следующий шаг алгоритма отбора голов
 				countHaedEnd = millis() + 10000;
-				if (pwmOut[0].member == 1) csOn(PWM_CH1); // клапан отбора голов, если есть
+				//if (pwmOut[0].member == 1) csOn(PWM_CH1); // клапан отбора голов, если есть
 				stepNext = 0;
 			}
 			break;
