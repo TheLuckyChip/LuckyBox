@@ -13,6 +13,7 @@
 #include <Ticker.h>
 #include <Adafruit_PWMServoDriver.h>
 #include <ESP8266WebServer.h>
+#include <WiFiClient.h>
 #include <EEPROM.h>
 #include <PID_v1.h>
 
@@ -106,6 +107,7 @@ extern Adafruit_PWMServoDriver pwm;
 
 // Web интерфейс для устройства
 extern ESP8266WebServer HTTP;
+extern WiFiClient client;
 
 extern PID myPID;
 
@@ -151,6 +153,7 @@ extern byte tempBigOut;
 extern byte tempBigOutOld;
 extern bool reSetTemperatureStartPressure;
 //extern bool settingColumnSet;
+extern float deltaBoilTube;
 extern float settingBoilTube;
 extern float settingColumn;
 extern float temperatureStartPressure;
@@ -229,11 +232,16 @@ extern bool alertEnable;
 extern bool alertLevelEnable;
 extern uint16_t BuzzerVolumeLevel;
 
+extern uint8_t powerType;
+
 extern uint8_t powerSendOld;
 extern uint8_t TX_BUF_IO_Power[8];
 extern uint8_t RX_BUF_IO[8];
 extern uint8_t RXio_cnt;
 extern unsigned long RX_Pause;
+extern unsigned long Tx_WiFi_Pause;
+extern uint8_t powerSendOldWiFi;
+extern bool powerWiFiPresent;
 
 extern uint8_t DistillationTransitionTemperature;
 extern uint8_t RefluxTransitionTemperature;

@@ -17,5 +17,6 @@ extern bool heaterStatus;
 extern void heaterLoop();
 extern void initHeater();
 extern void comHeaterLoop();
+extern void wifiHeaterLoop();
 
 #endif

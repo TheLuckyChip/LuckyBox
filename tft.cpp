@@ -96,27 +96,62 @@ void drawScreenBigNum(uint16_t x, uint16_t y, uint8_t num, uint16_t color, uint1
 	while (SPI1CMD & SPIBUSY) {}
 	SPI.endTransaction();
 }
+void drawScreenBigNumS(uint16_t x, uint16_t y, uint8_t num, uint16_t color, uint16_t bgcolor) {
+	uint8_t simbol;
+	uint8_t i;
+	uint16_t drawColor;
+	const uint32_t mask = ~((SPIMMOSI << SPILMOSI) | (SPIMMISO << SPILMISO));
+	SPI1U1 = ((SPI1U1 & mask) | ((7 << SPILMOSI) | (7 << SPILMISO)));
+	tft.setAddrWindow(x, y, 16, 20);
+	SPI.beginTransaction(SPISettings(40000000, MSBFIRST, SPI_MODE0));
+	uint16_t ptr = num * 40;
+	uint8_t b = 40;
+	while (b) {
+		simbol = image_data_Font_Num_s[ptr];
+		for (i = 0; i < 8; i++) {
+			if (simbol & 0x80) drawColor = bgcolor;
+			else drawColor = color;
+			simbol <<= 1;
+			while (SPI1CMD & SPIBUSY) {}
+			SPI1W0 = drawColor >> 8;
+			SPI1CMD |= SPIBUSY;
+			while (SPI1CMD & SPIBUSY) {}
+			SPI1W0 = drawColor;
+			SPI1CMD |= SPIBUSY;
+		}
+		b--;
+		ptr++;
+	}
+	while (SPI1CMD & SPIBUSY) {}
+	SPI.endTransaction();
+}
 void drawBigTemp(uint16_t x, uint16_t y, int data, uint16_t color, uint16_t bgcolor) {
-	uint8_t r1, r2, r3;
-	if (data < 1000 && data > 0) {
-		r1 = (uint8_t)(data / 100);
-		data -= r1 * 100;
-		r2 = (uint8_t)(data / 10);
-		r3 = (uint8_t)(data - r2 * 10);
+	uint8_t r1, r2, r3, r4;
+	if (data < 10000 && data > 0) {
+		r1 = (uint8_t)(data / 1000);
+		data -= r1 * 1000;
+		r2 = (uint8_t)(data / 100);
+		data -= r2 * 100;
+		r3 = (uint8_t)(data/10);
+		r4 = (uint8_t)(data - r3 * 10);
 	}
 	else {
 		r1 = 10;
 		r2 = 10;
 		r3 = 10;
+		r4 = 10;
 	}
 	if (r1 == 0) fillScreenRect(x, y, 32, 40, bgcolor);
 	else drawScreenBigNum(x, y, r1, color, bgcolor);
 	drawScreenBigNum(x + 32, y, r2, color, bgcolor);
 	tft.fillCircle(x + 67, y + 35, 3, color);
 	drawScreenBigNum(x + 72, 2, r3, color, bgcolor);
-	tft.drawCircle(x + 114, y + 5, 5, color);
-	tft.drawCircle(x + 114, y + 5, 4, color);
-	tft.drawCircle(x + 114, y + 5, 3, color);
+	// вывод мелко сотых
+	drawScreenBigNumS(x + 106, 20, r4, color, bgcolor);
+	// знак цельсия
+	//tft.drawCircle(x + 114, y + 5, 5, color);
+	tft.drawCircle(x + 116, y + 4, 4, color);
+	tft.drawCircle(x + 116, y + 4, 3, color);
 }
 String utf8rus(String source)
 {
@@ -576,14 +611,14 @@ void tftOutText(int temp_min, int temp_max) {
 	}
 
 	switch (tempBigOut) {
-		case 1: temp_convert = (int)(temperatureSensor[DS_Cube].data * 10); grColor = dallas_graph[0].color; break;
-		case 2: temp_convert = (int)(temperatureSensor[DS_Tube].data * 10); grColor = dallas_graph[1].color; break;
-		case 3: temp_convert = (int)(temperatureSensor[DS_Out].data * 10); grColor = dallas_graph[2].color; break;
-		case 4: temp_convert = (int)(temperatureSensor[DS_Def].data * 10); grColor = dallas_graph[3].color; break;
+		case 1: temp_convert = (int)(temperatureSensor[DS_Cube].data * 100); grColor = dallas_graph[0].color; break;
+		case 2: temp_convert = (int)(temperatureSensor[DS_Tube].data * 100); grColor = dallas_graph[1].color; break;
+		case 3: temp_convert = (int)(temperatureSensor[DS_Out].data * 100); grColor = dallas_graph[2].color; break;
+		case 4: temp_convert = (int)(temperatureSensor[DS_Def].data * 100); grColor = dallas_graph[3].color; break;
 	}
 	if (temp_in_old != temp_convert || tempBigOutOld != tempBigOut) {
 		tempBigOutOld = tempBigOut;
-		drawBigTemp(88, 2, temp_convert, grColor, ILI9341_BLACK);
+		drawBigTemp(87, 2, temp_convert, grColor, ILI9341_BLACK);
 	}
 
 	// вывод времени и давления
