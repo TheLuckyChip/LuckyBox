@@ -584,7 +584,9 @@ $(function () {
 	}
 	//Кнопки + и -
 	let flagSendProcess = false;
+	let flagButtonPress = false;
 	let timeout = false;
+	let timeMouse = false;
 	function f(n) {
 		n = (typeof n === 'string') ? n : n.toString();
 		if (n.indexOf('e') !== -1) return parseInt(n.split('e')[1]) * -1;
@@ -598,7 +600,8 @@ $(function () {
 	}*/
 	$(document).on('mousedown', '.minus', function (e) {
 		e.preventDefault();
-		flagSendProcess = true;
+		flagButtonPress = true;
+		// flagSendProcess = false;
 		let _this = $(this);
 		let count_interval = 0;
 		let time = 500;
@@ -636,9 +639,10 @@ $(function () {
 	$(document).on('mouseup', '.minus', function (e) {
 		e.preventDefault();
 		let $input = $(this).parent().find('input');
-		$input.change();
+		// $input.change();
 		clearInterval(timeout);
-		setTimeout(function() {flagSendProcess = false;}, 500);
+		clearTimeout(timeMouse);
+		timeMouse = setTimeout(function() {$input.change(); /*flagSendProcess = true;*/}, 1000);
 	});
 	$(document).on('click', '.minus', function (e) {
 		e.preventDefault();
@@ -667,7 +671,8 @@ $(function () {
 	$(document).on('mousedown', '.plus', function (e) {
 		//$(".plus").on('mouseup',function(e) {
 		e.preventDefault();
-		flagSendProcess = true;
+		flagButtonPress = true;
+		// flagSendProcess = true;
 		let _this = $(this);
 		let count_interval = 0;
 		let time = 500;
@@ -705,9 +710,10 @@ $(function () {
 	$(document).on('mouseup', '.plus', function (e) {
 		e.preventDefault();
 		let $input = $(this).parent().find('input');
-		$input.change();
+
 		clearInterval(timeout);
-		setTimeout(function() {flagSendProcess = false;}, 500);
+		clearTimeout(timeMouse);
+		timeMouse = setTimeout(function() {/*flagSendProcess = true;*/$input.change();}, 1000);
 	});
 	$(document).on('click', '.plus', function (e) {
 		e.preventDefault();
@@ -767,6 +773,22 @@ $(function () {
 	let countError = 0;
 	//громкость звука
 	let soundVolume = 0;
+	//изменение данных со стороны контроллера (считаем каунт 5)
+	let deltaChange = 0;
+	let alertChange = {
+		"t1":0,
+		"t2":0,
+		"t3":0,
+		"t4":0,
+		"t5":0,
+		"t6":0,
+		"t7":0,
+		"t8":0,
+	};
+	let powerChange = 0;
+	let mashingChange = 0;
+	let algorithmChange = 0;
+	let pidChange = 0;
 	//регекспы для датчиков
 	const re_p = new RegExp(/p1/);
 	const re_t = new RegExp(/^t/);
@@ -781,9 +803,9 @@ $(function () {
 		{"value":0,"text":"Ручной режим, только сигнализация"},
 		{"value":1,"text":"Прима отбор по пару (головная фракция по жидкости)"},
 		{"value":2,"text":"Отбор по пару"},
-		{"value":3,"text":"РК по жидкости"},
-		{"value":4,"text":"Бражная колонна, регулировка отбора охлаждением"},
-		{"value":5,"text":"Бражная колонна, регулировка отбора мощностью"}
+		{"value":3,"text":"РК отбор по жидкости (1 клапан на отбор)"},
+		{"value":4,"text":"РК отбор по жидкости (2 клапана на отбор)"},
+		{"value":5,"text":"Бражная колонна, регулировка отбора охлаждением"}
 		// {"value":3,"text":"РК по жидкости 1 клапан (головы - импульсы, тело - дельта)"},
 		// {"value":4,"text":"РК по жидкости 2 клапана (головы - импульсы, тело - дельта)"},
 		// {"value":5,"text":"РК по жидкости 2 клапана (головы - открыт, тело - дельта)"},
@@ -1703,12 +1725,14 @@ $(function () {
 			}
 		}
 	}
-	$(document).on('mousedown',"#distillation_process input", function () {
-		flagSendProcess = true;
-	});
+	// $(document).on('mousedown',"#distillation_process input", function () {
+		// flagSendProcess = true;
+		// flagButtonPress = true;
+	// });
 	$(document).on('change',"#distillation_process input",
 		$.debounce(function() {
-			flagSendProcess = true;
+			flagButtonPress = false;
+			// flagSendProcess = true;
 			if(distillationProcess["start"] === true) {
 				setDistillation();
 			}
@@ -1738,46 +1762,57 @@ $(function () {
 			dtoJson["t"] = {};
 			$.each(globalSensorsJson["sensors"], function (i, e) {
 				let sensor_key = Object.keys(e).shift();
-				let sensor_value = Number(globalSensorsJson["sensors"][i][sensor_key]["value"]);
-				let alert_value = Number(globalSensorsJson["sensors"][i][sensor_key]["allertValue"]);
-				$.each(distillationProcess["sensors"], function (j, q) {
-					if (j === sensor_key && re_t.test(sensor_key)) {
-						q["value"] = sensor_value;
-						let color_value = q["color"];
-						let fillcolor = "#" + dec2hex(color_value);
-						if (alert_value > 0 && sensor_value >= alert_value) {
-							$("#distillation_alert_bg_" + sensor_key).addClass("bg-danger");
-							$("#distillation_alert_text_" + sensor_key).addClass("text-danger");
-						} else {
-							$("#distillation_alert_bg_" + sensor_key).removeClass("bg-danger");
-							$("#distillation_alert_text_" + sensor_key).removeClass("text-danger");
-						}
-						$("#svg_distillation_color_" + sensor_key).css('fill', colorPersent(fillcolor, sensor_value, alert_value));
-						if (Number(q["member"]) !== 0) {
-							dtoJson["t"][sensor_key] = sensor_value;
-						}
+				if(re_t.test(sensor_key)) {
+					let sensor_value = Number(globalSensorsJson["sensors"][i][sensor_key]["value"]);
+					let alert_value = Number(globalSensorsJson["sensors"][i][sensor_key]["allertValue"]);
+					$.each(distillationProcess["sensors"], function (j, q) {
+						if (j === sensor_key && re_t.test(sensor_key)) {
+							q["value"] = sensor_value;
+							let color_value = q["color"];
+							let fillcolor = "#" + dec2hex(color_value);
+							if (alert_value > 0 && sensor_value >= alert_value) {
+								$("#distillation_alert_bg_" + sensor_key).addClass("bg-danger");
+								$("#distillation_alert_text_" + sensor_key).addClass("text-danger");
+							} else {
+								$("#distillation_alert_bg_" + sensor_key).removeClass("bg-danger");
+								$("#distillation_alert_text_" + sensor_key).removeClass("text-danger");
+							}
+							$("#svg_distillation_color_" + sensor_key).css('fill', colorPersent(fillcolor, sensor_value, alert_value));
+							if (Number(q["member"]) !== 0) {
+								dtoJson["t"][sensor_key] = sensor_value;
+							}
 
-						$("#distillation_" + sensor_key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
-						//убрал пока
-						/*if(!flagSendProcess) {
-							$("#distillation_cutoff_" + sensor_key).val(alert_value.toFixed(0));
-							//$("#distillation_temperature_" + sensor_key).val(temperature);
-						}*/
-						let allertValue = alert_value;
-						allertValue = allertValue > 0 ? allertValue.toFixed(2) : "";
-						if (allertValue !== "") {
-							$("#distillation_cutoff_result_" + sensor_key).text(allertValue).parent().find(".hidden").removeClass("hidden").addClass("show");
-						}else{
-							$("#distillation_cutoff_result_" + sensor_key).text(allertValue).parent().find(".show").removeClass("show").addClass("hidden");
+							$("#distillation_" + sensor_key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
+							//убрал пока
+							if (!flagSendProcess && !flagButtonPress) {
+								if($("#distillation_cutoff_" + sensor_key).length) {
+									//console.log(countChange, $("#distillation_cutoff_" + sensor_key).val(), alert_value);
+									if (Number($("#distillation_cutoff_" + sensor_key).val()) !== alert_value) {
+										alertChange[sensor_key]++
+									}
+									if (alertChange[sensor_key] > 5) {
+										$("#distillation_cutoff_" + sensor_key).val(alert_value);
+										//$("#distillation_temperature_" + sensor_key).val(temperature);
+										alertChange[sensor_key] = 0;
+									}
+								}
+							}
+							let allertValue = alert_value;
+							allertValue = allertValue > 0 ? allertValue.toFixed(2) : "";
+							if (allertValue !== "") {
+								$("#distillation_cutoff_result_" + sensor_key).text(allertValue).parent().find(".hidden").removeClass("hidden").addClass("show");
+							} else {
+								$("#distillation_cutoff_result_" + sensor_key).text(allertValue).parent().find(".show").removeClass("show").addClass("hidden");
+							}
+							//svg
+							if (sensor_value < 150) {
+								$("#svg_distillation_" + sensor_key).text(sensor_value.toFixed(1) + '°С');
+							} else {
+								$("#svg_distillation_" + sensor_key).text('');
+							}
 						}
-						//svg
-						if(sensor_value < 150) {
-							$("#svg_distillation_" + sensor_key).text(sensor_value.toFixed(1) + '°С');
-						}else{
-							$("#svg_distillation_" + sensor_key).text('');
-						}
-					}
-				});
+					});
+				}
 			});
 			//Исполнительные устройства
 			$.each(globalSensorsJson["devices"], function (i, e) {
@@ -1813,12 +1848,23 @@ $(function () {
 				})
 			});
 			let power_value = Number(globalSensorsJson["power"]);
-			let power_higt_value = distillationProcess["powerHigh"];
-			let power_lower_value = distillationProcess["powerLower"];
+			//let power_higt_value = distillationProcess["powerHigh"];
+			//let power_lower_value = distillationProcess["powerLower"];
 			//заполнение поля регулировки тена и рабочей мощности
-			if(!flagSendProcess) {
-				$("#distillation_power_set").val(power_higt_value.toFixed(0));
-				$("#distillation_power_lower_set").val(power_lower_value.toFixed(0));
+			if(!flagSendProcess && !flagButtonPress) {
+				//$("#distillation_power_set").val(power_higt_value.toFixed(0));
+				//$("#distillation_power_lower_set").val(power_lower_value.toFixed(0));
+
+				if (Number($("#distillation_power_set").val()) !== Number(globalSensorsJson["powerHigh"]) ||
+					Number($("#distillation_power_lower_set").val()) !== Number(globalSensorsJson["powerLower"])
+				) {
+					powerChange++
+				}
+				if (powerChange > 5) {
+					$("#distillation_power_set").val(globalSensorsJson["powerHigh"].toFixed(0));
+					$("#distillation_power_lower_set").val(globalSensorsJson["powerLower"].toFixed(0));
+					powerChange = 0;
+				}
 			}
 			$("#distillation_power_value").text(power_value.toFixed(0)).parent().find(".hidden").removeClass("hidden").addClass("show");
 
@@ -1889,13 +1935,15 @@ $(function () {
 					let sensor_name = (sensors[key].hasOwnProperty("name") ? sensors[key]["name"] : "");
 					if (sensor_name !== "") {
 						if (re_t.test(key)) {
-							let sensor_delta = '<label class="checkbox-inline"><input class="reflux_delta_radio" disabled id="delta_' + key + '" name="reflux_radio_' + key + '" type="radio"' +
-								' value="Y">Уставка</label>';
-							let sensor_cutoff = '<label class="checkbox-inline"><input disabled id="cutoff_' + key + '" name="reflux_radio_' + key + '" type="radio" value="Y">Отсечка</label>';
+							let sensor_delta = (key === 't2' ? '<label class="checkbox-inline pl-10">' +
+								'<input class="reflux_delta_radio" disabled id="delta_' + key + '" name="reflux_radio_' + key + '" type="radio"' +
+								' value="Y">Уставка</label>' : '');
+							let sensor_cutoff = '<label class="checkbox-inline pl-10">' +
+								'<input disabled id="cutoff_' + key + '" name="reflux_radio_' + key + '" type="radio" value="Y">Отсечка</label>';
 
 							let jscolor = sensors[key]["color"] > 0 ? dec2hex(sensors[key]["color"]) : "FFFFFF";
 
-							tpl_temperature += '<tr><td>' +
+							tpl_temperature += '<tr><td style="width: 320px">' +
 								'<div class="input-group input-group-sm">' +
 								'<span class="input-group-addon" style="background-color: #' + jscolor + '">' + key + '</span>' +
 								'<input readonly id="reflux_name_' + key + '" class="form-control input-sm" type="text" value="' + sensor_name + '">' +
@@ -1950,7 +1998,7 @@ $(function () {
 					if(key === "tapCorrection"){
 						tpl_stab += '<tr>'+
 							'<td>Коррекция угла открытия шарового крана</td>'+
-							'<td colspan="3" class="text-center">' + returnTplHtml([{id: "tapCorrection", value: sensors[key], min: '82', max: '170', step: '1'}], deltaTempl) + '</td>'+
+							'<td colspan="3" class="text-center">' + returnTplHtml([{id: "tapCorrection", value: sensors[key], min: '50', max: '250', step: '1'}], deltaTempl) + '</td>'+
 							'</tr>';
 					}
 				}
@@ -2064,6 +2112,7 @@ $(function () {
 		let tpl_safety_body = '';
 		let tpl_stab = '';
 		if (!sensors_select && $.fn.objIsEmpty(refluxProcess["sensors"], false)) {
+			console.log('ajax refluxSensorsGetTpl');
 			$.ajax({
 				url: ajax_url_debug + 'refluxSensorsGetTpl',
 				data: {},
@@ -2406,7 +2455,7 @@ $(function () {
 		refluxProcess["number"] = algorithm_val;
 		if($("#reflux_devices_out").length > 0) {
 			console.log("reflux_devices_out", algorithm_val);
-			if (algorithm_val === 1 || algorithm_val === 2 || algorithm_val === 3) {
+			if (algorithm_val === 1 || algorithm_val === 2 || algorithm_val === 3 || algorithm_val === 4) {
 				$("#reflux_devices_out").removeClass("hidden");
 			}else{
 				$("#reflux_devices_out").addClass("hidden");
@@ -2428,6 +2477,14 @@ $(function () {
 				$("#reflux_devices_body_prima").addClass("hidden");
 				// $("#reflux_devices_out_header").removeClass("hidden");
 			}else if (algorithm_val === 3){
+				$("#reflux_devices_head_rk").removeClass("hidden");
+				$("#reflux_devices_body_rk").removeClass("hidden");
+				$("#reflux_devices_head_steam").addClass("hidden");
+				$("#reflux_devices_body_steam").addClass("hidden");
+				$("#reflux_devices_head_prima").addClass("hidden");
+				$("#reflux_devices_body_prima").addClass("hidden");
+				// $("#reflux_devices_out_header").removeClass("hidden");
+			}else if (algorithm_val === 4){
 				$("#reflux_devices_head_rk").removeClass("hidden");
 				$("#reflux_devices_body_rk").removeClass("hidden");
 				$("#reflux_devices_head_steam").addClass("hidden");
@@ -2714,7 +2771,7 @@ $(function () {
 					}
 				}
 				//жижа
-				if (Number(refluxSendData["process"]["number"]) === 3) {
+				if (Number(refluxSendData["process"]["number"]) === 3 || Number(refluxSendData["process"]["number"]) === 4) {
 					let reflux_head_cycle_rk = $("#reflux_head_cycle_rk");
 					let reflux_head_time_rk = $("#reflux_head_time_rk");
 					let reflux_body_cycle_rk = $("#reflux_body_cycle_rk");
@@ -2772,12 +2829,13 @@ $(function () {
 			}
 		}
 	}
-	$(document).on('mousedown',"#reflux_process input", function () {
-		flagSendProcess = true;
-	});
+	// $(document).on('mousedown',"#reflux_process input", function () {
+	// 	flagSendProcess = true;
+	// });
 	$(document).on('change',"#reflux_process input",
 		$.debounce(function() {
-			flagSendProcess = true;
+			flagButtonPress = false;
+			// flagSendProcess = true;
 			if(refluxProcess["start"] === true) {
 				setReflux();
 			}
@@ -2818,18 +2876,49 @@ $(function () {
 							$("#reflux_alert_bg_" + sensor_key).removeClass("bg-danger");
 							$("#reflux_alert_text_" + sensor_key).removeClass("text-danger");
 						}
-						if (q["delta"] === false) {
+						// console.log(q);
+						if (q["delta"] === 0) {
 							$("#svg_reflux_color_" + sensor_key).css('fill', colorPersent(fillcolor, sensor_value, alert_value));
 						} else {
-							let delta_alert = $("#reflux_delta_" + sensor_key).val();
-							let delta_value = (delta_alert - alert_value + sensor_value).toFixed(2);
-							$("#svg_reflux_color_" + sensor_key).css('fill', colorPersent(fillcolor, delta_value, delta_alert));
+							let delta_alert = Number($("#reflux_delta_" + sensor_key).val());
+							let delta_value = parseFloat((delta_alert + sensor_value).toFixed(2));
+							$("#svg_reflux_color_" + sensor_key).css('fill', colorPersent(fillcolor, delta_value, (sensor_value + delta_alert)));
+							console.log(q["delta"], fillcolor, delta_value, (sensor_value + delta_alert))
 						}
 						//убрал пока
 						/*if(!flagSendProcess) {
 							//$("#reflux_delta_" + sensor_key).val(alert_value);
 							$("#reflux_cutoff_" + sensor_key).val(alert_value.toFixed(0));
 						}*/
+						//убрал пока
+						if (!flagSendProcess && !flagButtonPress) {
+							//дельта
+							if(globalSensorsJson.hasOwnProperty("delta")){
+								let reflux_delta = $("#reflux_delta_" + sensor_key);
+								if (reflux_delta.length) {
+									if (Number(reflux_delta.val()) !== Number(globalSensorsJson["delta"])) {
+										deltaChange++
+									}
+									if (deltaChange > 5) {
+										reflux_delta.val(globalSensorsJson["delta"]);
+										deltaChange = 0;
+									}
+								}
+							}
+
+							let reflux_cutoff = $("#reflux_cutoff_" + sensor_key);
+							if(reflux_cutoff.length) {
+								//console.log(countChange, $("#distillation_cutoff_" + sensor_key).val(), alert_value);
+								if (Number(reflux_cutoff.val()) !== alert_value) {
+									alertChange[sensor_key]++
+								}
+								if (alertChange[sensor_key] > 5) {
+									reflux_cutoff.val(alert_value);
+									//$("#distillation_temperature_" + sensor_key).val(temperature);
+									alertChange[sensor_key] = 0;
+								}
+							}
+						}
 						$("#reflux_" + sensor_key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 						let allertValue = alert_value;
 						allertValue = allertValue > 0 ? allertValue.toFixed(2) : "";
@@ -2893,12 +2982,182 @@ $(function () {
 			});
 			$("#reflux_alco_boil").text(globalSensorsJson["temperatureAlcoholBoil"].toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 			let power_value = Number(globalSensorsJson["power"]);
-			let power_higt_value = refluxProcess["powerHigh"];
-			let power_lower_value = refluxProcess["powerLower"];
+			// let power_higt_value = refluxProcess["powerHigh"];
+			// let power_lower_value = refluxProcess["powerLower"];
 			//заполнение поля регулировки тена и рабочей мощности
-			if(!flagSendProcess) {
-				$("#reflux_power_set").val(power_higt_value.toFixed(0));
-				$("#reflux_power_lower_set").val(power_lower_value.toFixed(0));
+			if(!flagSendProcess && !flagButtonPress) {
+				// $("#reflux_power_set").val(power_higt_value.toFixed(0));
+				// $("#reflux_power_lower_set").val(power_lower_value.toFixed(0));
+
+				if (Number($("#reflux_power_set").val()) !== Number(globalSensorsJson["powerHigh"]) ||
+					Number($("#reflux_power_lower_set").val()) !== Number(globalSensorsJson["powerLower"])
+				) {
+					powerChange++
+				}
+				if (powerChange > 5) {
+					$("#reflux_power_set").val(globalSensorsJson["powerHigh"].toFixed(0));
+					$("#reflux_power_lower_set").val(globalSensorsJson["powerLower"].toFixed(0));
+					powerChange = 0;
+				}
+				//настройки колонн
+				let valwe_head = {};
+				let valwe_headSteam = {};
+				let valwe_body = {};
+				let valwe_bodyPrima = {};
+				if(globalSensorsJson.hasOwnProperty("valwe")){
+					$.each(globalSensorsJson["valwe"], function (i, e) {
+						// console.log(i,e);
+						let valwe_key = Object.keys(e).shift();
+						switch(valwe_key){
+							case "head":
+								valwe_head = e;
+								break;
+							case "headSteam":
+								valwe_headSteam = e;
+								break;
+							case "body":
+								valwe_body = e;
+								break;
+							case "bodyPrima":
+								valwe_bodyPrima = e;
+								break;
+						}
+					})
+				}
+				//прима
+				let reflux_head_cycle_prima = $("#reflux_head_cycle_prima");
+				let reflux_head_time_prima = $("#reflux_head_time_prima");
+				let reflux_body_start_prima = $("#reflux_body_start_prima");
+				let reflux_body_stop_prima = $("#reflux_body_stop_prima");
+				let reflux_body_decline_prima = $("#reflux_body_decline_prima");
+				if (reflux_head_cycle_prima.length &&
+					reflux_head_time_prima.length &&
+					reflux_body_start_prima.length &&
+					reflux_body_stop_prima.length &&
+					reflux_body_decline_prima.length) {
+
+					if (Number(valwe_head["head"]["timeCycle"]) !== Number(reflux_head_cycle_prima.val())) {
+						algorithmChange ++;
+					}
+					if (Number(valwe_head["head"]["timeOn"]) !== Number(reflux_head_time_prima.val())) {
+						algorithmChange ++;
+					}
+					if (Number(valwe_bodyPrima["bodyPrima"]["percentStart"]) !== Number(reflux_body_start_prima.val())) {
+						algorithmChange ++;
+					}
+					if (Number(valwe_bodyPrima["bodyPrima"]["percentStop"]) !== Number(reflux_body_stop_prima.val())) {
+						algorithmChange ++;
+					}
+					if (Number(valwe_bodyPrima["bodyPrima"]["decline"]) !== Number(reflux_body_decline_prima.val())) {
+						algorithmChange ++;
+					}
+
+					if (algorithmChange > 5) {
+						if (Number(valwe_head["head"]["timeCycle"]) !== Number(reflux_head_cycle_prima.val())) {
+							reflux_head_cycle_prima.val(valwe_head["head"]["timeCycle"])
+						}
+						if (Number(valwe_head["head"]["timeOn"]) !== Number(reflux_head_time_prima.val())) {
+							reflux_head_time_prima.val(valwe_head["head"]["timeOn"])
+						}
+						if (Number(valwe_bodyPrima["bodyPrima"]["percentStart"]) !== Number(reflux_body_start_prima.val())) {
+							reflux_body_start_prima.val(valwe_bodyPrima["bodyPrima"]["percentStart"])
+						}
+						if (Number(valwe_bodyPrima["bodyPrima"]["percentStop"]) !== Number(reflux_body_stop_prima.val())) {
+							reflux_body_stop_prima.val(valwe_bodyPrima["bodyPrima"]["percentStop"])
+						}
+						if (Number(valwe_bodyPrima["bodyPrima"]["decline"]) !== Number(reflux_body_decline_prima.val())) {
+							reflux_body_decline_prima.val(valwe_bodyPrima["bodyPrima"]["decline"])
+						}
+						algorithmChange = 0;
+					}
+
+				}
+				//пар
+				let reflux_head_steam = $("#reflux_head_steam");
+				let reflux_body_start_steam = $("#reflux_body_start_steam");
+				let reflux_body_stop_steam = $("#reflux_body_stop_steam");
+				let reflux_body_decline_steam = $("#reflux_body_decline_steam");
+				if (reflux_head_steam.length &&
+					reflux_body_start_steam.length &&
+					reflux_body_stop_steam.length &&
+					reflux_body_decline_steam.length) {
+
+					if (Number(valwe_headSteam["headSteam"]["percent"]) !== Number(reflux_head_steam.val())) {
+						algorithmChange ++;
+					}
+					if (Number(valwe_bodyPrima["bodyPrima"]["percentStart"]) !== Number(reflux_body_start_steam.val())) {
+						algorithmChange ++;
+					}
+					if (Number(valwe_bodyPrima["bodyPrima"]["percentStop"]) !== Number(reflux_body_stop_steam.val())) {
+						algorithmChange ++;
+					}
+					if (Number(valwe_bodyPrima["bodyPrima"]["decline"]) !== Number(reflux_body_decline_steam.val())) {
+						algorithmChange ++;
+					}
+					if (algorithmChange > 5) {
+						if (Number(valwe_headSteam["headSteam"]["percent"]) !== Number(reflux_head_steam.val())) {
+							reflux_head_steam.val(valwe_headSteam["headSteam"]["percent"])
+						}
+						if (Number(valwe_bodyPrima["bodyPrima"]["percentStart"]) !== Number(reflux_body_start_steam.val())) {
+							reflux_body_start_steam.val(valwe_bodyPrima["bodyPrima"]["percentStart"])
+						}
+						if (Number(valwe_bodyPrima["bodyPrima"]["percentStop"]) !== Number(reflux_body_stop_steam.val())) {
+							reflux_body_stop_steam.val(valwe_bodyPrima["bodyPrima"]["percentStop"])
+						}
+						if (Number(valwe_bodyPrima["bodyPrima"]["decline"]) !== Number(reflux_body_decline_steam.val())) {
+							reflux_body_decline_steam.val(valwe_bodyPrima["bodyPrima"]["decline"])
+						}
+						algorithmChange = 0;
+					}
+
+				}
+				//жижа
+				let reflux_head_cycle_rk = $("#reflux_head_cycle_rk");
+				let reflux_head_time_rk = $("#reflux_head_time_rk");
+				let reflux_body_cycle_rk = $("#reflux_body_cycle_rk");
+				let reflux_body_time_rk = $("#reflux_body_time_rk");
+				let reflux_body_decline_rk = $("#reflux_body_decline_rk");
+				if (reflux_head_cycle_rk.length &&
+					reflux_head_time_rk.length &&
+					reflux_body_cycle_rk.length &&
+					reflux_body_time_rk.length &&
+					reflux_body_decline_rk.length) {
+
+					if (Number(valwe_head["head"]["timeCycle"]) !== Number(reflux_head_cycle_rk.val())) {
+						algorithmChange ++;
+					}
+					if (Number(valwe_head["head"]["timeOn"]) !== Number(reflux_head_time_rk.val())) {
+						algorithmChange ++;
+					}
+					if (Number(valwe_body["body"]["timeCycle"]) !== Number(reflux_body_cycle_rk.val())) {
+						algorithmChange ++;
+					}
+					if (Number(valwe_body["body"]["timeOn"]) !== Number(reflux_body_time_rk.val())) {
+						algorithmChange ++;
+					}
+					if (Number(valwe_body["body"]["decline"]) !== Number(reflux_body_decline_rk.val())) {
+						algorithmChange ++;
+					}
+					if (algorithmChange > 5) {
+						if (Number(valwe_head["head"]["timeCycle"]) !== Number(reflux_head_cycle_rk.val())) {
+							reflux_head_cycle_rk.val(valwe_head["head"]["timeCycle"])
+						}
+						if (Number(valwe_head["head"]["timeOn"]) !== Number(reflux_head_time_rk.val())) {
+							reflux_head_time_rk.val(valwe_head["head"]["timeOn"])
+						}
+						if (Number(valwe_body["body"]["timeCycle"]) !== Number(reflux_body_cycle_rk.val())) {
+							reflux_body_cycle_rk.val(valwe_body["body"]["timeCycle"])
+						}
+						if (Number(valwe_body["body"]["timeOn"]) !== Number(reflux_body_time_rk.val())) {
+							reflux_body_time_rk.val(valwe_body["body"]["timeOn"])
+						}
+						if (Number(valwe_body["body"]["decline"]) !== Number(reflux_body_decline_rk.val())) {
+							reflux_body_decline_rk.val(valwe_body["body"]["decline"])
+						}
+						algorithmChange = 0;
+					}
+
+				}
 			}
 			$("#reflux_power_value").text(power_value.toFixed(0)).parent().find(".hidden").removeClass("hidden").addClass("show");
 
@@ -3252,8 +3511,8 @@ $(function () {
 			};
 			mashingSendData["process"]["allow"] = (mashingProcess["start"] ? 3 : 0);
 
-			$.each(mashingProcess["sensors"], function (i, e) {
-				let sensor_key = i;
+			$.each(globalSensorsJson["mashing"], function (i, e) {
+				let sensor_key = Object.keys(e).shift();
 				let mashing_time = $("#mashing_time_" + sensor_key);
 				let mashing_temperature = $("#mashing_temperature_" + sensor_key);
 				let mashing_stop = $("#mashing_stop_" + sensor_key);
@@ -3261,23 +3520,24 @@ $(function () {
 					if (e["time"] !== mashing_time.val()) {
 						flagSendProcess = true;
 					}
-					mashingSendData[sensor_key]["time"] = e["time"] = mashing_time.val();
+					mashingSendData[sensor_key]["time"] = mashing_time.val();
 				}
 				if (mashing_temperature.length) {
 					if (e["temperature"] !== mashing_temperature.val()) {
 						flagSendProcess = true;
 					}
-					mashingSendData[sensor_key]["temperature"] = e["temperature"] = mashing_temperature.val();
+					mashingSendData[sensor_key]["temperature"] = mashing_temperature.val();
 				}
 				if (mashing_stop.length) {
 					let stop = Number(mashing_stop.prop("checked"));
 					if (e["stop"] !== stop) {
 						flagSendProcess = true;
 					}
-					mashingSendData[sensor_key]["stop"] = e["stop"] = stop;
+					mashingSendData[sensor_key]["stop"] = stop;
 				}
 			});
 			if (flagSendProcess) {
+				console.log(mashingProcess);
 				flagSendProcess = false;
 				clearInterval(sensorsProcessId);
 				// clearInterval(sensorsIntervalId);
@@ -3287,14 +3547,16 @@ $(function () {
 			}
 		}
 	}
-	$(document).on('mousedown',"#mashing_process input", function () {
-		flagSendProcess = true;
-	});
+	// $(document).on('mousedown',"#mashing_process input", function () {
+	// 	flagSendProcess = true;
+	// });
 	$(document).on('change',"#mashing_process input",
 		$.debounce(function() {
-			flagSendProcess = true;
+			flagButtonPress = false;
+			// flagSendProcess = true;
 			if(mashingProcess["start"] === true) {
 				setMashing();
+				console.log("debounce input")
 			}
 		}, 300)
 	);
@@ -3358,15 +3620,49 @@ $(function () {
 				}
 
 				let temperature = Number(e[pause_key]["temperature"]);
-				if(!flagSendProcess) {
+
+				if(!flagSendProcess && !flagButtonPress) {
 					//убрал пока
-					//$("#mashing_time_" + pause_key).val(time);
-					//$("#mashing_temperature_" + pause_key).val(temperature);
-					if (stop > 0) {
-						$("#mashing_stop_" + pause_key).prop("checked", true);
-					} else {
-						$("#mashing_stop_" + pause_key).prop("checked", false);
+					// $("#mashing_time_" + pause_key).val(time);
+					// $("#mashing_temperature_" + pause_key).val(temperature);
+					// if (stop > 0) {
+					// 	$("#mashing_stop_" + pause_key).prop("checked", true);
+					// } else {
+					// 	$("#mashing_stop_" + pause_key).prop("checked", false);
+					// }
+					let mashing_time = $("#mashing_time_" + pause_key);
+					let mashing_temperature = $("#mashing_temperature_" + pause_key);
+					let mashing_stop = $("#mashing_stop_" + pause_key);
+					if(mashing_time.length && mashing_temperature.length && mashing_stop.length){
+						if(time !== Number(mashing_time.val())){
+							mashingChange ++;
+						}
+						if(temperature !== Number(mashing_temperature.val())){
+							mashingChange ++;
+						}
+						if(stop !== Number(mashing_stop.prop("checked"))){
+							mashingChange ++;
+						}
+						if(mashingChange > 5){
+							if(time !== Number(mashing_time.val())){
+								mashing_time.val(time);
+							}
+							if(temperature !== Number(mashing_temperature.val())){
+								mashing_temperature.val(temperature);
+								// mashingProcess["sensors"][]
+								// mashing_temperature.change();
+							}
+							if(stop !== Number(mashing_stop.prop("checked"))){
+								if (stop > 0) {
+									mashing_stop.prop("checked", true);
+								} else {
+									mashing_stop.prop("checked", false);
+								}
+							}
+							mashingChange = 0;
+						}
 					}
+
 				}
 				if(step>0) {
 					$("#mashing_step_bg_" + pause_key).addClass("bg-success");
@@ -3553,12 +3849,13 @@ $(function () {
 			}
 		}
 	}
-	$(document).on('mousedown',"#pid_process input", function () {
-		flagSendProcess = true;
-	});
+	// $(document).on('mousedown',"#pid_process input", function () {
+	// 	flagSendProcess = true;
+	// });
 	$(document).on('change',"#pid_process input",
 		$.debounce(function() {
-			flagSendProcess = true;
+			flagButtonPress = false;
+			// flagSendProcess = true;
 			if(pidProcess["start"] === true) {
 				setPid();
 			}
@@ -3595,12 +3892,12 @@ $(function () {
 				$.each(pidProcess["pid"], function (pid_key, q) {
 					if (!re_t.test(pid_key)) {
 						if(pidProcess["pid"][pid_key].hasOwnProperty("deviceOutValue")) {
-							let pid_value = Number(pidProcess["pid"][pid_key]["deviceOutValue"]);
-							if (pid_value > 0) {
+							let pid_device_value = Number(pidProcess["pid"][pid_key]["deviceOutValue"]);
+							if (pid_device_value > 0) {
 								if (pid_key === "Ki") {
-									$(".pid_device_" + pid_key).text(pid_value.toFixed(2));
+									$(".pid_device_" + pid_key).text(pid_device_value.toFixed(2));
 								} else {
-									$(".pid_device_" + pid_key).text(pid_value.toFixed(0));
+									$(".pid_device_" + pid_key).text(pid_device_value.toFixed(0));
 								}
 							}
 						}
@@ -3625,6 +3922,20 @@ $(function () {
 			if (!$.fn.objIsEmpty(dtoJson["t"], false) && drowChart) {
 				dtoReceiver.start(dtoJson, 'view_pid_chart');
 			}
+			$.each(globalSensorsJson["pid"], function (i, e) {
+				let pid_key = Object.keys(e).shift();
+				let pid_value = Number(globalSensorsJson["pid"][i][pid_key]["userSetValue"]);
+				if (!flagSendProcess && !flagButtonPress) {
+					if(pid_value !== Number($("#pid_" + pid_key).val())){
+						pidChange++;
+					}
+					if(pidChange>5){
+						if(pid_value !== Number($("#pid_" + pid_key).val())){
+							$("#pid_" + pid_key).val(pid_value);
+						}
+					}
+				}
+			});
 		}
 	}
 
@@ -3727,9 +4038,21 @@ $(function () {
 					$("#pid_value_" + sensor_key).text(sensor_value.toFixed(2)).parent().find(".hidden").removeClass("hidden").addClass("show");
 				}
 			});
+			let active_tabs = $( "#nav-tabs li.active a" );
+
+			// console.log('active_tabs',active_tabs);
+			// $('#nav-tabs li a').on('shown.bs.tab', function (tab) {
+			// 	console.log('active_tabs',tab.target); // activated tab
+			// 	// tab.relatedTarget // previous tab
+			// });
 			//старт/стоп дистилляции
 			if (distillationProcess["start"] !== true && process === 1) {
-				$('#nav-tabs li a[data-target="#distillation"]').tab('show');
+				if(active_tabs.data('target') === "#distillation") {
+					distillationProcess["sensors"] = {};
+					$.fn.pasteDistillationSensors(false);
+				}else {
+					$('#nav-tabs li a[data-target="#distillation"]').tab('show');
+				}
 				$("#distillation_start").trigger("start-event");
 			}
 			if (distillationProcess["start"] === true && process !== 1) {
@@ -3737,7 +4060,12 @@ $(function () {
 			}
 			//старт/стоп ректификации
 			if (refluxProcess["start"] !== true && process === 2) {
-				$('#nav-tabs li a[data-target="#reflux"]').tab('show');
+				if(active_tabs.data('target') === "#reflux") {
+					refluxProcess["sensors"] = {};
+				 	$.fn.pasteRefluxSensors(false);
+				}else {
+					$('#nav-tabs li a[data-target="#reflux"]').tab('show');
+				}
 				$("#reflux_start").trigger("start-event");
 			}
 			if (refluxProcess["start"] === true && process !== 2) {
@@ -3745,7 +4073,13 @@ $(function () {
 			}
 			//старт/стоп затирания
 			if (mashingProcess["start"] !== true && process === 3) {
-				$('#nav-tabs li a[data-target="#mashing"]').tab('show');
+				// $('#nav-tabs li a[data-target="#mashing"]').tab('show');
+				if(active_tabs.data('target') === "#mashing") {
+					mashingProcess["sensors"] = {};
+					$.fn.pasteMashingSensors(false);
+				}else {
+					$('#nav-tabs li a[data-target="#mashing"]').tab('show');
+				}
 				$("#mashing_start").trigger("start-event");
 			}
 			if (mashingProcess["start"] === true && process !== 3) {
@@ -3925,6 +4259,7 @@ $(function () {
 				$("#distillation_volume").val(soundVolume);
 				$("#reflux_volume").val(soundVolume);
 				$("#mashing_volume").val(soundVolume);
+				$("#power_block").val(msg["powerblock"]).change();
 			}
 		});
 	}
@@ -4151,6 +4486,15 @@ $(function () {
 		soundVolume = sound_volume;
 		sendRequest("volume", {
 			"value": sound_volume
+		}, "text", false, _this, $("#error_settings"), false);
+	});
+	// Настройки блока питания
+	$(document).on("click", "#settings_power_block", function (e) {
+		e.preventDefault();
+		let _this = $(this);
+		let power_block_val = $("#power_block").val();
+		sendRequest("powerblock", {
+			"value": power_block_val
 		}, "text", false, _this, $("#error_settings"), false);
 	});
 	/*$("#settings_set_volume").on("click", function (e) {

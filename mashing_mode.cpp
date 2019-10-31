@@ -225,7 +225,11 @@ void mashingLoop() {
 			csOff(TFT_CS);
 #endif
 			tempBigOut = 1;
-			myPID.SetOutputLimits(0, WindowSize);		// временной интервал реагирования для PID
+			if (powerType <= 1) myPID.SetOutputLimits(0, WindowSize);		// временной интервал реагирования для PID
+			else {
+				myPID.SetSampleTime(1000);
+				myPID.SetOutputLimits(0, 100);
+			}
 			myPID.SetMode(AUTOMATIC);					// режим PID
 			Setpoint = processMashing[0].temperature;	// температура которую надо поддерживать PID алгоритму (1-й шаг)
 			processMashing[0].step = 1;					// для индикации обрабатываемой температурной паузы в WEB
@@ -273,9 +277,6 @@ void mashingLoop() {
 			}
 			break;
 		}
-
-
-
 		// Нагрев до температуры 2-й паузы если она задана
 		case 3: {
 			if (millis() >= timePauseOff) settingAlarm = false;	// выключили звуковой сигнал
@@ -314,9 +315,6 @@ void mashingLoop() {
 			}
 			break;
 		}
-
-
-
 		// Нагрев до температуры 3-й паузы если она задана
 		case 5: {
 			if (millis() >= timePauseOff) settingAlarm = false;	// выключили звуковой сигнал
@@ -355,9 +353,6 @@ void mashingLoop() {
 			}
 			break;
 		}
-
-
-
 		// Нагрев до температуры 4-й паузы если она задана
 		case 7: {
 			if (millis() >= timePauseOff) settingAlarm = false;	// выключили звуковой сигнал
@@ -396,9 +391,6 @@ void mashingLoop() {
 			}
 			break;
 		}
-
-
-
 		// Нагрев до температуры 5-й паузы если она задана
 		case 9: {
 			if (millis() >= timePauseOff) settingAlarm = false;	// выключили звуковой сигнал
@@ -435,9 +427,6 @@ void mashingLoop() {
 			}
 			break;
 		}
-
-
-
 		case 11: {
 			if (millis() >= timePauseOff) {
 				settingAlarm = false;		// выключили звуковой сигнал
@@ -450,42 +439,40 @@ void mashingLoop() {
 		}
 	}
 
-	//temperatureSensor[6].allertValue = Input;
-	//temperatureSensor[7].allertValue = Setpoint;
-
-	if (timeMashingPause < millis()) {
-
-		myPID.Compute();											// расчет времени для PID регулировки
-
-		if (millis() > WindowSize + windowStartTime) {
-			windowStartTime += WindowSize;
-			if (windowStartTime > millis()) windowStartTime = 0;    // защита от переполнения
-		}
-
-		// Если идет предварительный нагрев (до температуры поддержания Т стабилизации минус 4 градуса)
-		if (Input < Setpoint - 4) {
-			digitalWrite(heater, HIGH);
-			power.heaterPower = 100;
-		}
-		else if (Input > Setpoint + 2) {
-			digitalWrite(heater, LOW);
-			power.heaterPower = 0;
-		}
-		// включить или выключить ТЭН в зависимости от расчетов временного PID регулирования
-		else {
-			if (Output < millis() - windowStartTime) {
-				digitalWrite(heater, LOW);
-				power.heaterPower = 0;
+	if (powerType <= 1) {
+		if (timeMashingPause < millis()) {
+			myPID.Compute();											// расчет времени для PID регулировки
+			if (millis() > WindowSize + windowStartTime) {
+				windowStartTime += WindowSize;
+				if (windowStartTime > millis()) windowStartTime = 0;    // защита от переполнения
 			}
-			else {
+			// Если идет предварительный нагрев (до температуры поддержания Т стабилизации минус 4 градуса)
+			if (Input < Setpoint - 4) {
 				digitalWrite(heater, HIGH);
 				power.heaterPower = 100;
 			}
+			else if (Input > Setpoint + 2) {
+				digitalWrite(heater, LOW);
+				power.heaterPower = 0;
+			}
+			// включить или выключить ТЭН в зависимости от расчетов временного PID регулирования
+			else {
+				if (Output < millis() - windowStartTime) {
+					digitalWrite(heater, LOW);
+					power.heaterPower = 0;
+				}
+				else {
+					digitalWrite(heater, HIGH);
+					power.heaterPower = 100;
+				}
+			}
+			timeMashingPause = millis() + 100;
 		}
-
-		timeMashingPause = millis() + 100;
 	}
-	//delay(100);
+	else {
+		myPID.Compute();
+		power.heaterPower = (uint8_t)Output;
+	}
 
 	if (processMode.allow == 0) {
 		power.heaterPower = 0;

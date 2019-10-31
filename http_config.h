@@ -19,6 +19,7 @@ extern void handleSetSSID();
 extern void handleSetSSIDAP();
 extern void handleRestart();
 extern void handleSetRotate();
+extern void handleSetPowerBlock();
 extern void handleSetVolume();
 extern void handleConfigJSON();
 

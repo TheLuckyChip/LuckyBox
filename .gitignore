@@ -8,7 +8,7 @@
 /LuckyBox.vcxproj.filters
 /Release
 /pcb
-
+/data_18
 #.gitignore
 # JetBrains CLion
 .idea/*

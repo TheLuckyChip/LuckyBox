@@ -74,12 +74,14 @@ void setup()
 	// 1500 - сохраненные данные для процесса затирания
 	// 1600 - сохраненные данные PID установок
 	// 1700 - 1759 имя ssdp, 1760 - 1819 имя ssid, 1820 - 1879 имя ssidAP
-	// 1900 - 1931 пароль ssid, 1940 - 1971 пароль ssidAP, 1980 - часовой пояс, 1981 громкость пищалки
-	timezone = EEPROM.read(1980);
-	if (timezone < -12 || timezone > 12) timezone = 3;
+	// 1900 - 1931 пароль ssid, 1940 - 1971 пароль ssidAP, 1980 - часовой пояс, 1981 громкость пищалки, 1982 тип БП
+	powerType = EEPROM.read(1982);
+	if (powerType < 1 || powerType > 2) powerType = 1;
 	BuzzerVolumeLevel = EEPROM.read(1981);
 	if (BuzzerVolumeLevel > 100) BuzzerVolumeLevel = 4000;
 	else BuzzerVolumeLevel *= 40;
+	timezone = EEPROM.read(1980);
+	if (timezone < -12 || timezone > 12) timezone = 3;
 	// Считаем инверсию экрана и тачскрина
 	uint8_t tft180 = EEPROM.read(1298);
 	uint8_t touch180 = EEPROM.read(1299);
@@ -287,15 +289,17 @@ void setup()
 #endif
 	Serial.println("Temperature sensors:");
 	if (DS_Count == 0) Serial.println("Not present...");
-	if (DS_Count >= 1) Serial.println(temperatureSensor[DS_Cube].data);
-	if (DS_Count >= 2) Serial.println(temperatureSensor[DS_Tube].data);
-	if (DS_Count >= 3) Serial.println(temperatureSensor[DS_Out].data);
-	if (DS_Count >= 4) Serial.println(temperatureSensor[DS_Def].data);
-	if (DS_Count >= 5) Serial.println(temperatureSensor[DS_Res1].data);
-	if (DS_Count >= 6) Serial.println(temperatureSensor[DS_Res2].data);
-	if (DS_Count >= 7) Serial.println(temperatureSensor[DS_Res3].data);
-	if (DS_Count >= 8) Serial.println(temperatureSensor[DS_Res4].data);
-
+	if (DS_Count >= 1) {
+		if (temperatureSensor[0].data != 150) Serial.println(temperatureSensor[0].data);
+		if (temperatureSensor[1].data != 150) Serial.println(temperatureSensor[1].data);
+		if (temperatureSensor[2].data != 150) Serial.println(temperatureSensor[2].data);
+		if (temperatureSensor[3].data != 150) Serial.println(temperatureSensor[3].data);
+		if (temperatureSensor[4].data != 150) Serial.println(temperatureSensor[4].data);
+		if (temperatureSensor[5].data != 150) Serial.println(temperatureSensor[5].data);
+		if (temperatureSensor[6].data != 150) Serial.println(temperatureSensor[6].data);
+		if (temperatureSensor[7].data != 150) Serial.println(temperatureSensor[7].data);
+	}
+	else Serial.println("--.-");
 	Serial.println("Pressure sensor:");
 	if (pressureSensor.status) pressureRead();
 	Serial.println(pressureSensor.data);
@@ -319,6 +323,7 @@ void setup()
   attachInterrupt(intTouch, touchscreenUpdateSet, FALLING);
 #endif
   loadEepromReflux();
+  deltaBoilTube = temperatureSensor[DS_Tube].allertValueIn;
   loadEepromPid();
   setKp = Kp;
   setKi = Ki;
@@ -336,7 +341,39 @@ void setup()
   TX_BUF_IO_Power[3] = 0x70;		// p
   TX_BUF_IO_Power[4] = 0x3D;		// =
 
+  client.setTimeout(1000);
+  client.connect("192.168.1.250", 80);
+  if (client.connected()) {
+	  String url = "/powerOK?";
+	  url += "ok1="; url += 0x2D; url += "&";
+	  url += "ok2="; url += 0x4F; url += "&";
+	  url += "ok3="; url += 0x6B; url += "&";
+	  url += "ok4="; url += 0x2D;
+	  client.print(String("GET ") + url + " HTTP/1.1\r\n" +
+		  "Host: " + "192.168.1.250" + "\r\n" +
+		  "Connection: close\r\n\r\n");
+	  String line;
+	  unsigned long t = millis() + 500;
+	  while (client.connected() || client.available())
+	  {
+		  if (client.available()) {
+			  line = client.readStringUntil('\r');
+		  }
+		  if (t < millis()) break;
+	  }
+	  if (line[1] == 0x4F && line[2] == 0x4B) powerWiFiPresent = true;
+	  else client.stop();
+  }
+  else client.stop();
+
+  if (powerWiFiPresent) {
+	  Serial.println();
+	  Serial.println("WiFi Power Present!");
+  }
+  Serial.println();
   Serial.println("Setup Done!");
+
+  delay(100);
 
   Serial.end();
   Serial.begin(9600);

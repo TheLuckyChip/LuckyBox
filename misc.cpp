@@ -57,47 +57,6 @@ void check_Err() {
 	if (!errT) timePauseErrT = millis() + 10000;		// 10 секунд пауза до защиты
 }
 
-#if defined setHeater
-void swSerial_write(uint8_t b) {
-	// запретим прерывания
-	//cli();
-	unsigned long wait = F_CPU / 19200;
-	digitalWrite(heater, HIGH);
-	unsigned long start = ESP.getCycleCount();
-	// Start bit;
-	digitalWrite(heater, LOW);
-	WAIT;
-	for (int i = 0; i < 8; i++) {
-		digitalWrite(heater, (b & 1) ? HIGH : LOW);
-		WAIT;
-		b >>= 1;
-	}
-	// Stop bit
-	digitalWrite(heater, HIGH);
-	WAIT;
-	// разрешим прерывания
-	//sei();
-}
-#endif
-// передача мощности по UART
-void serialLoop() {
-#if defined setHeater	
-	// отправим мощность для ТЕНа на внешнее устройство
-	if (RX_Pause <= millis() || powerSendOld != power.heaterPower) {
-		uint8_t crc_send = power.heaterPower + 0x6D;
-		swSerial_write(0x41);		// A
-		swSerial_write(0x54);		// T
-		swSerial_write(0x2B);		// +
-		swSerial_write(0x70);		// p
-		swSerial_write(0x3D);		// =
-		swSerial_write(power.heaterPower);
-		swSerial_write(crc_send);
-		powerSendOld = power.heaterPower;
-		RX_Pause = millis() + 1000;
-	}
-#endif
-}
-
 // Выключение повышенного напряжения на клапана
 void stepApLoop() {
 	if (CH_all == true) {

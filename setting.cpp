@@ -9,12 +9,14 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
 // Web интерфейс для устройства
 ESP8266WebServer HTTP;
+// HTTP клиент
+WiFiClient client;
 
 // PID
 PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
 
-String curVersion = "2.0RC18";
-uint16_t versionForWeb = 2018;
+String curVersion = "2.0RC19";
+uint16_t versionForWeb = 2019;
 // Определяем переменные wifi
 String _ssid;      // Для хранения SSID
 String _password;  // Для хранения пароля сети
@@ -66,6 +68,7 @@ uint16_t scaleCount;
 byte tempBigOut;
 byte tempBigOutOld;
 bool reSetTemperatureStartPressure;
+float deltaBoilTube;				// уставка
 float settingBoilTube;
 float settingColumn = 101;         // Температура срабатывания оповещения от датчика в царге
 float temperatureStartPressure = 78;   //Температура кипения спирта при запуске отслеживания ректификации
@@ -140,11 +143,16 @@ bool alertEnable = true;
 bool alertLevelEnable = true;
 uint16_t BuzzerVolumeLevel;
 
+uint8_t powerType;
+
 uint8_t powerSendOld;
 uint8_t TX_BUF_IO_Power[8];
 uint8_t RX_BUF_IO[8];
 uint8_t RXio_cnt;
 unsigned long RX_Pause;
+unsigned long Tx_WiFi_Pause;
+uint8_t powerSendOldWiFi;
+bool powerWiFiPresent = false;
 
 uint8_t DistillationTransitionTemperature = 80;
 uint8_t RefluxTransitionTemperature = 55;
