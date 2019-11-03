@@ -33,9 +33,9 @@ void loop() {
   if (processMode.allow < 3 || processMode.allow == 6) {
 	  adcLoop();
 	  stepApLoop();
+	  if (powerType <= 1) heaterLoop();
   }
-  if (powerType <= 1) heaterLoop();
-  else { comHeaterLoop(); wifiHeaterLoop(); }
+  if (powerType == 2) { comHeaterLoop(); wifiHeaterLoop(); }
   sensorLoop();
   displayLoop();
   logfileLoop();
