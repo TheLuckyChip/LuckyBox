@@ -2,21 +2,25 @@
 // выключение канала
 void csOff(byte ch) {
 	if (ch == PWM_CH1) {
+		CH_up1 = true;
 		pwmOut[0].allert = 0;
 		if (pwmOut[0].invert == false) pwm.setPWM(ch, 4096, 0);
 		else pwm.setPWM(ch, 0, 4096);
 	}
 	else if (ch == PWM_CH2) {
+		CH_up2 = true;
 		pwmOut[1].allert = 0;
 		if (pwmOut[1].invert == false) pwm.setPWM(ch, 4096, 0);
 		else pwm.setPWM(ch, 0, 4096);
 	}
 	else if (ch == PWM_CH3) {
+		CH_up3 = true;
 		pwmOut[2].allert = 0;
 		if (pwmOut[2].invert == false) pwm.setPWM(ch, 4096, 0);
 		else pwm.setPWM(ch, 0, 4096);
 	}
 	else if (ch == PWM_CH4) {
+		CH_up4 = true;
 		pwmOut[3].allert = 0;
 		if (pwmOut[3].invert == false) pwm.setPWM(ch, 4096, 0);
 		else pwm.setPWM(ch, 0, 4096);
@@ -46,48 +50,60 @@ void csOff(byte ch) {
 // включение канала
 void csOn(byte ch) {
 	if (ch == PWM_CH1) {
-		// включаем доп. подачу напряжения
-		CH_all = true;
-		if (pwmOut[8].invert == false) pwm.setPWM(PWM_CH9, 0, 4096);
-		else pwm.setPWM(PWM_CH9, 4096, 0);
-		timeSetHighVoltage = millis() + 500;
-		// включаем сам клапан
-		pwmOut[0].allert = 1;
-		if (pwmOut[0].invert == false) pwm.setPWM(ch, 0, 4096);
-		else pwm.setPWM(ch, 4096, 0);
+		if (CH_up1 == true) {
+			// включаем доп. подачу напряжения
+			CH_all = true;
+			CH_up1 = false;
+			if (pwmOut[8].invert == false) pwm.setPWM(PWM_CH9, 0, 4096);
+			else pwm.setPWM(PWM_CH9, 4096, 0);
+			timeSetHighVoltage = millis() + 500;
+			// включаем сам клапан
+			pwmOut[0].allert = 1;
+			if (pwmOut[0].invert == false) pwm.setPWM(ch, 0, 4096);
+			else pwm.setPWM(ch, 4096, 0);
+		}
 	}
 	else if (ch == PWM_CH2) {
-		// включаем доп. подачу напряжения
-		CH_all = true;
-		if (pwmOut[8].invert == false) pwm.setPWM(PWM_CH9, 0, 4096);
-		else pwm.setPWM(PWM_CH9, 4096, 0);
-		timeSetHighVoltage = millis() + 500;
-		// включаем сам клапан
-		pwmOut[1].allert = 1;
-		if (pwmOut[1].invert == false) pwm.setPWM(ch, 0, 4096);
-		else pwm.setPWM(ch, 4096, 0);
+		if (CH_up2 == true) {
+			// включаем доп. подачу напряжения
+			CH_all = true;
+			CH_up2 = false;
+			if (pwmOut[8].invert == false) pwm.setPWM(PWM_CH9, 0, 4096);
+			else pwm.setPWM(PWM_CH9, 4096, 0);
+			timeSetHighVoltage = millis() + 500;
+			// включаем сам клапан
+			pwmOut[1].allert = 1;
+			if (pwmOut[1].invert == false) pwm.setPWM(ch, 0, 4096);
+			else pwm.setPWM(ch, 4096, 0);
+		}
 	}
 	else if (ch == PWM_CH3) {
-		// включаем доп. подачу напряжения
-		CH_all = true;
-		if (pwmOut[8].invert == false) pwm.setPWM(PWM_CH9, 0, 4096);
-		else pwm.setPWM(PWM_CH9, 4096, 0);
-		timeSetHighVoltage = millis() + 500;
-		// включаем сам клапан
-		pwmOut[2].allert = 1;
-		if (pwmOut[2].invert == false) pwm.setPWM(ch, 0, 4096);
-		else pwm.setPWM(ch, 4096, 0);
+		if (CH_up3 == true) {
+			// включаем доп. подачу напряжения
+			CH_all = true;
+			CH_up3 = false;
+			if (pwmOut[8].invert == false) pwm.setPWM(PWM_CH9, 0, 4096);
+			else pwm.setPWM(PWM_CH9, 4096, 0);
+			timeSetHighVoltage = millis() + 500;
+			// включаем сам клапан
+			pwmOut[2].allert = 1;
+			if (pwmOut[2].invert == false) pwm.setPWM(ch, 0, 4096);
+			else pwm.setPWM(ch, 4096, 0);
+		}
 	}
 	else if (ch == PWM_CH4) {
-		// включаем доп. подачу напряжения
-		CH_all = true;
-		if (pwmOut[8].invert == false) pwm.setPWM(PWM_CH9, 0, 4096);
-		else pwm.setPWM(PWM_CH9, 4096, 0);
-		timeSetHighVoltage = millis() + 500;
-		// включаем сам клапан
-		pwmOut[3].allert = 1;
-		if (pwmOut[3].invert == false) pwm.setPWM(ch, 0, 4096);
-		else pwm.setPWM(ch, 4096, 0);
+		if (CH_up4 == true) {
+			// включаем доп. подачу напряжения
+			CH_all = true;
+			CH_up4 = false;
+			if (pwmOut[8].invert == false) pwm.setPWM(PWM_CH9, 0, 4096);
+			else pwm.setPWM(PWM_CH9, 4096, 0);
+			timeSetHighVoltage = millis() + 500;
+			// включаем сам клапан
+			pwmOut[3].allert = 1;
+			if (pwmOut[3].invert == false) pwm.setPWM(ch, 0, 4096);
+			else pwm.setPWM(ch, 4096, 0);
+		}
 	}
 	else if (ch == PWM_CH5) {
 		pwmOut[4].allert = 1;

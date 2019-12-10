@@ -15,7 +15,7 @@ WiFiClient client;
 // PID
 PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
 
-String curVersion = "2.0RC19";
+String curVersion = "2.0RC19a";
 uint16_t versionForWeb = 2019;
 // Определяем переменные wifi
 String _ssid;      // Для хранения SSID
@@ -108,6 +108,10 @@ bool startWriteSD = false;
 bool endWriteSD = false;
 bool commandSD_en = false;
 bool CH_all = false;		// для режима удержания
+bool CH_up1 = true;		// признак что клапан выключен
+bool CH_up2 = true;		// признак что клапан выключен
+bool CH_up3 = true;		// признак что клапан выключен
+bool CH_up4 = true;		// признак что клапан выключен
 bool CH1 = false;			// для отрисовки в настройках
 bool CH2 = false;
 bool CH3 = false;
