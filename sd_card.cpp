@@ -136,7 +136,7 @@ void logfileLoop() {
 		}
 		else if (commandSD_en == true && sdStatus == true) {
 			csOn(TFT_CS);
-			tft.fillCircle(7, 236, 3, ILI9341_RED);
+			if (processMode.allow != 0) tft.fillCircle(7, 236, 3, ILI9341_RED);
 			csOff(TFT_CS);
 
 			csOn(SD_CS);

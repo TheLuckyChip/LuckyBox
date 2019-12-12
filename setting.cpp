@@ -162,3 +162,7 @@ uint8_t DistillationTransitionTemperature = 80;
 uint8_t RefluxTransitionTemperature = 55;
 uint8_t TapCorrectionWeb = 120;
 float TapCorrection = 1.20;
+
+unsigned long timeSetWChead;
+float temperatureOld_DS_Out;
+float temperatureOld_DS_Def;
