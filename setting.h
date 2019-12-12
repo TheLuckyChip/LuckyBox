@@ -252,4 +252,8 @@ extern uint8_t RefluxTransitionTemperature;
 extern uint8_t TapCorrectionWeb;
 extern float TapCorrection;
 
+extern unsigned long timeSetWChead;
+extern float temperatureOld_DS_Out;
+extern float temperatureOld_DS_Def;
+
 #endif
