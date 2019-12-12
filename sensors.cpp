@@ -529,8 +529,13 @@ void handleProcessModeIn() {
 			EEPROM.write(1497, power.inPowerHigh);
 			allertSave = true;
 		}
-		power.inPowerLow = HTTP.arg("powerLower").toInt();
-		if (power.inPowerLow > 100) power.inPowerLow = 100;
+		uint8_t inPowerLowWeb = HTTP.arg("powerLower").toInt();
+		if (inPowerLowWeb > 100) inPowerLowWeb = 100;
+#ifdef WColumn_power
+		// если ибет отбор голов по алгоритму БК с подруливанием мощностью
+		if (processMode.number == 5 && processMode.step >= 2 && inPowerLowWeb != power.inPowerLow) power.heaterPower = inPowerLowWeb;
+#endif
+		power.inPowerLow = inPowerLowWeb;
 		if (power.inPowerLow != EEPROM.read(1498)) {
 			EEPROM.write(1498, power.inPowerLow);
 			allertSave = true;
