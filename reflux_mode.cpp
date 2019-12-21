@@ -545,6 +545,209 @@ void rfluxLoopMode_1() {
 		}
 	}
 }
+
+
+
+
+
+// ТЕСТ БК с отбором голов по жидкости до дефа, а тело по пару после дефа
+
+/*
+void rfluxLoopMode_2() {
+	switch (processMode.step) {
+		// пришли при старте ректификации
+	case 0: {
+		// Закрыли отбор по пару
+		setPWM(PWM_CH5, 0, 10);
+		bodyPrimaPercent = bodyPrimaPercentStart;
+		counterStartStop = 0;
+		processMode.timeStep = 0;
+		processMode.step = 1;	// перешли на следующий шаг алгоритма
+		break;
+	}
+			// ждем начала подъема температуры в царге и включаем воду на охлаждение и понижаем мощность на ТЭН
+	case 1: {
+		if (temperatureSensor[DS_Tube].data >= RefluxTransitionTemperature || stepNext == 1) {
+			if (pwmOut[2].member == 1) csOn(PWM_CH3);	// включаем клапан подачи воды
+#ifndef Sign_of_Work
+			csOff(PWM_CH6);							// выключить дополнительный ТЭН на разгон
+#endif
+			csOn(PWM_CH2);				// охлаждение на отборе голов
+			csOn(PWM_CH3);				// охлаждение на отборе тела
+
+			power.heaterPower = power.inPowerLow;		// установили мощность на ТЭН 65 %
+			timeAllertInterval = millis() + 10000;		// установим счетчик времени для зв.сигнала 10 сек.
+			processMode.timeStep = 0;
+			nameProcessStep = "Стабилизация колонны";
+			processMode.step = 2;		// перешли на следующий шаг алгоритма
+			stepNext = 0;
+		}
+		break;
+	}
+			// пищалка на 10 сек.
+	case 2: {
+		if (timeAllertInterval <= millis() || stepNext == 1) {
+			timePauseOff = timeStabilizationReflux * 60000 + millis(); // время стабилизации колонны
+			processMode.step = 3;	// перешли на следующий шаг алгоритма
+			stepNext = 0;
+		}
+		break;
+	}
+			// ждем окончание стабилизации 20 минут
+	case 3: {
+		if (timePauseOff <= millis() || stepNext == 1) {
+			timeAllertInterval = millis() + 10000;	// установим счетчик времени для зв.сигнала 10 сек.
+			processMode.timeStep = 0;
+			nameProcessStep = "Отбор голов";
+			processMode.step = 4;	// перешли на следующий шаг алгоритма
+			stepNext = 0;
+		}
+		break;
+	}
+			// пищалка на 10 сек.
+	case 4: {
+		if (timeAllertInterval <= millis() || stepNext == 1) {
+			processMode.step = 5;		// перешли на следующий шаг алгоритма отбора голов
+			stepNext = 0;
+		}
+		break;
+	}
+			// ждем срабатывание датчика уровня в приемной емкоси голов если он есть, включаем пищалку, поднимаем мощность ТЭН для отбора
+	case 5: {
+		if ((adcIn[0].member == 1 && adcIn[0].allert == true) || stepNext == 1) {
+			if (countHaedEnd <= millis() || stepNext == 1) {	// антирдебезг 10 сек. :)
+				timeAllertInterval = millis() + 10000;	// счетчик времени для зв.сигнала
+				processMode.step = 6;		// перешли на следующий шаг алгоритма
+				stepNext = 0;
+			}
+		}
+		else countHaedEnd = millis() + 10000;
+
+		if (processMode.step == 6) {
+			csOff(PWM_CH1);	// закрыли клапан отбора голов
+			csOff(PWM_CH2);				// охлаждение на отборе голов
+			if (pwmOut[3].member == 1) csOff(PWM_CH4);		// закрыли клапан слива ПБ
+			// открыть шаровый кран отбора по пару
+			bodyPrimaPercentSet = percentCalc(bodyPrimaPercentStart);
+			setPWM(PWM_CH5, 0, bodyPrimaPercentSet);
+			///////////////////////////////////
+			processMode.timeStep = 0;
+			bodyTimeOffCount = 0;
+			bodyValveSet = true;
+			nameProcessStep = "Отбор тела";
+		}
+		// рулим клапаном отбора голов
+		else if (pwmOut[0].member == 1) valveSet(PWM_CH1);
+		break;
+	}
+
+
+			// ждем окончание по достижению температуры в кубе и рулим клапаном доп. охлаждения
+	case 6: {
+		if ((temperatureSensor[DS_Cube].allertValue > 0 && temperatureSensor[DS_Cube].data >= temperatureSensor[DS_Cube].allertValue) || stepNext == 1) {
+			power.heaterStatus = 0;							// выключили ТЭН
+			power.heaterPower = 0;							// установили мощность на ТЭН 0 %
+			temperatureSensor[DS_Cube].allert = true;	// сигнализация для WEB
+			processMode.timeStep = 0;
+			nameProcessStep = "Процесс закончен";
+			if (pwmOut[3].member == 1) csOn(PWM_CH4);
+			processMode.step = 7;						// перешли на следующий шаг алгоритма
+			numOkStop = 1;
+			stepNext = 0;
+			break;
+		}
+		else if (temperatureSensor[DS_Tube].allertValue > 0 && temperatureSensor[DS_Tube].data >= temperatureSensor[DS_Tube].allertValue) {
+			temperatureSensor[DS_Tube].allert = true;
+			// если первый стоп пищим 10 сек.
+			if (counterStartStop == 0) timeAllertInterval = millis() + 10000;			// установим счетчик времени для зв.сигнала
+			if (bodyValveSet) {
+				counterStartStop++;
+				nameProcessStep = "Отбор тела, " + String(counterStartStop) + "-й стоп";
+				bodyValveSet = false;
+			}
+			csOn(PWM_CH2);								// открыли клапан доп. подачи воды
+		}
+
+		if (adcIn[0].allert == true && alertLevelEnable == true) {
+			csOn(PWM_CH2);  // если емкость полная - уменьшаем отбор
+			//bodyTimeOffCount = processMode.timeStep;			// сбрасываем таймер остановки процесса
+		}
+		else if ((temperatureSensor[DS_Tube].data <= temperatureSensor[DS_Tube].allertValue - settingBoilTube) || temperatureSensor[DS_Tube].allertValue == 0) {
+			temperatureSensor[DS_Tube].allert = false;
+			csOff(PWM_CH2);	// закрыли клапан доп. подачи воды
+			if (counterStartStop == 0) nameProcessStep = "Отбор тела";
+			else nameProcessStep = "Отбор тела, старт/стопов - " + String(counterStartStop);
+			bodyValveSet = true;
+			//bodyTimeOffCount = processMode.timeStep;			// сбрасываем таймер остановки процесса
+		}
+
+		if (bodyValveSet == true) bodyTimeOffCount = processMode.timeStep;			// сбрасываем таймер остановки процесса
+
+		break;
+	}
+
+
+			// после завершения процесса ждем 120 сек. и выключаем клапана и пищалку
+	case 7: {
+		csOff(PWM_CH6);								// выключить дополнительный ТЭН на разгон
+		power.heaterStatus = 0;						// выключили ТЭН
+		power.heaterPower = 0;						// установили мощность 0%
+#if defined TFT_Display
+// выводим информацию по окончанию процесса
+		if (stopInfoOutScreen == true) {
+			outStopInfo();
+			stopInfoOutScreen = false;
+		}
+		else if (touch_in == true && stopInfoOutScreen == false) {
+			processMode.allow = 0;  // вышли из режима дистилляции
+			processMode.step = 0;	// обнулили шаг алгоритма
+			commandWriteSD = "Процесс завершен";
+			commandSD_en = true;
+			stopInfoOutScreen = true;
+			touchScreen = 0;
+			touchArea = 0;
+			touch_in = false;
+			initBuzzer(50);
+			delay(500);
+			attachInterrupt(intTouch, touchscreenUpdateSet, FALLING);
+		}
+#endif
+		// ждем 10 сек. до выключения сигнализации
+		if (processMode.timeStep >= 10 || adcIn[1].allert == true) {
+			csOff(PWM_CH1);				// закрыли клапан отбора
+			csOff(PWM_CH2);				// закрыли клапан отбора
+			setPWM(PWM_CH5, 0, 10);		// закрыть шаровый кран
+			settingAlarm = false;		// выключили звуковой сигнал
+			alertEnable = false;
+		}
+		// ждем 5 минут. до выключения клапанов
+		if (processMode.timeStep >= 300 || adcIn[2].allert == true) {
+			csOff(PWM_CH3);		// закрыли клапан подачи воды
+			temperatureSensor[DS_Cube].allert = false;	// сигнализация для WEB
+			temperatureSensor[DS_Tube].allert = false;
+			stepNext = 0;
+#ifndef TFT_Display
+			processMode.allow = 0;  // вышли из режима ректификации
+			processMode.step = 0;	// обнулили шаг алгоритма
+			commandWriteSD = "Процесс завершен";
+			commandSD_en = true;
+#endif
+		}
+		break;
+	}
+	}
+}
+*/
+
+
+
+
+
+
+
+
+
+
 // Прима - головы по жидкости, тело по пару
 // PWM_CH1 или PWM_CH2 - клапан отбора голов
 // PWM_CH3 - клапан подачи воды
@@ -780,6 +983,11 @@ void rfluxLoopMode_2() {
 		}
 	}
 }
+
+
+
+
+
 
 // РК по пару
 // PWM_CH3 - клапан подачи воды
@@ -1176,8 +1384,8 @@ void rfluxLoopMode_4() {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 				if (adcIn[0].allert == true && alertLevelEnable == true) { // если емкость полная - прекращаем отбор
-					if (typeRefOfValwe == 1) csOn(PWM_CH1);
-					else csOn(PWM_CH2);
+					if (typeRefOfValwe == 1) csOff(PWM_CH1);
+					else csOff(PWM_CH2);
 				}
 				else {
 					if (typeRefOfValwe == 1) valveSet(PWM_CH1);

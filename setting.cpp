@@ -15,7 +15,7 @@ WiFiClient client;
 // PID
 PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
 
-String curVersion = "2.0RC19a";
+String curVersion = "2.0RC19b";
 uint16_t versionForWeb = 2019;
 // Определяем переменные wifi
 String _ssid;      // Для хранения SSID
