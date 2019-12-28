@@ -545,7 +545,7 @@ void handleProcessModeIn() {
 			allertSave = true;
 		}
 		// параметры для клапанов и шарового крана + запись в EEPROM
-		if (processMode.number == 1 || processMode.number == 3 || processMode.number == 4) {	// головы = Прима и РК по жиже
+		if (processMode.number == 1 || processMode.number == 3 || processMode.number == 4 || processMode.number == 6) {	// головы = Прима, РК по жиже, БК с доп узлом отбора
 			headTimeCycle = HTTP.arg("head[timeCycle]").toInt();
 			if (headTimeCycle > 30) headTimeCycle = 30;
 			headtimeOn = HTTP.arg("head[timeOn]").toFloat();

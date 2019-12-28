@@ -7,6 +7,7 @@ int temp_in_old, temp_convert;
 uint16_t grColor;
 unsigned long timeOffMenu;
 uint8_t typePr = 0;
+//uint8_t cnt_p = 0;
 
 void fillScreenRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t color) {
 	const uint32_t mask = ~((SPIMMOSI << SPILMOSI) | (SPIMMISO << SPILMISO));
@@ -367,7 +368,7 @@ void tftOutText(int temp_min, int temp_max) {
 			// % алкоголя в кубе
 			tft.setCursor(42, 30);
 			if (temperatureCubeAlcohol <= 50 && temperatureCubeAlcohol >= 10) tft.printf("%.1f%% ", temperatureCubeAlcohol);
-			else if (temperatureCubeAlcohol < 10 && temperatureCubeAlcohol >= 1) tft.printf(" %.1f%% ", temperatureCubeAlcohol);
+			else if (temperatureCubeAlcohol < 10 && temperatureCubeAlcohol >= 0.1) tft.printf(" %.1f%% ", temperatureCubeAlcohol);
 			else tft.print("--.-% ");
 			break;
 		}
@@ -397,7 +398,7 @@ void tftOutText(int temp_min, int temp_max) {
 			// % алкоголя в кубе
 			tft.setCursor(42, 30);
 			if (temperatureCubeAlcohol <= 50 && temperatureCubeAlcohol >= 10) tft.printf("%.1f%% ", temperatureCubeAlcohol);
-			else if (temperatureCubeAlcohol < 10 && temperatureCubeAlcohol >= 1) tft.printf(" %.1f%% ", temperatureCubeAlcohol);
+			else if (temperatureCubeAlcohol < 10 && temperatureCubeAlcohol >= 0.1) tft.printf(" %.1f%% ", temperatureCubeAlcohol);
 			else tft.print("--.-% ");
 			break;
 		}
@@ -510,33 +511,34 @@ void tftOutText(int temp_min, int temp_max) {
 			if (adcIn[3].allert == true) tft.fillCircle(98, 54, 5, 0xFACB);
 			else tft.fillCircle(98, 54, 5, ILI9341_BLACK);
 		}
-		tft.setCursor(135, 47);
+		tft.setCursor(122, 47);
 		tft.setTextColor(ILI9341_LIGHTGREY);
 		tft.printf(">>");
-		if (pwmOut[0].member == 0) tft.drawCircle(173, 54, 6, ILI9341_DARKDARK);
+		if (pwmOut[0].member == 0) tft.drawCircle(160, 54, 6, ILI9341_DARKDARK);
 		else {
-			tft.drawCircle(173, 54, 6, ILI9341_LIGHTGREY);
-			if (pwmOut[0].allert == true) tft.fillCircle(173, 54, 5, 0x47EA);
-			else tft.fillCircle(173, 54, 5, ILI9341_BLACK);
+			tft.drawCircle(160, 54, 6, ILI9341_LIGHTGREY);
+			if (pwmOut[0].allert == true) tft.fillCircle(160, 54, 5, 0x47EA);
+			else tft.fillCircle(160, 54, 5, ILI9341_BLACK);
 		}
-		if (pwmOut[1].member == 0) tft.drawCircle(193, 54, 6, ILI9341_DARKDARK);
+		if (pwmOut[1].member == 0) tft.drawCircle(180, 54, 6, ILI9341_DARKDARK);
 		else {
-			tft.drawCircle(193, 54, 6, ILI9341_LIGHTGREY);
-			if (pwmOut[1].allert == true) tft.fillCircle(193, 54, 5, 0x47EA);
-			else tft.fillCircle(193, 54, 5, ILI9341_BLACK);
+			tft.drawCircle(180, 54, 6, ILI9341_LIGHTGREY);
+			if (pwmOut[1].allert == true) tft.fillCircle(180, 54, 5, 0x47EA);
+			else tft.fillCircle(180, 54, 5, ILI9341_BLACK);
 		}
-		if (pwmOut[2].member == 0) tft.drawCircle(213, 54, 6, ILI9341_DARKDARK);
+		if (pwmOut[2].member == 0) tft.drawCircle(200, 54, 6, ILI9341_DARKDARK);
 		else {
-			tft.drawCircle(213, 54, 6, ILI9341_LIGHTGREY);
-			if (pwmOut[2].allert == true) tft.fillCircle(213, 54, 5, 0x47EA);
-			else tft.fillCircle(213, 54, 5, ILI9341_BLACK);
+			tft.drawCircle(200, 54, 6, ILI9341_LIGHTGREY);
+			if (pwmOut[2].allert == true) tft.fillCircle(200, 54, 5, 0x47EA);
+			else tft.fillCircle(200, 54, 5, ILI9341_BLACK);
 		}
-		if (pwmOut[3].member == 0) tft.drawCircle(233, 54, 6, ILI9341_DARKDARK);
+		if (pwmOut[3].member == 0) tft.drawCircle(220, 54, 6, ILI9341_DARKDARK);
 		else {
-			tft.drawCircle(233, 54, 6, ILI9341_LIGHTGREY);
-			if (pwmOut[3].allert == true) tft.fillCircle(233, 54, 5, 0x47EA);
-			else tft.fillCircle(233, 54, 5, ILI9341_BLACK);
+			tft.drawCircle(220, 54, 6, ILI9341_LIGHTGREY);
+			if (pwmOut[3].allert == true) tft.fillCircle(220, 54, 5, 0x47EA);
+			else tft.fillCircle(220, 54, 5, ILI9341_BLACK);
 		}
+/*
 		if (pwmOut[4].member == 0) tft.drawCircle(253, 54, 6, ILI9341_DARKDARK);
 		else {
 			tft.drawCircle(253, 54, 6, ILI9341_LIGHTGREY);
@@ -561,6 +563,7 @@ void tftOutText(int temp_min, int temp_max) {
 			if (pwmOut[7].allert == true) tft.fillCircle(313, 54, 5, 0x47EA);
 			else tft.fillCircle(313, 54, 5, ILI9341_BLACK);
 		}
+*/
 	}
 	else if (processMode.allow == 3) {
 		// в процессе затирания выводим время и температуру паузы
@@ -621,14 +624,27 @@ void tftOutText(int temp_min, int temp_max) {
 		drawBigTemp(87, 2, temp_convert, grColor, ILI9341_BLACK);
 	}
 
-	// вывод времени и давления
+	// вывод времени, давления и мощности
 	tft.setTextSize(2);
 	tft.setCursor(223, 2);
 	tft.setTextColor(ILI9341_LIGHTGREY, ILI9341_BLACK);
 	tft.print(time_ntp);
-	tft.setCursor(236, 22);
+	// давление
+	tft.setCursor(235, 24);
 	tft.setTextColor(ILI9341_CYAN, ILI9341_BLACK); // голубой
 	tft.printf("%d mm", (int)pressureSensor.data);
+	// мощность
+	if (processMode.allow == 1 || processMode.allow == 2) {
+		tft.setTextColor(ILI9341_ORANGE, ILI9341_BLACK);
+		tft.setCursor(235, 46);
+		if (power.heaterPower == 100) tft.printf("%d", (int)power.heaterPower);
+		else if (power.heaterPower >= 10) tft.printf(" %d", (int)power.heaterPower);
+		else tft.printf("  %d", (int)power.heaterPower);
+		tft.setCursor(274, 52);
+		tft.setTextSize(1);
+		tft.print("%");
+		// бегущие стрелки перенес в display.cpp
+	}
 }
 
 void tftOutGraphDisplay() {
