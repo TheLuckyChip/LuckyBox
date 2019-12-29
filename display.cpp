@@ -1,6 +1,8 @@
 #include "display.h"
 
 byte touchRead = 0;
+uint8_t cnt_p = 0;
+unsigned long displayPowerInterval;
 
 void displayLoop() {
 	// опрос тачскрина
@@ -114,5 +116,20 @@ void displayLoop() {
 		if (processMode.allow != 0 && processMode.allow != 6 && processMode.step != 0 && touchScreen == 0) tftOutGraphDisplay(); // вывод на дисплей графиков, если он есть
 		DefCubOut++;
 #endif
+	}
+	// Вывод бегущей строчки мощности
+	if ((processMode.allow == 1 || processMode.allow == 2) && millis() > displayPowerInterval) {
+		displayPowerInterval = millis() + 250;
+		csOn(TFT_CS);
+		tft.setTextColor(ILI9341_ORANGE, ILI9341_BLACK);
+		tft.setCursor(283, 46);
+		tft.setTextSize(2);
+		switch (cnt_p) {
+			case 0: tft.print(">  "); cnt_p = 1; break;
+			case 1: tft.print(">> "); cnt_p = 2; break;
+			case 2: tft.print(" >>"); cnt_p = 3; break;
+			case 3: tft.print("  >"); cnt_p = 0; break;
+		}
+		csOff(TFT_CS);
 	}
 }

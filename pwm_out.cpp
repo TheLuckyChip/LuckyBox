@@ -56,7 +56,7 @@ void csOn(byte ch) {
 			CH_up1 = false;
 			if (pwmOut[8].invert == false) pwm.setPWM(PWM_CH9, 0, 4096);
 			else pwm.setPWM(PWM_CH9, 4096, 0);
-			timeSetHighVoltage = millis() + 500;
+			timeSetHighVoltage = millis() + 250;
 			// включаем сам клапан
 			pwmOut[0].allert = 1;
 			if (pwmOut[0].invert == false) pwm.setPWM(ch, 0, 4096);
@@ -70,7 +70,7 @@ void csOn(byte ch) {
 			CH_up2 = false;
 			if (pwmOut[8].invert == false) pwm.setPWM(PWM_CH9, 0, 4096);
 			else pwm.setPWM(PWM_CH9, 4096, 0);
-			timeSetHighVoltage = millis() + 500;
+			timeSetHighVoltage = millis() + 250;
 			// включаем сам клапан
 			pwmOut[1].allert = 1;
 			if (pwmOut[1].invert == false) pwm.setPWM(ch, 0, 4096);
@@ -84,7 +84,7 @@ void csOn(byte ch) {
 			CH_up3 = false;
 			if (pwmOut[8].invert == false) pwm.setPWM(PWM_CH9, 0, 4096);
 			else pwm.setPWM(PWM_CH9, 4096, 0);
-			timeSetHighVoltage = millis() + 500;
+			timeSetHighVoltage = millis() + 250;
 			// включаем сам клапан
 			pwmOut[2].allert = 1;
 			if (pwmOut[2].invert == false) pwm.setPWM(ch, 0, 4096);
@@ -98,7 +98,7 @@ void csOn(byte ch) {
 			CH_up4 = false;
 			if (pwmOut[8].invert == false) pwm.setPWM(PWM_CH9, 0, 4096);
 			else pwm.setPWM(PWM_CH9, 4096, 0);
-			timeSetHighVoltage = millis() + 500;
+			timeSetHighVoltage = millis() + 250;
 			// включаем сам клапан
 			pwmOut[3].allert = 1;
 			if (pwmOut[3].invert == false) pwm.setPWM(ch, 0, 4096);

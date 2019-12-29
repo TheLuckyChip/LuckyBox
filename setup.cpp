@@ -167,7 +167,20 @@ void setup()
 	while (SPI1CMD & SPIBUSY) {}
 	SPI.endTransaction();
 
+	// выводим версию поверх логотипа
+	//tft.setTextColor(ILI9341_BLACK);
+	//tft.setCursor(223, 35);
+	//tft.setTextSize(2);
+	//tft.print(utf8rus("Версия ПО:"));
+	//tft.setCursor(223, 35+18);
+	//tft.print(curVersion);
+	//tft.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
+	//tft.setTextSize(1);
+
 	// рисуем квадратики для индикации загрузки
+	//tft.setCursor(0, 2);
+	///////////////////////////////////////////////
+	//tft.print("Step 1 - I2C initialize          ");
 	scaleCount = 2;
 	tft.writeFillRect(scaleCount, 215, 15, 15, 0xFFFF);
 	delay(150);
@@ -191,6 +204,9 @@ void setup()
 	Serial.println("Step 3 - FS Init");
 #if defined TFT_Display
 	// рисуем квадратики для индикации загрузки
+	//tft.setCursor(0, 2);
+	///////////////////////////////////////////////
+	//tft.print("Step 2 - File system initialize  ");
 	scaleCount += 20;
 	tft.writeFillRect(scaleCount, 215, 15, 15, 0xFFFF);
 #endif
@@ -201,6 +217,9 @@ void setup()
 	Serial.println("Step 5 - WIFI Init");
 #if defined TFT_Display
 	// рисуем квадратики для индикации загрузки
+	//tft.setCursor(0, 2);
+	///////////////////////////////////////////////
+	//tft.print("Step 3 - WiFi initialize         ");
 	scaleCount += 20;
 	tft.writeFillRect(scaleCount, 215, 15, 15, 0xFFFF);
 #endif
@@ -235,6 +254,9 @@ void setup()
 		Serial.println("Step 7  - SSDP Init");
 #if defined TFT_Display
 		// рисуем квадратики для индикации загрузки
+		//tft.setCursor(0, 2);
+		///////////////////////////////////////////////
+		//tft.print("Step 4 - Start Web server        ");
 		scaleCount += 20;
 		if (scaleCount <= 282) tft.writeFillRect(scaleCount, 215, 15, 15, 0xFFFF);
 #endif
@@ -247,6 +269,9 @@ void setup()
 	Serial.println("Step 9  - Reflux Init");
 #if defined TFT_Display
 	// рисуем квадратики для индикации загрузки
+	//tft.setCursor(0, 2);
+	///////////////////////////////////////////////
+	//tft.print("Step 5 - Variable initialization ");
 	scaleCount += 20;
 	if (scaleCount <= 282) tft.writeFillRect(scaleCount, 215, 15, 15, 0xFFFF);
 #endif
@@ -275,6 +300,9 @@ void setup()
 	dallRead(10);
 #if defined TFT_Display
 	// рисуем квадратики для индикации загрузки
+	//tft.setCursor(0, 2);
+	///////////////////////////////////////////////
+	//tft.print("Step 6 - Sensors initialization  ");
 	scaleCount += 20;
 	if (scaleCount <= 282) tft.writeFillRect(scaleCount, 215, 15, 15, 0xFFFF);
 #endif
@@ -284,6 +312,9 @@ void setup()
 	dallRead(10);
 #if defined TFT_Display
 	// рисуем квадратики для индикации загрузки
+	//tft.setCursor(0, 2);
+	///////////////////////////////////////////////
+	//tft.print("Step 7 - ADC initialization      ");
 	scaleCount += 20;
 	if (scaleCount <= 282) tft.writeFillRect(scaleCount, 215, 15, 15, 0xFFFF);
 #endif
@@ -308,6 +339,9 @@ void setup()
   adcInit();
   #if defined TFT_Display
   // рисуем квадратики для индикации загрузки
+  //tft.setCursor(0, 2);
+  ///////////////////////////////////////////////
+  //tft.print("Step 8 - TouhScreen initialization");
   scaleCount += 20;
   if (scaleCount <= 282) tft.writeFillRect(scaleCount, 215, 15, 15, 0xFFFF);
 

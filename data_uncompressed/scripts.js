@@ -805,7 +805,8 @@ $(function () {
 		{"value":2,"text":"Отбор по пару"},
 		{"value":3,"text":"РК отбор по жидкости (1 клапан на отбор)"},
 		{"value":4,"text":"РК отбор по жидкости (2 клапана на отбор)"},
-		{"value":5,"text":"Бражная колонна, регулировка отбора охлаждением"}
+		{"value":5,"text":"Бражная колонна, регулировка отбора охлаждением"},
+		{"value":6,"text":"Бражная колонна, головная фракция по жидкости"}
 		// {"value":3,"text":"РК по жидкости 1 клапан (головы - импульсы, тело - дельта)"},
 		// {"value":4,"text":"РК по жидкости 2 клапана (головы - импульсы, тело - дельта)"},
 		// {"value":5,"text":"РК по жидкости 2 клапана (головы - открыт, тело - дельта)"},
@@ -2455,7 +2456,7 @@ $(function () {
 		refluxProcess["number"] = algorithm_val;
 		if($("#reflux_devices_out").length > 0) {
 			console.log("reflux_devices_out", algorithm_val);
-			if (algorithm_val === 1 || algorithm_val === 2 || algorithm_val === 3 || algorithm_val === 4) {
+			if (algorithm_val === 1 || algorithm_val === 2 || algorithm_val === 3 || algorithm_val === 4 || algorithm_val === 6) {
 				$("#reflux_devices_out").removeClass("hidden");
 			}else{
 				$("#reflux_devices_out").addClass("hidden");
@@ -2487,6 +2488,14 @@ $(function () {
 			}else if (algorithm_val === 4){
 				$("#reflux_devices_head_rk").removeClass("hidden");
 				$("#reflux_devices_body_rk").removeClass("hidden");
+				$("#reflux_devices_head_steam").addClass("hidden");
+				$("#reflux_devices_body_steam").addClass("hidden");
+				$("#reflux_devices_head_prima").addClass("hidden");
+				$("#reflux_devices_body_prima").addClass("hidden");
+				// $("#reflux_devices_out_header").removeClass("hidden");
+			}else if (algorithm_val === 6){
+				$("#reflux_devices_head_rk").removeClass("hidden");
+				$("#reflux_devices_body_rk").addClass("hidden");
 				$("#reflux_devices_head_steam").addClass("hidden");
 				$("#reflux_devices_body_steam").addClass("hidden");
 				$("#reflux_devices_head_prima").addClass("hidden");
@@ -2813,6 +2822,25 @@ $(function () {
 						refluxSendData["body"]["decline"] = val_reflux_body_decline_rk;
 					}
 				}
+				//бражная с клапаном на головы
+				if (Number(refluxSendData["process"]["number"]) === 6) {
+					let reflux_head_cycle_rk = $("#reflux_head_cycle_rk");
+					let reflux_head_time_rk = $("#reflux_head_time_rk");
+					if (reflux_head_cycle_rk.length) {
+						let val_reflux_head_cycle_rk = Number(reflux_head_cycle_rk.val());
+						if (Number(valwe_head["head"]["timeCycle"]) !== val_reflux_head_cycle_rk) {
+							flagSendProcess = true;
+						}
+						refluxSendData["head"]["timeCycle"] = val_reflux_head_cycle_rk;
+					}
+					if (reflux_head_time_rk.length) {
+						let val_reflux_head_time_rk = Number(reflux_head_time_rk.val());
+						if (Number(valwe_head["head"]["timeOn"]) !== val_reflux_head_time_rk) {
+							flagSendProcess = true;
+						}
+						refluxSendData["head"]["timeOn"] = val_reflux_head_time_rk;
+					}
+				}
 			}
 			if(stepRefluxNext){
 				flagSendProcess = true;
@@ -3111,7 +3139,7 @@ $(function () {
 					}
 
 				}
-				//жижа
+				//жижа и бражная колонна с клапаном
 				let reflux_head_cycle_rk = $("#reflux_head_cycle_rk");
 				let reflux_head_time_rk = $("#reflux_head_time_rk");
 				let reflux_body_cycle_rk = $("#reflux_body_cycle_rk");
