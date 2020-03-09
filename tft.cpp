@@ -481,7 +481,9 @@ void tftOutText(int temp_min, int temp_max) {
 		}
 	}
 
-	if (processMode.allow < 3) {
+
+
+	/*if (processMode.allow < 3) {
 		// состояние входов и выходов для дистилляции и ректификации
 		tft.setTextSize(2);
 		tft.setCursor(0, 47);
@@ -538,34 +540,8 @@ void tftOutText(int temp_min, int temp_max) {
 			if (pwmOut[3].allert == true) tft.fillCircle(220, 54, 5, 0x47EA);
 			else tft.fillCircle(220, 54, 5, ILI9341_BLACK);
 		}
-/*
-		if (pwmOut[4].member == 0) tft.drawCircle(253, 54, 6, ILI9341_DARKDARK);
-		else {
-			tft.drawCircle(253, 54, 6, ILI9341_LIGHTGREY);
-			if (pwmOut[4].allert == true) tft.fillCircle(253, 54, 5, 0x47EA);
-			else tft.fillCircle(253, 54, 5, ILI9341_BLACK);
-		}
-		if (pwmOut[5].member == 0) tft.drawCircle(273, 54, 6, ILI9341_DARKDARK);
-		else {
-			tft.drawCircle(273, 54, 6, ILI9341_LIGHTGREY);
-			if (pwmOut[5].allert == true) tft.fillCircle(273, 54, 5, 0x47EA);
-			else tft.fillCircle(273, 54, 5, ILI9341_BLACK);
-		}
-		if (pwmOut[6].member == 0) tft.drawCircle(293, 54, 6, ILI9341_DARKDARK);
-		else {
-			tft.drawCircle(293, 54, 6, ILI9341_LIGHTGREY);
-			if (pwmOut[6].allert == true) tft.fillCircle(293, 54, 5, 0x47EA);
-			else tft.fillCircle(293, 54, 5, ILI9341_BLACK);
-		}
-		if (pwmOut[7].member == 0) tft.drawCircle(313, 54, 6, ILI9341_DARKDARK);
-		else {
-			tft.drawCircle(313, 54, 6, ILI9341_LIGHTGREY);
-			if (pwmOut[7].allert == true) tft.fillCircle(313, 54, 5, 0x47EA);
-			else tft.fillCircle(313, 54, 5, ILI9341_BLACK);
-		}
-*/
 	}
-	else if (processMode.allow == 3) {
+	else*/ if (processMode.allow == 3) {
 		// в процессе затирания выводим время и температуру паузы
 
 		if (processMashing[0].step == 1) {
@@ -634,7 +610,7 @@ void tftOutText(int temp_min, int temp_max) {
 	tft.setTextColor(ILI9341_CYAN, ILI9341_BLACK); // голубой
 	tft.printf("%d mm", (int)pressureSensor.data);
 	// мощность
-	if (processMode.allow == 1 || processMode.allow == 2) {
+	/*if (processMode.allow == 1 || processMode.allow == 2) {
 		tft.setTextColor(ILI9341_ORANGE, ILI9341_BLACK);
 		tft.setCursor(235, 46);
 		if (power.heaterPower == 100) tft.printf("%d", (int)power.heaterPower);
@@ -644,7 +620,7 @@ void tftOutText(int temp_min, int temp_max) {
 		tft.setTextSize(1);
 		tft.print("%");
 		// бегущие стрелки перенес в display.cpp
-	}
+	}*/
 }
 
 void tftOutGraphDisplay() {

@@ -519,6 +519,9 @@ void rfluxLoopMode_1() {
 				delay(500);
 				attachInterrupt(intTouch, touchscreenUpdateSet, FALLING);
 			}
+			else { // просто вывод строки с датчиками, клапанами и мощностью
+
+			}
 #endif
 			// ждем 10 сек. до выключения сигнализации
 			if (processMode.timeStep >= 10 || adcIn[1].allert == true) {
@@ -1205,10 +1208,12 @@ void rfluxLoopMode_4() {
 					temperatureSensor[DS_Cube].allert = false;	// сигнализация для WEB
 					temperatureSensor[DS_Tube].allert = false;
 					stepNext = 0;
+#ifndef TFT_Display
 					processMode.allow = 0;  // вышли из режима ректификации
 					processMode.step = 0;	// обнулили шаг алгоритма
 					commandWriteSD = "Процесс завершен";
 					commandSD_en = true;
+#endif
 				}
 			}
 			// или 20 мин.
@@ -1425,10 +1430,12 @@ void rfluxLoopMode_5() {
 				temperatureSensor[DS_Cube].allert = false;	// сигнализация для WEB
 				temperatureSensor[DS_Tube].allert = false;
 				stepNext = 0;
+#ifndef TFT_Display
 				processMode.allow = 0;  // вышли из режима ректификации
 				processMode.step = 0;	// обнулили шаг алгоритма
 				commandWriteSD = "Процесс завершен";
 				commandSD_en = true;
+#endif
 			}
 		}
 		// или 20 мин.
@@ -1633,10 +1640,12 @@ void rfluxLoopMode_6() {
 				temperatureSensor[DS_Cube].allert = false;	// сигнализация для WEB
 				temperatureSensor[DS_Tube].allert = false;
 				stepNext = 0;
+#ifndef TFT_Display
 				processMode.allow = 0;  // вышли из режима ректификации
 				processMode.step = 0;	// обнулили шаг алгоритма
 				commandWriteSD = "Процесс завершен";
 				commandSD_en = true;
+#endif
 			}
 		}
 		// или 20 мин.
@@ -1881,10 +1890,12 @@ void rfluxLoopMode_6() {
 				temperatureSensor[DS_Cube].allert = false;	// сигнализация для WEB
 				temperatureSensor[DS_Tube].allert = false;
 				stepNext = 0;
+#ifndef TFT_Display
 				processMode.allow = 0;  // вышли из режима ректификации
 				processMode.step = 0;	// обнулили шаг алгоритма
 				commandWriteSD = "Процесс завершен";
 				commandSD_en = true;
+#endif
 			}
 		}
 		// или 20 мин.
@@ -2078,10 +2089,12 @@ void rfluxLoopMode_6() {
 					temperatureSensor[DS_Cube].allert = false;	// сигнализация для WEB
 					temperatureSensor[DS_Tube].allert = false;
 					stepNext = 0;
+#ifndef TFT_Display
 					processMode.allow = 0;  // вышли из режима ректификации
 					processMode.step = 0;	// обнулили шаг алгоритма
 					commandWriteSD = "Процесс завершен";
 					commandSD_en = true;
+#endif
 				}
 			}
 			// или 20 мин.

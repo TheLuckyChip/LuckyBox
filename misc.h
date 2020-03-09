@@ -15,5 +15,6 @@ extern void EEPROM_float_write(int addr, float val);
 extern void stop_Err();
 extern void check_Err();
 extern void stepApLoop();
+extern void setUserPWM(uint8_t pr);
 
 #endif

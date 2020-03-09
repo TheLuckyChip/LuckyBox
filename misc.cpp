@@ -67,3 +67,10 @@ void stepApLoop() {
 		}
 	}
 }
+
+void setUserPWM(uint8_t pr) {
+	uint16_t calc = pr * 40.95;
+	if (pr == 0) pwm.setPWM(PWM_CH7, 4096, 0); // off
+	else if (pr >= 100) pwm.setPWM(PWM_CH7, 0, 4096);
+	else pwm.setPWM(PWM_CH7, 0, calc);
+}

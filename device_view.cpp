@@ -117,6 +117,13 @@ void deviceViewLoop() {
 		switch (processMode.step) {
 			case 0: {
 				timeOut = millis();
+				// gпроверка pwm_for_user
+				if (CH4 == true) setUserPWM(100);
+				else if (CH3 == true) setUserPWM(75);
+				else if (CH2 == true) setUserPWM(50);
+				else if (CH1 == true) setUserPWM(25);
+				else setUserPWM(0);
+
 	#if defined TFT_Display
 				// подготовка данных для вывода на TFT
 				csOn(TFT_CS);

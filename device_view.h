@@ -12,7 +12,7 @@
 #include <time.h>
 #include "tft.h"
 #include "pwm_out.h"
-//#include <EEPROM.h>
+#include "misc.h"
 
 extern void deviceViewLoop();
 
