@@ -956,11 +956,23 @@ void outStopInfo() {
 				tft.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
 				tft.print(utf8rus("Штатно по алгоритму."));
 			}
+			if (numOkStop == 0) {
+				tft.setCursor(10, y);
+				tft.print(utf8rus("Т в кубе"));
+			}
+			else if (numOkStop == 1) {
+				tft.setCursor(10, y);
+				tft.print(utf8rus("% спирта в кубе"));
+			}
 		}
 		else {
 			tft.print(utf8rus("Штатно по алгоритму."));
 			y += 20;
-			if (numOkStop == 1) {
+			if (numOkStop == 0) {
+				tft.setCursor(10, y);
+				tft.print(utf8rus("Пропуск шага"));
+			}
+			else if (numOkStop == 1) {
 				tft.setCursor(10, y);
 				tft.print(utf8rus("Т в кубе"));
 			}

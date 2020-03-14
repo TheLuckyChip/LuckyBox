@@ -301,6 +301,7 @@ void distillationLoop() {
   				processMode.timeStep = 0;
   				nameProcessStep = "Процесс закончен";
   				settingAlarm = true;
+				numOkStop = 0;
   				processMode.step = 4;						// перешли на следующий шаг алгоритма
   			}
       }
@@ -313,6 +314,7 @@ void distillationLoop() {
           processMode.timeStep = 0;
           nameProcessStep = "Процесс закончен";
           settingAlarm = true;
+	  numOkStop = 1;
           processMode.step = 4;           // перешли на следующий шаг алгоритма
         }
       }

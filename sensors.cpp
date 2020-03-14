@@ -359,6 +359,9 @@ void sensorsUserSetOutWeb() {
 void handleProcessSensorOut() {
 	int i, k;
 	float cubeAlcohol;
+	float prSteam = (float)headSteamPercent / 2;
+	float prStart = (float)bodyPrimaPercentStart / 2;
+	float prStop = (float)bodyPrimaPercentStop / 2;
 	if (temperatureCubeAlcohol <= 50 && temperatureCubeAlcohol > 0) cubeAlcohol = temperatureCubeAlcohol;
 	else cubeAlcohol = 0;
 	temperatureAlcoholBoil = 78.91 - (780 - pressureSensor.data)*0.038; // расчет температуры кипения спирта при данном давлении
@@ -405,9 +408,9 @@ void handleProcessSensorOut() {
 	// импульсный режим на клапана
 	dataForWeb += "}}],\"valwe\":[";
 	dataForWeb += "{\"head\":{\"timeCycle\":" + String(headTimeCycle) + ",\"timeOn\":" + String(headtimeOn) + "}},";
-	dataForWeb += "{\"headSteam\":{\"percent\":" + String(headSteamPercent) + "}},";
+	dataForWeb += "{\"headSteam\":{\"percent\":" + String(prSteam) + "}},";
 	dataForWeb += "{\"body\":{\"timeCycle\":" + String(bodyTimeCycle) + ",\"timeOn\":" + String(bodytimeOn) + ",\"decline\":" + String(decline) + "}},";
-	dataForWeb += "{\"bodyPrima\":{\"percentStart\":" + String(bodyPrimaPercentStart) + ",\"percentStop\":" + String(bodyPrimaPercentStop) + ",\"decline\":" + String(bodyPrimaDecline);
+	dataForWeb += "{\"bodyPrima\":{\"percentStart\":" + String(prStart) + ",\"percentStop\":" + String(prStop) + ",\"decline\":" + String(bodyPrimaDecline);
 	// АЦП
 	dataForWeb += "}}],\"safety\":[";
 	for (i = 0; i < ADC_Cnt; i++) {
@@ -432,6 +435,7 @@ void handleProcessModeIn() {
 	int i;
 	byte n;
 	float allertReadTmp;
+	float tmpPR;
 	//commandWriteSD = "WebSend: ";
 	bool allertSave = false;
 	EEPROM.begin(2048);
@@ -580,18 +584,21 @@ void handleProcessModeIn() {
 			}
 		}
 		if (processMode.number == 2) {												// головы = По пару
-			headSteamPercent = HTTP.arg("headSteam[percent]").toInt();
-			if (headSteamPercent > 100) headSteamPercent = 100;
+			tmpPR = HTTP.arg("headSteam[percent]").toFloat();
+			headSteamPercent = tmpPR * 2;
+			if (headSteamPercent > 200) headSteamPercent = 200;
 			if (headSteamPercent != EEPROM.read(1490)) {
 				EEPROM.write(1490, headSteamPercent);
 				allertSave = true;
 			}
 		}
 		if (processMode.number == 1 || processMode.number == 2) {					// тело = Прима и По пару
-			bodyPrimaPercentStart = HTTP.arg("bodyPrima[percentStart]").toInt();
-			if (bodyPrimaPercentStart > 100) bodyPrimaPercentStart = 100;
-			bodyPrimaPercentStop = HTTP.arg("bodyPrima[percentStop]").toInt();
-			if (bodyPrimaPercentStop > 100) bodyPrimaPercentStop = 100;
+			tmpPR = HTTP.arg("bodyPrima[percentStart]").toFloat();
+			bodyPrimaPercentStart = tmpPR * 2;
+			if (bodyPrimaPercentStart > 200) bodyPrimaPercentStart = 200;
+			tmpPR = HTTP.arg("bodyPrima[percentStop]").toFloat();
+			bodyPrimaPercentStop = tmpPR * 2;
+			if (bodyPrimaPercentStop > 200) bodyPrimaPercentStop = 200;
 			bodyPrimaDecline = HTTP.arg("bodyPrima[decline]").toInt();
 			if (bodyPrimaDecline > 30) bodyPrimaDecline = 30;
 			if (bodyPrimaPercentStart != EEPROM.read(1491)) {

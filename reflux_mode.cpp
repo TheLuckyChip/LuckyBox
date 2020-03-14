@@ -59,11 +59,11 @@ void loadEepromReflux() {
 		if (timeBoilTubeSetReflux > 60) timeBoilTubeSetReflux = 10;
 
 		headSteamPercent = EEPROM.read(index); index++;
-		if (headSteamPercent > 100) headSteamPercent = 30;
+		if (headSteamPercent > 200) headSteamPercent = 60;
 		bodyPrimaPercentStart = EEPROM.read(index); index++;
-		if (bodyPrimaPercentStart > 100) bodyPrimaPercentStart = 100;
+		if (bodyPrimaPercentStart > 200) bodyPrimaPercentStart = 200;
 		bodyPrimaPercentStop = EEPROM.read(index); index++;
-		if (bodyPrimaPercentStop > 100) bodyPrimaPercentStop = 40;
+		if (bodyPrimaPercentStop > 200) bodyPrimaPercentStop = 80;
 		bodyPrimaDecline = EEPROM.read(index); index++;
 		if (bodyPrimaDecline > 30) bodyPrimaDecline = 15;
 
@@ -375,11 +375,13 @@ void valveSet(uint8_t ch) {
 	}
 }
 
+// перерасчет процентов в значение ШИМ для шарового крана
+// data = 200 это 100% т.к. шаг изменения 0.5
 uint16_t percentCalc(uint8_t data) {
-	uint8_t cnt = data / 5;
-	uint16_t percent_1 = (uint16_t)((float)(TapCorrection * percentCorrectSquare[cnt]) / 5);
-	uint16_t percent_2 = (uint16_t)((float)(TapCorrection * percentCorrectSquare[cnt + 1]) / 5);
-	uint16_t percent = (uint16_t)((float)(TapCorrection * percentCorrectSquare[cnt])) + (percent_2 - percent_1) * (data - cnt * 5);
+	uint8_t cnt = data / 10;
+	uint16_t percent_1 = (uint16_t)((float)(TapCorrection * percentCorrectSquare[cnt]) / 10);
+	uint16_t percent_2 = (uint16_t)((float)(TapCorrection * percentCorrectSquare[cnt + 1]) / 10);
+	uint16_t percent = (uint16_t)((float)(TapCorrection * percentCorrectSquare[cnt])) + (percent_2 - percent_1) * (data - cnt * 10);
 	return (percent / 5);
 }
 
@@ -406,8 +408,6 @@ void rfluxLoopMode_1() {
 	// выключение звука
 	if (alertEnable == false || (errA == false && errT == false && adcIn[0].allert == false
 		&& temperatureSensor[DS_Tube].allert == false && timeAllertInterval <= millis())) settingAlarm = false;
-
-
 
 	switch (processMode.step) {
 // пришли при старте ректификации
@@ -648,13 +648,14 @@ void rfluxLoopMode_2() {
 				timeAllertInterval = millis() + 10000;		// время для зв. сигнала
 				temperatureSensor[DS_Cube].allert = true;	// сигнализация для WEB
 				processMode.timeStep = 0;
+				if (stepNext == 1) numOkStop = 0;
+				else numOkStop = 1;
 				stepNext = 0;
 				// Закрыли отбор по пару
 				setPWM(PWM_CH5, 0, 10);
 				nameProcessStep = "Процесс закончен";
 				settingAlarm = true;
 				processMode.step = 7;						// перешли на следующий шаг алгоритма
-				numOkStop = 1;
 				break;
 			}
 
@@ -669,9 +670,9 @@ void rfluxLoopMode_2() {
 				bodyValveSet = false;
 
 				// расчет на сколько надо после старт/стопа открыть шаровый кран
-				bodyPrimaPercent = bodyPrimaPercentStart - (bodyPrimaDecline * counterStartStop);
-				if (bodyPrimaPercentStop < (bodyPrimaDecline * counterStartStop)) bodyPrimaPercent = bodyPrimaPercentStop;
-				bodyPrimaPercentSet = percentCalc(bodyPrimaPercent);
+				//bodyPrimaPercent = bodyPrimaPercentStart - (bodyPrimaDecline * counterStartStop * 2);
+				//if (bodyPrimaPercentStop < (bodyPrimaDecline * counterStartStop * 2)) bodyPrimaPercent = bodyPrimaPercentStop;
+				//bodyPrimaPercentSet = percentCalc(bodyPrimaPercent);
 				
 				// если есть польский буфер, работаем до первого стопа
 				if (pwmOut[3].member == 1) {
@@ -692,11 +693,8 @@ void rfluxLoopMode_2() {
 				}
 			}
 
-			// расчет на сколько надо после старт/стопа открыть шаровый кран
-			//bodyPrimaPercent = bodyPrimaPercentStart - (bodyPrimaDecline * counterStartStop);
-
 			// без ПБ рулим по уставке
-			if (temperatureSensor[DS_Tube].data <= temperatureSensor[DS_Tube].allertValue - settingBoilTube) {
+			if (settingBoilTube == 0 || temperatureSensor[DS_Tube].data <= temperatureSensor[DS_Tube].allertValue - settingBoilTube) {
 				temperatureSensor[DS_Tube].allert = false;
 				bodyValveSet = true;							// признак, что надо открыть клапан отбора
 			}
@@ -711,6 +709,9 @@ void rfluxLoopMode_2() {
 				bodyTimeOffCount = processMode.timeStep;			// сбрасываем таймер остановки процесса
 				if (counterStartStop == 0) nameProcessStep = "Отбор тела";
 				else nameProcessStep = "Отбор тела, старт/стопов - " + String(counterStartStop);
+				// расчет на сколько надо после старт/стопа открыть шаровый кран
+				bodyPrimaPercent = bodyPrimaPercentStart - (bodyPrimaDecline * counterStartStop * 2);
+				if (bodyPrimaPercentStop < (bodyPrimaDecline * counterStartStop * 2)) bodyPrimaPercent = bodyPrimaPercentStop;
 				bodyPrimaPercentSet = percentCalc(bodyPrimaPercent);	// Открываем шаровый кран
 				setPWM(PWM_CH5, 0, bodyPrimaPercentSet);
 			}
@@ -883,13 +884,14 @@ void rfluxLoopMode_3() {
 				timeAllertInterval = millis() + 10000;		// время для зв. сигнала
 				temperatureSensor[DS_Cube].allert = true;	// сигнализация для WEB
 				processMode.timeStep = 0;
+				if (stepNext == 1) numOkStop = 0;
+				else numOkStop = 1;
 				stepNext = 0;
 				// Закрыли отбор по пару
 				setPWM(PWM_CH5, 0, 10);
 				nameProcessStep = "Процесс закончен";
 				settingAlarm = true;
 				processMode.step = 7;						// перешли на следующий шаг алгоритма
-				numOkStop = 1;
 				break;
 			}
 
@@ -902,9 +904,9 @@ void rfluxLoopMode_3() {
 				bodyValveSet = false;
 
 				// расчет на сколько надо после старт/стопа открыть шаровый кран
-				bodyPrimaPercent = bodyPrimaPercentStart - (bodyPrimaDecline * counterStartStop);
-				if (bodyPrimaPercentStop < (bodyPrimaDecline * counterStartStop)) bodyPrimaPercent = bodyPrimaPercentStop;
-				bodyPrimaPercentSet = percentCalc(bodyPrimaPercent);
+				//bodyPrimaPercent = bodyPrimaPercentStart - (bodyPrimaDecline * counterStartStop * 2);
+				//if (bodyPrimaPercentStop < (bodyPrimaDecline * counterStartStop * 2)) bodyPrimaPercent = bodyPrimaPercentStop;
+				//bodyPrimaPercentSet = percentCalc(bodyPrimaPercent);
 
 				// если есть польский буфер, работаем до первого стопа
 				if (pwmOut[3].member == 1) {
@@ -929,7 +931,7 @@ void rfluxLoopMode_3() {
 			//bodyPrimaPercent = bodyPrimaPercentStart - (bodyPrimaDecline * counterStartStop);
 
 			// без ПБ рулим по уставке
-			if (temperatureSensor[DS_Tube].data <= temperatureSensor[DS_Tube].allertValue - settingBoilTube) {
+			if (settingBoilTube == 0 || temperatureSensor[DS_Tube].data <= temperatureSensor[DS_Tube].allertValue - settingBoilTube) {
 				temperatureSensor[DS_Tube].allert = false;
 				bodyValveSet = true;							// признак, что надо открыть клапан отбора
 			}
@@ -944,6 +946,9 @@ void rfluxLoopMode_3() {
 				bodyTimeOffCount = processMode.timeStep;			// сбрасываем таймер остановки процесса
 				if (counterStartStop == 0) nameProcessStep = "Отбор тела";
 				else nameProcessStep = "Отбор тела, старт/стопов - " + String(counterStartStop);
+				// расчет на сколько надо после старт/стопа открыть шаровый кран
+				bodyPrimaPercent = bodyPrimaPercentStart - (bodyPrimaDecline * counterStartStop * 2);
+				if (bodyPrimaPercentStop < (bodyPrimaDecline * counterStartStop * 2)) bodyPrimaPercent = bodyPrimaPercentStop;
 				bodyPrimaPercentSet = percentCalc(bodyPrimaPercent);	// Открываем шаровый кран
 				setPWM(PWM_CH5, 0, bodyPrimaPercentSet);
 			}
@@ -1117,7 +1122,8 @@ void rfluxLoopMode_4() {
 				nameProcessStep = "Процесс закончен";
 				settingAlarm = true;
 				processMode.step = 7;						// перешли на следующий шаг алгоритма
-				numOkStop = 1;
+				if (stepNext == 1) numOkStop = 0;
+				else numOkStop = 1;
 				stepNext = 0;
 				break;
 			}
@@ -1343,7 +1349,8 @@ void rfluxLoopMode_5() {
 			nameProcessStep = "Процесс закончен";
 			settingAlarm = true;
 			processMode.step = 7;						// перешли на следующий шаг алгоритма
-			numOkStop = 1;
+			if (stepNext == 1) numOkStop = 0;
+			else numOkStop = 1;
 			stepNext = 0;
 			break;
 		}
@@ -1568,7 +1575,8 @@ void rfluxLoopMode_6() {
 			nameProcessStep = "Процесс закончен";
 			if (pwmOut[3].member == 1) csOn(PWM_CH4);
 			processMode.step = 7;						// перешли на следующий шаг алгоритма
-			numOkStop = 1;
+			if (stepNext == 1) numOkStop = 0;
+			else numOkStop = 1;
 			stepNext = 0;
 			break;
 		}
@@ -1815,7 +1823,8 @@ void rfluxLoopMode_6() {
 			nameProcessStep = "Процесс закончен";
 			if (pwmOut[3].member == 1) csOn(PWM_CH4);
 			processMode.step = 7;						// перешли на следующий шаг алгоритма
-			numOkStop = 1;
+			if (stepNext == 1) numOkStop = 0;
+			else numOkStop = 1;
 			stepNext = 0;
 			break;
 		}
@@ -2017,7 +2026,8 @@ void rfluxLoopMode_6() {
 				nameProcessStep = "Процесс закончен";
 				if (pwmOut[3].member == 1) csOn(PWM_CH4);
 				processMode.step = 7;						// перешли на следующий шаг алгоритма
-				numOkStop = 1;
+				if (stepNext == 1) numOkStop = 0;
+				else numOkStop = 1;
 				stepNext = 0;
 				break;
 			}
@@ -2217,7 +2227,8 @@ void rfluxLoopMode_7() {
 				nameProcessStep = "Процесс закончен";
 				if (pwmOut[3].member == 1) csOn(PWM_CH4);
 				processMode.step = 7;						// перешли на следующий шаг алгоритма
-				numOkStop = 1;
+				if (stepNext == 1) numOkStop = 0;
+				else numOkStop = 1;
 				stepNext = 0;
 				break;
 			}
@@ -2340,11 +2351,11 @@ void refluxLoop() {
 		numOkStop = 0;
 		stepNext = 0;
 		countHaedEnd = 0;
+    settingBoilTube = 0;
 		beepEnd = false;
 		reSetTemperatureStartPressure = true;
 		if (processMode.number > 0) nameProcessStep = "Нагрев куба";
 		else {
-			settingBoilTube = 0;
 			if (pwmOut[0].member == 1) csOn(PWM_CH1);				// открыть клапан отбора голов
 			if (pwmOut[1].member == 1) csOn(PWM_CH2);				// открыть клапан отбора тела
 			if (pwmOut[2].member == 1) csOn(PWM_CH3);				// включаем клапан подачи воды
