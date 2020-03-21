@@ -2284,7 +2284,7 @@ $(function () {
 				'<div class="col-xs-4 col-sm-3 text-center text-middle text-primary text-nowrap">В конце %</div>'+
 				'<div id="reflux_devices_out_header_" class="col-xs-4 col-sm-3 text-center text-middle text-primary text-nowrap">%&#8595;</div></div>';
 			let tpl_devices_out_body = '';
-			if(flagout){
+			// if(flagout){
 				let valwe_head = {};
 				let valwe_headSteam = {};
 				let valwe_body = {};
@@ -2329,6 +2329,7 @@ $(function () {
 				tpl_devices_out_body += '<div id="reflux_devices_out" class="row' + visible_reflux_out +'">' +
 					'<div class="col-xs-12">';
 				//тпл головы жижа
+			if(flagout) {
 				tpl_devices_out_body +=
 					'<div id="reflux_devices_head_rk" class="row row-striped">' +
 					head_devices +
@@ -2337,6 +2338,7 @@ $(function () {
 					'<div class="col-xs-4 col-sm-3">' + tpl_head_cycle_rk + '</div>' +
 					'<div class="col-xs-4 col-sm-3">' + tpl_head_time_rk + '</div>' +
 					'</div></div>';
+			}
 				//тпл головы пар
 				tpl_devices_out_body +=
 					'<div id="reflux_devices_head_steam" class="row row-striped">' +
@@ -2378,6 +2380,7 @@ $(function () {
 				let val_body_decline_prima = (valwe_bodyPrima.hasOwnProperty("bodyPrima") ? valwe_bodyPrima["bodyPrima"]["decline"] : 0);
 				let tpl_body_decline_prima = returnTplHtml([{id: "reflux_body_decline_prima", value: val_body_decline_prima, min: '0', max: '30', step: '1'}], deltaTempl);
 				//тпл тело жижа
+			if(flagout) {
 				tpl_devices_out_body += '<div id="reflux_devices_body_rk" class="row row-striped">' +
 					'<div class="pt-10 pb-10 clearfix">' +
 					'<div class="col-xs-12 col-sm-3 pxs-10 text-middle text-center-xs text-strong">Клапан отбора тела</div>' +
@@ -2385,6 +2388,7 @@ $(function () {
 					'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_time_rk + '</div>' +
 					'<div class="col-xs-4 col-sm-3 pxs-0">' + tpl_body_decline_rk + '</div>' +
 					'</div></div>';
+			}
 				//тпл тело пар
 				tpl_devices_out_body += '<div id="reflux_devices_body_steam" class="row row-striped">' +
 					body_devices +
@@ -2407,7 +2411,7 @@ $(function () {
 				tpl_devices_out_body += '</div></div>';
 
 				tpl_devices_body = tpl_devices_out_body + tpl_devices_body;
-			}
+			// }
 
 			refluxTemplate = timeStepTemplate +
 				returnTplHtml([{id_value: "reflux_power_value", id_set: "reflux_power_set"}], powerTempl) +
@@ -2454,8 +2458,8 @@ $(function () {
 	$(document).on('change', '#reflux_algorithm_select', function () {
 		let algorithm_val = Number($(this).find(":selected").val());
 		refluxProcess["number"] = algorithm_val;
+		console.log("reflux_devices_out", algorithm_val);
 		if($("#reflux_devices_out").length > 0) {
-			console.log("reflux_devices_out", algorithm_val);
 			if (algorithm_val === 1 || algorithm_val === 2 || algorithm_val === 3 || algorithm_val === 4 || algorithm_val === 6) {
 				$("#reflux_devices_out").removeClass("hidden");
 			}else{
