@@ -162,7 +162,8 @@ void handleRefluxSensorTpl() {
 	String dataForWeb = "{";
 	// датчики температуры
 #if defined Debug_en
-	Serial.println(""); Serial.println("Топология отправка:");
+	if (RU) Serial.println(""); Serial.println("Топология отправка:");
+	else Serial.println(""); Serial.println("Topology sends:");
 #endif
 	for (i = 1; i <= DS_Cnt; i++) {
 		k = 0;
@@ -180,9 +181,16 @@ void handleRefluxSensorTpl() {
 		}
 #if defined Debug_en
 		Serial.print(i); Serial.print(" "); Serial.println(k);
-		Serial.print("Номер: ");  Serial.println(temperatureSensor[k].num);
-		Serial.print("Участвует: ");  Serial.println(temperatureSensor[k].member);
-		Serial.print("Уставка: ");  Serial.println(temperatureSensor[k].allertValueIn);//Serial.println(temperatureSensor[k].allertValue);
+		if (RU) {
+			Serial.print("Номер: ");  Serial.println(temperatureSensor[k].num);
+			Serial.print("Участвует: ");  Serial.println(temperatureSensor[k].member);
+			Serial.print("Уставка: ");  Serial.println(temperatureSensor[k].allertValueIn);
+		}
+		else {
+			Serial.print("Number: ");  Serial.println(temperatureSensor[k].num);
+			Serial.print("Member: ");  Serial.println(temperatureSensor[k].member);
+			Serial.print("Allert value: ");  Serial.println(temperatureSensor[k].allertValueIn);
+		}
 #endif
 	}
 	// выходы ШИМ
@@ -206,7 +214,8 @@ void handleRefluxSensorSetLoad() {
 	String dataForWeb = "{";
 	// датчики температуры
 #if defined Debug_en
-	Serial.println(""); Serial.println("Расстановка отправка:");
+	if (RU) Serial.println(""); Serial.println("Расстановка отправка:");
+	else Serial.println(""); Serial.println("Placement (out):");
 #endif
 	for (i = 1; i <= DS_Cnt; i++) {
 		k = 0;
@@ -223,8 +232,14 @@ void handleRefluxSensorSetLoad() {
 		}
 #if defined Debug_en
 		Serial.print(i); Serial.print(" "); Serial.println(k);
-		Serial.print("Номер: ");  Serial.println(temperatureSensor[k].num);
-		Serial.print("Участвует: ");  Serial.println(temperatureSensor[k].member);
+		if (RU) {
+			Serial.print("Номер: ");  Serial.println(temperatureSensor[k].num);
+			Serial.print("Участвует: ");  Serial.println(temperatureSensor[k].member);
+		}
+		else {
+			Serial.print("Number: ");  Serial.println(temperatureSensor[k].num);
+			Serial.print("Member: ");  Serial.println(temperatureSensor[k].member);
+		}
 #endif
 	}
 	// выходы ШИМ
@@ -247,7 +262,8 @@ void handleRefluxSensorSetSave() {
 	int i, k;
 	// парсим ответ от браузера в переменные
 #if defined Debug_en
-	Serial.println(""); Serial.println("Расстановка прием:");
+	if (RU) Serial.println(""); Serial.println("Расстановка прием:");
+	else Serial.println(""); Serial.println("Placement (in):");
 #endif
 	for (i = 1; i <= DS_Cnt; i++) {
 		k = 0;
@@ -266,8 +282,14 @@ void handleRefluxSensorSetSave() {
 		}
 #if defined Debug_en		
 		Serial.print(i); Serial.print(" "); Serial.println(k);
-		Serial.print("Номер: ");  Serial.println(temperatureSensor[k].num);
-		Serial.print("Участвует: ");  Serial.println(temperatureSensor[k].member);
+		if (RU) {
+			Serial.print("Номер: ");  Serial.println(temperatureSensor[k].num);
+			Serial.print("Участвует: ");  Serial.println(temperatureSensor[k].member);
+		}
+		else {
+			Serial.print("Number: ");  Serial.println(temperatureSensor[k].num);
+			Serial.print("Member: ");  Serial.println(temperatureSensor[k].member);
+		}
 #endif		
 	}
 	for (i = 0; i < 8; i++) {
@@ -394,14 +416,16 @@ void rfluxLoopMode_1() {
 			errA = false; check_Err();
 			if (errA) {
 				stop_Err();
-				nameProcessStep = "Стоп по аварии ADC > " + String(adcIn[numCrashStop].name);
+				if (RU) nameProcessStep = "Стоп по аварии ADC > " + String(adcIn[numCrashStop].name);
+				else nameProcessStep = "Accident stop from ADC > " + String(adcIn[numCrashStop].name);
 			}
 		}
 		if (processMode.step != 4 && timePauseErrT <= millis()) {
 			errT = false; check_Err();
 			if (errT) {
 				stop_Err();
-				nameProcessStep = "Стоп по аварии T > " + String(temperatureSensor[numCrashStop].name);
+				if (RU) nameProcessStep = "Стоп по аварии T > " + String(temperatureSensor[numCrashStop].name);
+				else nameProcessStep = "Accident stop from T > " + String(temperatureSensor[numCrashStop].name);
 			}
 		}
 	}
@@ -430,7 +454,8 @@ void rfluxLoopMode_1() {
 				processMode.timeStep = 0;
 				processMode.step = 2;		// перешли на следующий шаг алгоритма
 				stepNext = 0;
-				nameProcessStep = "Ручной режим, стабилизация";
+				if (RU) nameProcessStep = "Ручной режим, стабилизация колонны";
+				else nameProcessStep = "Manual mode, column stabilization";
 			}
 
 			break;
@@ -442,7 +467,8 @@ void rfluxLoopMode_1() {
 				settingAlarm = false;
 				processMode.step = 3;	// перешли на следующий шаг алгоритма
 				stepNext = 0;
-				nameProcessStep = "Ручной режим, отбор";
+				if (RU) nameProcessStep = "Ручной режим, отбор";
+				else nameProcessStep = "Manual mode, picking alcohol";
 			}
 			break;
 		}
@@ -489,7 +515,8 @@ void rfluxLoopMode_1() {
 				temperatureSensor[DS_Cube].allert = true;	// сигнализация для WEB
 				processMode.timeStep = 0;
 				stepNext = 0;
-				nameProcessStep = "Процесс закончен";
+				if (RU) nameProcessStep = "Процесс закончен";
+				else nameProcessStep = "Process is over";
 				settingAlarm = true;
 				processMode.step = 4;
 			}
@@ -509,7 +536,8 @@ void rfluxLoopMode_1() {
 			else if (touch_in == true && stopInfoOutScreen == false) {
 				processMode.allow = 0;  // вышли из режима дистилляции
 				processMode.step = 0;	// обнулили шаг алгоритма
-				commandWriteSD = "Процесс завершен";
+				if (RU) commandWriteSD = "Процесс завершен";
+				else commandWriteSD = "Process is over";
 				commandSD_en = true;
 				stopInfoOutScreen = true;
 				touchScreen = 0;
@@ -539,7 +567,8 @@ void rfluxLoopMode_1() {
 #ifndef TFT_Display
 				processMode.allow = 0;  // вышли из режима ректификации
 				processMode.step = 0;	// обнулили шаг алгоритма
-				commandWriteSD = "Процесс завершен";
+				if (RU) commandWriteSD = "Процесс завершен";
+				else commandWriteSD = "Process is over";
 				commandSD_en = true;
 #endif
 			}
@@ -575,7 +604,8 @@ void rfluxLoopMode_2() {
 				power.heaterPower = power.inPowerLow;		// установили мощность на ТЭН 65 %
 				timeAllertInterval = millis() + 10000;		// установим счетчик времени для зв.сигнала 10 сек.
 				processMode.timeStep = 0;
-				nameProcessStep = "Стабилизация колонны";
+				if (RU) nameProcessStep = "Стабилизация колонны";
+				else nameProcessStep = "Column stabilization";
 				processMode.step = 2;		// перешли на следующий шаг алгоритма
 				stepNext = 0;
 			}
@@ -595,7 +625,8 @@ void rfluxLoopMode_2() {
 			if (timePauseOff <= millis() || stepNext == 1) {
 				timeAllertInterval = millis() + 10000;	// установим счетчик времени для зв.сигнала 10 сек.
 				processMode.timeStep = 0;
-				nameProcessStep = "Отбор голов";
+				if (RU) nameProcessStep = "Отбор голов";
+				else nameProcessStep = "Picking heads";
 				processMode.step = 4;	// перешли на следующий шаг алгоритма
 				stepNext = 0;
 			}
@@ -633,7 +664,8 @@ void rfluxLoopMode_2() {
 				processMode.timeStep = 0;
 				bodyTimeOffCount = 0;
 				bodyValveSet = true;
-				nameProcessStep = "Отбор тела";
+				if (RU) nameProcessStep = "Отбор тела";
+				else nameProcessStep = "Picking hearts";
 			}
 			// рулим клапаном отбора голов
 			else if (pwmOut[0].member == 1) valveSet(PWM_CH1);
@@ -653,7 +685,8 @@ void rfluxLoopMode_2() {
 				stepNext = 0;
 				// Закрыли отбор по пару
 				setPWM(PWM_CH5, 0, 10);
-				nameProcessStep = "Процесс закончен";
+				if (RU) nameProcessStep = "Процесс закончен";
+				else nameProcessStep = "Process is over";
 				settingAlarm = true;
 				processMode.step = 7;						// перешли на следующий шаг алгоритма
 				break;
@@ -684,7 +717,8 @@ void rfluxLoopMode_2() {
 					processMode.timeStep = 0;
 					// Закрыли отбор по пару
 					setPWM(PWM_CH5, 0, 10);
-					nameProcessStep = "Процесс закончен";
+					if (RU) nameProcessStep = "Процесс закончен";
+					else nameProcessStep = "Process is over";
 					settingAlarm = true;
 					timePauseOff = 60000 * 20 + millis();
 					processMode.step = 7;						// перешли на следующий шаг алгоритма
@@ -707,8 +741,14 @@ void rfluxLoopMode_2() {
 
 			if (bodyValveSet == true && processMode.step != 7) {
 				bodyTimeOffCount = processMode.timeStep;			// сбрасываем таймер остановки процесса
-				if (counterStartStop == 0) nameProcessStep = "Отбор тела";
-				else nameProcessStep = "Отбор тела, старт/стопов - " + String(counterStartStop);
+				if (RU) {
+					if (counterStartStop == 0) nameProcessStep = "Отбор тела";
+					else nameProcessStep = "Отбор тела, старт/стопов - " + String(counterStartStop);
+				}
+				else {
+					if (counterStartStop == 0) nameProcessStep = "Picking hearts";
+					else nameProcessStep = "Picking hearts, start/stop - " + String(counterStartStop);
+				}
 				// расчет на сколько надо после старт/стопа открыть шаровый кран
 				bodyPrimaPercent = bodyPrimaPercentStart - (bodyPrimaDecline * counterStartStop * 2);
 				if (bodyPrimaPercentStop < (bodyPrimaDecline * counterStartStop * 2)) bodyPrimaPercent = bodyPrimaPercentStop;
@@ -724,13 +764,15 @@ void rfluxLoopMode_2() {
 					timeAllertInterval = millis() + 10000;		// время для зв. сигнала
 					processMode.timeStep = 0;
 					stepNext = 0;
-					nameProcessStep = "Процесс закончен";
+					if (RU) nameProcessStep = "Процесс закончен";
+					else nameProcessStep = "Process is over";
 					settingAlarm = true;
 					processMode.step = 7;						// перешли на следующий шаг алгоритма
 					numOkStop = 3;
 				}
 				else {
-					if (counterStartStop != 0) nameProcessStep = "Отбор тела, " + String(counterStartStop) + "-й стоп";
+					if (counterStartStop != 0 && RU) nameProcessStep = "Отбор тела, " + String(counterStartStop) + "-й стоп";
+					else if (counterStartStop != 0) nameProcessStep = "Picking hearts, " + String(counterStartStop) + "st stop";
 					setPWM(PWM_CH5, 0, 10);							// Закрыли отбор по пару
 				}
 			}
@@ -750,7 +792,8 @@ void rfluxLoopMode_2() {
 			else if (touch_in == true && stopInfoOutScreen == false) {
 				processMode.allow = 0;  // вышли из режима дистилляции
 				processMode.step = 0;	// обнулили шаг алгоритма
-				commandWriteSD = "Процесс завершен";
+				if (RU) commandWriteSD = "Процесс завершен";
+				else commandWriteSD = "Process is over";
 				commandSD_en = true;
 				stopInfoOutScreen = true;
 				touchScreen = 0;
@@ -778,7 +821,8 @@ void rfluxLoopMode_2() {
 #ifndef TFT_Display
 				processMode.allow = 0;  // вышли из режима ректификации
 				processMode.step = 0;	// обнулили шаг алгоритма
-				commandWriteSD = "Процесс завершен";
+				if (RU) commandWriteSD = "Процесс завершен";
+				else commandWriteSD = "Process is over";
 				commandSD_en = true;
 #endif
 			}
@@ -809,7 +853,8 @@ void rfluxLoopMode_3() {
 				power.heaterPower = power.inPowerLow;		// установили мощность на ТЭН 65 %
 				timeAllertInterval = millis() + 10000;		// установим счетчик времени для зв.сигнала 10 сек.
 				processMode.timeStep = 0;
-				nameProcessStep = "Стабилизация колонны";
+				if (RU) nameProcessStep = "Стабилизация колонны";
+				else nameProcessStep = "Column stabilization";
 				processMode.step = 2;		// перешли на следующий шаг алгоритма
 				stepNext = 0;
 			}
@@ -829,7 +874,8 @@ void rfluxLoopMode_3() {
 			if (timePauseOff <= millis() || stepNext == 1) {
 				timeAllertInterval = millis() + 10000;	// установим счетчик времени для зв.сигнала 10 сек.
 				processMode.timeStep = 0;
-				nameProcessStep = "Отбор голов";
+				if (RU) nameProcessStep = "Отбор голов";
+				else nameProcessStep = "Picking heads";
 				processMode.step = 4;	// перешли на следующий шаг алгоритма
 				stepNext = 0;
 			}
@@ -866,7 +912,8 @@ void rfluxLoopMode_3() {
 				processMode.timeStep = 0;
 				bodyTimeOffCount = 0;
 				bodyValveSet = true;
-				nameProcessStep = "Отбор тела";
+				if (RU) nameProcessStep = "Отбор тела";
+				else nameProcessStep = "Picking hearts";
 			}
 			// рулим краном отбора голов
 			else {
@@ -889,7 +936,8 @@ void rfluxLoopMode_3() {
 				stepNext = 0;
 				// Закрыли отбор по пару
 				setPWM(PWM_CH5, 0, 10);
-				nameProcessStep = "Процесс закончен";
+				if (RU) nameProcessStep = "Процесс закончен";
+				else nameProcessStep = "Process is over";
 				settingAlarm = true;
 				processMode.step = 7;						// перешли на следующий шаг алгоритма
 				break;
@@ -918,7 +966,8 @@ void rfluxLoopMode_3() {
 					processMode.timeStep = 0;
 					// Закрыли отбор по пару
 					setPWM(PWM_CH5, 0, 10);
-					nameProcessStep = "Процесс закончен";
+					if (RU) nameProcessStep = "Процесс закончен";
+					else nameProcessStep = "Process is over";
 					settingAlarm = true;
 					timePauseOff = 60000 * 20 + millis();
 					processMode.step = 7;						// перешли на следующий шаг алгоритма
@@ -944,8 +993,14 @@ void rfluxLoopMode_3() {
 
 			if (bodyValveSet == true && processMode.step != 7) {
 				bodyTimeOffCount = processMode.timeStep;			// сбрасываем таймер остановки процесса
-				if (counterStartStop == 0) nameProcessStep = "Отбор тела";
-				else nameProcessStep = "Отбор тела, старт/стопов - " + String(counterStartStop);
+				if (RU) {
+					if (counterStartStop == 0) nameProcessStep = "Отбор тела";
+					else nameProcessStep = "Отбор тела, старт/стопов - " + String(counterStartStop);
+				}
+				else {
+					if (counterStartStop == 0) nameProcessStep = "Picking hearts";
+					else nameProcessStep = "Picking hearts, start/stop - " + String(counterStartStop);
+				}
 				// расчет на сколько надо после старт/стопа открыть шаровый кран
 				bodyPrimaPercent = bodyPrimaPercentStart - (bodyPrimaDecline * counterStartStop * 2);
 				if (bodyPrimaPercentStop < (bodyPrimaDecline * counterStartStop * 2)) bodyPrimaPercent = bodyPrimaPercentStop;
@@ -961,13 +1016,15 @@ void rfluxLoopMode_3() {
 					timeAllertInterval = millis() + 10000;		// время для зв. сигнала
 					processMode.timeStep = 0;
 					stepNext = 0;
-					nameProcessStep = "Процесс закончен";
+					if (RU) nameProcessStep = "Процесс закончен";
+					else nameProcessStep = "Process is over";
 					settingAlarm = true;
 					processMode.step = 7;						// перешли на следующий шаг алгоритма
 					numOkStop = 3;
 				}
 				else {
-					if (counterStartStop != 0) nameProcessStep = "Отбор тела, " + String(counterStartStop) + "-й стоп";
+					if (counterStartStop != 0 && RU) nameProcessStep = "Отбор тела, " + String(counterStartStop) + "-й стоп";
+					else if (counterStartStop != 0) nameProcessStep = "Picking hearts, " + String(counterStartStop) + "st stop";
 					setPWM(PWM_CH5, 0, 10);							// Закрыли отбор по пару
 				}
 			}
@@ -987,7 +1044,8 @@ void rfluxLoopMode_3() {
 			else if (touch_in == true && stopInfoOutScreen == false) {
 				processMode.allow = 0;  // вышли из режима дистилляции
 				processMode.step = 0;	// обнулили шаг алгоритма
-				commandWriteSD = "Процесс завершен";
+				if (RU) commandWriteSD = "Процесс завершен";
+				else commandWriteSD = "Process is over";
 				commandSD_en = true;
 				stopInfoOutScreen = true;
 				touchScreen = 0;
@@ -1015,7 +1073,8 @@ void rfluxLoopMode_3() {
 #ifndef TFT_Display
 				processMode.allow = 0;  // вышли из режима ректификации
 				processMode.step = 0;	// обнулили шаг алгоритма
-				commandWriteSD = "Процесс завершен";
+				if (RU) commandWriteSD = "Процесс завершен";
+				else commandWriteSD = "Process is over";
 				commandSD_en = true;
 #endif
 			}
@@ -1048,7 +1107,8 @@ void rfluxLoopMode_4() {
 				power.heaterPower = power.inPowerLow;		// установили мощность на ТЭН 65 %
 				timeAllertInterval = millis() + 10000;		// установим счетчик времени для зв.сигнала 10 сек.
 				processMode.timeStep = 0;
-				nameProcessStep = "Стабилизация колонны";
+				if (RU) nameProcessStep = "Стабилизация колонны";
+				nameProcessStep = "Column stabilization";
 				processMode.step = 2;						// перешли на следующий шаг алгоритма
 				stepNext = 0;
 			}
@@ -1068,7 +1128,8 @@ void rfluxLoopMode_4() {
 			if (timePauseOff <= millis() || stepNext == 1) {
 				timeAllertInterval = millis() + 10000;		// установим счетчик времени для зв.сигнала 10 сек.
 				processMode.timeStep = 0;
-				nameProcessStep = "Отбор голов";
+				if (RU) nameProcessStep = "Отбор голов";
+				else nameProcessStep = "Picking heads";
 				processMode.step = 4;						// перешли на следующий шаг алгоритма
 				stepNext = 0;
 				if (typeRefOfValwe == 3) csOn(PWM_CH1);     // с 2-мя клапанами открыли CH1 на отбор голов
@@ -1099,7 +1160,8 @@ void rfluxLoopMode_4() {
 				processMode.timeStep = 0;
 				bodyTimeOffCount = 0;
 				bodyValveSet = true;
-				nameProcessStep = "Отбор тела";
+				if (RU) nameProcessStep = "Отбор тела";
+				else nameProcessStep = "Picking hearts";
 			}
 			// рулим клапаном отбора голов
 			else if (typeRefOfValwe == 1) valveSet(PWM_CH1);
@@ -1119,7 +1181,8 @@ void rfluxLoopMode_4() {
 					csOn(PWM_CH4);							// включаем клапан слива ПБ
 				}
 				processMode.timeStep = 0;
-				nameProcessStep = "Процесс закончен";
+				if (RU) nameProcessStep = "Процесс закончен";
+				else nameProcessStep = "Process is over";
 				settingAlarm = true;
 				processMode.step = 7;						// перешли на следующий шаг алгоритма
 				if (stepNext == 1) numOkStop = 0;
@@ -1141,7 +1204,8 @@ void rfluxLoopMode_4() {
 					timeAllertInterval = millis() + 10000;		// установим счетчик времени для зв.сигнала
 					csOn(PWM_CH4);								// включаем клапан слива ПБ
 					processMode.timeStep = 0;
-					nameProcessStep = "Процесс закончен";
+					if (RU) nameProcessStep = "Процесс закончен";
+					else nameProcessStep = "Process is over";
 					settingAlarm = true;
 					processMode.step = 7;						// перешли на следующий шаг алгоритма
 					numOkStop = 4;
@@ -1165,11 +1229,18 @@ void rfluxLoopMode_4() {
 				}
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 				bodyTimeOffCount = processMode.timeStep;		// сбрасываем таймер остановки процесса
-				if (counterStartStop == 0) nameProcessStep = "Отбор тела";
-				else nameProcessStep = "Отбор тела, старт/стопов - " + String(counterStartStop);
+                                if (RU) {
+					if (counterStartStop == 0) nameProcessStep = "Отбор тела";
+					else nameProcessStep = "Отбор тела, старт/стопов - " + String(counterStartStop);
+				}
+                                else {
+					if (counterStartStop == 0) nameProcessStep = "Picking hearts";
+					else nameProcessStep = "Picking hearts, start/stop - " + String(counterStartStop);
+				}
 			}
 			else {
-				if (counterStartStop != 0) nameProcessStep = "Отбор тела, " + String(counterStartStop) + "-й стоп";
+				if (counterStartStop != 0 && RU) nameProcessStep = "Отбор тела, " + String(counterStartStop) + "-й стоп";
+				else if (counterStartStop != 0) nameProcessStep = "Picking hearts, " + String(counterStartStop) + "st stop";
 				if (typeRefOfValwe == 1) csOff(PWM_CH1);
 				else csOff(PWM_CH2);
 			}
@@ -1189,7 +1260,8 @@ void rfluxLoopMode_4() {
 			else if (touch_in == true && stopInfoOutScreen == false) {
 				processMode.allow = 0;  // вышли из режима дистилляции
 				processMode.step = 0;	// обнулили шаг алгоритма
-				commandWriteSD = "Процесс завершен";
+				if (RU) commandWriteSD = "Процесс завершен";
+				else commandWriteSD = "Process is over";
 				commandSD_en = true;
 				stopInfoOutScreen = true;
 				touchScreen = 0;
@@ -1217,7 +1289,8 @@ void rfluxLoopMode_4() {
 #ifndef TFT_Display
 					processMode.allow = 0;  // вышли из режима ректификации
 					processMode.step = 0;	// обнулили шаг алгоритма
-					commandWriteSD = "Процесс завершен";
+					if (RU) commandWriteSD = "Процесс завершен";
+					else commandWriteSD = "Process is over";
 					commandSD_en = true;
 #endif
 				}
@@ -1233,7 +1306,8 @@ void rfluxLoopMode_4() {
 #ifndef TFT_Display
 					processMode.allow = 0;  // вышли из режима ректификации
 					processMode.step = 0;	// обнулили шаг алгоритма
-					commandWriteSD = "Процесс завершен";
+					if (RU) commandWriteSD = "Процесс завершен";
+					else commandWriteSD = "Process is over";
 					commandSD_en = true;
 #endif
 				}
@@ -1266,7 +1340,8 @@ void rfluxLoopMode_5() {
 			power.heaterPower = power.inPowerLow;		// установили мощность на ТЭН 65 %
 			timeAllertInterval = millis() + 10000;		// установим счетчик времени для зв.сигнала 10 сек.
 			processMode.timeStep = 0;
-			nameProcessStep = "Стабилизация колонны";
+			if (RU) nameProcessStep = "Стабилизация колонны";
+			else nameProcessStep = "Column stabilization";
 			processMode.step = 2;						// перешли на следующий шаг алгоритма
 			stepNext = 0;
 		}
@@ -1286,7 +1361,8 @@ void rfluxLoopMode_5() {
 		if (timePauseOff <= millis() || stepNext == 1) {
 			timeAllertInterval = millis() + 10000;		// установим счетчик времени для зв.сигнала 10 сек.
 			processMode.timeStep = 0;
-			nameProcessStep = "Отбор голов";
+			if (RU) nameProcessStep = "Отбор голов";
+			else nameProcessStep = "Picking heads";
 			processMode.step = 4;						// перешли на следующий шаг алгоритма
 			stepNext = 0;
 		}
@@ -1326,7 +1402,8 @@ void rfluxLoopMode_5() {
 			processMode.timeStep = 0;
 			bodyTimeOffCount = 0;
 			bodyValveSet = true;
-			nameProcessStep = "Отбор тела";
+			if (RU) nameProcessStep = "Отбор тела";
+			else nameProcessStep = "Picking hearts";
 		}
 		// рулим клапаном отбора голов
 		else if (typeRefOfValwe == 3 || typeRefOfValwe == 1) valveSet(PWM_CH1);
@@ -1346,7 +1423,8 @@ void rfluxLoopMode_5() {
 				csOn(PWM_CH4);							// включаем клапан слива ПБ
 			}
 			processMode.timeStep = 0;
-			nameProcessStep = "Процесс закончен";
+			if (RU) nameProcessStep = "Процесс закончен";
+			else nameProcessStep = "Process is over";
 			settingAlarm = true;
 			processMode.step = 7;						// перешли на следующий шаг алгоритма
 			if (stepNext == 1) numOkStop = 0;
@@ -1369,7 +1447,8 @@ void rfluxLoopMode_5() {
 				timeAllertInterval = millis() + 10000;		// установим счетчик времени для зв.сигнала
 				csOn(PWM_CH4);								// включаем клапан слива ПБ
 				processMode.timeStep = 0;
-				nameProcessStep = "Процесс закончен";
+				if (RU) nameProcessStep = "Процесс закончен";
+				else nameProcessStep = "Process is over";
 				settingAlarm = true;
 				processMode.step = 7;						// перешли на следующий шаг алгоритма
 				numOkStop = 4;
@@ -1387,11 +1466,18 @@ void rfluxLoopMode_5() {
 			if (typeRefOfValwe == 1) valveSet(PWM_CH1);
 			else if (typeRefOfValwe == 2 || typeRefOfValwe == 3) valveSet(PWM_CH2);
 			bodyTimeOffCount = processMode.timeStep;		// сбрасываем таймер остановки процесса
-			if (counterStartStop == 0) nameProcessStep = "Отбор тела";
-			else nameProcessStep = "Отбор тела, старт/стопов - " + String(counterStartStop);
+			if (RU) {
+				if (counterStartStop == 0) nameProcessStep = "Отбор тела";
+				else nameProcessStep = "Отбор тела, старт/стопов - " + String(counterStartStop);
+			}
+			else {
+				if (counterStartStop == 0) nameProcessStep = "Picking hearts";
+				else nameProcessStep = "Picking hearts, start/stop - " + String(counterStartStop);
+			}
 		}
 		else {
-			if (counterStartStop != 0) nameProcessStep = "Отбор тела, " + String(counterStartStop) + "-й стоп";
+			if (counterStartStop != 0 && RU) nameProcessStep = "Отбор тела, " + String(counterStartStop) + "-й стоп";
+			else if (counterStartStop != 0) nameProcessStep = "Picking hearts, " + String(counterStartStop) + "st stop";
 			csOff(PWM_CH1);
 			csOff(PWM_CH2);
 		}
@@ -1412,7 +1498,8 @@ void rfluxLoopMode_5() {
 		else if (touch_in == true && stopInfoOutScreen == false) {
 			processMode.allow = 0;  // вышли из режима дистилляции
 			processMode.step = 0;	// обнулили шаг алгоритма
-			commandWriteSD = "Процесс завершен";
+			if (RU) commandWriteSD = "Процесс завершен";
+			else commandWriteSD = "Process is over";
 			commandSD_en = true;
 			stopInfoOutScreen = true;
 			touchScreen = 0;
@@ -1440,7 +1527,8 @@ void rfluxLoopMode_5() {
 #ifndef TFT_Display
 				processMode.allow = 0;  // вышли из режима ректификации
 				processMode.step = 0;	// обнулили шаг алгоритма
-				commandWriteSD = "Процесс завершен";
+				if (RU) commandWriteSD = "Процесс завершен";
+				else commandWriteSD = "Process is over";
 				commandSD_en = true;
 #endif
 			}
@@ -1456,7 +1544,8 @@ void rfluxLoopMode_5() {
 #ifndef TFT_Display
 				processMode.allow = 0;  // вышли из режима ректификации
 				processMode.step = 0;	// обнулили шаг алгоритма
-				commandWriteSD = "Процесс завершен";
+				if (RU) commandWriteSD = "Процесс завершен";
+				else commandWriteSD = "Process is over";
 				commandSD_en = true;
 #endif
 			}
@@ -1956,7 +2045,8 @@ void rfluxLoopMode_6() {
 				power.heaterPower = power.inPowerLow;		// установили мощность на ТЭН 65 %
 				timeAllertInterval = millis() + 10000;		// установим счетчик времени для зв.сигнала 10 сек.
 				processMode.timeStep = 0;
-				nameProcessStep = "Стабилизация колонны";
+				if (RU) nameProcessStep = "Стабилизация колонны";
+				else nameProcessStep = "Column stabilization";
 				processMode.step = 2;		// перешли на следующий шаг алгоритма
 				stepNext = 0;
 			}
@@ -1976,7 +2066,8 @@ void rfluxLoopMode_6() {
 			if (timePauseOff <= millis() || stepNext == 1) {
 				timeAllertInterval = millis() + 10000;	// установим счетчик времени для зв.сигнала 10 сек.
 				processMode.timeStep = 0;
-				nameProcessStep = "Отбор голов";
+				if (RU) nameProcessStep = "Отбор голов";
+				else nameProcessStep = "Picking heads";
 				processMode.step = 4;	// перешли на следующий шаг алгоритма
 				stepNext = 0;
 			}
@@ -2010,7 +2101,8 @@ void rfluxLoopMode_6() {
 				processMode.timeStep = 0;
 				bodyTimeOffCount = 0;
 				bodyValveSet = true;
-				nameProcessStep = "Отбор тела";
+				if (RU) nameProcessStep = "Отбор тела";
+				else nameProcessStep = "Picking hearts";
 				stepNext = 0;
 			}
 
@@ -2023,7 +2115,8 @@ void rfluxLoopMode_6() {
 				power.heaterPower = 0;							// установили мощность на ТЭН 0 %
 				temperatureSensor[DS_Cube].allert = true;	// сигнализация для WEB
 				processMode.timeStep = 0;
-				nameProcessStep = "Процесс закончен";
+				if (RU) nameProcessStep = "Процесс закончен";
+				else nameProcessStep = "Process is over";
 				if (pwmOut[3].member == 1) csOn(PWM_CH4);
 				processMode.step = 7;						// перешли на следующий шаг алгоритма
 				if (stepNext == 1) numOkStop = 0;
@@ -2037,7 +2130,8 @@ void rfluxLoopMode_6() {
 				if (counterStartStop == 0) timeAllertInterval = millis() + 10000;			// установим счетчик времени для зв.сигнала
 				if (bodyValveSet) {
 					counterStartStop++;
-					nameProcessStep = "Отбор тела, " + String(counterStartStop) + "-й стоп";
+					if (RU) nameProcessStep = "Отбор тела, " + String(counterStartStop) + "-й стоп";
+					else nameProcessStep = "Picking hearts, " + String(counterStartStop) + "st stop";
 					bodyValveSet = false;
 				}
 				csOn(PWM_CH2);								// открыли клапан доп. подачи воды
@@ -2050,8 +2144,14 @@ void rfluxLoopMode_6() {
 			else if ((temperatureSensor[DS_Tube].data <= temperatureSensor[DS_Tube].allertValue - settingBoilTube) || temperatureSensor[DS_Tube].allertValue == 0) {
 				temperatureSensor[DS_Tube].allert = false;
 				csOff(PWM_CH2);	// закрыли клапан доп. подачи воды
-				if (counterStartStop == 0) nameProcessStep = "Отбор тела";
-				else nameProcessStep = "Отбор тела, старт/стопов - " + String(counterStartStop);
+				if (RU) {
+					if (counterStartStop == 0) nameProcessStep = "Отбор тела";
+					else nameProcessStep = "Отбор тела, старт/стопов - " + String(counterStartStop);
+				}
+				else {
+					if (counterStartStop == 0) nameProcessStep = "Picking hearts";
+					else nameProcessStep = "Picking hearts, start/stop - " + String(counterStartStop);
+				}
 				bodyValveSet = true;
 				//bodyTimeOffCount = processMode.timeStep;			// сбрасываем таймер остановки процесса
 			}
@@ -2074,7 +2174,8 @@ void rfluxLoopMode_6() {
 			else if (touch_in == true && stopInfoOutScreen == false) {
 				processMode.allow = 0;  // вышли из режима дистилляции
 				processMode.step = 0;	// обнулили шаг алгоритма
-				commandWriteSD = "Процесс завершен";
+				if (RU) commandWriteSD = "Процесс завершен";
+				else commandWriteSD = "Process is over";
 				commandSD_en = true;
 				stopInfoOutScreen = true;
 				touchScreen = 0;
@@ -2102,7 +2203,8 @@ void rfluxLoopMode_6() {
 #ifndef TFT_Display
 					processMode.allow = 0;  // вышли из режима ректификации
 					processMode.step = 0;	// обнулили шаг алгоритма
-					commandWriteSD = "Процесс завершен";
+					if (RU) commandWriteSD = "Процесс завершен";
+					else commandWriteSD = "Process is over";
 					commandSD_en = true;
 #endif
 				}
@@ -2118,7 +2220,8 @@ void rfluxLoopMode_6() {
 #ifndef TFT_Display
 					processMode.allow = 0;  // вышли из режима ректификации
 					processMode.step = 0;	// обнулили шаг алгоритма
-					commandWriteSD = "Процесс завершен";
+					if (RU) commandWriteSD = "Процесс завершен";
+					else commandWriteSD = "Process is over";
 					commandSD_en = true;
 #endif
 				}
@@ -2155,7 +2258,8 @@ void rfluxLoopMode_7() {
 				power.heaterPower = power.inPowerLow;		// установили мощность на ТЭН 65 %
 				timeAllertInterval = millis() + 10000;		// установим счетчик времени для зв.сигнала 10 сек.
 				processMode.timeStep = 0;
-				nameProcessStep = "Стабилизация колонны";
+				if (RU) nameProcessStep = "Стабилизация колонны";
+				else nameProcessStep = "Column stabilization";
 				processMode.step = 2;		// перешли на следующий шаг алгоритма
 				stepNext = 0;
 			}
@@ -2175,7 +2279,8 @@ void rfluxLoopMode_7() {
 			if (timePauseOff <= millis() || stepNext == 1) {
 				timeAllertInterval = millis() + 10000;	// установим счетчик времени для зв.сигнала 10 сек.
 				processMode.timeStep = 0;
-				nameProcessStep = "Отбор голов";
+				if (RU) nameProcessStep = "Отбор голов";
+				else nameProcessStep = "Picking heads";
 				processMode.step = 4;	// перешли на следующий шаг алгоритма
 				stepNext = 0;
 			}
@@ -2211,7 +2316,8 @@ void rfluxLoopMode_7() {
 				processMode.timeStep = 0;
 				bodyTimeOffCount = 0;
 				bodyValveSet = true;
-				nameProcessStep = "Отбор тела";
+				if (RU) nameProcessStep = "Отбор тела";
+				else nameProcessStep = "Picking hearts";
 			}
 			// рулим клапаном отбора голов
 			else if (pwmOut[0].member == 1) valveSet(PWM_CH1);
@@ -2224,7 +2330,8 @@ void rfluxLoopMode_7() {
 				power.heaterPower = 0;							// установили мощность на ТЭН 0 %
 				temperatureSensor[DS_Cube].allert = true;	// сигнализация для WEB
 				processMode.timeStep = 0;
-				nameProcessStep = "Процесс закончен";
+				if (RU) nameProcessStep = "Процесс закончен";
+				else nameProcessStep = "Process is over";
 				if (pwmOut[3].member == 1) csOn(PWM_CH4);
 				processMode.step = 7;						// перешли на следующий шаг алгоритма
 				if (stepNext == 1) numOkStop = 0;
@@ -2238,7 +2345,8 @@ void rfluxLoopMode_7() {
 				if (counterStartStop == 0) timeAllertInterval = millis() + 10000;			// установим счетчик времени для зв.сигнала
 				if (bodyValveSet) {
 					counterStartStop++;
-					nameProcessStep = "Отбор тела, " + String(counterStartStop) + "-й стоп";
+					if (RU) nameProcessStep = "Отбор тела, " + String(counterStartStop) + "-й стоп";
+					else nameProcessStep = "Picking hearts, " + String(counterStartStop) + "st stop";
 					bodyValveSet = false;
 				}
 				csOn(PWM_CH2);								// открыли клапан доп. подачи воды
@@ -2251,8 +2359,14 @@ void rfluxLoopMode_7() {
 			else if ((temperatureSensor[DS_Tube].data <= temperatureSensor[DS_Tube].allertValue - settingBoilTube) || temperatureSensor[DS_Tube].allertValue == 0) {
 				temperatureSensor[DS_Tube].allert = false;
 				csOff(PWM_CH2);	// закрыли клапан доп. подачи воды
-				if (counterStartStop == 0) nameProcessStep = "Отбор тела";
-				else nameProcessStep = "Отбор тела, старт/стопов - " + String(counterStartStop);
+				if (RU) {
+					if (counterStartStop == 0) nameProcessStep = "Отбор тела";
+					else nameProcessStep = "Отбор тела, старт/стопов - " + String(counterStartStop);
+				}
+				else {
+					if (counterStartStop == 0) nameProcessStep = "Picking hearts";
+					else nameProcessStep = "Picking hearts, start/stop - " + String(counterStartStop);
+				}
 				bodyValveSet = true;
 				//bodyTimeOffCount = processMode.timeStep;			// сбрасываем таймер остановки процесса
 			}
@@ -2275,7 +2389,8 @@ void rfluxLoopMode_7() {
 			else if (touch_in == true && stopInfoOutScreen == false) {
 				processMode.allow = 0;  // вышли из режима дистилляции
 				processMode.step = 0;	// обнулили шаг алгоритма
-				commandWriteSD = "Процесс завершен";
+				if (RU) commandWriteSD = "Процесс завершен";
+				else commandWriteSD = "Process is over";
 				commandSD_en = true;
 				stopInfoOutScreen = true;
 				touchScreen = 0;
@@ -2303,7 +2418,8 @@ void rfluxLoopMode_7() {
 #ifndef TFT_Display
 				processMode.allow = 0;  // вышли из режима ректификации
 				processMode.step = 0;	// обнулили шаг алгоритма
-				commandWriteSD = "Процесс завершен";
+				if (RU) commandWriteSD = "Процесс завершен";
+				else commandWriteSD = "Process is over";
 				commandSD_en = true;
 #endif
 			}
@@ -2354,16 +2470,21 @@ void refluxLoop() {
     settingBoilTube = 0;
 		beepEnd = false;
 		reSetTemperatureStartPressure = true;
-		if (processMode.number > 0) nameProcessStep = "Нагрев куба";
+		if (processMode.number > 0) {
+			if (RU) nameProcessStep = "Нагрев куба";
+			else nameProcessStep = "Pot heating";
+		}
 		else {
 			if (pwmOut[0].member == 1) csOn(PWM_CH1);				// открыть клапан отбора голов
 			if (pwmOut[1].member == 1) csOn(PWM_CH2);				// открыть клапан отбора тела
 			if (pwmOut[2].member == 1) csOn(PWM_CH3);				// включаем клапан подачи воды
-			nameProcessStep = "Ручной режим, нагрев куба";
+			if (RU) nameProcessStep = "Ручной режим, нагрев куба";
+			else nameProcessStep = "Manual mode, pot heating";
 		}
 	}
 	else if (stepNext == 1) {
-		commandWriteSD = "WebSend: Пропустить шаг";
+		if (RU) commandWriteSD = "WebSend: Пропустить шаг";
+		else commandWriteSD = "WebSend: skip step";
 		commandSD_en = true;
 	}
 
@@ -2423,14 +2544,16 @@ void refluxLoop() {
 			errA = false; check_Err();
 			if (errA) {
 				stop_Err();
-				nameProcessStep = "Стоп по аварии ADC > " + String(adcIn[numCrashStop].name);
+				if (RU) nameProcessStep = "Стоп по аварии ADC > " + String(adcIn[numCrashStop].name);
+				else nameProcessStep = "Emergency stop by ADC > " + String(adcIn[numCrashStop].name);
 			}
 		}
 		if (processMode.step != 7 && timePauseErrT <= millis()) {
 			errT = false; check_Err();
 			if (errT) {
 				stop_Err();
-				nameProcessStep = "Стоп по аварии T > " + String(temperatureSensor[numCrashStop].name);
+				if (RU) nameProcessStep = "Стоп по аварии T > " + String(temperatureSensor[numCrashStop].name);
+				else nameProcessStep = "Emergency stop by T > " + String(temperatureSensor[numCrashStop].name);
 			}
 		}
 
@@ -2445,7 +2568,8 @@ void refluxLoop() {
 		// завершение отбора по времени закрытого состояния клапана на отборе тела
 		if (counterStartStop > 0 && processMode.timeStep >= (timeStabilizationReflux * 60 + bodyTimeOffCount)) {
 			stop_Err();
-			nameProcessStep = "Стоп по времени Старт/Стоп";
+			if (RU) nameProcessStep = "Стоп по времени Старт/Стоп";
+			else nameProcessStep = "Stop by time start/stop";
 			numOkStop = 2;
 		}
 	}

@@ -460,7 +460,8 @@ void handleProcessModeIn() {
 
 	if (processMode.allow < 3) {
 #if defined Debug_en
-		Serial.println(""); Serial.println("Прием уставок:");
+		if (RU) Serial.println(""); Serial.println("Прием уставок:");
+		else Serial.println(""); Serial.println("Receive settings:");
 #endif
 		for (i = 0; i < DS_Cnt; i++) {
 			n = temperatureSensor[i].num;
@@ -468,18 +469,20 @@ void handleProcessModeIn() {
 			tmpAllertValue = HTTP.arg(arg + "[allertValue]").toFloat();
 			
 			if (temperatureSensor[i].num != 2) {
-				if (tmpAllertValue > 10) temperatureSensor[i].allertValue = tmpAllertValue;
+				if (tmpAllertValue > 0) temperatureSensor[i].allertValue = tmpAllertValue;
 				else temperatureSensor[i].allertValue = 0;
 			}
 			else {
 				if (tmpAllertValue > 0 && tmpAllertValue != temperatureSensor[i].allertValueIn) {
 					reSetTemperatureStartPressure = true;
-					commandWriteSD = "WebSend: Смена уставки";
+					if (RU) commandWriteSD = "WebSend: Смена уставки";
+					else commandWriteSD = "WebSend: Change setpoint";
 					commandSD_en = true;
 					deltaBoilTube = tmpAllertValue;
 				}
 				else if (tmpAllertValue == 0 && tmpAllertValue != temperatureSensor[i].allertValueIn) {
-					commandWriteSD = "WebSend: Отмена уставки";
+					if (RU) commandWriteSD = "WebSend: Отмена уставки";
+					else commandWriteSD = "WebSend: Remove setpoint";
 					commandSD_en = true;
 					deltaBoilTube = 0;
 				}
@@ -502,10 +505,10 @@ void handleProcessModeIn() {
 				}
 			}
 #if defined Debug_en
-			Serial.print(n); Serial.print(" Номер: ");  Serial.println(temperatureSensor[i].num);
-			Serial.print("Получили уставку: ");  Serial.println(tmpAllertValue);
+			Serial.print(n); Serial.print(" Number: ");  Serial.println(temperatureSensor[i].num);
+			Serial.print("Setpoint in: ");  Serial.println(tmpAllertValue);
 			Serial.print("Member: ");  Serial.println(temperatureSensor[i].member);
-			Serial.print("Уставка: ");  Serial.println(temperatureSensor[i].allertValue);
+			Serial.print("Setpoint: ");  Serial.println(temperatureSensor[i].allertValue);
 #endif
 		}
 	}
@@ -630,11 +633,15 @@ void handleProcessModeIn() {
 	// для записи лога на SD
 	if (processModeOld != processMode.allow && processMode.allow < 4) {
 		if (processMode.allow == 0) {
-			commandWriteSD = "WebSend: Стоп";
+			if (RU) commandWriteSD = "WebSend: Стоп";
+			else commandWriteSD = "WebSend: Stop";
 			stopInfoOutScreen = true;
 			touchScreen = 0;
 		}
-		else commandWriteSD = "WebSend: Старт";
+		else {
+			if (RU) commandWriteSD = "WebSend: Старт";
+			else commandWriteSD = "WebSend: Start";
+		}
 		commandSD_en = true;
 	}
 

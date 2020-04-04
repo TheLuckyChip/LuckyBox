@@ -1,6 +1,5 @@
 #include "display.h"
 
-byte touchRead = 0;
 uint8_t cnt_p = 0;
 unsigned long displayPowerInterval;
 
@@ -8,11 +7,10 @@ void displayLoop() {
 	// опрос тачскрина
 #if defined TFT_Display
 	if (touch_in == true && stopInfoOutScreen == true) {
-		if (touchRead == 0) {
-			initBuzzer(50);
-			//delay(5);
+		if (touchRead) {
 			touchscreenUpdate();
-			touchRead = 1;
+			initBuzzer(50);
+		}
 			// определим область нажатия для меню
 			if (processMode.allow == 0 && touchScreen == 0) {
 				if (touch_x > 0 && touch_x < 160 && touch_y > 20 && touch_y < 130) touchArea = 1;
@@ -67,9 +65,9 @@ void displayLoop() {
 				else touchArea = 0;
 			}
 			delay(50);
-		}
+
 		delay(500);
-		touchRead = 0;
+		touchRead = 1;
 		touch_in = false;
 		attachInterrupt(intTouch, touchscreenUpdateSet, FALLING);
 	}
