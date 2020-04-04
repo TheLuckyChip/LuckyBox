@@ -171,6 +171,6 @@ unsigned long timeSetWChead;
 float temperatureOld_DS_Out;
 float temperatureOld_DS_Def;
 
-byte touchRead = 0;
+byte touchRead = 1;
 
 bool RU;

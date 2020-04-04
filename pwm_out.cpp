@@ -48,7 +48,7 @@ void csOff(byte ch) {
 	else {
 		pwm.setPWM(ch, 4096, 0);
 #if defined TFT_Display
-		if (touch_in == true && (ch == SD_CS || ch == TFT_CS)) {
+		if (touch_in == true && (ch == SD_CS || ch == TFT_CS) && touchRead == 1) {
 			touchscreenUpdate();
 			touchRead = 0;
 			initBuzzer(50);
