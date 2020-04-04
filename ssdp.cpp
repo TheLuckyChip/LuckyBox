@@ -17,7 +17,8 @@ void initSSDP(void)
 	SSDP.setModelName("LuckyBox");
 	SSDP.setModelNumber("000000000001");
 	SSDP.setModelURL("https://luckycenter.ru");
-	SSDP.setManufacturer("Счастливчик");
+	if (RU) SSDP.setManufacturer("Счастливчик");
+	else SSDP.setManufacturer("Lucky");
 	SSDP.setManufacturerURL("https://luckycenter.ru");
 	SSDP.begin();
 }

@@ -1,6 +1,5 @@
 #include "display.h"
 
-byte touchRead = 0;
 uint8_t cnt_p = 0;
 unsigned long displayPowerInterval;
 
@@ -8,11 +7,10 @@ void displayLoop() {
 	// опрос тачскрина
 #if defined TFT_Display
 	if (touch_in == true && stopInfoOutScreen == true) {
-		if (touchRead == 0) {
-			initBuzzer(50);
-			//delay(5);
+		if (touchRead) {
 			touchscreenUpdate();
-			touchRead = 1;
+			initBuzzer(50);
+		}
 			// определим область нажатия для меню
 			if (processMode.allow == 0 && touchScreen == 0) {
 				if (touch_x > 0 && touch_x < 160 && touch_y > 20 && touch_y < 130) touchArea = 1;
@@ -67,9 +65,9 @@ void displayLoop() {
 				else touchArea = 0;
 			}
 			delay(50);
-		}
+
 		delay(500);
-		touchRead = 0;
+		touchRead = 1;
 		touch_in = false;
 		attachInterrupt(intTouch, touchscreenUpdateSet, FALLING);
 	}
@@ -117,10 +115,80 @@ void displayLoop() {
 		DefCubOut++;
 #endif
 	}
-	// Вывод бегущей строчки мощности
+#if defined TFT_Display
+	// Вывод бегущей строчки мощности и самой мощности, так же клапанов и датчиков
 	if ((processMode.allow == 1 || processMode.allow == 2) && millis() > displayPowerInterval) {
 		displayPowerInterval = millis() + 250;
 		csOn(TFT_CS);
+
+		// клапана и датчики
+		// состояние входов и выходов для дистилляции и ректификации
+		tft.setTextSize(2);
+		tft.setCursor(0, 47);
+		tft.setTextColor(ILI9341_LIGHTGREY);
+		tft.printf("<<");
+		if (adcIn[0].member == 0) tft.drawCircle(38, 54, 6, ILI9341_DARKDARK);
+		else {
+			tft.drawCircle(38, 54, 6, ILI9341_LIGHTGREY);
+			if (adcIn[0].allert == true) tft.fillCircle(38, 54, 5, 0xFACB);
+			else tft.fillCircle(38, 54, 5, ILI9341_BLACK);
+		}
+		if (adcIn[1].member == 0) tft.drawCircle(58, 54, 6, ILI9341_DARKDARK);
+		else {
+			tft.drawCircle(58, 54, 6, ILI9341_LIGHTGREY);
+			if (adcIn[1].allert == true) tft.fillCircle(58, 54, 5, 0xFACB);
+			else tft.fillCircle(58, 54, 5, ILI9341_BLACK);
+		}
+		if (adcIn[2].member == 0) tft.drawCircle(78, 54, 6, ILI9341_DARKDARK);
+		else {
+			tft.drawCircle(78, 54, 6, ILI9341_LIGHTGREY);
+			if (adcIn[2].allert == true) tft.fillCircle(78, 54, 5, 0xFACB);
+			else tft.fillCircle(78, 54, 5, ILI9341_BLACK);
+		}
+		if (adcIn[3].member == 0) tft.drawCircle(98, 54, 6, ILI9341_DARKDARK);
+		else {
+			tft.drawCircle(98, 54, 6, ILI9341_LIGHTGREY);
+			if (adcIn[3].allert == true) tft.fillCircle(98, 54, 5, 0xFACB);
+			else tft.fillCircle(98, 54, 5, ILI9341_BLACK);
+		}
+		tft.setCursor(122, 47);
+		tft.setTextColor(ILI9341_LIGHTGREY);
+		tft.printf(">>");
+		if (pwmOut[0].member == 0) tft.drawCircle(160, 54, 6, ILI9341_DARKDARK);
+		else {
+			tft.drawCircle(160, 54, 6, ILI9341_LIGHTGREY);
+			if (pwmOut[0].allert == true) tft.fillCircle(160, 54, 5, 0x47EA);
+			else tft.fillCircle(160, 54, 5, ILI9341_BLACK);
+		}
+		if (pwmOut[1].member == 0) tft.drawCircle(180, 54, 6, ILI9341_DARKDARK);
+		else {
+			tft.drawCircle(180, 54, 6, ILI9341_LIGHTGREY);
+			if (pwmOut[1].allert == true) tft.fillCircle(180, 54, 5, 0x47EA);
+			else tft.fillCircle(180, 54, 5, ILI9341_BLACK);
+		}
+		if (pwmOut[2].member == 0) tft.drawCircle(200, 54, 6, ILI9341_DARKDARK);
+		else {
+			tft.drawCircle(200, 54, 6, ILI9341_LIGHTGREY);
+			if (pwmOut[2].allert == true) tft.fillCircle(200, 54, 5, 0x47EA);
+			else tft.fillCircle(200, 54, 5, ILI9341_BLACK);
+		}
+		if (pwmOut[3].member == 0) tft.drawCircle(220, 54, 6, ILI9341_DARKDARK);
+		else {
+			tft.drawCircle(220, 54, 6, ILI9341_LIGHTGREY);
+			if (pwmOut[3].allert == true) tft.fillCircle(220, 54, 5, 0x47EA);
+			else tft.fillCircle(220, 54, 5, ILI9341_BLACK);
+		}
+
+		// мощность
+		tft.setTextSize(2);
+		tft.setTextColor(ILI9341_ORANGE, ILI9341_BLACK);
+		tft.setCursor(235, 46);
+		if (power.heaterPower == 100) tft.printf("%d", (int)power.heaterPower);
+		else if (power.heaterPower >= 10) tft.printf(" %d", (int)power.heaterPower);
+		else tft.printf("  %d", (int)power.heaterPower);
+		tft.setCursor(274, 52);
+		tft.setTextSize(1);
+		tft.print("%");
 		tft.setTextColor(ILI9341_ORANGE, ILI9341_BLACK);
 		tft.setCursor(283, 46);
 		tft.setTextSize(2);
@@ -132,4 +200,5 @@ void displayLoop() {
 		}
 		csOff(TFT_CS);
 	}
+#endif
 }

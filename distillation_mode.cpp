@@ -218,14 +218,16 @@ void distillationLoop() {
 		errA = false; check_Err();
 		if (errA) {
 			stop_Err();
-			nameProcessStep = "Стоп по аварии ADC > " + String(adcIn[numCrashStop].name);
+			if (RU) nameProcessStep = "Стоп по аварии ADC > " + String(adcIn[numCrashStop].name);
+			else nameProcessStep = "Emergency stop by ADC > " + String(adcIn[numCrashStop].name);
 		}
 	}
 	if (processMode.step != 4 && timePauseErrT <= millis()) {
 		errT = false; check_Err();
 		if (errT) {
 			stop_Err();
-			nameProcessStep = "Стоп по аварии T > " + String(temperatureSensor[numCrashStop].name);
+			if (RU) nameProcessStep = "Стоп по аварии T > " + String(temperatureSensor[numCrashStop].name);
+			else nameProcessStep = "Emergency stop by T > " + String(temperatureSensor[numCrashStop].name);
 		}
 	}
 
@@ -259,9 +261,12 @@ void distillationLoop() {
 			tempBigOut = 1;
 			power.heaterStatus = 1;							// включили нагрев
 			csOn(PWM_CH6);									// включить дополнительный ТЭН на разгон
+			if (pwmOut[0].member == 1) csOn(PWM_CH1);		// открыть клапан отбора
+			if (pwmOut[1].member == 1) csOn(PWM_CH2);		// открыть клапан отбора
 			power.heaterPower = power.inPowerHigh;			// установили мощность на ТЭН
 			processMode.timeStep = 0;
-			nameProcessStep = "Нагрев куба";
+			if (RU) nameProcessStep = "Нагрев куба";
+			else nameProcessStep = "Pot heating";
 			processMode.timeStart = time(nullptr);
 			processMode.step = 1;		// перешли на следующий шаг алгоритма
 			break;
@@ -276,7 +281,8 @@ void distillationLoop() {
 				power.heaterPower = power.inPowerLow;	// установили мощность на ТЭН
 				timeAllertInterval = millis() + 10000;	// счетчик времени для зв.сигнала
 				processMode.timeStep = 0;
-				nameProcessStep = "Отбор СС";
+				if (RU) nameProcessStep = "Отбор СС";
+				else nameProcessStep = "Picking raw alcohol";
 				processMode.step = 2;	// перешли на следующий шаг алгоритма
 			}
 			timeStopDistLevelErr = millis(); // время сработавшего датчика уровня
@@ -290,16 +296,34 @@ void distillationLoop() {
 		}
 		case 3: {
 			// ждем достижения заданных температур
-			if (temperatureSensor[DS_Cube].data >= temperatureSensor[DS_Cube].allertValue && temperatureSensor[DS_Cube].allertValue > 0) {
-				power.heaterStatus = 0;						// выключили ТЭН
-				power.heaterPower = 0;						// установили мощность 0%
-				temperatureSensor[DS_Cube].allert = true;	// сигнализация для WEB
-				timeAllertInterval = millis() + 10000;	// счетчик времени для зв.сигнала						// подали звуковой сигнал
-				processMode.timeStep = 0;
-				nameProcessStep = "Процесс закончен";
-				settingAlarm = true;
-				processMode.step = 4;						// перешли на следующий шаг алгоритма
-			}
+      if (temperatureSensor[DS_Cube].allertValue > 5) {
+  			if (temperatureSensor[DS_Cube].data >= temperatureSensor[DS_Cube].allertValue) { // остановка по t куба
+  				power.heaterStatus = 0;						// выключили ТЭН
+  				power.heaterPower = 0;						// установили мощность 0%
+  				temperatureSensor[DS_Cube].allert = true;	// сигнализация для WEB
+  				timeAllertInterval = millis() + 10000;	// счетчик времени для зв.сигнала						// подали звуковой сигнал
+  				processMode.timeStep = 0;
+  				if (RU) nameProcessStep = "Процесс закончен";
+				else nameProcessStep = "Process is over";
+  				settingAlarm = true;
+				numOkStop = 0;
+  				processMode.step = 4;						// перешли на следующий шаг алгоритма
+  			}
+      }
+      else if (temperatureSensor[DS_Cube].allertValue > 0 && temperatureSensor[DS_Cube].allertValue <= 5) {
+        if (temperatureCubeAlcohol > 0 && temperatureCubeAlcohol <= temperatureSensor[DS_Cube].allertValue) { // остановка по остатку спирта в кубе
+          power.heaterStatus = 0;           // выключили ТЭН
+          power.heaterPower = 0;            // установили мощность 0%
+          temperatureSensor[DS_Cube].allert = true; // сигнализация для WEB
+          timeAllertInterval = millis() + 10000;  // счетчик времени для зв.сигнала           // подали звуковой сигнал
+          processMode.timeStep = 0;
+          if (RU) nameProcessStep = "Процесс закончен";
+          else nameProcessStep = "Process is over";
+          settingAlarm = true;
+	  numOkStop = 1;
+          processMode.step = 4;           // перешли на следующий шаг алгоритма
+        }
+      }
 			// если выбраны для процесса клапана отбора, закроем их при срабатывании датчика уровня
 			if (adcIn[0].member == 1 && adcIn[0].allert == true) {
 				valveOnOff = true;
@@ -318,8 +342,14 @@ void distillationLoop() {
 				power.heaterPower = 0;						// установили мощность 0%
 				timeAllertInterval = millis() + 10000;	// счетчик времени для зв.сигнала						// подали звуковой сигнал
 				processMode.timeStep = 0;
-				nameProcessStep = "Процесс закончен, емкость полная";
-				commandWriteSD = "Переполнение емкости";
+				if (RU) { 
+					nameProcessStep = "Процесс закончен, емкость полная";
+					commandWriteSD = "Переполнена емкость";
+				}
+				else {
+					nameProcessStep = "Process is over, tank is full";
+					commandWriteSD = "Tank is full";
+				}
 				commandSD_en = true;
 				settingAlarm = true;
 				processMode.step = 4;						// перешли на следующий шаг алгоритма
@@ -342,7 +372,8 @@ void distillationLoop() {
 			else if (touch_in == true && stopInfoOutScreen == false) {
 				processMode.allow = 0;  // вышли из режима дистилляции
 				processMode.step = 0;	// обнулили шаг алгоритма
-				commandWriteSD = "Процесс завершен";
+				if (RU) commandWriteSD = "Процесс завершен";
+				else nameProcessStep = "Process is over";
 				commandSD_en = true;
 				stopInfoOutScreen = true;
 				touchScreen = 0;
@@ -367,7 +398,8 @@ void distillationLoop() {
 #ifndef TFT_Display
 				processMode.allow = 0;  // вышли из режима дистилляции
 				processMode.step = 0;	// обнулили шаг алгоритма
-				commandWriteSD = "Процесс завершен";
+				if (RU) commandWriteSD = "Процесс завершен";
+				else nameProcessStep = "Process is over";
 				commandSD_en = true;
 #endif
 			}

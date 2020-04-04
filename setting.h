@@ -256,4 +256,8 @@ extern unsigned long timeSetWChead;
 extern float temperatureOld_DS_Out;
 extern float temperatureOld_DS_Def;
 
+extern byte touchRead;
+
+extern bool RU;
+
 #endif

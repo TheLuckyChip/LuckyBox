@@ -48,7 +48,8 @@ void initHTTP(void)
 					tft.setCursor(0, 10);
 					tft.setTextColor(ILI9341_WHITE);
 					tft.setTextSize(2);
-					tft.print(utf8rus("Обновление Web интерфейса")); //tft.print(" Web files update");
+					if (RU) tft.print(utf8rus("Обновление Web интерфейса"));
+					else tft.print("Web files update");
 					timeStartLoad = millis() + 500;
 					csOff(TFT_CS);
 #endif
@@ -61,14 +62,15 @@ void initHTTP(void)
 					Update.printError(Serial);
 				}
 				else {
-					Serial.println("...scetch files update...");
+					Serial.println("...scetch file update...");
 #if defined TFT_Display
 					csOn(TFT_CS);
 					fillScreenRect(0, 0, 320, 240, ILI9341_BLACK);
 					tft.setCursor(0, 10);
 					tft.setTextColor(ILI9341_WHITE);
 					tft.setTextSize(2);
-					tft.print(utf8rus("Обновление кода программы")); //tft.print(" Sketch files update");
+					if (RU) tft.print(utf8rus("Обновление кода программы"));
+					else tft.print("Sketch file update");
 					timeStartLoad = millis() + 500;
 					csOff(TFT_CS);
 #endif
@@ -86,9 +88,11 @@ void initHTTP(void)
 			tft.println();
 			tft.println();
 			tft.println();
-			tft.println(utf8rus("Обновление завершено!")); //tft.println(" Succes!");
+			if (RU) tft.println(utf8rus("Обновление завершено!"));
+			else tft.println("Succes!");
 			tft.println();
-			tft.print(utf8rus("Перезагрузка...")); //tft.print(" Restart...");
+			if (RU) tft.print(utf8rus("Перезагрузка..."));
+			else tft.print("Restart...");
 			timeStartLoad = millis() + 500;
 			csOff(TFT_CS);
 #endif

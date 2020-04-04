@@ -5,6 +5,8 @@
 //#define		WColumn_water   // Подруливание отбора голов водой
 //#define		WColumn_power   // Подруливание отбора голов мощностью
 
+// Язык интерфейса на TFT дисплее
+#define		language_RUS
 
 // ТЭН
 #define		heater			16

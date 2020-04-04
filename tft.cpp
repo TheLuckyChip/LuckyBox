@@ -221,7 +221,8 @@ void initTFT() {
 	tft.setCursor(0, 2);
 	tft.setTextColor(ILI9341_WHITE);
 	tft.setTextSize(1);
-	tft.print(utf8rus("Версия ПО: "));
+	if (RU) tft.print(utf8rus("Версия ПО: "));
+	else tft.print(utf8rus("FW version: "));
 	tft.print(curVersion);
 	tft.setCursor(199, 2);
 	tft.print("    SN: ");
@@ -242,7 +243,8 @@ void tftStartForGraph() {
 	else if (processMode.allow == 3) drawScreen4bitMonoBitmap(0, 10, 32, 32, imageProcessMashing);
 	else if (processMode.allow == 4) {
 		tft.setTextSize(1);
-		tft.print(utf8rus("Настройка"));
+		if (RU) tft.print(utf8rus("Настройка"));
+		else tft.print(utf8rus("Setup"));
 		tft.setTextSize(2);
 		tft.setCursor(0, 16);
 		tft.print("PID");
@@ -352,12 +354,21 @@ void tftOutText(int temp_min, int temp_max) {
 
 	switch (processMode.allow) {
 		case 1: {
-			tft.print(utf8rus(" Дистилляция"));
+			if (RU) tft.print(utf8rus("Дистилляция"));
+			else tft.print(utf8rus("Distillation"));
 			// какой шаг процесса
-			tft.setCursor(36, 10);
-			if (processMode.step < 2) tft.print(utf8rus("Нагрев"));
-			else if (processMode.step < 4) tft.print(utf8rus(" Отбор"));
-			else tft.print(utf8rus("  Стоп"));
+			if (RU) {
+				tft.setCursor(36, 10);
+				if (processMode.step < 2) tft.print(utf8rus("Нагрев"));
+				else if (processMode.step < 4) tft.print(utf8rus(" Отбор"));
+				else tft.print(utf8rus("  Стоп"));
+			}
+			else {
+				tft.setCursor(30, 10);
+				if (processMode.step < 2) tft.print(utf8rus("Heating"));
+				else if (processMode.step < 4) tft.print(utf8rus("Picking"));
+				else tft.print(utf8rus("   Stop"));
+			}
 			// время шага
 			tft.setCursor(42, 20);
 			if (processMode.timeStep < 36000) tft.print(" ");
@@ -373,20 +384,38 @@ void tftOutText(int temp_min, int temp_max) {
 			break;
 		}
 		case 2: {
-			tft.print(utf8rus("Ректификация"));
+			if (RU) tft.print(utf8rus("Ректификация"));
+			else tft.print(utf8rus("Reflux"));
 			// какой шаг процесса
-			tft.setCursor(36, 10);
-			if (processMode.number > 0) {
-				if (processMode.step < 2) tft.print(utf8rus("Нагрев"));
-				else if (processMode.step < 4) tft.print(utf8rus(" Стаб."));
-				else if (processMode.step < 6) tft.print(utf8rus("Головы"));
-				else if (processMode.step < 7) tft.print(utf8rus("  Тело"));
-				else tft.print(utf8rus("  Стоп"));
+			if (RU) {
+				tft.setCursor(36, 10);
+				if (processMode.number > 0) {
+					if (processMode.step < 2) tft.print(utf8rus("Нагрев"));
+					else if (processMode.step < 4) tft.print(utf8rus(" Стаб."));
+					else if (processMode.step < 6) tft.print(utf8rus("Головы"));
+					else if (processMode.step < 7) tft.print(utf8rus("  Тело"));
+					else tft.print(utf8rus("  Стоп"));
+				}
+				// ручной режим ректификации
+				else {
+					if (processMode.step < 2) tft.print(utf8rus("Нагрев"));
+					else tft.print(utf8rus(" Отбор"));
+				}
 			}
-			// ручной режим ректификации
 			else {
-				if (processMode.step < 2) tft.print(utf8rus("Нагрев"));
-				else tft.print(utf8rus(" Отбор"));
+				tft.setCursor(30, 10);
+				if (processMode.number > 0) {
+					if (processMode.step < 2) tft.print(utf8rus("Heating"));
+					else if (processMode.step < 4) tft.print(utf8rus("  Stab."));
+					else if (processMode.step < 6) tft.print(utf8rus("  Heads"));
+					else if (processMode.step < 7) tft.print(utf8rus(" Hearts"));
+					else tft.print(utf8rus("   Stop"));
+				}
+				// ручной режим ректификации
+				else {
+					if (processMode.step < 2) tft.print(utf8rus("Heating"));
+					else tft.print(utf8rus("Picking"));
+				}
 			}
 			// время шага
 			tft.setCursor(42, 20);
@@ -403,7 +432,8 @@ void tftOutText(int temp_min, int temp_max) {
 			break;
 		}
 		case 3: {
-			tft.print(utf8rus("Затирание"));
+			if (RU) tft.print(utf8rus("Затирание"));
+			else tft.print(utf8rus("Mashing"));
 			break;
 		}
 	}
@@ -481,7 +511,9 @@ void tftOutText(int temp_min, int temp_max) {
 		}
 	}
 
-	if (processMode.allow < 3) {
+
+
+	/*if (processMode.allow < 3) {
 		// состояние входов и выходов для дистилляции и ректификации
 		tft.setTextSize(2);
 		tft.setCursor(0, 47);
@@ -538,34 +570,8 @@ void tftOutText(int temp_min, int temp_max) {
 			if (pwmOut[3].allert == true) tft.fillCircle(220, 54, 5, 0x47EA);
 			else tft.fillCircle(220, 54, 5, ILI9341_BLACK);
 		}
-/*
-		if (pwmOut[4].member == 0) tft.drawCircle(253, 54, 6, ILI9341_DARKDARK);
-		else {
-			tft.drawCircle(253, 54, 6, ILI9341_LIGHTGREY);
-			if (pwmOut[4].allert == true) tft.fillCircle(253, 54, 5, 0x47EA);
-			else tft.fillCircle(253, 54, 5, ILI9341_BLACK);
-		}
-		if (pwmOut[5].member == 0) tft.drawCircle(273, 54, 6, ILI9341_DARKDARK);
-		else {
-			tft.drawCircle(273, 54, 6, ILI9341_LIGHTGREY);
-			if (pwmOut[5].allert == true) tft.fillCircle(273, 54, 5, 0x47EA);
-			else tft.fillCircle(273, 54, 5, ILI9341_BLACK);
-		}
-		if (pwmOut[6].member == 0) tft.drawCircle(293, 54, 6, ILI9341_DARKDARK);
-		else {
-			tft.drawCircle(293, 54, 6, ILI9341_LIGHTGREY);
-			if (pwmOut[6].allert == true) tft.fillCircle(293, 54, 5, 0x47EA);
-			else tft.fillCircle(293, 54, 5, ILI9341_BLACK);
-		}
-		if (pwmOut[7].member == 0) tft.drawCircle(313, 54, 6, ILI9341_DARKDARK);
-		else {
-			tft.drawCircle(313, 54, 6, ILI9341_LIGHTGREY);
-			if (pwmOut[7].allert == true) tft.fillCircle(313, 54, 5, 0x47EA);
-			else tft.fillCircle(313, 54, 5, ILI9341_BLACK);
-		}
-*/
 	}
-	else if (processMode.allow == 3) {
+	else*/ if (processMode.allow == 3) {
 		// в процессе затирания выводим время и температуру паузы
 
 		if (processMashing[0].step == 1) {
@@ -604,13 +610,19 @@ void tftOutText(int temp_min, int temp_max) {
 		tft.setCursor(0, 47);
 		tft.setTextColor(ILI9341_LIGHTGREY, ILI9341_BLACK);
 		if (processMode.step < 11) {
-			if (timeOutTFT == 0) tft.print(utf8rus(" Пауза    "));
+			if (timeOutTFT == 0) {
+				if (RU) tft.print(utf8rus(" Пауза    "));
+				else tft.print(utf8rus(" Pause    "));
+			}
 			else if (processMode.timeStep <= 1) tft.printf("> %.1f min. = ", timeOutTFT / 60);
 			else tft.printf(" %.1f min. = ", timeOutTFT / 60);
 			// температура
 			tft.printf("%.1f C    ", tempOutTFT);
 		}
-		else tft.print(utf8rus(" Процесс завершен       "));
+		else {
+			if (RU) tft.print(utf8rus(" Процесс завершен       "));
+			else tft.print(utf8rus(" Process completed      "));
+		}
 	}
 
 	switch (tempBigOut) {
@@ -634,7 +646,7 @@ void tftOutText(int temp_min, int temp_max) {
 	tft.setTextColor(ILI9341_CYAN, ILI9341_BLACK); // голубой
 	tft.printf("%d mm", (int)pressureSensor.data);
 	// мощность
-	if (processMode.allow == 1 || processMode.allow == 2) {
+	/*if (processMode.allow == 1 || processMode.allow == 2) {
 		tft.setTextColor(ILI9341_ORANGE, ILI9341_BLACK);
 		tft.setCursor(235, 46);
 		if (power.heaterPower == 100) tft.printf("%d", (int)power.heaterPower);
@@ -644,7 +656,7 @@ void tftOutText(int temp_min, int temp_max) {
 		tft.setTextSize(1);
 		tft.print("%");
 		// бегущие стрелки перенес в display.cpp
-	}
+	}*/
 }
 
 void tftOutGraphDisplay() {
@@ -769,9 +781,25 @@ void tftStopLoop() {
 		fillScreenRect(175, 125, 100, 60, 0x67EC);
 		tft.drawRect(175, 125, 100, 60, 0x0000);
 
-		drawBitmapString(80, 78, &Exit, ILI9341_RED, 0xFFF6);
-		drawBitmapString(60, 141, &Esc, ILI9341_BLACK, 0xFB6D);
-		drawBitmapString(196, 140, &Ok, ILI9341_BLACK, 0x67EC);
+    if (RU) {
+		  drawBitmapString(80, 78, &Exit, ILI9341_RED, 0xFFF6);
+		  drawBitmapString(60, 141, &Esc, ILI9341_BLACK, 0xFB6D);
+		  drawBitmapString(196, 140, &Ok, ILI9341_BLACK, 0x67EC);
+    }
+    else {
+      tft.setTextSize(1);
+      tft.setFont(&FreeSerifBold24pt7b);
+      tft.setTextColor(ILI9341_RED);
+      tft.setCursor(106, 108);
+      tft.print("Exit?");
+      tft.setTextColor(ILI9341_BLACK);
+      tft.setCursor(66, 170);
+      tft.print("No");
+      tft.setCursor(188, 170);
+      tft.print("Yes");
+      tft.setFont(NULL);
+      tft.setTextSize(2);
+    }
 
 		csOff(TFT_CS);
 		touchScreen = 2;
@@ -796,7 +824,8 @@ void tftStopLoop() {
 				CH4 = false;
 			}
 			if (processMode.allow < 4) {
-				commandWriteSD = "TouchSend: Стоп";
+				if (RU) commandWriteSD = "TouchSend: Стоп";
+				else commandWriteSD = "TouchSend: Stop";
 				commandSD_en = true;
 			}
 			processMode.step = 0;
@@ -826,19 +855,58 @@ void tftStartLoop() {
 
 				if (touchArea == 1) {
 					typePr = 1;
-					drawBitmapString(56, 68, &StartDist, ILI9341_RED, 0xFFF6);
+					if (RU) drawBitmapString(56, 68, &StartDist, ILI9341_RED, 0xFFF6);
+          else {
+            tft.setTextSize(1);
+            tft.setFont(&FreeSerifBold12pt7b);
+            tft.setTextColor(ILI9341_RED);
+            tft.setCursor(124, 84);
+            tft.print("S t a r t");
+            tft.setCursor(70, 108);
+            tft.print("D i s t i l a t i o n ?");
+          }
 				}
 				else if (touchArea == 2) {
 					typePr = 2;
-					drawBitmapString(50, 68, &StartRect, ILI9341_RED, 0xFFF6);
+					if (RU) drawBitmapString(50, 68, &StartRect, ILI9341_RED, 0xFFF6);
+          else {
+            tft.setTextSize(1);
+            tft.setFont(&FreeSerifBold12pt7b);
+            tft.setTextColor(ILI9341_RED);
+            tft.setCursor(124, 84);
+            tft.print("S t a r t");
+            tft.setCursor(102, 108);
+            tft.print("R e f l u x ?");
+          }
 				}
 				else if (touchArea == 3) {
 					typePr = 3;
-					drawBitmapString(82, 68, &StartMash, ILI9341_RED, 0xFFF6);
+					if (RU) drawBitmapString(82, 68, &StartMash, ILI9341_RED, 0xFFF6);
+          else {
+            tft.setTextSize(1);
+            tft.setFont(&FreeSerifBold12pt7b);
+            tft.setTextColor(ILI9341_RED);
+            tft.setCursor(124, 84);
+            tft.print("S t a r t");
+            tft.setCursor(86, 108);
+            tft.print("M a s h i n g ?");
+          }
 				}
 				touchArea = 0;
-				drawBitmapString(60, 141, &Esc, ILI9341_BLACK, 0xFB6D);
-				drawBitmapString(196, 140, &Ok, ILI9341_BLACK, 0x67EC);
+        if (RU) {
+				  drawBitmapString(60, 141, &Esc, ILI9341_BLACK, 0xFB6D);
+				  drawBitmapString(196, 140, &Ok, ILI9341_BLACK, 0x67EC);
+        }
+        else {
+          tft.setFont(&FreeSerifBold24pt7b);
+          tft.setTextColor(ILI9341_BLACK);
+          tft.setCursor(66, 170);
+          tft.print("No");
+          tft.setCursor(188, 170);
+          tft.print("Yes");
+          tft.setFont(NULL);
+          tft.setTextSize(2);
+        }
 
 				csOff(TFT_CS);
 				touchScreen = 3;
@@ -860,7 +928,8 @@ void tftStartLoop() {
 				break;
 			}
 			else if (touchArea == 22) { // Да - запускаем процесс
-				commandWriteSD = "TouchSend: Старт";
+				if (RU) commandWriteSD = "TouchSend: Старт";
+				else commandWriteSD = "TouchSend: Stop";
 				commandSD_en = true;
 				processMode.step = 0;
 				processMode.allow = typePr;
@@ -930,86 +999,117 @@ void outStopInfo() {
 	tft.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
 	tft.setCursor(10, y);
 	if (processMode.allow == 1) {
-		tft.print(utf8rus("Дистилляция завершена."));
+		if (RU) tft.print(utf8rus("Дистилляция завершена."));
+		else tft.print(utf8rus("Distillation completed."));
 	}
 	else if (processMode.allow == 2) {
-		tft.print(utf8rus("Ректификация завершена."));
+		if (RU) tft.print(utf8rus("Ректификация завершена."));
+		else tft.print(utf8rus("Reflux completed."));
 	}
 	y += 20;
 	if (errA == true) {
 		tft.setCursor(10, y);
 		tft.setTextColor(ILI9341_RED, ILI9341_BLACK);
-		tft.print(utf8rus("Авария по датчикам:"));
+		if (RU) tft.print(utf8rus("Авария по датчикам:"));
+		else tft.print(utf8rus("Sensor Alarm:"));
 		y += 20;
 		tft.setCursor(10, y);
 		tft.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
 		switch (numCrashStop) {
-		case 0: tft.print(utf8rus(adcIn[0].name)); break;
-		case 1: tft.print(utf8rus(adcIn[1].name)); break;
-		case 2: tft.print(utf8rus(adcIn[2].name)); break;
-		case 3: tft.print(utf8rus(adcIn[3].name)); break;
+			case 0: tft.print(utf8rus(adcIn[0].name)); break;
+			case 1: tft.print(utf8rus(adcIn[1].name)); break;
+			case 2: tft.print(utf8rus(adcIn[2].name)); break;
+			case 3: tft.print(utf8rus(adcIn[3].name)); break;
 		}
+		tft.print(".");
 	}
 	else if (errT == true) {
 		tft.setCursor(10, y);
 		tft.setTextColor(ILI9341_RED, ILI9341_BLACK);
-		tft.print(utf8rus("Стоп по температуре:"));
+		if (RU) tft.print(utf8rus("Стоп по температуре:"));
+		else tft.print(utf8rus("Temperature stop:"));
 		y += 20;
 		tft.setCursor(10, y);
 		tft.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
 		switch (numCrashStop) {
-		case 0: tft.print(utf8rus(temperatureSensor[0].name)); break;
-		case 1: tft.print(utf8rus(temperatureSensor[1].name)); break;
-		case 2: tft.print(utf8rus(temperatureSensor[2].name)); break;
-		case 3: tft.print(utf8rus(temperatureSensor[3].name)); break;
-		case 4: tft.print(utf8rus(temperatureSensor[4].name)); break;
-		case 5: tft.print(utf8rus(temperatureSensor[5].name)); break;
-		case 6: tft.print(utf8rus(temperatureSensor[6].name)); break;
-		case 7: tft.print(utf8rus(temperatureSensor[7].name)); break;
+			case 0: tft.print(utf8rus(temperatureSensor[0].name)); break;
+			case 1: tft.print(utf8rus(temperatureSensor[1].name)); break;
+			case 2: tft.print(utf8rus(temperatureSensor[2].name)); break;
+			case 3: tft.print(utf8rus(temperatureSensor[3].name)); break;
+			case 4: tft.print(utf8rus(temperatureSensor[4].name)); break;
+			case 5: tft.print(utf8rus(temperatureSensor[5].name)); break;
+			case 6: tft.print(utf8rus(temperatureSensor[6].name)); break;
+			case 7: tft.print(utf8rus(temperatureSensor[7].name)); break;
 		}
+		tft.print(".");
 	}
 	else {
 		tft.setCursor(10, y);
 		if (processMode.allow == 1) {
 			if (timeStopDistLevelErr == 0) {
 				tft.setTextColor(ILI9341_RED, ILI9341_BLACK);
-				tft.print(utf8rus("Переполнена емкость."));
+				if (RU) tft.print(utf8rus("Переполнена емкость."));
+				else tft.print(utf8rus("Overflow capacity."));
 				tft.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
 			}
 			else {
 				tft.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
-				tft.print(utf8rus("Штатно по алгоритму."));
+				if (RU) tft.print(utf8rus("Штатно по алгоритму."));
+				else tft.print(utf8rus("Correctly by logic."));
+			}
+			y += 20;
+			if (numOkStop == 0) {
+				tft.setCursor(10, y);
+				if (RU) tft.print(utf8rus("Т в кубе."));
+				else tft.print(utf8rus("Т of tank."));
+			}
+			else if (numOkStop == 1) {
+				tft.setCursor(10, y);
+				if (RU) tft.print(utf8rus("% спирта в кубе."));
+				else tft.print(utf8rus("% alcohol of tank."));
 			}
 		}
 		else {
-			tft.print(utf8rus("Штатно по алгоритму."));
+			if (RU) tft.print(utf8rus("Штатно по алгоритму."));
+			else tft.print(utf8rus("Correctly by logic."));
 			y += 20;
-			if (numOkStop == 1) {
+			if (numOkStop == 0) {
 				tft.setCursor(10, y);
-				tft.print(utf8rus("Т в кубе"));
+				if (RU) tft.print(utf8rus("Пропуск шага."));
+				else tft.print(utf8rus("Skip step."));
+			}
+			else if (numOkStop == 1) {
+				tft.setCursor(10, y);
+				if (RU) tft.print(utf8rus("Т в кубе."));
+				else tft.print(utf8rus("Т of tank."));
 			}
 			else if (numOkStop == 2) {
 				tft.setCursor(10, y);
-				tft.print(utf8rus("Время Старт/Стоп"));
+				if (RU) tft.print(utf8rus("Время Старт/Стоп."));
+				else tft.print(utf8rus("Time Start/Stop."));
 			}
 			else if (numOkStop == 3) {
 				tft.setCursor(10, y);
-				tft.print(utf8rus("Min. скорость отбора"));
+				if (RU) tft.print(utf8rus("Min. скорость отбора."));
+				else tft.print(utf8rus("Min. speed rate."));
 			}
 			else if (numOkStop == 4) {
 				tft.setCursor(10, y);
-				tft.print(utf8rus("ПБ и 1-й Стоп"));
+				if (RU) tft.print(utf8rus("ПБ и 1-й Стоп."));
+				else tft.print(utf8rus("PB and 1st Stop."));
 			}
 		}
 	}
 	if (processMode.allow == 2) {
 		tft.setCursor(10, 165);
-		tft.print(utf8rus("Старт/Стопов = "));
+		if (RU) tft.print(utf8rus("Старт/Стопов = "));
+		else tft.print(utf8rus("Start/Stop = "));
 		tft.print(counterStartStop);
 	}
 	unsigned long t = time(nullptr) - processMode.timeStart;
 	tft.setCursor(10, 185);
-	tft.print(utf8rus("Продолжительность = "));
+	if (RU) tft.print(utf8rus("Продолжительность = "));
+	else tft.print(utf8rus("Process time = "));
 	tft.print(t / 3600);
 	if (((t / 60) % 60) >= 10) tft.print(":");
 	else tft.print(":0");
