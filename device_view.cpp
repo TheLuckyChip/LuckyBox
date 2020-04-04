@@ -5,7 +5,7 @@ uint16_t color;
 
 void deviceTempAdcOutScreen() {
 	String time_ntp = GetTime();
-	
+	csOn(TFT_CS);	
 	// вывод времени и давления
 	tft.setTextSize(2);
 	tft.setCursor(223, 2);
@@ -24,8 +24,11 @@ void deviceTempAdcOutScreen() {
 	tft.setCursor(199, 66);
 	tft.print("    SN: ");
 	tft.print(addrMacMod);
+	csOff(TFT_CS);
+  delay(5);
 
 	// вывод температур
+	csOn(TFT_CS);
 	tft.setTextSize(2);
 	tft.setCursor(0, 2);
 	if (DS_Cube != 10 && temperatureSensor[DS_Cube].color != ILI9341_BLACK) tft.setTextColor(temperatureSensor[DS_Cube].color, ILI9341_BLACK);
@@ -54,7 +57,10 @@ void deviceTempAdcOutScreen() {
 	if (DS_Def != 10 && temperatureSensor[DS_Def].data < 150.0) tft.printf("T4:%.1f ", temperatureSensor[DS_Def].data);
 	else if (StateDsReset == 0xFF && temperatureSensor[3].data < 150.0) tft.printf("T4:%.1f ", temperatureSensor[3].data);
 	else tft.print("T4:--.-");
+	csOff(TFT_CS);
+  delay(5);
 
+	csOn(TFT_CS);
 	tft.setCursor(0, 42);
 	if (DS_Res1 != 10 && temperatureSensor[DS_Res1].color != ILI9341_BLACK) tft.setTextColor(temperatureSensor[DS_Res1].color, ILI9341_BLACK);
 	else tft.setTextColor(ILI9341_DARKDARK, ILI9341_BLACK);
@@ -82,9 +88,12 @@ void deviceTempAdcOutScreen() {
 	if (DS_Res4 != 10 && temperatureSensor[DS_Res4].data < 150.0) tft.printf("T8:%.1f ", temperatureSensor[DS_Res4].data);
 	else if (StateDsReset == 0xFF && temperatureSensor[7].data < 150.0) tft.printf("T8:%.1f ", temperatureSensor[7].data);
 	else tft.print("T8:--.-");
+	csOff(TFT_CS);
+  delay(5);
 
 	// вывод датчиков безопасности
 	settingAlarm = false;
+	csOn(TFT_CS);
 	if (adcIn[0].allert == true) { color = ILI9341_RED; settingAlarm = true; }
 	else color = ILI9341_LIGHTGREY;
 	tft.setTextColor(color, ILI9341_BLACK);
@@ -97,6 +106,9 @@ void deviceTempAdcOutScreen() {
 	tft.drawCircle(119, 110, 22, color); tft.drawCircle(119, 110, 23, color); tft.drawCircle(119, 110, 21, color);
 	tft.setCursor(110, 103);
 	tft.print("A1");
+	csOff(TFT_CS);
+  delay(5);
+	csOn(TFT_CS);
 	if (adcIn[2].allert == true) { color = ILI9341_RED; settingAlarm = true; }
 	else color = ILI9341_LIGHTGREY;
 	tft.setTextColor(color, ILI9341_BLACK);
@@ -109,6 +121,8 @@ void deviceTempAdcOutScreen() {
 	tft.drawCircle(279, 110, 22, color); tft.drawCircle(279, 110, 23, color); tft.drawCircle(279, 110, 21, color);
 	tft.setCursor(269, 103);
 	tft.print("A3");
+	csOff(TFT_CS);
+  delay(5);
 }
 
 void deviceViewLoop() {
@@ -117,6 +131,7 @@ void deviceViewLoop() {
 		switch (processMode.step) {
 			case 0: {
 				timeOut = millis();
+
 	#if defined TFT_Display
 				// подготовка данных для вывода на TFT
 				csOn(TFT_CS);
@@ -174,6 +189,7 @@ void deviceViewLoop() {
 				deviceTempAdcOutScreen();
 
 				csOff(TFT_CS);
+        delay(5);
 	#endif
 				processMode.step = 1;
 				break;
@@ -181,11 +197,12 @@ void deviceViewLoop() {
 			case 1: {
 				if (touchScreen == 0) {
 #if defined TFT_Display
-					csOn(TFT_CS);
+					//csOn(TFT_CS);
 
 					deviceTempAdcOutScreen();
 
 					if (touchScreenDV == 1) {
+						csOn(TFT_CS);
 						touchScreenDV = 0;
 						// вывод клапанов
 						if (touchArea == 61) {
@@ -245,8 +262,10 @@ void deviceViewLoop() {
 							tft.fillRect(260, 210, 39, 2, color);
 							tft.fillTriangle(254, 212, 305, 212, 280, 230, color);
 						}
-					}
 					csOff(TFT_CS);
+          delay(5);
+					}
+					//csOff(TFT_CS);
 #endif
 				}
 				break;

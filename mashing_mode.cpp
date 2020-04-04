@@ -91,16 +91,30 @@ void handleMashingSensorTpl() {
 		}
 	}
 	// температурные паузы
-	dataForWeb += "\"pause1\":{\"name\":\"Кислотная пауза\",\"time\":" + String(processMashing[0].time);
-	dataForWeb += ",\"temperature\":" + String(processMashing[0].temperature) + ",\"stop\":" + String(processMashing[0].stop) + "},";
-	dataForWeb += "\"pause2\":{\"name\":\"Белковая пауза\",\"time\":" + String(processMashing[1].time);
-	dataForWeb += ",\"temperature\":" + String(processMashing[1].temperature) + ",\"stop\":" + String(processMashing[1].stop) + "},";
-	dataForWeb += "\"pause3\":{\"name\":\"Мальтозная пауза\",\"time\":" + String(processMashing[2].time);
-	dataForWeb += ",\"temperature\":" + String(processMashing[2].temperature) + ",\"stop\":" + String(processMashing[2].stop) + "},";
-	dataForWeb += "\"pause4\":{\"name\":\"Осахаривание\",\"time\":" + String(processMashing[3].time);
-	dataForWeb += ",\"temperature\":" + String(processMashing[3].temperature) + ",\"stop\":" + String(processMashing[3].stop) + "},";
-	dataForWeb += "\"pause5\":{\"name\":\"Мэш аут\",\"time\":" + String(processMashing[4].time);
-	dataForWeb += ",\"temperature\":" + String(processMashing[4].temperature) + ",\"stop\":" + String(processMashing[4].stop) + "}}";
+	if (RU) {
+		dataForWeb += "\"pause1\":{\"name\":\"Кислотная пауза\",\"time\":" + String(processMashing[0].time);
+		dataForWeb += ",\"temperature\":" + String(processMashing[0].temperature) + ",\"stop\":" + String(processMashing[0].stop) + "},";
+		dataForWeb += "\"pause2\":{\"name\":\"Белковая пауза\",\"time\":" + String(processMashing[1].time);
+		dataForWeb += ",\"temperature\":" + String(processMashing[1].temperature) + ",\"stop\":" + String(processMashing[1].stop) + "},";
+		dataForWeb += "\"pause3\":{\"name\":\"Мальтозная пауза\",\"time\":" + String(processMashing[2].time);
+		dataForWeb += ",\"temperature\":" + String(processMashing[2].temperature) + ",\"stop\":" + String(processMashing[2].stop) + "},";
+		dataForWeb += "\"pause4\":{\"name\":\"Осахаривание\",\"time\":" + String(processMashing[3].time);
+		dataForWeb += ",\"temperature\":" + String(processMashing[3].temperature) + ",\"stop\":" + String(processMashing[3].stop) + "},";
+		dataForWeb += "\"pause5\":{\"name\":\"Мэш аут\",\"time\":" + String(processMashing[4].time);
+		dataForWeb += ",\"temperature\":" + String(processMashing[4].temperature) + ",\"stop\":" + String(processMashing[4].stop) + "}}";
+	}
+	else {
+		dataForWeb += "\"pause1\":{\"name\":\"Beta-Glucanase rest\",\"time\":" + String(processMashing[0].time);
+		dataForWeb += ",\"temperature\":" + String(processMashing[0].temperature) + ",\"stop\":" + String(processMashing[0].stop) + "},";
+		dataForWeb += "\"pause2\":{\"name\":\"Protease rest\",\"time\":" + String(processMashing[1].time);
+		dataForWeb += ",\"temperature\":" + String(processMashing[1].temperature) + ",\"stop\":" + String(processMashing[1].stop) + "},";
+		dataForWeb += "\"pause3\":{\"name\":\"Beta-Amylase rests\",\"time\":" + String(processMashing[2].time);
+		dataForWeb += ",\"temperature\":" + String(processMashing[2].temperature) + ",\"stop\":" + String(processMashing[2].stop) + "},";
+		dataForWeb += "\"pause4\":{\"name\":\"Alpha-Amylase rests\",\"time\":" + String(processMashing[3].time);
+		dataForWeb += ",\"temperature\":" + String(processMashing[3].temperature) + ",\"stop\":" + String(processMashing[3].stop) + "},";
+		dataForWeb += "\"pause5\":{\"name\":\"Mash-out\",\"time\":" + String(processMashing[4].time);
+		dataForWeb += ",\"temperature\":" + String(processMashing[4].temperature) + ",\"stop\":" + String(processMashing[4].stop) + "}}";
+	}
 	HTTP.send(200, "text/json", dataForWeb);
 }
 // Отправка - Добавить датчики для процесса
@@ -236,7 +250,8 @@ void mashingLoop() {
 			processMode.timeStep = 0;					// для расчета и вывода времени прошедшего с начала текущего шага
 			windowStartTime = millis();					// для расчетов в алгоритме PID
 			processMode.timeStart = time(nullptr);
-			nameProcessStep = "1-я пауза нагрев";
+			if (RU) nameProcessStep = "1-я пауза, нагрев";
+			else nameProcessStep = "1st rest, heating";
 			processMode.step = 1;			// перешли на следующий шаг алгоритма
 			break;
 		}
@@ -248,14 +263,16 @@ void mashingLoop() {
 				processMashing[0].step = 0;
 				processMashing[1].step = 1;					// для индикации обрабатываемой температурной паузы в WEB
 				windowStartTime = millis();					// для расчетов в алгоритме PID
-				nameProcessStep = "2-я пауза нагрев";
+				if (RU) nameProcessStep = "2-я пауза, нагрев";
+				else nameProcessStep = "2st rest, heating";
 				processMode.step = 3;			// пропускаем шаг
 			}
 			else if (Input >= Setpoint) {
 				stepTime = millis();			// для расчетов в алгоритме PID
 				settingAlarm = true;			// подаем звуковой сигнал
 				timePauseOff = millis() + 6000;		// счетчик времени для зв.сигнала
-				nameProcessStep = "1-я пауза стаб.";
+				if (RU) nameProcessStep = "1-я пауза, стаб.";
+				else nameProcessStep = "1st rest, stab.";
 				processMode.step = 2;			// перешли на следующий шаг алгоритма
 			}
 			processMode.timeStep = 0;			// для расчета и вывода времени прошедшего с начала текущего шага
@@ -272,7 +289,8 @@ void mashingLoop() {
 				windowStartTime = millis();					// для расчетов в алгоритме PID
 				settingAlarm = true;			// подаем звуковой сигнал
 				timePauseOff = millis() + 6000;		// счетчик времени для зв.сигнала
-				nameProcessStep = "2-я пауза нагрев";
+				if (RU) nameProcessStep = "2-я пауза, нагрев";
+				else nameProcessStep = "2st rest, heating";
 				processMode.step = 3;			// перешли на следующий шаг алгоритма
 			}
 			break;
@@ -286,14 +304,16 @@ void mashingLoop() {
 				processMashing[1].step = 0;
 				processMashing[2].step = 1;					// для индикации обрабатываемой температурной паузы в WEB
 				windowStartTime = millis();					// для расчетов в алгоритме PID
-				nameProcessStep = "3-я пауза нагрев";
+				if (RU) nameProcessStep = "3-я пауза, нагрев";
+				else nameProcessStep = "3st rest, heating";
 				processMode.step = 5;			// пропускаем шаг
 			}
 			else if (Input >= Setpoint) {
 				stepTime = millis();			// для расчетов в алгоритме PID
 				settingAlarm = true;			// подаем звуковой сигнал
 				timePauseOff = millis() + 6000;		// счетчик времени для зв.сигнала
-				nameProcessStep = "2-я пауза стаб.";
+				if (RU) nameProcessStep = "2-я пауза, стаб.";
+				else nameProcessStep = "2st rest, stab.";
 				processMode.step = 4;			// перешли на следующий шаг алгоритма
 			}
 			processMode.timeStep = 0;			// для расчета и вывода времени прошедшего с начала текущего шага
@@ -310,7 +330,8 @@ void mashingLoop() {
 				windowStartTime = millis();					// для расчетов в алгоритме PID
 				settingAlarm = true;						// подаем звуковой сигнал
 				timePauseOff = millis() + 6000;				// счетчик времени для зв.сигнала
-				nameProcessStep = "3-я пауза нагрев";
+				if (RU) nameProcessStep = "3-я пауза, нагрев";
+				else nameProcessStep = "3st rest, heating";
 				processMode.step = 5;			// перешли на следующий шаг алгоритма
 			}
 			break;
@@ -324,14 +345,16 @@ void mashingLoop() {
 				processMashing[2].step = 0;
 				processMashing[3].step = 1;					// для индикации обрабатываемой температурной паузы в WEB
 				windowStartTime = millis();					// для расчетов в алгоритме PID
-				nameProcessStep = "4-я пауза нагрев";
+				if (RU) nameProcessStep = "4-я пауза, нагрев";
+				else nameProcessStep = "4st rest, heating";
 				processMode.step = 7;			// пропускаем шаг
 			}
 			else if (Input >= Setpoint) {
 				stepTime = millis();			// для расчетов в алгоритме PID
 				settingAlarm = true;			// подаем звуковой сигнал
 				timePauseOff = millis() + 6000;		// счетчик времени для зв.сигнала
-				nameProcessStep = "3-я пауза стаб.";
+				if (RU) nameProcessStep = "3-я пауза, стаб.";
+				else nameProcessStep = "3st rest, stab.";
 				processMode.step = 6;			// перешли на следующий шаг алгоритма
 			}
 			processMode.timeStep = 0;			// для расчета и вывода времени прошедшего с начала текущего шага
@@ -348,7 +371,8 @@ void mashingLoop() {
 				windowStartTime = millis();					// для расчетов в алгоритме PID
 				settingAlarm = true;				// подаем звуковой сигнал
 				timePauseOff = millis() + 6000;		// счетчик времени для зв.сигнала
-				nameProcessStep = "4-я пауза нагрев";
+				if (RU) nameProcessStep = "4-я пауза, нагрев";
+				else nameProcessStep = "4st rest, heating";
 				processMode.step = 7;			// перешли на следующий шаг алгоритма
 			}
 			break;
@@ -362,14 +386,16 @@ void mashingLoop() {
 				processMashing[3].step = 0;
 				processMashing[4].step = 1;					// для индикации обрабатываемой температурной паузы в WEB
 				windowStartTime = millis();					// для расчетов в алгоритме PID
-				nameProcessStep = "5-я пауза нагрев";
+				if (RU) nameProcessStep = "5-я пауза, нагрев";
+				else nameProcessStep = "5st rest, heating";
 				processMode.step = 9;			// пропускаем шаг
 			}
 			else if (Input >= Setpoint) {
 				stepTime = millis();			// для расчетов в алгоритме PID
 				settingAlarm = true;			// подаем звуковой сигнал
 				timePauseOff = millis() + 6000;		// счетчик времени для зв.сигнала
-				nameProcessStep = "4-я пауза стаб.";
+				if (RU) nameProcessStep = "4-я пауза, стаб.";
+				else nameProcessStep = "4st rest, stab.";
 				processMode.step = 8;			// перешли на следующий шаг алгоритма
 			}
 			processMode.timeStep = 0;			// для расчета и вывода времени прошедшего с начала текущего шага
@@ -386,7 +412,8 @@ void mashingLoop() {
 				windowStartTime = millis();					// для расчетов в алгоритме PID
 				settingAlarm = true;				// подаем звуковой сигнал
 				timePauseOff = millis() + 6000;		// счетчик времени для зв.сигнала
-				nameProcessStep = "5-я пауза нагрев";
+				if (RU) nameProcessStep = "5-я пауза, нагрев";
+				else nameProcessStep = "5st rest, heating";
 				processMode.step = 9;			// перешли на следующий шаг алгоритма
 			}
 			break;
@@ -408,7 +435,8 @@ void mashingLoop() {
 				stepTime = millis();			// для расчетов в алгоритме PID
 				settingAlarm = true;			// подаем звуковой сигнал
 				timePauseOff = millis() + 6000;		// счетчик времени для зв.сигнала
-				nameProcessStep = "5-я пауза стаб.";
+				if (RU) nameProcessStep = "5-я пауза, стаб.";
+				else nameProcessStep = "5st rest, stab.";
 				processMode.step = 10;			// перешли на следующий шаг алгоритма
 			}
 			processMode.timeStep = 0;			// для расчета и вывода времени прошедшего с начала текущего шага
@@ -432,7 +460,8 @@ void mashingLoop() {
 				settingAlarm = false;		// выключили звуковой сигнал
 				processMode.step = 0;
 				processMode.allow = 0;
-				commandWriteSD = "Процесс завершен";
+				if (RU) commandWriteSD = "Процесс завершен";
+				else commandWriteSD = "Process is over";
 				commandSD_en = true;
 			}
 			break;

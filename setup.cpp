@@ -60,6 +60,12 @@ void setup()
 	csOff(TFT_RES_PRG);
 	delay(2);
 
+#if defined language_RUS
+	RU = true;
+#else
+	RU = false;
+#endif
+
 	Serial.begin(115200);
 	//Serial.begin(38400);
 	Serial.println("");

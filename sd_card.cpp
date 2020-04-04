@@ -56,29 +56,52 @@ void sdWriteHeader() {
 	else fileName += String(month) + "_";
 	if (day < 10) fileName += "0" + String(day) + ".log";
 	else fileName += String(day) + ".log";
-
-	switch (processMode.allow) {
-		case 0: fileData = "Простой"; break;
-		case 1: fileData = "Дистилляция"; break;
-		case 2: fileData = "Ректификация"; break;
-		case 3: fileData = "Затирание"; break;
-		case 4: fileData = "Пивоварение"; break;
-		case 5: fileData = ""; break;
-		case 6: fileData = ""; break;
+	if (RU) {
+		switch (processMode.allow) {
+			case 0: fileData = "Простой"; break;
+			case 1: fileData = "Дистилляция"; break;
+			case 2: fileData = "Ректификация"; break;
+			case 3: fileData = "Затирание"; break;
+			case 4: fileData = "Пивоварение"; break;
+			case 5: fileData = ""; break;
+			case 6: fileData = ""; break;
+		}
 	}
-	//Serial.println(fileName);
-	//Serial.println(fileData);
+	else {
+		switch (processMode.allow) {
+			case 0: fileData = "Idle mode"; break;
+			case 1: fileData = "Distillation"; break;
+			case 2: fileData = "Reflux"; break;
+			case 3: fileData = "Mashing"; break;
+			case 4: fileData = "Brewing"; break;
+			case 5: fileData = ""; break;
+			case 6: fileData = ""; break;
+		}
+	}
 	csOn(SD_CS);
 	myFile = SD.open(fileName, FILE_WRITE);
 	myFile.println(fileData);
-	if (processMode.allow == 2) {
+	if (processMode.allow == 2 && RU) {
 		switch (processMode.number) {
-		case 0: fileData = "Алгоритм: ручной режим, только сигнализация"; break;
-		case 1: fileData = "Алгоритм: Прима - головы по жидкости, тело по пару"; break;
-		case 2: fileData = "Алгоритм: РК с отбором по пару"; break;
-		case 3: fileData = "Алгоритм: РК с отбором по жидкости"; break;
-		case 4: fileData = "Алгоритм: БК регулировка отбора охлаждением"; break;
-		case 5: fileData = "Алгоритм: БК регулировка отбора мощностью"; break;
+			case 0: fileData = "Алгоритм: ручной режим, только сигнализация"; break;
+			case 1: fileData = "Алгоритм: Прима - головы по жидкости, тело по пару"; break;
+			case 2: fileData = "Алгоритм: РК с отбором по пару"; break;
+			case 3: fileData = "Алгоритм: РК с отбором по жидкости, 1 клапан отбора"; break;
+			case 4: fileData = "Алгоритм: РК с отбором по жидкости, 2 клапана отбора"; break;
+			case 5: fileData = "Алгоритм: БК регулировка охлаждением"; break;
+			case 6: fileData = "Алгоритм: БК регулировка "; break;
+		}
+		myFile.println(fileData);
+	}
+	else if (processMode.allow == 2) {
+		switch (processMode.number) {
+			case 0: fileData = "Algorithm: manual, only alarm"; break;
+			case 1: fileData = "Algorithm: Prima - heads by liquid, hearts by vapor"; break;
+			case 2: fileData = "Algorithm: relfux, picking by vapor"; break;
+			case 3: fileData = "Algorithm: reflux, picking by liqiud, one valve"; break;
+			case 4: fileData = "Algorithm: reflux, picking by liqiud, two valves"; break;
+			case 5: fileData = "Algorithm: BC, cooling management"; break;
+			case 6: fileData = "Algorithm: BC, cooling management, heads by liqiud"; break;
 		}
 		myFile.println(fileData);
 	}
@@ -99,13 +122,22 @@ void sdWriteLog() {
 	for (int i = 0; i < 8; i++) {
 		if (temperatureSensor[i].member != 0) fileData += String(temperatureSensor[i].name) + " = " + String(temperatureSensor[i].data) + "\t";
 	}
-	fileData += "Давление = " + String(pressureSensor.data) + "\t";
-	if (processMode.allow == 2) {
-		fileData += "Уставка дельта = " + String(temperatureSensor[DS_Tube].allertValueIn) + "\t";
-		fileData += "Уставка температура = " + String(temperatureSensor[DS_Tube].allertValue) + "\t";
+	if (RU) {
+		fileData += "Давление = " + String(pressureSensor.data) + "\t";
+		if (processMode.allow == 2) {
+			fileData += "Уставка дельта = " + String(temperatureSensor[DS_Tube].allertValueIn) + "\t";
+			fileData += "Уставка температура = " + String(temperatureSensor[DS_Tube].allertValue) + "\t";
+		}
+		fileData += "Мощность = " + String(power.heaterPower);
 	}
-	fileData += "Мощность = " + String(power.heaterPower);
-	//Serial.println(fileData);
+	else {
+		fileData += "Pressure = " + String(pressureSensor.data) + "\t";
+		if (processMode.allow == 2) {
+			fileData += "Set point delta = " + String(temperatureSensor[DS_Tube].allertValueIn) + "\t";
+			fileData += "Set point temperature = " + String(temperatureSensor[DS_Tube].allertValue) + "\t";
+		}
+		fileData += "Power = " + String(power.heaterPower);
+	}
 	csOn(SD_CS);
 	myFile = SD.open(fileName, FILE_WRITE);
 	if (commandSD_en == true) {

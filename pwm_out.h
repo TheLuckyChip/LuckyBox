@@ -10,6 +10,8 @@
 
 #include "setting.h"
 #include "user_config.h"
+#include "touch_interrupt.h"
+#include "buzzer.h"
 
 extern void csOff(byte ch);
 extern void csOn(byte ch);

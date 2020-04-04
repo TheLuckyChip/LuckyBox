@@ -15,7 +15,11 @@ WiFiClient client;
 // PID
 PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
 
-String curVersion = "2.0RC19b";
+#if defined language_RUS
+  String curVersion = "2.0.20";
+#else
+  String curVersion = "2.0 en";
+#endif
 uint16_t versionForWeb = 2019;
 // Определяем переменные wifi
 String _ssid;      // Для хранения SSID
@@ -166,3 +170,7 @@ float TapCorrection = 1.20;
 unsigned long timeSetWChead;
 float temperatureOld_DS_Out;
 float temperatureOld_DS_Def;
+
+byte touchRead = 1;
+
+bool RU;
