@@ -14,6 +14,7 @@
 #include <Adafruit_PWMServoDriver.h>
 #include <ESP8266WebServer.h>
 #include <WiFiClient.h>
+#include <ESP8266NetBIOS.h>
 #include <EEPROM.h>
 #include <PID_v1.h>
 
@@ -113,6 +114,8 @@ extern PID myPID;
 
 extern uint16_t percentCorrectSquare[];
 
+extern String WiFiPower;
+
 extern String curVersion;
 extern uint16_t versionForWeb;
 // Определяем переменные wifi
@@ -122,6 +125,7 @@ extern String _ssidAP;
 extern String _ssidAPconnect;
 extern String _passwordAP;
 extern String SSDP_Name;
+extern char NBNS_Name[60];
 extern String addrMacMod;
 extern bool touchInvert;
 extern bool tftInvert;
@@ -188,6 +192,7 @@ extern int WindowSize;
 extern unsigned long windowStartTime, stepTime;
 extern unsigned long timeStopDistLevelErr;
 extern String nameProcessStep;
+extern String name_Process_Step;
 extern String commandWriteSD;
 extern bool startWriteSD;
 extern bool endWriteSD;
@@ -247,6 +252,11 @@ extern unsigned long Tx_WiFi_Pause;
 extern uint8_t powerSendOldWiFi;
 extern bool powerWiFiPresent;
 
+//extern unsigned long timeScaleGet;
+extern uint16_t scaleWiFiOunces;
+extern uint16_t scaleWiFiSpeed;
+//extern bool scaleWiFiPresent;
+
 extern uint8_t DistillationTransitionTemperature;
 extern uint8_t RefluxTransitionTemperature;
 extern uint8_t TapCorrectionWeb;
@@ -259,5 +269,7 @@ extern float temperatureOld_DS_Def;
 extern byte touchRead;
 
 extern bool RU;
+
+extern uint8_t timeScaleResponse;
 
 #endif

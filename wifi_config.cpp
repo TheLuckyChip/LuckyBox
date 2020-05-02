@@ -2,6 +2,8 @@
 
 void initWifi() {
 	WiFi.disconnect();
+	wifi_station_set_hostname("LuckyBox");
+	WiFi.hostname("LuckyBox");
 	IPAddress apIP(192, 168, 4, 1);
 	WiFi.mode(WIFI_AP_STA);
 	WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));

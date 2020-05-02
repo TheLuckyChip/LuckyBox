@@ -15,12 +15,14 @@ WiFiClient client;
 // PID
 PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
 
+String WiFiPower = "192.168.1.250";
+
 #if defined language_RUS
   String curVersion = "2.0.20";
 #else
   String curVersion = "2.0 en";
 #endif
-uint16_t versionForWeb = 2019;
+uint16_t versionForWeb = 2020;//1000;
 // Определяем переменные wifi
 String _ssid;      // Для хранения SSID
 String _password;  // Для хранения пароля сети
@@ -28,6 +30,7 @@ String _ssidAP;  // SSID AP точки доступа
 String _ssidAPconnect;
 String _passwordAP;  // пароль точки доступа
 String SSDP_Name;  // Имя SSDP
+char NBNS_Name[60];
 String addrMacMod;
 // Настройки TFT
 bool touchInvert = false;
@@ -107,6 +110,7 @@ int WindowSize = 250;
 unsigned long windowStartTime, stepTime;
 unsigned long timeStopDistLevelErr;
 String nameProcessStep = " ";
+String name_Process_Step = " ";
 String commandWriteSD;
 bool startWriteSD = false;
 bool endWriteSD = false;
@@ -162,6 +166,11 @@ unsigned long Tx_WiFi_Pause;
 uint8_t powerSendOldWiFi;
 bool powerWiFiPresent = false;
 
+//unsigned long timeScaleGet;
+uint16_t scaleWiFiOunces;
+uint16_t scaleWiFiSpeed;
+//bool scaleWiFiPresent = false;
+
 uint8_t DistillationTransitionTemperature = 80;
 uint8_t RefluxTransitionTemperature = 55;
 uint8_t TapCorrectionWeb = 120;
@@ -174,3 +183,6 @@ float temperatureOld_DS_Def;
 byte touchRead = 1;
 
 bool RU;
+
+uint8_t timeScaleResponse = 60;
+

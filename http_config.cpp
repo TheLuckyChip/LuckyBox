@@ -15,6 +15,8 @@ void initHTTP(void)
 	HTTP.on("/powerblock", handleSetPowerBlock); // Тип блока питания
 	HTTP.on("/volume", handleSetVolume); // Громкость
 	HTTP.on("/restart", handleRestart);   // Перезагрузка модуля по запросу вида /restart?device=ok
+	HTTP.on("/scale_post_LB", handleScale);   // Данные от весов
+
 
 	// Добавляем функцию Update для перезаписи прошивки по WiFi при 1М(256K SPIFFS) и выше
 	HTTP.on("/update", HTTP_POST, []() {
@@ -261,8 +263,7 @@ void handleRestart() {
 	}
 }
 
-void handleConfigJSON()
-{
+void handleConfigJSON() {
 	String dataForWeb = "{";
 	dataForWeb += "\"version\":\"" + String(curVersion) + "\",";
 	dataForWeb += "\"SSDP\":\"" + String(SSDP_Name) + "\",";
@@ -272,4 +273,9 @@ void handleConfigJSON()
 	dataForWeb += "\"volume\":\"" + String(BuzzerVolumeLevel/40) + "\",";
 	dataForWeb += "\"timezone\":" + String(timezone) + "}";
 	HTTP.send(200, "text/json", dataForWeb);
+}
+void handleScale() {
+  scaleWiFiOunces = HTTP.arg("scale").toInt();
+  scaleWiFiSpeed = HTTP.arg("speed").toInt();
+  timeScaleResponse = 0;
 }

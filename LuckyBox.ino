@@ -21,7 +21,7 @@
 void loop() {
   HTTP.handleClient();
   switch (processMode.allow) {
-    case 0: tftMenuLoop(); break;
+  case 0: tftMenuLoop(); break;
 	case 1: distillationLoop(); break;
 	case 2: refluxLoop(); break;
 	case 3: mashingLoop(); break;
@@ -35,7 +35,7 @@ void loop() {
 	  stepApLoop();
 	  if (powerType <= 1) heaterLoop();
   }
-  if (powerType == 2) { comHeaterLoop(); wifiHeaterLoop(); }
+  if (powerType == 2) comHeaterLoop();
   sensorLoop();
   displayLoop();
   logfileLoop();

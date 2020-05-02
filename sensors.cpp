@@ -699,6 +699,7 @@ void sensorLoop() {
 
 		timeSec = millis() + 1000;
 		processMode.timeStep++;
+    if (timeScaleResponse < 255) timeScaleResponse++;
 
 		// Пищалка для WEB
 		if (settingAlarm == true && BuzzerVolumeLevel > 0) {

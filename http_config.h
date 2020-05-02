@@ -22,5 +22,6 @@ extern void handleSetRotate();
 extern void handleSetPowerBlock();
 extern void handleSetVolume();
 extern void handleConfigJSON();
+extern void handleScale();
 
 #endif

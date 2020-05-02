@@ -320,10 +320,29 @@ void distillationLoop() {
           if (RU) nameProcessStep = "Процесс закончен";
           else nameProcessStep = "Process is over";
           settingAlarm = true;
-	  numOkStop = 1;
+	        numOkStop = 1;
           processMode.step = 4;           // перешли на следующий шаг алгоритма
         }
       }
+
+
+
+      
+      else {
+          if (RU) {
+            nameProcessStep = "Отбор СС " + String(scaleWiFiOunces) + " мл (" + String(scaleWiFiSpeed) + " мл/ч)";
+          }
+          else {
+            nameProcessStep = "Picking raw alcohol " + String(scaleWiFiOunces) + " ml (" + String(scaleWiFiSpeed) + " ml/h)";
+          }
+      }
+
+
+
+
+
+
+      
 			// если выбраны для процесса клапана отбора, закроем их при срабатывании датчика уровня
 			if (adcIn[0].member == 1 && adcIn[0].allert == true) {
 				valveOnOff = true;
