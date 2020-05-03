@@ -1871,7 +1871,8 @@ $(function () {
 
 			if(globalSensorsJson["process"]["step"] !== "") {
 				let stepProcess = globalSensorsJson["process"]["step"];
-				$("#distillation_step").html('Текущая операция: <span class="text-primary">' + stepProcess + '</span>').removeClass("hidden");
+				let infoProcess = globalSensorsJson["process"]["info"];
+				$("#distillation_step").html('Текущая операция: <span class="text-primary">' + stepProcess + '</span><p class="text-primary font-weight-normal">'+infoProcess+'</p>').removeClass("hidden");
 			}else{
 				$("#distillation_step").html('').addClass("hidden");
 			}
@@ -3196,7 +3197,8 @@ $(function () {
 
 			if(globalSensorsJson["process"]["step"] !== "") {
 				let stepProcess = globalSensorsJson["process"]["step"];
-				$("#reflux_step").html('Текущая операция: <span class="text-primary">' + stepProcess + '</span>').removeClass("hidden");
+				let infoProcess = globalSensorsJson["process"]["info"];
+				$("#reflux_step").html('Текущая операция: <span class="text-primary">' + stepProcess + '</span><p class="text-primary font-weight-normal">'+infoProcess+'</p>').removeClass("hidden");
 			}else{
 				$("#reflux_step").html('').addClass("hidden");
 			}
