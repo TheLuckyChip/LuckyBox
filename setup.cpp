@@ -236,7 +236,7 @@ void setup()
 
 #ifdef remoteUpd
 		HTTPClient http;
-		http.begin("http://update.luckycloud.ru/api/firmwares");
+		http.begin("http://update.vinokurshchik.ru/api/firmwares");
 		int httpCode = http.GET();
 		if (httpCode == 200) {
 		  payload = http.getString();

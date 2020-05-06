@@ -12,7 +12,7 @@ bool bodyValveSet;
 unsigned long timeValveMs;
 uint8_t bodyPrimaPercent;
 uint16_t bodyPrimaPercentSet;
-
+uint8_t powerLow;
 // Для плавного повышения мощности при стабилизации колпачковой колонны
 uint8_t stepPowerCount;
 uint8_t stepPowerPercent;
@@ -454,7 +454,7 @@ void rfluxLoopMode_1() {
 #ifndef Sign_of_Work
 				csOff(PWM_CH6);							// выключить дополнительный ТЭН на разгон
 #endif
-				power.heaterPower = power.inPowerLow;		// установили мощность на ТЭН 65 %
+				power.heaterPower = powerLow;		// установили мощность на ТЭН 65 %
 				timeAllertInterval = millis() + 10000;		// установим счетчик времени для зв.сигнала 10 сек
 				settingAlarm = true;
 				processMode.timeStep = 0;
@@ -607,7 +607,7 @@ void rfluxLoopMode_2() {
 #ifndef Sign_of_Work
 				csOff(PWM_CH6);							// выключить дополнительный ТЭН на разгон
 #endif
-				power.heaterPower = power.inPowerLow;		// установили мощность на ТЭН 65 %
+				power.heaterPower = powerLow;		// установили мощность на ТЭН 65 %
 				timeAllertInterval = millis() + 10000;		// установим счетчик времени для зв.сигнала 10 сек.
 				processMode.timeStep = 0;
 				if (RU) name_Process_Step = "Стабилизация колонны";
@@ -631,20 +631,20 @@ void rfluxLoopMode_2() {
 #ifdef columnSoftStart
 			// плавный подъем температуры
 			if ((timeStabilizationReflux * 40) > processMode.timeStep) { // первую половину времени стакбилизации плавный рост мощности
-				stepPowerStart = power.inPowerLow / 2;
-				stepPowerPercent = power.inPowerLow / 20;
+				stepPowerStart = powerLow / 2;
+				stepPowerPercent = powerLow / 20;
 				if (stepPowerTime < processMode.timeStep) { // шаги повышения мощности
 					stepPowerCount++;
 					stepPowerTime += (timeStabilizationReflux * 3);
 				}
 				power.heaterPower = stepPowerStart + (stepPowerPercent * stepPowerCount);
-				if (power.heaterPower > power.inPowerLow) power.heaterPower = power.inPowerLow;
+				if (power.heaterPower > powerLow) power.heaterPower = powerLow;
 			}
 			else {
-				power.heaterPower = power.inPowerLow;
+				power.heaterPower = powerLow;
 			}
 #else
-			power.heaterPower = power.inPowerLow;
+			power.heaterPower = powerLow;
 #endif
 			if (timePauseOff <= millis() || stepNext == 1) {
 				timeAllertInterval = millis() + 10000;	// установим счетчик времени для зв.сигнала 10 сек.
@@ -868,7 +868,7 @@ void rfluxLoopMode_3() {
 #ifndef Sign_of_Work
 				csOff(PWM_CH6);							// выключить дополнительный ТЭН на разгон
 #endif
-				power.heaterPower = power.inPowerLow;		// установили мощность на ТЭН 65 %
+				power.heaterPower = powerLow;		// установили мощность на ТЭН 65 %
 				timeAllertInterval = millis() + 10000;		// установим счетчик времени для зв.сигнала 10 сек.
 				processMode.timeStep = 0;
 				if (RU) name_Process_Step = "Стабилизация колонны";
@@ -892,20 +892,20 @@ void rfluxLoopMode_3() {
 #ifdef columnSoftStart
 			// плавный подъем температуры
 			if ((timeStabilizationReflux * 40) > processMode.timeStep) { // первую половину времени стакбилизации плавный рост мощности
-				stepPowerStart = power.inPowerLow / 2;
-				stepPowerPercent = power.inPowerLow / 20;
+				stepPowerStart = powerLow / 2;
+				stepPowerPercent = powerLow / 20;
 				if (stepPowerTime < processMode.timeStep) { // шаги повышения мощности
 					stepPowerCount++;
 					stepPowerTime += (timeStabilizationReflux * 3);
 				}
 				power.heaterPower = stepPowerStart + (stepPowerPercent * stepPowerCount);
-				if (power.heaterPower > power.inPowerLow) power.heaterPower = power.inPowerLow;
+				if (power.heaterPower > powerLow) power.heaterPower = powerLow;
 			}
 			else {
-				power.heaterPower = power.inPowerLow;
+				power.heaterPower = powerLow;
 			}
 #else
-			power.heaterPower = power.inPowerLow;
+			power.heaterPower = powerLow;
 #endif
 			if (timePauseOff <= millis() || stepNext == 1) {
 				timeAllertInterval = millis() + 10000;	// установим счетчик времени для зв.сигнала 10 сек.
@@ -1131,11 +1131,11 @@ void rfluxLoopMode_4() {
 #ifndef Sign_of_Work
 				csOff(PWM_CH6);							// выключить дополнительный ТЭН на разгон
 #endif
-				power.heaterPower = power.inPowerLow;		// установили мощность на ТЭН 65 %
+				power.heaterPower = powerLow;		// установили мощность на ТЭН 65 %
 				timeAllertInterval = millis() + 10000;		// установим счетчик времени для зв.сигнала 10 сек.
 				processMode.timeStep = 0;
 				if (RU) name_Process_Step = "Стабилизация колонны";
-				name_Process_Step = "Column stabilization";
+				else name_Process_Step = "Column stabilization";
 				processMode.step = 2;						// перешли на следующий шаг алгоритма
 				stepNext = 0;
 			}
@@ -1155,20 +1155,20 @@ void rfluxLoopMode_4() {
 #ifdef columnSoftStart
 			// плавный подъем температуры
 			if ((timeStabilizationReflux * 40) > processMode.timeStep) { // первую половину времени стакбилизации плавный рост мощности
-				stepPowerStart = power.inPowerLow / 2;
-				stepPowerPercent = power.inPowerLow / 20;
+				stepPowerStart = powerLow / 2;
+				stepPowerPercent = powerLow / 20;
 				if (stepPowerTime < processMode.timeStep) { // шаги повышения мощности
 					stepPowerCount++;
 					stepPowerTime += (timeStabilizationReflux * 3);
 				}
 				power.heaterPower = stepPowerStart + (stepPowerPercent * stepPowerCount);
-				if (power.heaterPower > power.inPowerLow) power.heaterPower = power.inPowerLow;
+				if (power.heaterPower > powerLow) power.heaterPower = powerLow;
 			}
 			else {
-				power.heaterPower = power.inPowerLow;
+				power.heaterPower = powerLow;
 			}
 #else
-			power.heaterPower = power.inPowerLow;
+			power.heaterPower = powerLow;
 #endif
 			if (timePauseOff <= millis() || stepNext == 1) {
 				timeAllertInterval = millis() + 10000;		// установим счетчик времени для зв.сигнала 10 сек.
@@ -1382,7 +1382,7 @@ void rfluxLoopMode_5() {
 #ifndef Sign_of_Work
 			csOff(PWM_CH6);							// выключить дополнительный ТЭН на разгон
 #endif
-			power.heaterPower = power.inPowerLow;		// установили мощность на ТЭН 65 %
+			power.heaterPower = powerLow;		// установили мощность на ТЭН 65 %
 			timeAllertInterval = millis() + 10000;		// установим счетчик времени для зв.сигнала 10 сек.
 			processMode.timeStep = 0;
 			if (RU) name_Process_Step = "Стабилизация колонны";
@@ -1406,20 +1406,20 @@ void rfluxLoopMode_5() {
 #ifdef columnSoftStart
 		// плавный подъем температуры
 		if ((timeStabilizationReflux * 40) > processMode.timeStep) { // первую половину времени стакбилизации плавный рост мощности
-			stepPowerStart = power.inPowerLow / 2;
-			stepPowerPercent = power.inPowerLow / 20;
+			stepPowerStart = powerLow / 2;
+			stepPowerPercent = powerLow / 20;
 			if (stepPowerTime < processMode.timeStep) { // шаги повышения мощности
 				stepPowerCount++;
 				stepPowerTime += (timeStabilizationReflux * 3);
 			}
 			power.heaterPower = stepPowerStart + (stepPowerPercent * stepPowerCount);
-			if (power.heaterPower > power.inPowerLow) power.heaterPower = power.inPowerLow;
+			if (power.heaterPower > powerLow) power.heaterPower = powerLow;
 		}
 		else {
-			power.heaterPower = power.inPowerLow;
+			power.heaterPower = powerLow;
 		}
 #else
-		power.heaterPower = power.inPowerLow;
+		power.heaterPower = powerLow;
 #endif
 		if (timePauseOff <= millis() || stepNext == 1) {
 			timeAllertInterval = millis() + 10000;		// установим счетчик времени для зв.сигнала 10 сек.
@@ -1636,7 +1636,7 @@ void rfluxLoopMode_6() {
 #ifndef Sign_of_Work
 			csOff(PWM_CH6);							// выключить дополнительный ТЭН на разгон
 #endif
-			power.heaterPower = power.inPowerLow;		// установили мощность на ТЭН 65 %
+			power.heaterPower = powerLow;		// установили мощность на ТЭН 65 %
 			timeAllertInterval = millis() + 10000;		// установим счетчик времени для зв.сигнала 10 сек.
 			processMode.timeStep = 0;
 			name_Process_Step = "Стабилизация колонны";
@@ -1659,20 +1659,20 @@ void rfluxLoopMode_6() {
 #ifdef columnSoftStart
 		// плавный подъем температуры
 		if ((timeStabilizationReflux * 40) > processMode.timeStep) { // первую половину времени стакбилизации плавный рост мощности
-			stepPowerStart = power.inPowerLow / 2;
-			stepPowerPercent = power.inPowerLow / 20;
+			stepPowerStart = powerLow / 2;
+			stepPowerPercent = powerLow / 20;
 			if (stepPowerTime < processMode.timeStep) { // шаги повышения мощности
 				stepPowerCount++;
 				stepPowerTime += (timeStabilizationReflux * 3);
 			}
 			power.heaterPower = stepPowerStart + (stepPowerPercent * stepPowerCount);
-			if (power.heaterPower > power.inPowerLow) power.heaterPower = power.inPowerLow;
+			if (power.heaterPower > powerLow) power.heaterPower = powerLow;
 		}
 		else {
-			power.heaterPower = power.inPowerLow;
+			power.heaterPower = powerLow;
 		}
 #else
-		power.heaterPower = power.inPowerLow;
+		power.heaterPower = powerLow;
 #endif
 		if (timePauseOff <= millis() || stepNext == 1) {
 			timeAllertInterval = millis() + 10000;	// установим счетчик времени для зв.сигнала 10 сек.
@@ -1874,7 +1874,7 @@ void rfluxLoopMode_6() {
 #ifndef Sign_of_Work
 			csOff(PWM_CH6);							// выключить дополнительный ТЭН на разгон
 #endif
-			power.heaterPower = power.inPowerLow;		// установили мощность на ТЭН 65 %
+			power.heaterPower = powerLow;		// установили мощность на ТЭН 65 %
 			timeAllertInterval = millis() + 10000;		// установим счетчик времени для зв.сигнала 10 сек.
 			processMode.timeStep = 0;
 			name_Process_Step = "Стабилизация колонны";
@@ -1897,20 +1897,20 @@ void rfluxLoopMode_6() {
 #ifdef columnSoftStart
 		// плавный подъем температуры
 		if ((timeStabilizationReflux * 40) > processMode.timeStep) { // первую половину времени стакбилизации плавный рост мощности
-			stepPowerStart = power.inPowerLow / 2;
-			stepPowerPercent = power.inPowerLow / 20;
+			stepPowerStart = powerLow / 2;
+			stepPowerPercent = powerLow / 20;
 			if (stepPowerTime < processMode.timeStep) { // шаги повышения мощности
 				stepPowerCount++;
 				stepPowerTime += (timeStabilizationReflux * 3);
 			}
 			power.heaterPower = stepPowerStart + (stepPowerPercent * stepPowerCount);
-			if (power.heaterPower > power.inPowerLow) power.heaterPower = power.inPowerLow;
+			if (power.heaterPower > powerLow) power.heaterPower = powerLow;
 		}
 		else {
-			power.heaterPower = power.inPowerLow;
+			power.heaterPower = powerLow;
 		}
 #else
-		power.heaterPower = power.inPowerLow;
+		power.heaterPower = powerLow;
 #endif
 		if (timePauseOff <= millis() || stepNext == 1) {
 			timeAllertInterval = millis() + 10000;	// установим счетчик времени для зв.сигнала 10 сек.
@@ -1929,7 +1929,7 @@ void rfluxLoopMode_6() {
 			countHaedEnd = millis() + 10000;
 			stepNext = 0;
 			timeSetWChead = millis() + 60000; // 1 минут не корректировать мощность отбора
-			power.heaterPower = power.inPowerLow;
+			power.heaterPower = powerLow;
 			temperatureOld_DS_Out = temperatureSensor[DS_Out].data;
 			temperatureOld_DS_Def = temperatureSensor[DS_Def].data;
 		}
@@ -1949,7 +1949,7 @@ void rfluxLoopMode_6() {
 		if (timeSetWChead < millis()) {
 			// регулировка по Т отбора
 			if (temperatureSensor[DS_Out].allertValue > 0 && temperatureSensor[DS_Out].data >= temperatureSensor[DS_Out].allertValue) {
-				if (power.heaterPower > power.inPowerLow - 2) {
+				if (power.heaterPower > powerLow - 2) {
 					if (!(temperatureSensor[DS_Out].data + 0.125 <= temperatureOld_DS_Out)) {
 						power.heaterPower -= 1;
 					}
@@ -1958,7 +1958,7 @@ void rfluxLoopMode_6() {
 				timeSetWChead = millis() + 120000; // 2 минута
 			}
 			else if (temperatureSensor[DS_Out].allertValue > 0 && temperatureSensor[DS_Out].data <= temperatureSensor[DS_Out].allertValue - 1) {
-				if (power.heaterPower < power.inPowerLow) {
+				if (power.heaterPower < powerLow) {
 					if (!(temperatureSensor[DS_Out].data >= temperatureOld_DS_Out + 0.125)) {
 						power.heaterPower += 1;
 					}
@@ -1968,7 +1968,7 @@ void rfluxLoopMode_6() {
 			}
 			// регулировка по Т воды
 			if (temperatureSensor[DS_Def].allertValue > 0 && temperatureSensor[DS_Def].data >= temperatureSensor[DS_Def].allertValue + 2) {
-				if (power.heaterPower > power.inPowerLow - 3) {
+				if (power.heaterPower > powerLow - 3) {
 					if (!(temperatureSensor[DS_Def].data + 0.25 <= temperatureOld_DS_Def)) {
 						power.heaterPower -= 1;
 					}
@@ -1977,7 +1977,7 @@ void rfluxLoopMode_6() {
 				timeSetWChead = millis() + 120000; // 2 минута
 			}
 			else if (temperatureSensor[DS_Def].allertValue > 0 && temperatureSensor[DS_Def].data <= temperatureSensor[DS_Def].allertValue - 2) {
-				if (power.heaterPower < power.inPowerLow) {
+				if (power.heaterPower < powerLow) {
 					if (!(temperatureSensor[DS_Def].data >= temperatureOld_DS_Def + 0.25)) {
 						power.heaterPower += 1;
 					}
@@ -1998,7 +1998,7 @@ void rfluxLoopMode_6() {
 			bodyValveSet = true;
 			name_Process_Step = "Отбор тела";
 			stepNext = 0;
-			power.heaterPower = power.inPowerLow;
+			power.heaterPower = powerLow;
 		}
 
 		break;
@@ -2156,7 +2156,7 @@ void rfluxLoopMode_6() {
 #ifndef Sign_of_Work
 				csOff(PWM_CH6);							// выключить дополнительный ТЭН на разгон
 #endif
-				power.heaterPower = power.inPowerLow;		// установили мощность на ТЭН 65 %
+				power.heaterPower = powerLow;		// установили мощность на ТЭН 65 %
 				timeAllertInterval = millis() + 10000;		// установим счетчик времени для зв.сигнала 10 сек.
 				processMode.timeStep = 0;
 				if (RU) name_Process_Step = "Стабилизация колонны";
@@ -2180,20 +2180,20 @@ void rfluxLoopMode_6() {
 #ifdef columnSoftStart
 			// плавный подъем температуры
 			if ((timeStabilizationReflux * 40) > processMode.timeStep) { // первую половину времени стакбилизации плавный рост мощности
-				stepPowerStart = power.inPowerLow / 2;
-				stepPowerPercent = power.inPowerLow / 20;
+				stepPowerStart = powerLow / 2;
+				stepPowerPercent = powerLow / 20;
 				if (stepPowerTime < processMode.timeStep) { // шаги повышения мощности
 					stepPowerCount++;
 					stepPowerTime += (timeStabilizationReflux * 3);
 				}
 				power.heaterPower = stepPowerStart + (stepPowerPercent * stepPowerCount);
-				if (power.heaterPower > power.inPowerLow) power.heaterPower = power.inPowerLow;
+				if (power.heaterPower > powerLow) power.heaterPower = powerLow;
 			}
 			else {
-				power.heaterPower = power.inPowerLow;
+				power.heaterPower = powerLow;
 			}
 #else
-			power.heaterPower = power.inPowerLow;
+			power.heaterPower = powerLow;
 #endif
 			if (timePauseOff <= millis() || stepNext == 1) {
 				timeAllertInterval = millis() + 10000;	// установим счетчик времени для зв.сигнала 10 сек.
@@ -2405,7 +2405,7 @@ void rfluxLoopMode_7() {
 				csOn(PWM_CH2);				// охлаждение на отборе голов
 				csOn(PWM_CH4);				// отбор в емкость голов
 
-				power.heaterPower = power.inPowerLow;		// установили мощность на ТЭН 65 %
+				power.heaterPower = powerLow;		// установили мощность на ТЭН 65 %
 				timeAllertInterval = millis() + 10000;		// установим счетчик времени для зв.сигнала 10 сек.
 				processMode.timeStep = 0;
 				if (RU) name_Process_Step = "Стабилизация колонны";
@@ -2429,19 +2429,19 @@ void rfluxLoopMode_7() {
 #ifdef columnSoftStart
 			// плавный подъем температуры
 		    if ((timeStabilizationReflux * 40) > processMode.timeStep) { // первую половину времени стакбилизации плавный рост мощности
-			    stepPowerStart =  power.inPowerLow / 2;
-			    stepPowerPercent = power.inPowerLow / 20;
+			    stepPowerStart =  powerLow / 2;
+			    stepPowerPercent = powerLow / 20;
 			    if (stepPowerTime < processMode.timeStep) { // шаги повышения мощности
 			        stepPowerCount++;
 			        stepPowerTime += (timeStabilizationReflux * 3);
 			    }
 			    power.heaterPower = stepPowerStart + (stepPowerPercent * stepPowerCount);
-			    if (power.heaterPower > power.inPowerLow) power.heaterPower = power.inPowerLow;
+			    if (power.heaterPower > powerLow) power.heaterPower = powerLow;
 		    } else {
-			    power.heaterPower = power.inPowerLow;
+			    power.heaterPower = powerLow;
 		    }
 #else
-		    power.heaterPower = power.inPowerLow;
+		    power.heaterPower = powerLow;
 #endif
 			if (timePauseOff <= millis() || stepNext == 1) {
 				timeAllertInterval = millis() + 10000;	// установим счетчик времени для зв.сигнала 10 сек.
@@ -2671,14 +2671,19 @@ void refluxLoop() {
 	}
 
 	// Мощности ТЭНа (разогрев / работа)
+#ifdef reducedPower
+	powerLow = (float)power.inPowerLow * 0.9;
+#else
+	powerLow = power.inPowerLow;
+#endif
 	if (processMode.step < 2) power.heaterPower = power.inPowerHigh;
 	else if (processMode.step < 7) {
-		if (processMode.number == 5 && processMode.step < 4) power.heaterPower = (float)power.inPowerLow * 0.8; // БК стабилизация
-		else if (processMode.number == 6 && processMode.step < 6) power.heaterPower = (float)power.inPowerLow * 0.9; // БК стабилизация
+		if (processMode.number == 5 && processMode.step < 4) power.heaterPower = powerLow; // БК стабилизация
+		else if (processMode.number == 6 && processMode.step < 6) power.heaterPower = powerLow; // БК стабилизация
 #ifdef WColumn_power
-		else if (processMode.number != 5) power.heaterPower = power.inPowerLow;
+		else if (processMode.number != 5) power.heaterPower = powerLow;
 #else
-		else power.heaterPower = power.inPowerLow;
+		else power.heaterPower = powerLow;
 #endif
 	}
 
@@ -2746,8 +2751,8 @@ void refluxLoop() {
 
 		nameProcessStep = name_Process_Step;
 		// % шарового крана (стрелка вниз &#8659, перечеркнутый круг &#216)
-		if (processMode.step == 6) {
-			if ((processMode.number == 1 || processMode.number == 2)) {
+		if (processMode.number == 1 || processMode.number == 2) {
+			if (processMode.step == 6) {
 				if (bodyValveSet == true) nameProcessStep += " (\&#216 " + String(bodyPrimaPercent / 2) + "%)";
 				else nameProcessStep += " (\&#216 0%)";
 			}
