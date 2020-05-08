@@ -36,12 +36,28 @@ void check_Err() {
 	else if (adcIn[3].member == 1 && adcIn[3].allert == true) { settingAlarm = true; errA = true; numCrashStop = 3; }
 	if (!errA) timePauseErrA = millis() + 10000;		// 10 секунд пауза до защиты
 	// датчики безопасности по температурным датчикам кроме Т куба и Т царги кроме бражной колонны
+#ifdef WColumn_water
 	if (temperatureSensor[DS_Out].cutoff == 1 && temperatureSensor[DS_Out].member == 1 && temperatureSensor[DS_Out].allertValue > 0 && temperatureSensor[DS_Out].data >= temperatureSensor[DS_Out].allertValue && processMode.number != 5) {
 		settingAlarm = true; errT = true; numCrashStop = DS_Out;
 	}
 	else if (temperatureSensor[DS_Def].cutoff == 1 && temperatureSensor[DS_Def].member == 1 && temperatureSensor[DS_Def].allertValue > 0 && temperatureSensor[DS_Def].data >= temperatureSensor[DS_Def].allertValue && processMode.number != 5) {
 		settingAlarm = true; errT = true; numCrashStop = DS_Def;
 	}
+#elif defined WColumn_power
+	if (temperatureSensor[DS_Out].cutoff == 1 && temperatureSensor[DS_Out].member == 1 && temperatureSensor[DS_Out].allertValue > 0 && temperatureSensor[DS_Out].data >= temperatureSensor[DS_Out].allertValue && processMode.number != 5) {
+		settingAlarm = true; errT = true; numCrashStop = DS_Out;
+}
+	else if (temperatureSensor[DS_Def].cutoff == 1 && temperatureSensor[DS_Def].member == 1 && temperatureSensor[DS_Def].allertValue > 0 && temperatureSensor[DS_Def].data >= temperatureSensor[DS_Def].allertValue && processMode.number != 5) {
+		settingAlarm = true; errT = true; numCrashStop = DS_Def;
+	}
+#else
+	if (temperatureSensor[DS_Out].cutoff == 1 && temperatureSensor[DS_Out].member == 1 && temperatureSensor[DS_Out].allertValue > 0 && temperatureSensor[DS_Out].data >= temperatureSensor[DS_Out].allertValue) {
+		settingAlarm = true; errT = true; numCrashStop = DS_Out;
+	}
+	else if (temperatureSensor[DS_Def].cutoff == 1 && temperatureSensor[DS_Def].member == 1 && temperatureSensor[DS_Def].allertValue > 0 && temperatureSensor[DS_Def].data >= temperatureSensor[DS_Def].allertValue) {
+		settingAlarm = true; errT = true; numCrashStop = DS_Def;
+	}
+#endif
 	else if (temperatureSensor[DS_Res1].cutoff == 1 && temperatureSensor[DS_Res1].member == 1 && temperatureSensor[DS_Res1].allertValue > 0 && temperatureSensor[DS_Res1].data >= temperatureSensor[DS_Res1].allertValue) {
 		settingAlarm = true; errT = true; numCrashStop = DS_Res1;
 	}
