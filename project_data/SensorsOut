@@ -1,5 +1,5 @@
 {
-	"process":{"allow":1,"number":0,"step":"Нагрев куба","time":0,"timeStart":0,"info":"Весы: 5литров в час<br>Скоро пойдут хвосты"},
+	"process":{"allow":0,"number":0,"step":"Нагрев куба","time":0,"timeStart":0,"info":"Весы: 5литров в час<br>Скоро пойдут хвосты"},
 	"sensors":[
 	{"t1":{"value":50.00,"name":"В кубе","color":64588,"member":1,"priority":0,"allertValue":90}},
 	{"t2":{"value":55.00,"name":"В царге","color":7905,"member":0,"priority":0,"allertValue":55.5}},

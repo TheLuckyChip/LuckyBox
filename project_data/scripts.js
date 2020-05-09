@@ -1390,9 +1390,11 @@ $(function () {
 
 								distillationProcess["sensors"][key] = {};
 								if (tmp) {
-									distillationProcess["sensors"][key] = {"name": name, "cutoff": cutoff, "color": color, "allertValue": 0, "value": 0,"member":1};
+									// distillationProcess["sensors"][key] = {"name": name, "cutoff": cutoff, "color": color, "allertValue": 0, "value": 0,"member":1};
+									distillationProcess["sensors"][key] = {"cutoff": cutoff, "allertValue": 0, "value": 0,"member":1};
 								} else {
-									distillationProcess["sensors"][key] = {"name": name, "value": 0,"member":1};
+									// distillationProcess["sensors"][key] = {"name": name, "value": 0,"member":1};
+									distillationProcess["sensors"][key] = {"value": 0,"member":1};
 								}
 							}
 						});
@@ -2040,9 +2042,11 @@ $(function () {
 
 								refluxProcess["sensors"][key] = {};
 								if (tmp) {
-									refluxProcess["sensors"][key] = {"name": name, "delta": delta, "cutoff": cutoff, "color": color, "allertValue": 0, "value": 0, "member":1};
+									// refluxProcess["sensors"][key] = {"name": name, "delta": delta, "cutoff": cutoff, "color": color, "allertValue": 0, "value": 0, "member":1};
+									refluxProcess["sensors"][key] = {"delta": delta, "cutoff": cutoff, "allertValue": 0, "value": 0, "member":1};
 								} else {
-									refluxProcess["sensors"][key] = {"name": name, "value": 0,"member":1};
+									// refluxProcess["sensors"][key] = {"name": name, "value": 0,"member":1};
+									refluxProcess["sensors"][key] = {"value": 0,"member":1};
 								}
 							}
 						});
