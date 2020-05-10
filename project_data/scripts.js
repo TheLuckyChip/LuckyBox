@@ -1390,11 +1390,11 @@ $(function () {
 
 								distillationProcess["sensors"][key] = {};
 								if (tmp) {
-									// distillationProcess["sensors"][key] = {"name": name, "cutoff": cutoff, "color": color, "allertValue": 0, "value": 0,"member":1};
-									distillationProcess["sensors"][key] = {"cutoff": cutoff, "allertValue": 0, "value": 0,"member":1};
+									distillationProcess["sensors"][key] = {"name": name, "cutoff": cutoff, "color": color, "allertValue": 0, "value": 0,"member":1};
+									// distillationProcess["sensors"][key] = {"cutoff": cutoff, "allertValue": 0, "value": 0,"member":1};
 								} else {
-									// distillationProcess["sensors"][key] = {"name": name, "value": 0,"member":1};
-									distillationProcess["sensors"][key] = {"value": 0,"member":1};
+									distillationProcess["sensors"][key] = {"name": name, "value": 0,"member":1};
+									// distillationProcess["sensors"][key] = {"value": 0,"member":1};
 								}
 							}
 						});
@@ -1424,7 +1424,7 @@ $(function () {
 				$.fn.pasteDistillationSensors(false);
 			}, 1000);
 		}
-		let sensorsDistillationSend = {
+		/*let sensorsDistillationSend = {
 			"t1": {"name": "", "cutoff": 0, "color": 0, "member": 0, "priority": 0, "allertValue": 0},
 			"t2": {"name": "", "cutoff": 0, "color": 0, "member": 0, "priority": 0, "allertValue": 0},
 			"t3": {"name": "", "cutoff": 0, "color": 0, "member": 0, "priority": 0, "allertValue": 0},
@@ -1445,6 +1445,25 @@ $(function () {
 			"in2": {"name": "", "member": 0},
 			"in3": {"name": "", "member": 0},
 			"in4": {"name": "", "member": 0},
+			"transitionTemperature": 0
+		};*/
+		let sensorsDistillationSend = {
+			"t1": {"cutoff": 0, "member": 0, "priority": 0, "allertValue": 0},
+			"t2": {"cutoff": 0, "member": 0, "priority": 0, "allertValue": 0},
+			"t3": {"cutoff": 0, "member": 0, "priority": 0, "allertValue": 0},
+			"t4": {"cutoff": 0, "member": 0, "priority": 0, "allertValue": 0},
+			"t5": {"cutoff": 0, "member": 0, "priority": 0, "allertValue": 0},
+			"t6": {"cutoff": 0, "member": 0, "priority": 0, "allertValue": 0},
+			"t7": {"cutoff": 0, "member": 0, "priority": 0, "allertValue": 0},
+			"t8": {"cutoff": 0, "member": 0, "priority": 0, "allertValue": 0},
+			"out1": {"member": 0},
+			"out2": {"member": 0},
+			"out3": {"member": 0},
+			"out4": {"member": 0},
+			"in1": {"member": 0},
+			"in2": {"member": 0},
+			"in3": {"member": 0},
+			"in4": {"member": 0},
 			"transitionTemperature": 0
 		};
 		let distillationTemplate = '';
@@ -1483,11 +1502,11 @@ $(function () {
 				//console.log(i,e);
 				let sensor_key = i;
 				//let name_sensor = e["name"];
-				if (e.hasOwnProperty("name") && sensorsDistillationSend[sensor_key].hasOwnProperty("name")) {
-					sensorsDistillationSend[sensor_key]["name"] = e["name"];
-				}
+				// if (e.hasOwnProperty("name") && sensorsDistillationSend[sensor_key].hasOwnProperty("name")) {
+				// 	sensorsDistillationSend[sensor_key]["name"] = e["name"];
+				// }
 				if (re_t.test(sensor_key) && Number(e["member"]) !== 0) {
-					sensorsDistillationSend[sensor_key]["color"] = e["color"];
+					// sensorsDistillationSend[sensor_key]["color"] = e["color"];
 					sensorsDistillationSend[sensor_key]["member"] = 1;
 
 					let tpl_cutoff = '';
@@ -1520,7 +1539,7 @@ $(function () {
 							'</div>';
 					}
 				}
-				if (re_out.test(sensor_key) && Number(e["member"]) !== 0) {
+				if (re_out.test(sensor_key) && Number(e["member"]) !== 0 && sensorsDistillationSend.hasOwnProperty(sensor_key)) {
 					sensorsDistillationSend[sensor_key]["member"] = 1;
 					tpl_devices_body += '<div class="row row-striped">' +
 						'<div class="pt-10 pb-10 clearfix">' +
@@ -2042,11 +2061,11 @@ $(function () {
 
 								refluxProcess["sensors"][key] = {};
 								if (tmp) {
-									// refluxProcess["sensors"][key] = {"name": name, "delta": delta, "cutoff": cutoff, "color": color, "allertValue": 0, "value": 0, "member":1};
-									refluxProcess["sensors"][key] = {"delta": delta, "cutoff": cutoff, "allertValue": 0, "value": 0, "member":1};
+									refluxProcess["sensors"][key] = {"name": name, "delta": delta, "cutoff": cutoff, "color": color, "allertValue": 0, "value": 0, "member":1};
+									// refluxProcess["sensors"][key] = {"delta": delta, "cutoff": cutoff, "allertValue": 0, "value": 0, "member":1};
 								} else {
-									// refluxProcess["sensors"][key] = {"name": name, "value": 0,"member":1};
-									refluxProcess["sensors"][key] = {"value": 0,"member":1};
+									refluxProcess["sensors"][key] = {"name": name, "value": 0,"member":1};
+									// refluxProcess["sensors"][key] = {"value": 0,"member":1};
 								}
 							}
 						});
@@ -2087,7 +2106,7 @@ $(function () {
 				$.fn.pasteRefluxSensors(false);
 			}, 1000);
 		}
-		let sensorsRefluxSend = {
+		/*let sensorsRefluxSend = {
 			"t1": {"name": "", "delta": 0, "cutoff": 0, "color": 0, "member": 0, "priority": 0, "allertValue": 0},
 			"t2": {"name": "", "delta": 0, "cutoff": 0, "color": 0, "member": 0, "priority": 0, "allertValue": 0},
 			"t3": {"name": "", "delta": 0, "cutoff": 0, "color": 0, "member": 0, "priority": 0, "allertValue": 0},
@@ -2108,6 +2127,28 @@ $(function () {
 			"in2": {"name": "", "member": 0},
 			"in3": {"name": "", "member": 0},
 			"in4": {"name": "", "member": 0},
+			"stab": 0,
+			"point": 0,
+			"transitionTemperature": 0,
+			"tapCorrection": 0
+		};*/
+		let sensorsRefluxSend = {
+			"t1": {"delta": 0, "cutoff": 0, "member": 0, "priority": 0, "allertValue": 0},
+			"t2": {"delta": 0, "cutoff": 0, "member": 0, "priority": 0, "allertValue": 0},
+			"t3": {"delta": 0, "cutoff": 0, "member": 0, "priority": 0, "allertValue": 0},
+			"t4": {"delta": 0, "cutoff": 0, "member": 0, "priority": 0, "allertValue": 0},
+			"t5": {"delta": 0, "cutoff": 0, "member": 0, "priority": 0, "allertValue": 0},
+			"t6": {"delta": 0, "cutoff": 0, "member": 0, "priority": 0, "allertValue": 0},
+			"t7": {"delta": 0, "cutoff": 0, "member": 0, "priority": 0, "allertValue": 0},
+			"t8": {"delta": 0, "cutoff": 0, "member": 0, "priority": 0, "allertValue": 0},
+			"out1": {"member": 0},
+			"out2": {"member": 0},
+			"out3": {"member": 0},
+			"out4": {"member": 0},
+			"in1": {"member": 0},
+			"in2": {"member": 0},
+			"in3": {"member": 0},
+			"in4": {"member": 0},
 			"stab": 0,
 			"point": 0,
 			"transitionTemperature": 0,
@@ -2176,11 +2217,11 @@ $(function () {
 
 			$.each(refluxProcess["sensors"], function (i, e) {
 				let sensor_key = i;
-				if (e.hasOwnProperty("name") && sensorsRefluxSend[sensor_key].hasOwnProperty("name")) {
-					sensorsRefluxSend[sensor_key]["name"] = e["name"];
-				}
+				// if (e.hasOwnProperty("name") && sensorsRefluxSend[sensor_key].hasOwnProperty("name")) {
+				// 	sensorsRefluxSend[sensor_key]["name"] = e["name"];
+				// }
 				if (re_t.test(sensor_key) && Number(e["member"]) !== 0) {
-					sensorsRefluxSend[sensor_key]["color"] = e["color"];
+					// sensorsRefluxSend[sensor_key]["color"] = e["color"];
 					sensorsRefluxSend[sensor_key]["member"] = 1;
 					let tpl_delta = '';
 					let tpl_delta_result = '';
@@ -2231,7 +2272,7 @@ $(function () {
 							'</div>';
 					}
 				}
-				if (re_out.test(sensor_key) && Number(e["member"]) !== 0) {
+				if (re_out.test(sensor_key) && Number(e["member"]) !== 0 && sensorsRefluxSend.hasOwnProperty(sensor_key)) {
 					sensorsRefluxSend[sensor_key]["member"] = 1;
 					//console.log(sensor_key);
 					if(sensor_key === "out1" || sensor_key === "out2") {
@@ -3333,7 +3374,7 @@ $(function () {
 				$.fn.pasteMashingSensors(false);
 			}, 1000);
 		}
-		let sensorsMashingSend = {
+		/*let sensorsMashingSend = {
 			"t1": {"name": "", "color": 0, "member": 0, "priority": 0},
 			"t2": {"name": "", "color": 0, "member": 0, "priority": 0},
 			"t3": {"name": "", "color": 0, "member": 0, "priority": 0},
@@ -3347,6 +3388,21 @@ $(function () {
 			"pause3": {"name": "", "time": 0, "temperature": 0, "stop": 0},
 			"pause4": {"name": "", "time": 0, "temperature": 0, "stop": 0},
 			"pause5": {"name": "", "time": 0, "temperature": 0, "stop": 0}
+		};*/
+		let sensorsMashingSend = {
+			"t1": {"member": 0, "priority": 0},
+			"t2": {"member": 0, "priority": 0},
+			"t3": {"member": 0, "priority": 0},
+			"t4": {"member": 0, "priority": 0},
+			"t5": {"member": 0, "priority": 0},
+			"t6": {"member": 0, "priority": 0},
+			"t7": {"member": 0, "priority": 0},
+			"t8": {"member": 0, "priority": 0},
+			"pause1": {"time": 0, "temperature": 0, "stop": 0},
+			"pause2": {"time": 0, "temperature": 0, "stop": 0},
+			"pause3": {"time": 0, "temperature": 0, "stop": 0},
+			"pause4": {"time": 0, "temperature": 0, "stop": 0},
+			"pause5": {"time": 0, "temperature": 0, "stop": 0}
 		};
 		let mashingTemplate = '';
 		let tpl_pause_body = '';
@@ -3397,11 +3453,11 @@ $(function () {
 						temperature = e["temperature"] = Number(q[pause_key]["temperature"]);
 					}
 				});
-				if (sensorsMashingSend[sensor_key].hasOwnProperty("name")) {
-					sensorsMashingSend[sensor_key]["name"] = name_sensor;
-				}
+				// if (sensorsMashingSend[sensor_key].hasOwnProperty("name")) {
+				// 	sensorsMashingSend[sensor_key]["name"] = name_sensor;
+				// }
 				if (re_t.test(sensor_key) && Number(e["member"]) !== 0) {
-					sensorsMashingSend[sensor_key]["color"] = e["color"];
+					// sensorsMashingSend[sensor_key]["color"] = e["color"];
 					sensorsMashingSend[sensor_key]["member"] = 1;
 					sensorsMashingSend[sensor_key]["priority"] = e["priority"];
 					tpl_all_body += '<div class="row row-striped">' +
