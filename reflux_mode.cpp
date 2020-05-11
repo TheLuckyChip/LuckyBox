@@ -200,7 +200,7 @@ void handleRefluxSensorTpl() {
 #endif
 	}
 	// выходы ШИМ
-	for (i = 0; i < 8; i++) {
+	for (i = 0; i < 4; i++) {
 		dataForWeb += "\"out" + String(i + 1) + "\":{\"value\":" + String(pwmOut[i].data) + ",\"name\":\"" + String(pwmOut[i].name) + "\",\"member\":" + String(tpl2web.pwmMember[i]) + "},";
 	}
 	// входы АЦП
@@ -249,7 +249,7 @@ void handleRefluxSensorSetLoad() {
 #endif
 	}
 	// выходы ШИМ
-	for (i = 0; i < 8; i++) {
+	for (i = 0; i < 4; i++) {
 		dataForWeb += "\"out" + String(i + 1) + "\":{\"value\":" + String(pwmOut[i].data) + ",\"name\":\"" + String(pwmOut[i].name) + "\",\"member\":" + String(pwmOut[i].member) + "},";
 	}
 	// входы АЦП
@@ -278,7 +278,7 @@ void handleRefluxSensorSetSave() {
 				arg = "t" + String(i);
 				temperatureSensor[k].member = HTTP.arg(arg + "[member]").toInt();
 				temperatureSensor[k].priority = HTTP.arg(arg + "[priority]").toInt();
-				temperatureSensor[k].allertValue = HTTP.arg(arg + "[allertValue]").toFloat();
+				//temperatureSensor[k].allertValue = HTTP.arg(arg + "[allertValue]").toFloat();
 				temperatureSensor[k].delta = HTTP.arg(arg + "[delta]").toInt();
 				temperatureSensor[k].cutoff = HTTP.arg(arg + "[cutoff]").toInt();
 				break;
@@ -298,7 +298,7 @@ void handleRefluxSensorSetSave() {
 		}
 #endif		
 	}
-	for (i = 0; i < 8; i++) {
+	for (i = 0; i < 4; i++) {
 		arg = "out" + String(i + 1);
 		pwmOut[i].member = HTTP.arg(arg + "[member]").toInt();
 	}
@@ -324,9 +324,10 @@ void handleRefluxSensorSetSave() {
 		EEPROM.write(index, temperatureSensor[i].delta); index++;
 		EEPROM.write(index, temperatureSensor[i].cutoff); index++;
 	}
-	for (i = 0; i < 8; i++) { // 8 байт
+	for (i = 0; i < 4; i++) { // было 8 байт
 		EEPROM.write(index, pwmOut[i].member);  index++;
 	}
+	index += 4;
 	for (i = 0; i < 4; i++) { // 4 байта
 		EEPROM.write(index, adcIn[i].member);  index++;
 	}
@@ -339,7 +340,6 @@ void handleRefluxSensorSetSave() {
 	EEPROM.write(index, TapCorrectionWeb);
 	
 	EEPROM.end();
-	////delay(200);
 }
 
 void valveSet(uint8_t ch) {
@@ -2750,22 +2750,25 @@ void refluxLoop() {
 			&& timeAllertInterval <= millis())) settingAlarm = false;
 
 		nameProcessStep = name_Process_Step;
-		// % шарового крана (стрелка вниз &#8659, перечеркнутый круг &#216)
+		// % шарового крана
 		if (processMode.number == 1 || processMode.number == 2) {
 			if (processMode.step == 6) {
 				if (bodyValveSet == true) nameProcessStep += " (\&#216 " + String(bodyPrimaPercent / 2) + "%)";
 				else nameProcessStep += " (\&#216 0%)";
 			}
 		}
-		// Вывод веса и скорости отбора в поле операции
+		// Вывод веса и скорости отбора
 		if (timeScaleResponse < 60 && processMode.step > 3 && processMode.step < 7) {
 		  if (RU) {
-			nameProcessStep += " " + String(scaleWiFiOunces) + " мл (" + String(scaleWiFiSpeed) + " мл/ч)";
+			  processInfo = "Объем: " + String(scaleWiFiOunces) + " мл. ";
+			  processInfo += "Скорость отбора: " + String(scaleWiFiSpeed) + " мл/ч.";
 		  }
 		  else {
-			nameProcessStep += " " + String(scaleWiFiOunces) + " ml (" + String(scaleWiFiSpeed) + " ml/h)";
+			  processInfo = "Volume: " + String(scaleWiFiOunces) + " ml. ";
+			  processInfo += "Sampling rate: " + String(scaleWiFiSpeed) + " ml/h.";
 		  }
 		}
+		else processInfo = "";
 	}
 
 	if (processMode.number > 0 && processMode.step == 6) {
@@ -2777,6 +2780,10 @@ void refluxLoop() {
 			numOkStop = 2;
 		}
 	}
+
+	/*processInfo = "тест";
+	processInfo += "<br>";
+	processInfo += "тест";*/
 
 	// Уходим на выбранный алгоритм
 	switch (processMode.number) {

@@ -1,11 +1,11 @@
 #include "setup.h"
 
-String payload;
-int ver_fw = versionForWeb;
-bool fw_update = false;
-
 void setup()
 {
+	String payload;
+	int ver_fw = versionForWeb;
+	bool fw_update = false;
+
 	// Настройка вывода для ТЭНа
 	pinMode(heater, OUTPUT);
 	digitalWrite(heater, LOW);
@@ -236,7 +236,8 @@ void setup()
 
 #ifdef remoteUpd
 		HTTPClient http;
-		http.begin("http://update.vinokurshchik.ru/api/firmwares");
+		if (RU) http.begin("http://update.vinokurshchik.ru/api/firmwares/ru");
+		else http.begin("http://update.vinokurshchik.ru/api/firmwares/en");
 		int httpCode = http.GET();
 		if (httpCode == 200) {
 		  payload = http.getString();

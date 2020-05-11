@@ -51,6 +51,7 @@ struct DS_Str {
 };
 struct BMP_Str {
 	float		data;			// значение атмосферного давления
+	float		dataP[4];		// значение температуры для усреднения и исключения глюков опроса
 	float		dataStart;		// значение атмосферного давления для коррекции дельты
 	bool		status;			// наличие датчика
 	uint16_t	color;			// цвет для графика
@@ -114,7 +115,7 @@ extern PID myPID;
 
 extern uint16_t percentCorrectSquare[];
 
-extern String WiFiPower;
+//extern String WiFiPower;
 
 extern String curVersion;
 extern uint16_t versionForWeb;
@@ -191,6 +192,7 @@ extern float setTempForPID;
 extern int WindowSize;
 extern unsigned long windowStartTime, stepTime;
 extern unsigned long timeStopDistLevelErr;
+extern String processInfo;
 extern String nameProcessStep;
 extern String name_Process_Step;
 extern String commandWriteSD;

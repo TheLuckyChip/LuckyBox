@@ -101,7 +101,7 @@ void handleDistillationTpl() {
 		}
 	}
 	// выходы ШИМ
-	for (i = 0; i < 8; i++) {
+	for (i = 0; i < 4; i++) {
 		dataForWeb += "\"out" + String(i + 1) + "\":{\"value\":" + String(pwmOut[i].data) + ",\"name\":\"" + String(pwmOut[i].name) + "\",\"member\":" + String(tpl2web.pwmMember[i]) + "},";
 	}
 	// входы АЦП
@@ -133,7 +133,7 @@ void handleDistillationSensorSetLoad() {
 		}
 	}
 	// выходы ШИМ
-	for (i = 0; i < 8; i++) {
+	for (i = 0; i < 4; i++) {
 		dataForWeb += "\"out" + String(i + 1) + "\":{\"value\":" + String(pwmOut[i].data) + ",\"name\":\"" + String(pwmOut[i].name) + "\",\"member\":" + String(pwmOut[i].member) + "},";
 	}
 	// входы АЦП
@@ -166,7 +166,7 @@ void handleDistillationSensorSetSave() {
 			else break;
 		}
 	}
-	for (i = 0; i < 8; i++) {
+	for (i = 0; i < 4; i++) {
 		arg = "out" + String(i + 1);
 		pwmOut[i].member = HTTP.arg(arg + "[member]").toInt();
 	}
@@ -186,16 +186,17 @@ void handleDistillationSensorSetSave() {
 		EEPROM_float_write(index, temperatureSensor[i].allertValue); index += 4;
 		EEPROM.write(index, temperatureSensor[i].cutoff); index++;
 	}
-	for (i = 0; i < 8; i++) {
+	for (i = 0; i < 4; i++) {
 		EEPROM.write(index, pwmOut[i].member);  index++;
 	}
+	index += 4;
 	for (i = 0; i < 4; i++) {
 		EEPROM.write(index, adcIn[i].member);  index++;
 	}
 	EEPROM.write(index, DistillationTransitionTemperature);
 
 	EEPROM.end();
-	////delay(200);
+
 	HTTP.send(200, "text/json", "{\"result\":\"ok\"}");
 }
 

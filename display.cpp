@@ -114,6 +114,8 @@ void displayLoop() {
 		if (processMode.allow != 0 && processMode.allow != 6 && processMode.step != 0 && touchScreen == 0) tftOutGraphDisplay(); // вывод на дисплей графиков, если он есть
 		DefCubOut++;
 #endif
+		//Serial.print("free_heap_size: ");
+		//Serial.println(system_get_free_heap_size());
 	}
 #if defined TFT_Display
 	// Вывод бегущей строчки мощности и самой мощности, так же клапанов и датчиков

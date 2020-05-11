@@ -15,14 +15,14 @@ WiFiClient client;
 // PID
 PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
 
-String WiFiPower = "192.168.1.250";
+//String WiFiPower = "192.168.1.250";
 
 #if defined language_RUS
-  String curVersion = "2.0.20";
+  String curVersion = "2.0.21";
 #else
-  String curVersion = "2.0 en";
+  String curVersion = "2.0.21 en";
 #endif
-uint16_t versionForWeb = 2020;//1000;
+uint16_t versionForWeb = 2021;
 // Определяем переменные wifi
 String _ssid;      // Для хранения SSID
 String _password;  // Для хранения пароля сети
@@ -109,6 +109,7 @@ float setTempForPID = 65;
 int WindowSize = 250;
 unsigned long windowStartTime, stepTime;
 unsigned long timeStopDistLevelErr;
+String processInfo;
 String nameProcessStep = " ";
 String name_Process_Step = " ";
 String commandWriteSD;
