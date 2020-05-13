@@ -31,6 +31,9 @@ body {
 span.show {
 	display: inline-block !important;
 }
+.font-weight-normal{
+	font-weight: normal!important;
+}
 .mt-10{
 	margin-top: 10px;
 }

@@ -32,7 +32,9 @@
 #include "heater.h"
 #include <EEPROM.h>
 #include <time.h>
-#include "misc.h" 
+#include "misc.h"
+#include "ArduinoJson.h"
+#include <ESP8266httpUpdate.h>
 
 // Заставка для TFT при старте
 const PROGMEM uint8_t imageDataStartScreen[24000] = {

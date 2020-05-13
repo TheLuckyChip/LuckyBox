@@ -1,14 +1,16 @@
 ﻿################################################################################
 # Данный GITIGNORE-файл был автоматически создан Microsoft(R) Visual Studio.
 ################################################################################
-
+/.git
+/.vs
 /__vm
-/LuckyBox.sln
-/LuckyBox.vcxproj
-/LuckyBox.vcxproj.filters
+.gitignore
+LuckyBox.sln
+LuckyBox.vcxproj
+LuckyBox.vcxproj.filters
+LuckyBox.vcxproj.user
 /Release
 /pcb
-/data_18
 #.gitignore
 # JetBrains CLion
 .idea/*
