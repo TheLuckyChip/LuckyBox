@@ -12,11 +12,24 @@ bool loadConfig()
 		if (EEPROM.read(index) != 255 && EEPROM.read(index) != 0 && cnt < 60) {
 			SSDP_Name += " ";
 			SSDP_Name[cnt] = EEPROM.read(index);
+			NBNS_Name[cnt] = SSDP_Name[cnt];
 			index++;
 			cnt++;
 		}
 		else {
-			if (cnt <= 2) SSDP_Name = "LuckyBox";
+			if (cnt < 2) {
+				SSDP_Name = "LuckyBox";
+				NBNS_Name[0] = 76;
+				NBNS_Name[1] = 117;
+				NBNS_Name[2] = 99;
+				NBNS_Name[3] = 107;
+				NBNS_Name[4] = 121;
+				NBNS_Name[5] = 66;
+				NBNS_Name[6] = 111;
+				NBNS_Name[7] = 120;
+				NBNS_Name[8] = 0;
+			}
+			else NBNS_Name[cnt] = 0;
 			break;
 		}
 	}

@@ -2,6 +2,10 @@
 
 void setup()
 {
+	String payload;
+	int ver_fw = versionForWeb;
+	bool fw_update = false;
+
 	// Настройка вывода для ТЭНа
 	pinMode(heater, OUTPUT);
 	digitalWrite(heater, LOW);
@@ -173,20 +177,7 @@ void setup()
 	while (SPI1CMD & SPIBUSY) {}
 	SPI.endTransaction();
 
-	// выводим версию поверх логотипа
-	//tft.setTextColor(ILI9341_BLACK);
-	//tft.setCursor(223, 35);
-	//tft.setTextSize(2);
-	//tft.print(utf8rus("Версия ПО:"));
-	//tft.setCursor(223, 35+18);
-	//tft.print(curVersion);
-	//tft.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
-	//tft.setTextSize(1);
-
 	// рисуем квадратики для индикации загрузки
-	//tft.setCursor(0, 2);
-	///////////////////////////////////////////////
-	//tft.print("Step 1 - I2C initialize          ");
 	scaleCount = 2;
 	tft.writeFillRect(scaleCount, 215, 15, 15, 0xFFFF);
 	delay(150);
@@ -210,9 +201,6 @@ void setup()
 	Serial.println("Step 3 - FS Init");
 #if defined TFT_Display
 	// рисуем квадратики для индикации загрузки
-	//tft.setCursor(0, 2);
-	///////////////////////////////////////////////
-	//tft.print("Step 2 - File system initialize  ");
 	scaleCount += 20;
 	tft.writeFillRect(scaleCount, 215, 15, 15, 0xFFFF);
 #endif
@@ -223,9 +211,6 @@ void setup()
 	Serial.println("Step 5 - WIFI Init");
 #if defined TFT_Display
 	// рисуем квадратики для индикации загрузки
-	//tft.setCursor(0, 2);
-	///////////////////////////////////////////////
-	//tft.print("Step 3 - WiFi initialize         ");
 	scaleCount += 20;
 	tft.writeFillRect(scaleCount, 215, 15, 15, 0xFFFF);
 #endif
@@ -248,6 +233,25 @@ void setup()
 		Serial.println("WiFi connected");
 		Serial.println("IP address: ");
 		Serial.println(Local_IP);
+
+#ifdef remoteUpd
+		HTTPClient http;
+		if (RU) http.begin("http://update.vinokurshchik.ru/api/firmwares/ru");
+		else http.begin("http://update.vinokurshchik.ru/api/firmwares/en");
+		int httpCode = http.GET();
+		if (httpCode == 200) {
+		  payload = http.getString();
+		  Serial.print("GET: ");
+		  Serial.println(httpCode);
+		  Serial.println(payload);
+		  fw_update = true;
+		}
+		else {
+		  Serial.print("ERR response: ");
+		  Serial.println(httpCode);
+		}
+		http.end();   //Close connection
+#endif
 	}
 
 	Serial.println("Step 6 - Time, NTP Init");
@@ -260,13 +264,11 @@ void setup()
 		Serial.println("Step 7  - SSDP Init");
 #if defined TFT_Display
 		// рисуем квадратики для индикации загрузки
-		//tft.setCursor(0, 2);
-		///////////////////////////////////////////////
-		//tft.print("Step 4 - Start Web server        ");
 		scaleCount += 20;
 		if (scaleCount <= 282) tft.writeFillRect(scaleCount, 215, 15, 15, 0xFFFF);
 #endif
 		initSSDP();
+		NBNS.begin(NBNS_Name);
 	}
 
 	//Настраиваем и запускаем HTTP интерфейс
@@ -275,9 +277,6 @@ void setup()
 	Serial.println("Step 9  - Reflux Init");
 #if defined TFT_Display
 	// рисуем квадратики для индикации загрузки
-	//tft.setCursor(0, 2);
-	///////////////////////////////////////////////
-	//tft.print("Step 5 - Variable initialization ");
 	scaleCount += 20;
 	if (scaleCount <= 282) tft.writeFillRect(scaleCount, 215, 15, 15, 0xFFFF);
 #endif
@@ -306,9 +305,6 @@ void setup()
 	dallRead(10);
 #if defined TFT_Display
 	// рисуем квадратики для индикации загрузки
-	//tft.setCursor(0, 2);
-	///////////////////////////////////////////////
-	//tft.print("Step 6 - Sensors initialization  ");
 	scaleCount += 20;
 	if (scaleCount <= 282) tft.writeFillRect(scaleCount, 215, 15, 15, 0xFFFF);
 #endif
@@ -318,9 +314,6 @@ void setup()
 	dallRead(10);
 #if defined TFT_Display
 	// рисуем квадратики для индикации загрузки
-	//tft.setCursor(0, 2);
-	///////////////////////////////////////////////
-	//tft.print("Step 7 - ADC initialization      ");
 	scaleCount += 20;
 	if (scaleCount <= 282) tft.writeFillRect(scaleCount, 215, 15, 15, 0xFFFF);
 #endif
@@ -345,9 +338,6 @@ void setup()
   adcInit();
   #if defined TFT_Display
   // рисуем квадратики для индикации загрузки
-  //tft.setCursor(0, 2);
-  ///////////////////////////////////////////////
-  //tft.print("Step 8 - TouhScreen initialization");
   scaleCount += 20;
   if (scaleCount <= 282) tft.writeFillRect(scaleCount, 215, 15, 15, 0xFFFF);
 
@@ -381,50 +371,184 @@ void setup()
   TX_BUF_IO_Power[3] = 0x70;		// p
   TX_BUF_IO_Power[4] = 0x3D;		// =
 
-  client.setTimeout(1000);
-  client.connect("192.168.1.250", 80);
-  if (client.connected()) {
-	  String url = "/powerOK?";
-	  url += "ok1="; url += 0x2D; url += "&";
-	  url += "ok2="; url += 0x4F; url += "&";
-	  url += "ok3="; url += 0x6B; url += "&";
-	  url += "ok4="; url += 0x2D;
-	  client.print(String("GET ") + url + " HTTP/1.1\r\n" +
-		  "Host: " + "192.168.1.250" + "\r\n" +
-		  "Connection: close\r\n\r\n");
-	  String line;
-	  unsigned long t = millis() + 500;
-	  while (client.connected() || client.available())
-	  {
-		  if (client.available()) {
-			  line = client.readStringUntil('\r');
-		  }
-		  if (t < millis()) break;
-	  }
-	  if (line[1] == 0x4F && line[2] == 0x4B) powerWiFiPresent = true;
-	  else client.stop();
-  }
-  else client.stop();
+  Serial.println();
 
-  if (powerWiFiPresent) {
-	  Serial.println();
-	  Serial.println("WiFi Power Present!");
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////  
+#ifdef remoteUpd
+  if (fw_update) {
+    DynamicJsonBuffer jsonBuffer;
+    JsonObject& root = jsonBuffer.parseObject(payload);
+    ver_fw = root[String("version")];
+    String box = root["box"].as<String>();
+    String web = root["web"].as<String>();
+    Serial.print("FW Version: ");
+    Serial.println(ver_fw);
+    if (ver_fw == versionForWeb) fw_update = false;
   }
+  
+  if (fw_update) {
+// Вывод менюшки на подтверждение
+    csOn(TFT_CS);
+    fillScreenRect(0, 16, 320, 204, ILI9341_BLACK);
+    fillScreenRect(25, 57, 270, 140, 0xFFF6);
+    tft.drawRect(27, 59, 266, 136, ILI9341_BLACK);// 0xFC00);
+    tft.drawRect(28, 60, 264, 134, ILI9341_BLACK);// 0xFC00);
+    fillScreenRect(45, 125, 100, 60, 0xFB6D);
+    tft.drawRect(45, 125, 100, 60, 0x0000);
+    fillScreenRect(175, 125, 100, 60, 0x67EC);
+    tft.drawRect(175, 125, 100, 60, 0x0000);
+    // Выводим версию
+    tft.setTextSize(1);
+    tft.setTextColor(ILI9341_WHITE);
+    if (RU) {
+      tft.setCursor(70, 28);
+      tft.print(utf8rus("Доступно обновление ПО: "));
+    } else {
+      tft.setCursor(58, 28);
+      tft.print(utf8rus("Software update available: "));
+    }
+    String stringOne = String(ver_fw, DEC);
+    tft.print(stringOne[0]); tft.print("."); tft.print(stringOne[1]); tft.print("."); tft.print(stringOne[2]); tft.print(stringOne[3]);
+
+    if (RU) drawBitmapString(42, 68, &UpdateFW, ILI9341_BLACK, 0xFFF6);
+    else {
+      tft.setTextSize(1);
+      tft.setFont(&FreeSerifBold12pt7b);
+      tft.setTextColor(ILI9341_BLACK);
+      tft.setCursor(70, 96);
+      tft.print("U p d a t e   F W ?");
+    }
+
+    if (RU) {
+      drawBitmapString(60, 141, &Esc, ILI9341_BLACK, 0xFB6D);
+      drawBitmapString(196, 140, &Ok, ILI9341_BLACK, 0x67EC);
+    }
+    else {
+      tft.setFont(&FreeSerifBold24pt7b);
+      tft.setTextColor(ILI9341_BLACK);
+      tft.setCursor(66, 170);
+      tft.print("No");
+      tft.setCursor(188, 170);
+      tft.print("Yes");
+      tft.setFont(NULL);
+      tft.setTextSize(2);
+    }
+    csOff(TFT_CS);
+// Ждем подтверждение или отмену
+    touchArea = 0;
+    unsigned long timeMenuUPD = millis() + 30000;
+    while (1) {
+      yield();
+      //displayLoop();
+      if (touch_in == true && stopInfoOutScreen == true) {
+        touchscreenUpdate();
+        initBuzzer(50);
+        if (touch_x > 10 && touch_x < 160 && touch_y > 100) touchArea = 21;
+        else if (touch_x > 160 && touch_x < 320 && touch_y > 100) touchArea = 22;
+        else touchArea = 0;
+        delay(250);
+        touch_in = false;
+        attachInterrupt(intTouch, touchscreenUpdateSet, FALLING);
+      }
+
+      if (touchArea == 21 || timeMenuUPD < millis()) { // Нет - уходим на главный экран
+        fw_update = false;
+        break;
+      }
+      else if (touchArea == 22) { // Да - запускаем обновление прошивки
+        fw_update = true;
+        break;
+      }
+    }
+  }
+  else {
+    Serial.println("No software updates, latest version installed");
+  }
+
+  if (fw_update) {
+// Выводим предупреждение что обновляемся
+    csOn(TFT_CS);
+    fillScreenRect(25, 57, 270, 140, 0xFFF6);
+    tft.drawRect(27, 59, 266, 136, ILI9341_BLACK);// 0xFC00);
+    tft.drawRect(28, 60, 264, 134, ILI9341_BLACK);// 0xFC00);
+    tft.setTextSize(1);
+
+    tft.setFont(NULL);
+    tft.setTextColor(ILI9341_BLACK);
+    if (RU) {
+      tft.setCursor(76, 80);
+      tft.print(utf8rus("- НЕ ВЫКЛЮЧАЙТЕ АВТОМАТИКУ -"));
+    } else {
+      tft.setCursor(67, 80);
+      tft.print("- DON'T SWITCH OFF THE DEVICE -");
+    }
+    
+    tft.setFont(&FreeSerifBold12pt7b);
+    tft.setCursor(104, 124);
+    tft.print("U p d a t e");
+    csOff(TFT_CS);
+    delay(500);
+
+    DynamicJsonBuffer jsonBuffer;
+    JsonObject& root = jsonBuffer.parseObject(payload);
+    int ver_fw = root[String("version")];
+    String box = root["box"].as<String>();
+    String web = root["web"].as<String>();
+    Serial.print("FW Version: ");
+    Serial.println(ver_fw);
+    if (ver_fw != versionForWeb) {
+      Serial.println(box);
+      Serial.println(web);
+
+      Serial.print("Update SPIFFS...");
+      // Выводим на TFT
+      csOn(TFT_CS);
+      tft.setCursor(100, 158);
+      tft.print("S P I F F S");
+      csOff(TFT_CS);
+      
+      t_httpUpdate_return ret = ESPhttpUpdate.updateSpiffs(web);
+      if (ret == HTTP_UPDATE_OK) {
+        Serial.println(" Ok");
+        Serial.print("Update sketch...");
+        // Выводим на TFT
+        csOn(TFT_CS);
+        fillScreenRect(30, 130, 258, 32, 0xFFF6);
+        tft.setCursor(106, 158);
+        tft.print("S k e t c h");
+        csOff(TFT_CS);
+        
+        ret = ESPhttpUpdate.update(box);
+        switch (ret) {
+          case HTTP_UPDATE_FAILED:
+            Serial.printf("HTTP_UPDATE_FAILED Error (%d): %s", ESPhttpUpdate.getLastError(), ESPhttpUpdate.getLastErrorString().c_str());
+            break;
+    
+          case HTTP_UPDATE_NO_UPDATES:
+            Serial.println("HTTP_UPDATE_NO_UPDATES");
+            break;
+    
+          case HTTP_UPDATE_OK:
+            Serial.println("HTTP_UPDATE_OK");
+            break;
+        }
+      }
+      else {
+        Serial.println(" Err");
+      }
+    }
+  }
+#endif
+  touchRead = 1;
+  touchArea = 0;
+  touchScreen = 0;
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
   Serial.println();
   Serial.println("Setup Done!");
-
+  
   delay(100);
 
   Serial.end();
   Serial.begin(9600);
-
-  /*Serial.println();
-  Serial.print("T1 = num:"); Serial.print(temperatureSensor[0].num); Serial.print(" name:"); Serial.println(DS_Cube);
-  Serial.print("T2 = num:"); Serial.print(temperatureSensor[1].num); Serial.print(" name:"); Serial.println(DS_Tube);
-  Serial.print("T3 = num:"); Serial.print(temperatureSensor[2].num); Serial.print(" name:"); Serial.println(DS_Out);
-  Serial.print("T4 = num:"); Serial.print(temperatureSensor[3].num); Serial.print(" name:"); Serial.println(DS_Def);
-  Serial.print("Т5 = num:"); Serial.print(temperatureSensor[4].num); Serial.print(" name:"); Serial.println(DS_Res1);
-  Serial.print("Т6 = num:"); Serial.print(temperatureSensor[5].num); Serial.print(" name:"); Serial.println(DS_Res2);
-  Serial.print("Т7 = num:"); Serial.print(temperatureSensor[6].num); Serial.print(" name:"); Serial.println(DS_Res3);
-  Serial.print("Т8 = num:"); Serial.print(temperatureSensor[7].num); Serial.print(" name:"); Serial.println(DS_Res4);*/
 }

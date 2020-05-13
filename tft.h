@@ -585,6 +585,7 @@ const PROGMEM uint8_t imageProcessBeer[512] = {
 
 extern Adafruit_ILI9341 tft;
 extern String utf8rus(String source);
+extern void drawBitmapString(uint16_t x, uint16_t y, const tImage *image, uint16_t color, uint16_t bgcolor);
 extern void initTFT();
 extern void tftStartForGraph();
 extern void tftOutGraphDisplay();

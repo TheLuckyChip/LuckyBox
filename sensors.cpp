@@ -32,7 +32,19 @@ void initPressureSensor()
 void pressureRead()
 {
 #if defined Pressure_BMP085 || defined Pressure_BMP180 || defined Pressure_BMP280 || defined Pressure_BME280
-	if (pressureSensor.status) pressureSensor.data = bmp.readPressure() / 133.3;
+	pressureSensor.dataP[3] = pressureSensor.dataP[2];
+	pressureSensor.dataP[2] = pressureSensor.dataP[1];
+	pressureSensor.dataP[1] = pressureSensor.dataP[0];
+	if (pressureSensor.status) pressureSensor.dataP[0] = bmp.readPressure() / 133.3;
+	// вычислим ближайший к текущему значению результат
+	float dp1 = abs(pressureSensor.dataP[0] - pressureSensor.data);
+	float dp2 = abs(pressureSensor.dataP[1] - pressureSensor.data);
+	float dp3 = abs(pressureSensor.dataP[2] - pressureSensor.data);
+	float dp4 = abs(pressureSensor.dataP[3] - pressureSensor.data);
+	if (dp1 <= dp2 && dp1 <= dp3 && dp1 <= dp4 && pressureSensor.dataP[0] > 0) pressureSensor.data = pressureSensor.dataP[0];
+	else if (dp2 <= dp1 && dp2 <= dp3 && dp2 <= dp4 && pressureSensor.dataP[1] > 0) pressureSensor.data = pressureSensor.dataP[1];
+	else if (dp3 <= dp1 && dp3 <= dp2 && dp3 <= dp4 && pressureSensor.dataP[2] > 0) pressureSensor.data = pressureSensor.dataP[2];
+	else if (dp4 <= dp1 && dp4 <= dp2 && dp4 <= dp3 && pressureSensor.dataP[3] > 0) pressureSensor.data = pressureSensor.dataP[3];
 #endif
 }
 
@@ -366,8 +378,8 @@ void handleProcessSensorOut() {
 	else cubeAlcohol = 0;
 	temperatureAlcoholBoil = 78.91 - (780 - pressureSensor.data)*0.038; // расчет температуры кипения спирта при данном давлении
 	settingColumnShow = settingColumn + (temperatureAlcoholBoil - temperatureStartPressure); // расчет уставки при изменившемся атмосферном давлении
-	String dataForWeb = "{\"process\":{\"allow\":" + String(processMode.allow) + ",\"number\":" + String(processMode.number);
-	dataForWeb += ",\"step\":\"" + String(nameProcessStep) + "\",\"time\":" + String(processMode.timeStep) + ",\"timeStart\":" + String(processMode.timeStart) + "},\"sensors\":[";
+	String dataForWeb = "{\"process\":{\"allow\":" + String(processMode.allow) + ",\"number\":" + String(processMode.number) + ",\"info\":\"" + String(processInfo);
+	dataForWeb += "\",\"step\":\"" + String(nameProcessStep) + "\",\"time\":" + String(processMode.timeStep) + ",\"timeStart\":" + String(processMode.timeStart) + "},\"sensors\":[";
 	// датчики температуры
 	for (i = 1; i <= DS_Cnt; i++) {
 		k = 0;
@@ -401,9 +413,9 @@ void handleProcessSensorOut() {
 	// ...
 	// devices
 	dataForWeb += "\"devices\":[";
-	for (i = 0; i < PWM_Cnt; i++) {
+	for (i = 0; i < 4; i++) {
 		dataForWeb += "{\"out" + String(i + 1) + "\":{\"value\":" + String(pwmOut[i].data) + ",\"member\":" + String(pwmOut[i].member) + ",\"allert\":" + String(pwmOut[i].allert);
-		if (i < (PWM_Cnt - 1)) dataForWeb += "}},";
+		if (i < 3) dataForWeb += "}},";
 	}
 	// импульсный режим на клапана
 	dataForWeb += "}}],\"valwe\":[";
@@ -699,6 +711,7 @@ void sensorLoop() {
 
 		timeSec = millis() + 1000;
 		processMode.timeStep++;
+    if (timeScaleResponse < 255) timeScaleResponse++;
 
 		// Пищалка для WEB
 		if (settingAlarm == true && BuzzerVolumeLevel > 0) {
