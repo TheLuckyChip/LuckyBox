@@ -39,7 +39,7 @@ void initHTTP(void)
 			if (nameBinFile == "LuckyBox.spiffs.bin" || nameBinFile == "LuckyBox.ino.spiffs.bin") {	
 				uint32_t maxSketchSpace = (ESP.getFreeSketchSpace() - ESP.getSketchSize());
 				Serial.println(maxSketchSpace);
-				if (!Update.begin(maxSketchSpace, U_SPIFFS)) { //start with max available size
+				if (!Update.begin(maxSketchSpace, U_FS)) { //start with max available size
 					Update.printError(Serial);
 				}
 				else {
