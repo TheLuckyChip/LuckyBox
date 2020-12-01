@@ -3,6 +3,7 @@
 ################################################################################
 /.git
 /.vs
+/.vscode
 /__vm
 .gitignore
 LuckyBox.sln
@@ -21,3 +22,9 @@ CMakeListsPrivate.txt
 /cmake-build-release/*
 /project_data/data_old/
 /project_data/node_modules/
+
+# commandline build
+build/
+# tools
+tools/arduino-cli
+tools/mkspiffs*
