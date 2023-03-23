@@ -1,6 +1,9 @@
 #include "setting.h"
 
 Ticker tickerSet;
+#ifdef power_PWM
+Ticker tickerSetPower;
+#endif
 
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
@@ -11,18 +14,32 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 ESP8266WebServer HTTP;
 // HTTP клиент
 WiFiClient client;
-
 // PID
 PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
 
 //String WiFiPower = "192.168.1.250";
 
 #if defined language_RUS
-  String curVersion = "2.0.21";
+  String curVersion = "2.0.22";
 #else
-  String curVersion = "2.0.21 en";
+  String curVersion = "2.0.22 en";
 #endif
-uint16_t versionForWeb = 2021;
+uint16_t versionForWeb = 2022;
+/*
+#ifdef set_MQTT
+uint8_t numDataSendMQTT = 0;
+unsigned long timeDelaySendDevicesMQTT;
+unsigned long timeDelaySendMQTT;
+char mqttServer[]          = "luckycloud.ru";
+String clientId            = "vasiliy";
+String clientPass          = "123qwe";
+char publishTopicData[]    = "luckybox/vasiliy/controller_send";
+char subscribeTopicDistill[]  = "luckybox/vasiliy/distillation";
+char subscribeTopicStart[]  = "luckybox/vasiliy/start";
+char subscribeTopicSet[]    = "luckybox/vasiliy/web_send";
+char subscribeTopicDevices[] = "luckybox/vasiliy/web_sensors";
+#endif
+*/
 // Определяем переменные wifi
 String _ssid;      // Для хранения SSID
 String _password;  // Для хранения пароля сети
@@ -30,8 +47,9 @@ String _ssidAP;  // SSID AP точки доступа
 String _ssidAPconnect;
 String _passwordAP;  // пароль точки доступа
 String SSDP_Name;  // Имя SSDP
-char NBNS_Name[60];
+//char NBNS_Name[60];
 String addrMacMod;
+int myNetworkNum = 0;
 // Настройки TFT
 bool touchInvert = false;
 bool tftInvert = false;
@@ -184,6 +202,8 @@ float temperatureOld_DS_Def;
 byte touchRead = 1;
 
 bool RU;
+
+//bool updateSet = false;
 
 uint8_t timeScaleResponse = 60;
 

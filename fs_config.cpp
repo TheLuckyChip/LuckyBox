@@ -9,19 +9,23 @@ fs::File fsUploadFile;
 void initFS(void)
 {
   if(!SPIFFS.begin()) {
+#if defined Debug_en
 	Serial.println("SPIFFS Mount Failed");
+#endif
   return;
   }
-  #ifdef ESP8266
+#ifdef ESP8266
   fs::Dir dir = SPIFFS.openDir("/");
   while (dir.next()) {    
     String fileName = dir.fileName();
     size_t fileSize = dir.fileSize();
+#if defined Debug_en
     Serial.printf("FS File: %s, size: %s\n", fileName.c_str(), formatBytes(fileSize).c_str());
+#endif
   }
-  #else
+#else
     listDir("/", 0);
-  #endif
+#endif
     Serial.printf("\n");
  
 	//HTTP страницы дл¤ работы с FFS
@@ -167,7 +171,9 @@ void handleFileList() {
     return;
   }
   String path = HTTP.arg("dir");
+#if defined Debug_en
   Serial.println("handleFileList: " + path);
+#endif
   fs::Dir dir = SPIFFS.openDir(path);
   path = String();
   

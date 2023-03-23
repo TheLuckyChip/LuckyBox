@@ -14,7 +14,6 @@
 #include "user_config.h"
 #include "wifi_config.h"
 #include "time_config.h"
-#include "ssdp.h"
 #include "tft.h"
 #include "http_config.h"
 #include "fs_config.h"
@@ -33,8 +32,6 @@
 #include <EEPROM.h>
 #include <time.h>
 #include "misc.h"
-#include "ArduinoJson.h"
-#include <ESP8266httpUpdate.h>
 
 // Заставка для TFT при старте
 const PROGMEM uint8_t imageDataStartScreen[24000] = {

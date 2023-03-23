@@ -14,7 +14,6 @@
 #include <Adafruit_PWMServoDriver.h>
 #include <ESP8266WebServer.h>
 #include <WiFiClient.h>
-#include <ESP8266NetBIOS.h>
 #include <EEPROM.h>
 #include <PID_v1.h>
 
@@ -101,24 +100,39 @@ extern struct PR_Mashing processMashing[5];
 extern struct PR_Power power;
 
 extern Ticker tickerSet;
+#ifdef power_PWM
+extern Ticker tickerSetPower;
+#endif
 
 extern Adafruit_PWMServoDriver pwm;
-
-// Объект для обновления с web страницы
-//extern ESP8266HTTPUpdateServer httpUpdater;
 
 // Web интерфейс для устройства
 extern ESP8266WebServer HTTP;
 extern WiFiClient client;
-
+//#ifdef set_MQTT
+//extern PubSubClient mqttclient;
+//#endif
 extern PID myPID;
 
 extern uint16_t percentCorrectSquare[];
 
-//extern String WiFiPower;
-
 extern String curVersion;
 extern uint16_t versionForWeb;
+/*
+#ifdef set_MQTT
+extern uint8_t numDataSendMQTT;
+extern unsigned long timeDelaySendDevicesMQTT;
+extern unsigned long timeDelaySendMQTT;
+extern char mqttServer[];
+extern String clientId;
+extern String clientPass;
+extern char publishTopicData[];
+extern char subscribeTopicDistill[];
+extern char subscribeTopicStart[];
+extern char subscribeTopicSet[];
+extern char subscribeTopicDevices[];
+#endif
+*/
 // Определяем переменные wifi
 extern String _ssid;
 extern String _password;
@@ -126,8 +140,9 @@ extern String _ssidAP;
 extern String _ssidAPconnect;
 extern String _passwordAP;
 extern String SSDP_Name;
-extern char NBNS_Name[60];
+//extern char NBNS_Name[60];
 extern String addrMacMod;
+extern int myNetworkNum;
 extern bool touchInvert;
 extern bool tftInvert;
 extern String jsonConfig;
@@ -271,6 +286,8 @@ extern float temperatureOld_DS_Def;
 extern byte touchRead;
 
 extern bool RU;
+
+//extern bool updateSet;
 
 extern uint8_t timeScaleResponse;
 

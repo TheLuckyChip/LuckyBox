@@ -12,24 +12,24 @@ bool loadConfig()
 		if (EEPROM.read(index) != 255 && EEPROM.read(index) != 0 && cnt < 60) {
 			SSDP_Name += " ";
 			SSDP_Name[cnt] = EEPROM.read(index);
-			NBNS_Name[cnt] = SSDP_Name[cnt];
+//			NBNS_Name[cnt] = SSDP_Name[cnt];
 			index++;
 			cnt++;
 		}
 		else {
 			if (cnt < 2) {
 				SSDP_Name = "LuckyBox";
-				NBNS_Name[0] = 76;
-				NBNS_Name[1] = 117;
-				NBNS_Name[2] = 99;
-				NBNS_Name[3] = 107;
-				NBNS_Name[4] = 121;
-				NBNS_Name[5] = 66;
-				NBNS_Name[6] = 111;
-				NBNS_Name[7] = 120;
-				NBNS_Name[8] = 0;
+//				NBNS_Name[0] = 76;
+//				NBNS_Name[1] = 117;
+//				NBNS_Name[2] = 99;
+//				NBNS_Name[3] = 107;
+//				NBNS_Name[4] = 121;
+//				NBNS_Name[5] = 66;
+//				NBNS_Name[6] = 111;
+//				NBNS_Name[7] = 120;
+//				NBNS_Name[8] = 0;
 			}
-			else NBNS_Name[cnt] = 0;
+//			else NBNS_Name[cnt] = 0;
 			break;
 		}
 	}
@@ -97,10 +97,12 @@ bool loadConfig()
 			break;
 		}
 	}
+#if defined Debug_en
 	Serial.print("SSDP Name = "); Serial.println(SSDP_Name);
 	Serial.print("SSID = "); Serial.print(_ssid);
 	Serial.print("    password = "); Serial.println(_password);
 	Serial.print("SSIDAP = "); Serial.print(_ssidAP); Serial.print(" - ");
+#endif
 	String addrMac = WiFi.softAPmacAddress();
 	String addrMacMod = "            ";
 	addrMacMod[0] = addrMac[0];	addrMacMod[1] = addrMac[1];
@@ -109,8 +111,10 @@ bool loadConfig()
 	addrMacMod[6] = addrMac[9];	addrMacMod[7] = addrMac[10];
 	addrMacMod[8] = addrMac[12]; addrMacMod[9] = addrMac[13];
 	addrMacMod[10] = addrMac[15]; addrMacMod[11] = addrMac[16];
+#if defined Debug_en
 	Serial.print(addrMacMod);
 	Serial.print("    passwordAP = "); Serial.println(_passwordAP);
 	Serial.println();
+#endif
 	EEPROM.end();
 }
