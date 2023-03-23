@@ -454,6 +454,7 @@ void handleProcessModeIn() {
 	// парсим ответ от браузера в переменные
 	uint8_t processModeOld = processMode.allow;
 	processMode.allow = HTTP.arg("process[allow]").toInt();
+	if (processModeOld != processMode.allow) processMode.step = 0;
 	processMode.number = HTTP.arg("process[number]").toInt();
 
 	// проверим выбраны ли датчики для процесса

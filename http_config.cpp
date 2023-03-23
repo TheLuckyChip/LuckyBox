@@ -17,20 +17,24 @@ void initHTTP(void)
 	HTTP.on("/restart", handleRestart);   // Перезагрузка модуля по запросу вида /restart?device=ok
 	HTTP.on("/scale_post_LB", handleScale);   // Данные от весов
 
-
 	// Добавляем функцию Update для перезаписи прошивки по WiFi при 1М(256K SPIFFS) и выше
 	HTTP.on("/update", HTTP_POST, []() {
 		HTTP.sendHeader("Connection", "close");
 		HTTP.send(200, "text/json", (Update.hasError()) ? "{\"update\":\"err\"}" : "{\"update\":\"ok\"}");
-		//HTTP.send_P(200, "text/plain", (Update.hasError()) ? "FAIL" : "OK");
 		delay(500);
 		ESP.restart();
 	}, []() {
+		//updateSet = true;
 		HTTPUpload& upload = HTTP.upload();
 		if (upload.status == UPLOAD_FILE_START) {
 			startLoad = 1;
 			Serial.setDebugOutput(true);
-			//WiFiUDP::stopAll();
+			Serial.println("Free Heap: ");  Serial.println(ESP.getFreeHeap());
+			
+			if (ESP.getFreeHeap() < 512) {
+				Serial.print("Not free HEAP: ");  Serial.println(ESP.getFreeHeap());
+				return;
+			}
 			
 			String nameBinFile = upload.filename.c_str();
 

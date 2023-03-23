@@ -17,5 +17,8 @@ extern bool heaterStatus;
 extern void heaterLoop();
 extern void initHeater();
 extern void comHeaterLoop();
+#ifdef power_PMBK
+extern void pvmk_on_off();
+#endif
 
 #endif
